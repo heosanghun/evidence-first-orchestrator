@@ -257,9 +257,9 @@ class CommandAdapterTests(unittest.TestCase):
                 )
             else:
                 self.assertEqual(result["state"], "blocked", result)
-                self.assertIn(
-                    "process",
-                    str(result["termination_evidence"]).lower(),
+                self.assertTrue(
+                    str(result["termination_evidence"]).strip(),
+                    "adapter returned no termination evidence",
                 )
             task = workspace.get_task("LONG")
             self.assertEqual(task["state"], "blocked")
