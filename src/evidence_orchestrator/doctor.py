@@ -178,6 +178,7 @@ def audit_workspace(
         projection = workspace.audit_projections()
         result["checks"]["integrity"] = projection
         result["checks"]["status"] = workspace.status()
+        result["checks"]["independence"] = workspace.audit_independence()
         result["checks"]["agent_directories"] = {
             agent["id"]: {
                 "reports": (workspace.reports_dir / agent["id"]).is_dir(),
@@ -192,6 +193,12 @@ def audit_workspace(
             and lease_expired(task)
         ]
         result["checks"]["expired_leases"] = expired
+        pending_revocations = [
+            task["id"]
+            for task in workspace.list_tasks()
+            if task["state"] == "revoking"
+        ]
+        result["checks"]["pending_revocations"] = pending_revocations
         broker_secret_findings: list[dict[str, Any]] = []
         for path in (
             [workspace.config_path]
@@ -203,7 +210,9 @@ def audit_workspace(
         result["healthy"] = (
             not projection["mismatches"]
             and not expired
+            and not pending_revocations
             and not broker_secret_findings
+            and not result["checks"]["independence"]["summary"]["action_required"]
             and all(
                 all(paths.values())
                 for paths in result["checks"]["agent_directories"].values()

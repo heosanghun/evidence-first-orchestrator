@@ -39,6 +39,13 @@ def _parse_command(value: str | None) -> list[str] | None:
     return parsed
 
 
+def _parse_json_array(value: str, *, option: str) -> list[Any]:
+    parsed = json.loads(value)
+    if not isinstance(parsed, list):
+        raise ValueError(f"{option} must be a JSON array")
+    return parsed
+
+
 def _workspace(path: str) -> Workspace:
     return Workspace(Path(path))
 
@@ -67,8 +74,29 @@ def _cmd_agent_add(args: argparse.Namespace) -> None:
         mode=args.mode,
         command=_parse_command(args.command_json),
         write_roots=args.write_root,
+        controller_id=args.controller_id,
+        provider=args.provider,
+        model_family=args.model_family,
+        capabilities=args.capability,
+        max_concurrency=args.max_concurrency,
+        active=not args.inactive,
     )
     _emit(record)
+
+
+def _cmd_agent_update(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).update_agent(
+            actor=args.actor,
+            agent_id=args.agent_id,
+            controller_id=args.controller_id,
+            provider=args.provider,
+            model_family=args.model_family,
+            capabilities=args.capability,
+            max_concurrency=args.max_concurrency,
+            active=not args.inactive,
+        )
+    )
 
 
 def _cmd_agent_list(args: argparse.Namespace) -> None:
@@ -81,6 +109,7 @@ def _cmd_task_add(args: argparse.Namespace) -> None:
         "gpu": args.allow_gpu,
         "performance_metrics": args.allow_performance_metrics,
         "network": args.allow_network,
+        "outcome_data": args.allow_outcome_data,
     }
     gates = {
         "require_validation": not args.no_validation,
@@ -98,6 +127,25 @@ def _cmd_task_add(args: argparse.Namespace) -> None:
         allowed_write_roots=args.allow_write,
         permissions=permissions,
         gates=gates,
+        task_type=args.task_type,
+        risk_tier=args.risk_tier,
+        required_capabilities=args.requires_capability,
+        resource_locks=args.resource_lock,
+        verification_policy={
+            "required_attestations": args.required_attestations,
+            "allowed_verifiers": args.verifier,
+            "independence_dimensions": args.independence_dimension or ["actor"],
+        },
+        delivery_policy={
+            "allow_proxy": args.allow_proxy_delivery,
+            "git_remote_name": (
+                args.proxy_remote_name
+                or ("origin" if args.allow_proxy_delivery else None)
+            ),
+            "git_remote_url": args.proxy_remote_url,
+            "git_ref": args.proxy_ref,
+            "required_repo_paths": args.proxy_repo_path,
+        },
         idempotency_key=args.idempotency_key,
     )
     _emit(task)
@@ -157,6 +205,26 @@ def _cmd_task_block(args: argparse.Namespace) -> None:
     )
 
 
+def _cmd_task_revoke(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).revoke_lease(
+            actor=args.actor,
+            task_id=args.task_id,
+            reason=args.reason,
+        )
+    )
+
+
+def _cmd_task_confirm_revocation(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).confirm_revocation(
+            actor=args.actor,
+            task_id=args.task_id,
+            termination_evidence=args.termination_evidence,
+        )
+    )
+
+
 def _cmd_task_submit(args: argparse.Namespace) -> None:
     _emit(
         _workspace(args.path).submit(
@@ -165,6 +233,36 @@ def _cmd_task_submit(args: argparse.Namespace) -> None:
             lease_token=args.lease_token,
             report_path=args.report,
             manifest_path=args.evidence,
+        )
+    )
+
+
+def _cmd_task_proxy_submit(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).proxy_submit(
+            actor=args.actor,
+            task_id=args.task_id,
+            author=args.author,
+            report_path=args.report,
+            manifest_path=args.evidence,
+            source_repo=args.source_repo,
+            source_commit=args.source_commit,
+            source_files=_parse_json_array(
+                args.source_files_json,
+                option="--source-files-json",
+            ),
+        )
+    )
+
+
+def _cmd_task_attest(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).attest(
+            actor=args.actor,
+            task_id=args.task_id,
+            decision=args.decision,
+            note=args.note,
+            verification_manifest=args.evidence,
         )
     )
 
@@ -181,9 +279,37 @@ def _cmd_task_verify(args: argparse.Namespace) -> None:
     )
 
 
+def _cmd_transfer_orchestrator(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).transfer_orchestrator(
+            actor=args.actor,
+            target=args.target,
+            reason=args.reason,
+        )
+    )
+
+
+def _cmd_audit_independence(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).audit_independence(
+            dimensions=args.dimension,
+        )
+    )
+
+
 def _cmd_task_requeue(args: argparse.Namespace) -> None:
     _emit(
         _workspace(args.path).requeue(
+            actor=args.actor,
+            task_id=args.task_id,
+            reason=args.reason,
+        )
+    )
+
+
+def _cmd_task_invalidate(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).invalidate(
             actor=args.actor,
             task_id=args.task_id,
             reason=args.reason,
@@ -299,13 +425,28 @@ def build_parser() -> argparse.ArgumentParser:
     init.add_argument("--orchestrator", default="antigravity")
     init.add_argument(
         "--preset",
-        choices=["antigravity-codex-claude"],
+        choices=["antigravity-codex-claude", "meta-4-agent"],
     )
     init.set_defaults(handler=_cmd_init)
 
     status = subparsers.add_parser("status", help="Show workspace and task status")
     status.add_argument("path")
     status.set_defaults(handler=_cmd_status)
+
+    workspace_command = subparsers.add_parser(
+        "workspace",
+        help="Manage signed workspace governance",
+    )
+    workspace_sub = workspace_command.add_subparsers(
+        dest="workspace_command",
+        required=True,
+    )
+    transfer = workspace_sub.add_parser("transfer-orchestrator")
+    transfer.add_argument("path")
+    transfer.add_argument("--actor", required=True)
+    transfer.add_argument("--to", dest="target", required=True)
+    transfer.add_argument("--reason", required=True)
+    transfer.set_defaults(handler=_cmd_transfer_orchestrator)
 
     agent = subparsers.add_parser("agent", help="Manage registered agents")
     agent_sub = agent.add_subparsers(dest="agent_command", required=True)
@@ -320,7 +461,24 @@ def build_parser() -> argparse.ArgumentParser:
         help='Command argv as JSON, for example ["codex","exec","{prompt}"]',
     )
     agent_add.add_argument("--write-root", action="append", default=[])
+    agent_add.add_argument("--controller-id")
+    agent_add.add_argument("--provider", default="unknown")
+    agent_add.add_argument("--model-family", default="unknown")
+    agent_add.add_argument("--capability", action="append", default=[])
+    agent_add.add_argument("--max-concurrency", type=int, default=1)
+    agent_add.add_argument("--inactive", action="store_true")
     agent_add.set_defaults(handler=_cmd_agent_add)
+    agent_update = agent_sub.add_parser("update")
+    agent_update.add_argument("path")
+    agent_update.add_argument("--actor", required=True)
+    agent_update.add_argument("--id", dest="agent_id", required=True)
+    agent_update.add_argument("--controller-id", required=True)
+    agent_update.add_argument("--provider", required=True)
+    agent_update.add_argument("--model-family", required=True)
+    agent_update.add_argument("--capability", action="append", default=[])
+    agent_update.add_argument("--max-concurrency", type=int, default=1)
+    agent_update.add_argument("--inactive", action="store_true")
+    agent_update.set_defaults(handler=_cmd_agent_update)
     agent_list = agent_sub.add_parser("list")
     agent_list.add_argument("path")
     agent_list.set_defaults(handler=_cmd_agent_list)
@@ -343,6 +501,31 @@ def build_parser() -> argparse.ArgumentParser:
     task_add.add_argument("--allow-gpu", action="store_true")
     task_add.add_argument("--allow-network", action="store_true")
     task_add.add_argument("--allow-performance-metrics", action="store_true")
+    task_add.add_argument("--allow-outcome-data", action="store_true")
+    task_add.add_argument("--task-type", default="general")
+    task_add.add_argument(
+        "--risk-tier",
+        choices=["low", "medium", "high", "critical"],
+        default="medium",
+    )
+    task_add.add_argument("--requires-capability", action="append", default=[])
+    task_add.add_argument("--resource-lock", action="append", default=[])
+    task_add.add_argument("--allow-proxy-delivery", action="store_true")
+    task_add.add_argument(
+        "--proxy-remote-name",
+        help="Preregistered Git remote name (defaults to origin for proxy tasks)",
+    )
+    task_add.add_argument("--proxy-remote-url")
+    task_add.add_argument("--proxy-ref")
+    task_add.add_argument("--proxy-repo-path", action="append", default=[])
+    task_add.add_argument("--verifier", action="append", default=[])
+    task_add.add_argument("--required-attestations", type=int, default=0)
+    task_add.add_argument(
+        "--independence-dimension",
+        action="append",
+        choices=["actor", "controller", "model_family"],
+        default=None,
+    )
     task_add.add_argument("--allow-skips", action="store_true")
     task_add.add_argument("--no-validation", action="store_true")
     task_add.add_argument("--no-known-answer-check", action="store_true")
@@ -386,6 +569,29 @@ def build_parser() -> argparse.ArgumentParser:
     task_block.add_argument("--reason", required=True)
     task_block.set_defaults(handler=_cmd_task_block)
 
+    task_revoke = task_sub.add_parser("revoke")
+    task_revoke.add_argument("path")
+    task_revoke.add_argument("--actor", required=True)
+    task_revoke.add_argument("--id", dest="task_id", required=True)
+    task_revoke.add_argument("--reason", required=True)
+    task_revoke.set_defaults(handler=_cmd_task_revoke)
+
+    task_confirm_revocation = task_sub.add_parser("confirm-revocation")
+    task_confirm_revocation.add_argument("path")
+    task_confirm_revocation.add_argument("--actor", required=True)
+    task_confirm_revocation.add_argument(
+        "--id",
+        dest="task_id",
+        required=True,
+    )
+    task_confirm_revocation.add_argument(
+        "--termination-evidence",
+        required=True,
+    )
+    task_confirm_revocation.set_defaults(
+        handler=_cmd_task_confirm_revocation
+    )
+
     task_submit = task_sub.add_parser("submit")
     task_submit.add_argument("path")
     task_submit.add_argument("--actor", required=True)
@@ -394,6 +600,38 @@ def build_parser() -> argparse.ArgumentParser:
     task_submit.add_argument("--report", required=True)
     task_submit.add_argument("--evidence", required=True)
     task_submit.set_defaults(handler=_cmd_task_submit)
+
+    task_proxy_submit = task_sub.add_parser("proxy-submit")
+    task_proxy_submit.add_argument("path")
+    task_proxy_submit.add_argument("--actor", required=True)
+    task_proxy_submit.add_argument("--id", dest="task_id", required=True)
+    task_proxy_submit.add_argument("--author", required=True)
+    task_proxy_submit.add_argument("--report", required=True)
+    task_proxy_submit.add_argument("--evidence", required=True)
+    task_proxy_submit.add_argument("--source-repo", required=True)
+    task_proxy_submit.add_argument("--source-commit", required=True)
+    task_proxy_submit.add_argument(
+        "--source-files-json",
+        required=True,
+        help=(
+            "JSON array of {local_path, repo_path} records; bytes are checked "
+            "with git cat-file"
+        ),
+    )
+    task_proxy_submit.set_defaults(handler=_cmd_task_proxy_submit)
+
+    task_attest = task_sub.add_parser("attest")
+    task_attest.add_argument("path")
+    task_attest.add_argument("--actor", required=True)
+    task_attest.add_argument("--id", dest="task_id", required=True)
+    task_attest.add_argument(
+        "--decision",
+        choices=["accept", "reject"],
+        required=True,
+    )
+    task_attest.add_argument("--note", required=True)
+    task_attest.add_argument("--evidence")
+    task_attest.set_defaults(handler=_cmd_task_attest)
 
     task_verify = task_sub.add_parser("verify")
     task_verify.add_argument("path")
@@ -410,6 +648,13 @@ def build_parser() -> argparse.ArgumentParser:
     task_requeue.add_argument("--id", dest="task_id", required=True)
     task_requeue.add_argument("--reason", required=True)
     task_requeue.set_defaults(handler=_cmd_task_requeue)
+
+    task_invalidate = task_sub.add_parser("invalidate")
+    task_invalidate.add_argument("path")
+    task_invalidate.add_argument("--actor", required=True)
+    task_invalidate.add_argument("--id", dest="task_id", required=True)
+    task_invalidate.add_argument("--reason", required=True)
+    task_invalidate.set_defaults(handler=_cmd_task_invalidate)
 
     task_archive = task_sub.add_parser("archive")
     task_archive.add_argument("path")
@@ -434,6 +679,18 @@ def build_parser() -> argparse.ArgumentParser:
     projection_repair.add_argument("path")
     projection_repair.add_argument("--actor", required=True)
     projection_repair.set_defaults(handler=_cmd_projection_repair)
+
+    audit = subparsers.add_parser("audit", help="Run read-only policy audits")
+    audit_sub = audit.add_subparsers(dest="audit_command", required=True)
+    audit_independence = audit_sub.add_parser("independence")
+    audit_independence.add_argument("path")
+    audit_independence.add_argument(
+        "--dimension",
+        action="append",
+        choices=["actor", "controller", "model_family"],
+        default=None,
+    )
+    audit_independence.set_defaults(handler=_cmd_audit_independence)
 
     doctor = subparsers.add_parser("doctor", help="Audit a broker workspace")
     doctor.add_argument("path")

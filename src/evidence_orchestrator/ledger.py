@@ -9,7 +9,7 @@ import os
 from pathlib import Path
 from typing import Any
 
-from .errors import IntegrityError
+from .errors import AuthorizationError, IntegrityError
 from .lock import FileLock
 from .util import canonical_json, utc_now
 
@@ -73,12 +73,34 @@ class Ledger:
         action: str,
         task_id: str | None,
         payload: dict[str, Any],
+        expected_orchestrator: str | None = None,
     ) -> dict[str, Any]:
         """Append one signed event while holding the ledger lock."""
 
         with FileLock(self.lock_path):
             events = self.read()
             self._verify_events(events)
+            if expected_orchestrator is not None:
+                effective_orchestrator: str | None = None
+                for existing in events:
+                    if existing.get("action") == "workspace.initialized":
+                        configured = (
+                            existing.get("payload", {})
+                            .get("config", {})
+                            .get("orchestrator")
+                        )
+                        if isinstance(configured, str):
+                            effective_orchestrator = configured
+                    elif existing.get("action") == "workspace.orchestrator_transferred":
+                        target = existing.get("payload", {}).get("to")
+                        if isinstance(target, str):
+                            effective_orchestrator = target
+                if effective_orchestrator != expected_orchestrator:
+                    raise AuthorizationError(
+                        "Orchestrator authority changed before the event could "
+                        f"commit: expected {expected_orchestrator!r}, observed "
+                        f"{effective_orchestrator!r}"
+                    )
             previous_hash = events[-1]["event_hash"] if events else GENESIS_HASH
             core = {
                 "sequence": len(events) + 1,

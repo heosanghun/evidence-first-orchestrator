@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import json
 import tempfile
 import unittest
 from pathlib import Path
-import json
 
 from evidence_orchestrator.errors import (
     AuthorizationError,
+    ConfigurationError,
     EvidenceError,
     IntegrityError,
     LeaseError,
@@ -156,8 +157,8 @@ class WorkspaceLifecycleTests(unittest.TestCase):
         second = self.workspace.create_task(
             actor="antigravity",
             task_id="T1",
-            title="Different ignored retry",
-            description="Retry.",
+            title="First",
+            description="First.",
             owner="codex",
             idempotency_key="stable-key",
         )
@@ -174,6 +175,29 @@ class WorkspaceLifecycleTests(unittest.TestCase):
         self.assertEqual(len(recovered), 1)
         self.assertEqual(recovered[0]["state"], "blocked")
         self.assertIn("manual requeue", recovered[0]["blocked_reason"])
+
+    def test_expired_running_lease_retains_lock_until_termination_confirmed(
+        self,
+    ) -> None:
+        self.create_task()
+        claimed = self.workspace.claim(
+            actor="codex",
+            task_id="T1",
+            lease_seconds=10,
+        )
+        self.workspace.start(
+            actor="codex",
+            task_id="T1",
+            lease_token=claimed["lease_token"],
+        )
+        recovered = self.workspace.recover_expired(
+            actor="antigravity",
+            now="2999-01-01T00:00:00Z",
+        )
+        self.assertEqual(len(recovered), 1)
+        self.assertEqual(recovered[0]["state"], "revoking")
+        self.assertIsNotNone(recovered[0]["lease"])
+        self.assertIn("termination must be confirmed", recovered[0]["blocked_reason"])
 
     def test_projection_loss_is_detected_and_repairable(self) -> None:
         self.create_task()
@@ -218,15 +242,16 @@ class WorkspaceLifecycleTests(unittest.TestCase):
             owner="codex",
             idempotency_key="one-operation",
         )
-        retry = self.workspace.create_task(
-            actor="antigravity",
-            task_id="T2",
-            title="Accidental duplicate",
-            description="Should resolve to T1.",
-            owner="claude",
-            idempotency_key="one-operation",
-        )
-        self.assertEqual(retry["id"], first["id"])
+        with self.assertRaisesRegex(ConfigurationError, "immutable task contract"):
+            self.workspace.create_task(
+                actor="antigravity",
+                task_id="T2",
+                title="Accidental duplicate",
+                description="Must not resolve to unrelated work.",
+                owner="claude",
+                idempotency_key="one-operation",
+            )
+        self.assertEqual(first["id"], "T1")
         self.assertFalse(self.workspace._task_path("T2").exists())
 
 
