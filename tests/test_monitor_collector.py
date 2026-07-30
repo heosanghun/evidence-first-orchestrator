@@ -1335,5 +1335,524 @@ class FrozenKnownAnswerTests(unittest.TestCase):
         )
 
 
+class StrictJsonEqualityTests(unittest.TestCase):
+    """Type-strict JSON equality is the primitive EFO-5R was rejected for."""
+
+    def test_boolean_never_equals_integer_at_any_depth(self) -> None:
+        for left, right in (
+            (True, 1),
+            (False, 0),
+            ({"schema_version": True}, {"schema_version": 1}),
+            ({"schema_version": False}, {"schema_version": 0}),
+            ([True], [1]),
+            ({"a": [{"b": True}]}, {"a": [{"b": 1}]}),
+            ({"a": {"b": [0, False]}}, {"a": {"b": [0, 0]}}),
+        ):
+            with self.subTest(left=left, right=right):
+                self.assertEqual(left, right)
+                self.assertFalse(collector.strict_json_equal(left, right))
+                self.assertFalse(collector.strict_json_equal(right, left))
+
+    def test_integer_never_equals_float_at_any_depth(self) -> None:
+        for left, right in (
+            (1, 1.0),
+            (0, 0.0),
+            ({"schema_version": 1}, {"schema_version": 1.0}),
+            ([1], [1.0]),
+            ({"a": [{"b": 1}]}, {"a": [{"b": 1.0}]}),
+        ):
+            with self.subTest(left=left, right=right):
+                self.assertEqual(left, right)
+                self.assertFalse(collector.strict_json_equal(left, right))
+                self.assertFalse(collector.strict_json_equal(right, left))
+
+    def test_container_shape_keys_and_order_must_match_exactly(self) -> None:
+        for left, right in (
+            ({"a": 1}, {"a": 1, "b": 2}),
+            ({"a": 1}, {"b": 1}),
+            ({"a": 1}, [("a", 1)]),
+            ([1, 2], (1, 2)),
+            ([1, 2], [2, 1]),
+            ([1, 2], [1, 2, 3]),
+            ([], {}),
+            (None, False),
+            (None, 0),
+            ("1", 1),
+            ("true", True),
+            ({"a": None}, {"a": False}),
+        ):
+            with self.subTest(left=left, right=right):
+                self.assertFalse(collector.strict_json_equal(left, right))
+                self.assertFalse(collector.strict_json_equal(right, left))
+
+    def test_exact_deep_copies_remain_equal(self) -> None:
+        value = {
+            "actor": "claude-b",
+            "schema_version": 1,
+            "control_principal": "claude-b-control",
+            "model_family": "anthropic-claude",
+            "alias_of": None,
+            "alias_chain": ["claude", "claude-root"],
+            "nested": {"levels": [0, 1, {"flag": False, "ratio": 1.5}]},
+        }
+        self.assertTrue(collector.strict_json_equal(value, value))
+        self.assertTrue(
+            collector.strict_json_equal(
+                value,
+                json.loads(json.dumps(value, ensure_ascii=False)),
+            )
+        )
+        self.assertTrue(collector.strict_json_equal([], []))
+        self.assertTrue(collector.strict_json_equal({}, {}))
+        self.assertTrue(collector.strict_json_equal(None, None))
+
+    def test_non_json_values_are_never_equal(self) -> None:
+        marker = object()
+        self.assertFalse(collector.strict_json_equal(marker, marker))
+        self.assertFalse(
+            collector.strict_json_equal({"a": marker}, {"a": marker})
+        )
+        self.assertFalse(
+            collector.strict_json_equal({True: 1}, {True: 1}),
+        )
+
+
+class StrictIdentityKnownAnswerTests(FrozenKnownAnswerTests):
+    """Frozen EFO-5R regressions for type-confused signed identities."""
+
+    def test_known_answer_r1_boolean_schema_version_is_not_registered(
+        self,
+    ) -> None:
+        for bad_version in (True, False, 1.0, "1", None, [1], {"value": 1}):
+            with self.subTest(schema_version=bad_version):
+                registered = self._registered("claude-a")
+                registered["identity"]["schema_version"] = bad_version
+                self.assertEqual(
+                    collector.resolve_signed_identity_groups(
+                        [registered],
+                        ledger_valid=True,
+                    ),
+                    {},
+                )
+        self.assertEqual(
+            collector.resolve_signed_identity_groups(
+                [self._registered("claude-a")],
+                ledger_valid=True,
+            ),
+            {"claude-a": frozenset({"claude-a"})},
+        )
+
+    def test_known_answer_r1_boolean_root_cannot_anchor_an_alias(self) -> None:
+        root = self._registered("claude")
+        root["identity"]["schema_version"] = True
+        alias = self._registered(
+            "claude-a",
+            principal="claude-control",
+            alias_of="claude",
+            alias_chain=("claude",),
+        )
+        self.assertEqual(
+            collector.resolve_signed_identity_groups(
+                [root, alias],
+                ledger_valid=True,
+            ),
+            {},
+        )
+
+    def test_known_answer_r2_exact_efo5_rejection_input_is_unattested(
+        self,
+    ) -> None:
+        resolved = self._identity_snapshot("claude-b")
+        claimed = {**resolved, "schema_version": True}
+        # The exact defect that rejected EFO-5: Python equality accepts this.
+        self.assertEqual(claimed, resolved)
+        self.assertFalse(collector.strict_json_equal(claimed, resolved))
+        self.assertIsNone(
+            collector.attested_actor(
+                {"actor": "claude-b", "identity": claimed},
+                "actor",
+                "identity",
+                {"claude-b": resolved},
+            )
+        )
+
+        raw_task = {
+            "id": "TYPE-CONFUSED",
+            "title": "Type-confused verification claim",
+            "owner": "owner-agent",
+            "state": "verified",
+            "updated_at": "2026-07-30T01:00:00Z",
+            "verification": {"actor": "claude-b", "identity": claimed},
+        }
+        agents, tasks, _ledger, _alerts, _activity = self._collect(
+            [raw_task],
+            [self._registered("owner-agent"), self._registered("claude-b")],
+            [self._profile("claude-b")],
+        )
+        self._assert_idle(agents[0])
+        self.assertEqual([task["id"] for task in tasks], ["TYPE-CONFUSED"])
+        self.assertEqual(
+            collector.task_actor_ids(
+                raw_task,
+                {"claude-b": resolved},
+                {"owner-agent", "claude-b"},
+            ),
+            frozenset({"owner-agent"}),
+        )
+
+    def test_known_answer_r2_boolean_transport_author_is_unattested(
+        self,
+    ) -> None:
+        resolved = self._identity_snapshot("antigravity")
+        raw_task = {
+            "id": "TRANSPORTED",
+            "title": "Externally dispatched work",
+            "owner": "owner-agent",
+            "state": "pending",
+            "lease": None,
+            "updated_at": "2026-07-29T01:00:00Z",
+            "external_status": {
+                "phase": "working",
+                "reported_at": "2026-07-30T02:00:00Z",
+                "author": "antigravity",
+                "author_identity": {**resolved, "schema_version": True},
+            },
+        }
+        agents, tasks, _ledger, _alerts, _activity = self._collect(
+            [raw_task],
+            [self._registered("owner-agent"), self._registered("antigravity")],
+            [self._profile("antigravity")],
+        )
+        self._assert_idle(agents[0])
+        self.assertEqual(tasks[0]["external_phase"], "working")
+
+    def test_known_answer_r3_integer_and_float_never_attest(self) -> None:
+        integer = self._identity_snapshot("claude-b")
+        floating = {**integer, "schema_version": 1.0}
+        for claimed, resolved in ((integer, floating), (floating, integer)):
+            with self.subTest(claimed=claimed["schema_version"]):
+                self.assertEqual(claimed, resolved)
+                self.assertIsNone(
+                    collector.attested_actor(
+                        {"actor": "claude-b", "identity": dict(claimed)},
+                        "actor",
+                        "identity",
+                        {"claude-b": resolved},
+                    )
+                )
+
+    def test_known_answer_r4_nested_substitution_never_attests(self) -> None:
+        resolved = {
+            **self._identity_snapshot(
+                "claude-b",
+                alias_of="claude",
+                alias_chain=("claude",),
+            ),
+            "attributes": {"levels": [1, 0, {"trusted": False, "rank": 2}]},
+        }
+        substitutions = (
+            {"schema_version": True},
+            {"alias_chain": [True]},
+            {"attributes": {"levels": [True, 0, {"trusted": False, "rank": 2}]}},
+            {"attributes": {"levels": [1, False, {"trusted": False, "rank": 2}]}},
+            {"attributes": {"levels": [1, 0, {"trusted": 0, "rank": 2}]}},
+            {"attributes": {"levels": [1, 0, {"trusted": False, "rank": True}]}},
+            {"attributes": {"levels": [1, 0, {"trusted": False, "rank": 2.0}]}},
+        )
+        for substitution in substitutions:
+            with self.subTest(substitution=substitution):
+                claimed = {**resolved, **substitution}
+                self.assertFalse(
+                    collector.strict_json_equal(claimed, resolved)
+                )
+                self.assertIsNone(
+                    collector.attested_actor(
+                        {"actor": "claude-b", "identity": claimed},
+                        "actor",
+                        "identity",
+                        {"claude-b": resolved},
+                    )
+                )
+
+    def test_known_answer_r4_registered_alias_chain_rejects_non_strings(
+        self,
+    ) -> None:
+        for bad_chain in ([True], [1], [1.0], [None], [["claude"]]):
+            with self.subTest(alias_chain=bad_chain):
+                root = self._registered("claude")
+                alias = self._registered(
+                    "claude-a",
+                    principal="claude-control",
+                    alias_of="claude",
+                )
+                root["identity"]["control_principal"] = "claude-control"
+                alias["identity"]["alias_chain"] = bad_chain
+                groups = collector.resolve_signed_identity_groups(
+                    [root, alias],
+                    ledger_valid=True,
+                )
+                self.assertEqual(groups, {"claude": frozenset({"claude"})})
+
+    def test_known_answer_r5_exact_deep_copy_attests(self) -> None:
+        resolved = self._identity_snapshot("claude-b")
+        deep_copy = json.loads(json.dumps(resolved, ensure_ascii=False))
+        self.assertIsNot(deep_copy, resolved)
+        self.assertTrue(collector.strict_json_equal(deep_copy, resolved))
+        self.assertEqual(
+            collector.attested_actor(
+                {"actor": "claude-b", "identity": deep_copy},
+                "actor",
+                "identity",
+                {"claude-b": resolved},
+            ),
+            "claude-b",
+        )
+
+        agents, _tasks, _ledger, _alerts, _activity = self._collect(
+            [
+                {
+                    "id": "EXACT-COPY",
+                    "title": "Exactly attested verification",
+                    "owner": "owner-agent",
+                    "state": "verified",
+                    "updated_at": "2026-07-30T01:00:00Z",
+                    "verification": {
+                        "actor": "claude-b",
+                        "identity": json.loads(
+                            json.dumps(resolved, ensure_ascii=False)
+                        ),
+                    },
+                }
+            ],
+            [self._registered("owner-agent"), self._registered("claude-b")],
+            [self._profile("claude-b")],
+        )
+        self.assertEqual(agents[0]["current_task_id"], "EXACT-COPY")
+        self.assertEqual(agents[0]["state"], "waiting")
+        self.assertEqual(agents[0]["status_source"], "canonical")
+        self.assertEqual(agents[0]["progress_percent"], 100)
+
+
+class CollectorProvenanceTests(unittest.TestCase):
+    """Frozen EFO-5R regressions for protocol 1.3 and build provenance."""
+
+    SYSTEM = {
+        "hostname": "gpu-server",
+        "load_1m": 0.5,
+        "uptime_seconds": 10,
+        "memory": {"used_gib": 1.0, "total_gib": 2.0, "percent": 50.0},
+        "disk": {
+            "used_gib": 1.0,
+            "total_gib": 2.0,
+            "free_gib": 1.0,
+            "percent": 50.0,
+        },
+    }
+    PRIVATE_KEYS = (
+        "password",
+        "passwd",
+        "secret",
+        "token",
+        "environment",
+        "env",
+        "command",
+        "cmdline",
+        "pid",
+        "uuid",
+        "ssh",
+        "authorization",
+        "identity",
+        "author_identity",
+        "control_principal",
+        "model_family",
+        "alias_of",
+        "alias_chain",
+    )
+
+    def _assert_no_private_keys(self, value: object, path: str = "$") -> None:
+        if isinstance(value, dict):
+            for key, item in value.items():
+                self.assertNotIn(
+                    str(key).lower(),
+                    self.PRIVATE_KEYS,
+                    f"private key at {path}.{key}",
+                )
+                self._assert_no_private_keys(item, f"{path}.{key}")
+        elif isinstance(value, list):
+            for index, item in enumerate(value):
+                self._assert_no_private_keys(item, f"{path}[{index}]")
+
+    def test_known_answer_r8_build_matches_the_exact_checkout_commit(
+        self,
+    ) -> None:
+        probe = collector.run_command(
+            ["git", "-C", str(collector.SOURCE_ROOT), "rev-parse", "HEAD"]
+        )
+        build = collector.collector_build()
+        if probe.returncode == 0 and collector.COMMIT_RE.fullmatch(
+            probe.stdout.strip()
+        ):
+            self.assertEqual(build, probe.stdout.strip())
+            self.assertEqual(len(build), 40)
+            self.assertEqual(build, build.lower())
+        else:
+            self.assertEqual(build, collector.COLLECTOR_BUILD_UNAVAILABLE)
+
+    @patch("monitor.collector.run_command")
+    def test_known_answer_r8_only_exact_lowercase_hex_is_reported(
+        self,
+        run_command_mock,
+    ) -> None:
+        commit = "0828c0b6ff792da29317228679f7e962aec457ad"
+        run_command_mock.return_value = collector.CommandResult(
+            0,
+            f"{commit}\n",
+            "",
+        )
+        self.assertEqual(collector.collector_build(), commit)
+
+        for stdout in (
+            commit.upper(),
+            commit[:39],
+            commit + "0",
+            "not-a-commit",
+            "",
+            f"{commit} extra",
+            "0828c0b",
+        ):
+            with self.subTest(stdout=stdout):
+                run_command_mock.return_value = collector.CommandResult(
+                    0,
+                    f"{stdout}\n",
+                    "",
+                )
+                self.assertEqual(
+                    collector.collector_build(),
+                    collector.COLLECTOR_BUILD_UNAVAILABLE,
+                )
+
+    @patch("monitor.collector.run_command")
+    def test_known_answer_r9_failed_provenance_is_never_inferred(
+        self,
+        run_command_mock,
+    ) -> None:
+        for returncode in (1, 127, 128):
+            with self.subTest(returncode=returncode):
+                run_command_mock.return_value = collector.CommandResult(
+                    returncode,
+                    "0828c0b6ff792da29317228679f7e962aec457ad\n",
+                    "fatal: not a git repository",
+                )
+                self.assertEqual(
+                    collector.collector_build(),
+                    collector.COLLECTOR_BUILD_UNAVAILABLE,
+                )
+
+    def test_known_answer_r9_source_without_git_provenance_is_unavailable(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            probe = collector.run_command(
+                ["git", "-C", directory, "rev-parse", "HEAD"]
+            )
+            self.assertNotEqual(
+                probe.returncode,
+                0,
+                "temporary directory unexpectedly has Git provenance",
+            )
+            self.assertEqual(
+                collector.collector_build(directory),
+                collector.COLLECTOR_BUILD_UNAVAILABLE,
+            )
+            self.assertEqual(
+                collector.collector_build(Path(directory) / "absent"),
+                collector.COLLECTOR_BUILD_UNAVAILABLE,
+            )
+
+    @patch("monitor.collector.query_gpus", return_value=([], []))
+    def test_known_answer_r10_public_snapshot_is_1_3_and_non_secret(
+        self,
+        _query_gpus_mock,
+    ) -> None:
+        status = {
+            "tasks": [
+                {
+                    "id": "PUBLIC-1",
+                    "title": "Public task title",
+                    "owner": "claude-b",
+                    "state": "running",
+                    "lease": {"expires_at": "2099-01-01T00:00:00Z"},
+                    "updated_at": "2026-07-30T01:00:00Z",
+                    "verification": {
+                        "actor": "claude-b",
+                        "identity": {
+                            "actor": "claude-b",
+                            "schema_version": 1,
+                            "control_principal": "private-control-principal",
+                            "model_family": "private-model-family",
+                            "alias_of": None,
+                            "alias_chain": [],
+                        },
+                    },
+                }
+            ],
+            "status": {"ledger": {"valid": True, "event_count": 12}},
+        }
+        registered = [
+            {
+                "id": "claude-b",
+                "identity": {
+                    "schema_version": 1,
+                    "control_principal": "private-control-principal",
+                    "model_family": "private-model-family",
+                    "alias_of": None,
+                    "alias_chain": [],
+                },
+            }
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            config = {
+                "history_file": str(Path(directory) / "history.json"),
+                "efo_ledger_file": str(Path(directory) / "absent.jsonl"),
+                "ingest_secret_file": str(Path(directory) / "private-secret"),
+                "agents": [
+                    {
+                        "id": "claude-b",
+                        "efo_id": "claude-b",
+                        "name": "Claude B",
+                        "role": "worker",
+                    }
+                ],
+            }
+            with patch(
+                "monitor.collector.collect_system",
+                return_value=dict(self.SYSTEM),
+            ), patch(
+                "monitor.collector.parse_json_command",
+                side_effect=[status, registered],
+            ):
+                snapshot = collector.collect_snapshot(config)
+
+        self.assertEqual(snapshot["source"]["collector"], "efo-monitor/1.3")
+        self.assertEqual(collector.COLLECTOR_VERSION, "efo-monitor/1.3")
+        build = snapshot["source"]["collector_build"]
+        self.assertIsInstance(build, str)
+        self.assertTrue(
+            build == collector.COLLECTOR_BUILD_UNAVAILABLE
+            or collector.COMMIT_RE.fullmatch(build),
+            f"unexpected collector_build: {build!r}",
+        )
+        self.assertEqual(snapshot["agents"][0]["current_task_id"], "PUBLIC-1")
+        self._assert_no_private_keys(snapshot)
+        serialized = json.dumps(snapshot, ensure_ascii=False)
+        for private in (
+            "private-control-principal",
+            "private-model-family",
+            "private-secret",
+            "absent.jsonl",
+        ):
+            self.assertNotIn(private, serialized)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -23,7 +23,14 @@ from pathlib import Path
 from typing import Any, Iterable, Sequence
 
 SCHEMA_VERSION = "1.0"
-COLLECTOR_VERSION = "efo-monitor/1.2"
+COLLECTOR_VERSION = "efo-monitor/1.3"
+# Non-secret provenance marker. It is either the exact lowercase 40-hex commit
+# of the checkout that is running this file, or the literal string below. A
+# commit is never inferred, defaulted, or reconstructed from anything else.
+COLLECTOR_BUILD_UNAVAILABLE = "unavailable"
+COMMIT_RE = re.compile(r"[0-9a-f]{40}")
+SOURCE_ROOT = Path(__file__).resolve().parent.parent
+IDENTITY_SCHEMA_VERSION = 1
 HISTORY_LIMIT = 60
 ACTIVITY_LIMIT = 300
 TASK_PROGRESS = {
@@ -567,6 +574,60 @@ def lease_is_active(
     return expires > current
 
 
+def strict_json_equal(left: Any, right: Any) -> bool:
+    """Compare two decoded JSON values by exact type at every level.
+
+    Python's ``==`` treats ``True == 1`` and ``1 == 1.0`` as equal, so a
+    claimed identity carrying a boolean or float can otherwise match a signed
+    identity carrying an integer. Equality here requires identical concrete
+    types for every value, identical string keys, and identical list order and
+    length, so booleans never equal integers and integers never equal floats.
+    Anything that is not a decoded JSON value compares as unequal.
+    """
+
+    if type(left) is not type(right):
+        return False
+    if isinstance(left, dict):
+        if len(left) != len(right):
+            return False
+        for key, value in left.items():
+            if type(key) is not str or key not in right:
+                return False
+            if not strict_json_equal(value, right[key]):
+                return False
+        return True
+    if isinstance(left, list):
+        return len(left) == len(right) and all(
+            strict_json_equal(item, other) for item, other in zip(left, right)
+        )
+    if left is None:
+        return True
+    if isinstance(left, (bool, str, int, float)):
+        return left == right
+    return False
+
+
+def collector_build(root: Path | str | None = None) -> str:
+    """Return the exact checkout commit running this collector, or a marker.
+
+    The value is public build provenance, never a secret. When the source has
+    no readable Git provenance the collector reports ``unavailable`` rather
+    than guessing a commit.
+    """
+
+    directory = Path(root) if root is not None else SOURCE_ROOT
+    result = run_command(
+        ["git", "-C", str(directory), "rev-parse", "HEAD"],
+        timeout=8,
+    )
+    if result.returncode != 0:
+        return COLLECTOR_BUILD_UNAVAILABLE
+    commit = result.stdout.strip()
+    if COMMIT_RE.fullmatch(commit):
+        return commit
+    return COLLECTOR_BUILD_UNAVAILABLE
+
+
 def _resolve_signed_identity_registry(
     registered_agents: list[dict[str, Any]],
     *,
@@ -609,7 +670,12 @@ def _resolve_signed_identity_registry(
         identity = record.get("identity") if isinstance(record, dict) else None
         if not isinstance(identity, dict) or set(identity) != expected_keys:
             return reject(agent_id)
-        if identity.get("schema_version") != 1:
+        schema_version = identity.get("schema_version")
+        # `True == 1` in Python, so the concrete type is checked before value.
+        if (
+            type(schema_version) is not int
+            or schema_version != IDENTITY_SCHEMA_VERSION
+        ):
             return reject(agent_id)
         principal = identity.get("control_principal")
         model_family = identity.get("model_family")
@@ -653,7 +719,7 @@ def _resolve_signed_identity_registry(
                     return reject(agent_id)
             snapshot = {
                 "actor": agent_id,
-                "schema_version": 1,
+                "schema_version": IDENTITY_SCHEMA_VERSION,
                 "control_principal": principal,
                 "model_family": model_family,
                 "alias_of": alias_of,
@@ -699,7 +765,13 @@ def attested_actor(
     identity_field: str,
     identity_registry: dict[str, dict[str, Any]],
 ) -> str | None:
-    """Return an actor only when it carries its own complete signed identity."""
+    """Return an actor only when it carries its own complete signed identity.
+
+    The claimed snapshot must be recursively type-strict equal to the resolved
+    signed identity, so a type-confused claim such as ``schema_version: true``
+    never attests against a registered ``schema_version: 1``.
+    """
+
 
     if not isinstance(record, dict):
         return None
@@ -710,7 +782,7 @@ def attested_actor(
     if not isinstance(resolved, dict):
         return None
     claimed = record.get(identity_field)
-    if not isinstance(claimed, dict) or claimed != resolved:
+    if not isinstance(claimed, dict) or not strict_json_equal(claimed, resolved):
         return None
     return actor
 
@@ -1174,6 +1246,7 @@ def collect_snapshot(config: dict[str, Any]) -> dict[str, Any]:
                 "SSH GPU 서버",
             ),
             "collector": COLLECTOR_VERSION,
+            "collector_build": collector_build(),
             "ledger": {
                 "valid": bool(ledger.get("valid", ledger.get("ok", False))),
                 "event_count": int(

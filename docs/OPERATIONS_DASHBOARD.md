@@ -59,6 +59,27 @@ own identity snapshot is a dict exactly equal to that resolved identity. A
 missing snapshot, an unregistered actor, a partial object, a superset, or any
 other dict attests nothing, so two absent identities never match each other.
 
+### Type-strict identity equality
+
+Identity equality is recursively strict by JSON type at every level, not
+Python-value equality. Python treats `True == 1` and `1 == 1.0` as equal, so a
+claimed identity carrying `schema_version: true` would otherwise attest against
+a registered `schema_version: 1`. The comparison therefore requires:
+
+- identical concrete types for every value, so a boolean never equals an
+  integer and an integer never equals a float;
+- identical string keys and identical container types, so an object never
+  equals an array;
+- identical list length and order.
+
+A registered identity is accepted only when its `schema_version` is an integer
+whose value is exactly `1`. A boolean, float, string, or container
+`schema_version` rejects the whole registry entry, and an alias anchored to a
+rejected entry is rejected with it. Only an exact deep copy of the resolved
+signed identity attests; partial, extra, malformed, unregistered, and
+type-confused claims — including a nested boolean or integer substitution in
+any identity container — remain unattested.
+
 A profile's `id` is display only. Attribution uses the configured `efo_id` and
 its validated signed alias group, never the display ID. A profile whose display
 ID collides with an unrelated registered agent therefore cannot inherit that
@@ -86,9 +107,35 @@ rolling release, the Pages Function accepts their exact seven-field card
 shape but normalizes each card to a safe waiting/offline projection with no
 current task, zero workflow progress, and `status_source=none`. It marks the
 stored source as `agent_projection_compat=legacy_idle`. Extra legacy fields
-and legacy-shaped cards claiming to be collector `1.2` still fail closed.
-Once collector `1.2` uploads, full task-bound cards replace the compatibility
-projection.
+and legacy-shaped cards claiming to be collector `1.2` or `1.3` still fail
+closed. Once a task-binding collector uploads, full task-bound cards replace
+the compatibility projection.
+
+## Collector protocol and build provenance
+
+The current collector reports `source.collector == "efo-monitor/1.3"`. Protocol
+`1.3` keeps the `1.2` snapshot contract and adds type-strict signed-identity
+equality plus one non-secret provenance field:
+
+- `source.collector_build` is the exact lowercase 40-hex Git commit of the
+  checkout that produced the snapshot, obtained from
+  `git rev-parse HEAD` in the collector source tree;
+- when that repository provenance is unreadable — no checkout, no `git`, or a
+  refused repository — the value is the exact string `unavailable`;
+- a commit is never inferred, defaulted, shortened, or reconstructed, and the
+  field carries no secret, token, credential, path, or environment data.
+
+**Production activation contract.** A deployment counts as activated only when
+both conditions hold on the stored snapshot:
+
+```text
+source.collector       == "efo-monitor/1.3"
+source.collector_build == <the verified deployed commit>
+```
+
+`collector_build == "unavailable"`, a mismatched commit, or a lower protocol
+marker means the running collector is not the verified deployed revision, and
+the deployment is not activated.
 
 ## Cloudflare Pages
 
