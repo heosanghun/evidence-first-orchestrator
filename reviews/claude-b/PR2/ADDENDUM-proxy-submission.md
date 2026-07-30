@@ -119,3 +119,43 @@ confirmed to resolve from `/tmp/efo-main/src/` for the `main` run.
 | `raw/attack_main.sh` | `e285e1b30311d80f05a3082fdad63ab4803910fa12462a1ff3bc1f8ff5840b78` |
 | `raw/raw-attack-main.txt` | `c8b8d1af8285ee7418c7a773973289f9dc0c8fd7279dc01188ca7a04a8f3f368` |
 | `raw/raw-main-suite.txt` | `051b79ea49a522e24da66344b673800d901c60f8a054287e9fb7e2d3f14736fd` |
+
+---
+
+## Re-confirmed at `main` = `31705d5d` (issue #3 was filed against `f35d5176`)
+
+`main` has advanced twice since issue #3 was filed, both times without touching
+the finding:
+
+- `f2cc922 → f35d5176` — `codex/proxy-submission` merge (the reviewed work).
+- `f35d5176 → 31705d5d` — `9b9e0c5 feat: add transport-attested worker progress`,
+  `4871867 fix: expire proxy status and reject forged projections`,
+  `31705d5 fix: align monitor task projection contract`.
+
+`src/evidence_orchestrator/independence.py` is **untouched** across both, and a
+diff-wide grep for `audit_verification_events` and `identity_attested` over
+`f35d5176..31705d5d` returns **0 hits**. Note that `4871867`'s "reject forged
+projections" is about task projections, not identity declarations — it does not
+reach this path.
+
+Measured at `31705d5d`, not inferred:
+
+| Step | Observed |
+|---|---|
+| B3 honest verify by a same-identity verifier | rejected — `same_control_principal, same_model_family` |
+| B5 byte-identical verify after `agent attest` | **accepted, exit 0**, state `verified` |
+| B6 `ledger audit-independence` | `checked: 1`, `independent: 1`, `non_independent: 0` |
+
+Suite at `31705d5d`: **79 tests, OK, 0 skipped, exit 0** — up from 67, so the
+twelve new tests do not cover this case either.
+
+Run binding, since the raw output again hashes identically to the earlier runs
+(the script emits no absolute paths): workspace `wsm2`, timestamp
+`2026-07-30 12:16:48Z`, `REPO=/tmp/efo-main2`, and the module confirmed
+resolving from `/tmp/efo-main2/src/evidence_orchestrator/__init__.py`.
+
+| Artifact | SHA-256 |
+|---|---|
+| `raw/attack_main2.sh` | `62aa3ada8737ae7579046b8502c26ee66a637f6ddf34ffd4dbeddde773cddf42` |
+| `raw/raw-attack-main2.txt` | `c8b8d1af8285ee7418c7a773973289f9dc0c8fd7279dc01188ca7a04a8f3f368` |
+| `raw/raw-main2-suite.txt` | `03551fe32b11ba02b28ae0b1f9ca6bc7ae18117464150dee5c84defea42565b6` |
