@@ -39,7 +39,7 @@
     },
     {
       "id": "antigravity",
-      "efo_id": "antigravity",
+      "efo_id": "antigravity-worker",
       "name": "Antigravity",
       "role": "연구 운영·기록",
       "allow_unregistered": true
@@ -47,7 +47,11 @@
   ],
   "project_aliases": [
     {
-      "pattern": "system1|equi|thought|deq",
+      "pattern": "deq_revival|cts",
+      "name": "CTS"
+    },
+    {
+      "pattern": "system1|equi|thought",
       "name": "System 1.5"
     },
     {
@@ -59,8 +63,16 @@
       "name": "System 3"
     },
     {
-      "pattern": "cts",
-      "name": "CTS"
+      "pattern": "system4",
+      "name": "System 4"
+    },
+    {
+      "pattern": "cogniboard",
+      "name": "CogniBoard"
+    },
+    {
+      "pattern": "rotem",
+      "name": "Rotem 2024"
     }
   ]
 }

@@ -453,13 +453,18 @@ def task_to_view(task: dict[str, Any]) -> dict[str, Any]:
     """Reduce an EFO task projection to public operational fields."""
 
     state = str(task.get("state") or "pending").lower()
+    lease_active = bool(task.get("lease"))
+    next_action = TASK_NEXT.get(state, "오케스트레이터 확인")
+    if state in ACTIVE_STATES and not lease_active:
+        next_action = "임대 만료 상태 확인"
     return {
         "id": sanitize_label(task.get("id"), "task"),
         "title": sanitize_label(task.get("title"), "Untitled task", 140),
         "owner": sanitize_label(task.get("owner"), "unassigned"),
         "state": state,
+        "lease_active": lease_active,
         "progress_percent": TASK_PROGRESS.get(state, 0),
-        "next": TASK_NEXT.get(state, "오케스트레이터 확인"),
+        "next": next_action,
         "updated_at": task.get("updated_at") or task.get("created_at") or utc_now(),
     }
 
@@ -480,9 +485,12 @@ def choose_agent_task(tasks: list[dict[str, Any]]) -> dict[str, Any] | None:
     return min(tasks, key=lambda task: priority.get(task["state"], 99), default=None)
 
 
-def agent_state(task_state: str | None) -> str:
+def agent_state(task: dict[str, Any] | None) -> str:
     """Map an EFO task state to a dashboard agent state."""
 
+    task_state = task.get("state") if task else None
+    if task_state in ACTIVE_STATES and not task.get("lease_active", False):
+        return "blocked"
     if task_state in ACTIVE_STATES:
         return "working"
     if task_state == "blocked":
@@ -573,7 +581,7 @@ def collect_efo(
             "waiting" if profile.get("allow_unregistered", True) else "offline"
         )
         state = (
-            agent_state(current["state"])
+            agent_state(current)
             if current
             else ("waiting" if efo_id in registered_ids else missing_state)
         )

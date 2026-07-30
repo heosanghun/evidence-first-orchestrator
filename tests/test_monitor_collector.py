@@ -64,6 +64,20 @@ class MonitorCollectorTests(unittest.TestCase):
         self.assertEqual(task["next"], "독립 검증")
         self.assertEqual(collector.workflow_progress([task]), 80)
 
+    def test_running_task_without_lease_is_reported_as_blocked(self) -> None:
+        task = collector.task_to_view(
+            {
+                "id": "DRYRUN",
+                "title": "flow smoke test",
+                "owner": "codex",
+                "state": "running",
+                "lease": None,
+            }
+        )
+        self.assertFalse(task["lease_active"])
+        self.assertEqual(task["next"], "임대 만료 상태 확인")
+        self.assertEqual(collector.agent_state(task), "blocked")
+
     def test_history_is_bounded_and_owner_only(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "state" / "history.json"

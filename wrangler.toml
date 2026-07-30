@@ -2,3 +2,7 @@ name = "evidence-first-orchestrator"
 pages_build_output_dir = "./public"
 compatibility_date = "2026-07-30"
 send_metrics = false
+
+[[kv_namespaces]]
+binding = "EFO_MONITOR_KV"
+id = "d916ef0363804dd99b22719ad6507216"
