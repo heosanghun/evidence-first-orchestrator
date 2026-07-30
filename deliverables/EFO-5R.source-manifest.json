@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "task": "EFO-5R",
+  "repository": "https://github.com/heosanghun/evidence-first-orchestrator.git",
+  "branch": "claude-b/EFO-5R-strict-json-identity",
+  "verified_base": "0828c0b6ff792da29317228679f7e962aec457ad",
+  "rejected_parent": "5a7f7f60e4a30dbfd9c9da82e9dfee3eb959fcb4",
+  "head": "03e87ffdb929f565de550489a8a5d39c84a78b2d",
+  "files": [
+    {
+      "path": "docs/OPERATIONS_DASHBOARD.md",
+      "mode": "100644",
+      "blob_oid": "55179987a98abfb4557707b25bbd0b83e4676d8c",
+      "sha256": "ffe4c4a687882062bd04b41997dadc6d3cfb0842b2e50382e2a0f75da6a88634",
+      "size_bytes": 10360
+    },
+    {
+      "path": "monitor/collector.py",
+      "mode": "100644",
+      "blob_oid": "e3ea8967ca1d90045d0ba5265a447cc1f4279037",
+      "sha256": "13c5530c22ef3984bc588a190d2a99daa3a693528117bc85a7c0730aa44f4504",
+      "size_bytes": 47528
+    },
+    {
+      "path": "tests/test_monitor_collector.py",
+      "mode": "100644",
+      "blob_oid": "f1726baf78148cad1c9b484dbcf5e969b0fdd731",
+      "sha256": "0327a7369d56342ff117bb0753796c61b4561b5eb0c542189a7515377cf09ef5",
+      "size_bytes": 68757
+    }
+  ],
+  "validation_summary": {
+    "python_passed": 126,
+    "node_passed": 18,
+    "failed": 0,
+    "skipped": 0
+  }
+}

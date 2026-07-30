@@ -1,0 +1,39 @@
+You are Claude B, the implementation worker for EFO-5R. Continue your prior
+EFO-5 session, but treat the previous candidate as formally rejected.
+
+Canonical task:
+  D:\AI\System1.5 - Codex\.efo-deliveries\EFO-5R.task.md
+
+Repository:
+  D:\AI\System1.5 - Codex\.efo-deliveries\EFO-5-source
+
+Required starting state:
+  HEAD must be 5a7f7f60e4a30dbfd9c9da82e9dfee3eb959fcb4 and clean.
+  Create/switch to branch claude-b/EFO-5R-strict-json-identity.
+
+Read the canonical task in full and implement it end to end. You may write only:
+  monitor/collector.py
+  tests/test_monitor_collector.py
+  docs/OPERATIONS_DASHBOARD.md
+
+Important independent rejection to reproduce first:
+  A claimed identity with schema_version=true is currently accepted against
+  a resolved identity with schema_version=1 because Python True == 1.
+
+Use recursive type-strict JSON equality, not another shallow special case.
+Do not weaken signed-identity validation. Add the frozen adversarial tests,
+collector protocol 1.3, and a non-secret collector_build value that is the
+exact lowercase 40-hex checkout commit when available or "unavailable"
+otherwise. Do not fabricate a commit.
+
+Run the complete Python and Node suites, compile/syntax checks,
+git diff --check, exact scope and clean-tree checks. Zero skips.
+Do not use GPU, datasets, benchmarks, web search, package installation,
+production services, or performance metrics.
+
+Commit the exact implementation. Do not merge main, deploy, or claim
+verification. In your final answer use six numbered sections:
+1 Scope, 2 Implementation, 3 Validation, 4 Known Answers,
+5 Source/Provenance, 6 Limitations/Result.
+Include exact base, parent, head, changed paths, raw counts, and RESULT: READY
+or RESULT: BLOCKED.
