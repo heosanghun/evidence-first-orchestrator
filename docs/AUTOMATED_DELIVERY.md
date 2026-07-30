@@ -20,6 +20,29 @@ and authenticate it using Anthropic's documentation:
 Do not store an API key, OAuth token, password, or SSH credential in an EFO
 agent command. Agent commands are signed into the ledger.
 
+## Bind the workspace before authentication
+
+Before installing, authenticating, or starting a consumer, capture one
+read-only identity packet:
+
+```bash
+efo workspace fingerprint /home/shoon/efo_ws
+```
+
+Compare `hostname`, `user`, `runtime.efo_version`, `runtime.package_path`,
+`workspace.workspace_id`, the canonical root path, ledger SHA-256 and head,
+agent IDs, and task IDs with the approved baseline. Stop on any unexplained
+difference. A valid signature proves one ledger is internally intact; it does
+not prove that the operator opened the intended ledger.
+
+Run provider authentication only in an operator-controlled terminal. Do not
+wrap `claude auth login` in a script that captures stdout, and do not retain its
+ephemeral authorization URL, state, or returned code in chat, an EFO report,
+the ledger, or shell history. Open the URL in the operator's browser and enter
+any returned code directly into the same live terminal process. If the URL was
+logged, shared, or its waiting process ended, cancel that attempt and generate
+a new one. Retain only the non-secret result of `claude auth status`.
+
 ## Identity is part of every prompt
 
 The adapter renders the signed agent profile and current orchestrator profile

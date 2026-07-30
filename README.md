@@ -387,6 +387,7 @@ Open `http://127.0.0.1:8765`. Remote binding is rejected unless
 efo recover ./team-workspace --actor antigravity
 efo ledger verify ./team-workspace
 efo ledger audit-projections ./team-workspace
+efo workspace fingerprint ./team-workspace
 efo doctor ./team-workspace
 efo audit independence ./team-workspace
 efo task revoke ./team-workspace \
@@ -402,6 +403,12 @@ efo task invalidate ./team-workspace \
   --id HISTORICAL-1 \
   --reason "Retrospective audit found a non-independent approval."
 ```
+
+`workspace fingerprint` is read-only and binds the canonical path, host,
+runtime, signed workspace ID, ledger SHA-256/head, agents, and tasks into one
+JSON packet. Use it before an upgrade or provider authentication; a valid
+signature proves the integrity of the ledger that was opened, not that the
+operator opened the intended ledger.
 
 An expired claimed task moves to `BLOCKED`; an expired running task moves to
 `REVOKING` because its process may still be live. Neither is silently

@@ -13,6 +13,7 @@ from .dashboard import serve
 from .doctor import audit_legacy_workspace, audit_workspace
 from .errors import EFOError
 from .evidence import validate_submission
+from .fingerprint import workspace_fingerprint
 from .workspace import Workspace
 
 
@@ -302,6 +303,10 @@ def _cmd_transfer_orchestrator(args: argparse.Namespace) -> None:
     )
 
 
+def _cmd_workspace_fingerprint(args: argparse.Namespace) -> None:
+    _emit(workspace_fingerprint(_workspace(args.path)))
+
+
 def _cmd_audit_independence(args: argparse.Namespace) -> None:
     _emit(
         _workspace(args.path).audit_independence(
@@ -460,6 +465,12 @@ def build_parser() -> argparse.ArgumentParser:
     transfer.add_argument("--to", dest="target", required=True)
     transfer.add_argument("--reason", required=True)
     transfer.set_defaults(handler=_cmd_transfer_orchestrator)
+    fingerprint = workspace_sub.add_parser(
+        "fingerprint",
+        help="Print a read-only workspace, ledger, host, and runtime identity packet",
+    )
+    fingerprint.add_argument("path")
+    fingerprint.set_defaults(handler=_cmd_workspace_fingerprint)
 
     agent = subparsers.add_parser("agent", help="Manage registered agents")
     agent_sub = agent.add_subparsers(dest="agent_command", required=True)
