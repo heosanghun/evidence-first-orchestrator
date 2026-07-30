@@ -85,3 +85,37 @@ One harness bug of mine was caught before any conclusion was drawn: the first
 run of B5 failed with `Independent verification manifest is required`, which is
 a different gate than the one under test. The verifier evidence manifest was
 added and the whole script re-run; only the corrected run is reported.
+
+---
+
+## Escalation: P1-1 is now on `main`
+
+`codex/proxy-submission` was merged. `main` is now
+`f35d5176d97337b8f41555b5d8af08bc4f4167a7`, and the only commit added between
+the branch state reviewed above and the merge is `f35d517 fix: serialize task
+projection reads during claim` — a concurrency fix. `independence.py` is
+**unchanged**; `audit_verification_events` was not touched.
+
+Re-run against `main` at `f35d5176`, measured, not inferred:
+
+| Step | Observed at `f35d5176` |
+|---|---|
+| B3 honest verify by a same-identity verifier | rejected — `same_control_principal, same_model_family` |
+| B4 `agent attest --control-principal openai --model-family openai-codex` | exit 0 |
+| B5 byte-identical verify replayed | **accepted, exit 0**, state `verified` |
+| B6 `ledger audit-independence` | `checked: 1`, `independent: 1`, `non_independent: 0` |
+| B7 ledger | attestation at seq 10, between `task.submitted` (9) and `task.verified` (11) |
+
+Suite at `f35d5176`: 67 tests, OK, 0 skipped, exit 0.
+
+`raw/raw-attack-main.txt` is byte-identical to `raw/raw-attack-proxy.txt`
+because the script emits no absolute paths. They are separate runs: distinct
+workspaces (`wsm` vs `wsp`), timestamps 66 minutes apart, and `REPO` pointing at
+`/tmp/efo-main` (`f35d517`) versus `/tmp/efo-proxy` (`e2cf6b4`). The module was
+confirmed to resolve from `/tmp/efo-main/src/` for the `main` run.
+
+| Artifact | SHA-256 |
+|---|---|
+| `raw/attack_main.sh` | `e285e1b30311d80f05a3082fdad63ab4803910fa12462a1ff3bc1f8ff5840b78` |
+| `raw/raw-attack-main.txt` | `c8b8d1af8285ee7418c7a773973289f9dc0c8fd7279dc01188ca7a04a8f3f368` |
+| `raw/raw-main-suite.txt` | `051b79ea49a522e24da66344b673800d901c60f8a054287e9fb7e2d3f14736fd` |
