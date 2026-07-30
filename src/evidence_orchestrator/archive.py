@@ -57,6 +57,7 @@ def archive_evidence_bundle(
     report: dict[str, Any] | None,
     manifest: dict[str, Any],
     max_artifact_bytes: int,
+    extra_files: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     """Retain reports, manifests, and bounded artifacts under content hashes."""
 
@@ -104,6 +105,15 @@ def archive_evidence_bundle(
                     False,
                 )
             )
+    for extra in extra_files or []:
+        files.append(
+            (
+                Path(extra["path"]).resolve(),
+                extra["sha256"],
+                str(extra.get("kind", "extra")),
+                bool(extra.get("force", True)),
+            )
+        )
 
     retained: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()

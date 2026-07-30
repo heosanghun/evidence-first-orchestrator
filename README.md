@@ -261,6 +261,47 @@ The optional policy supplies identity declarations only for read-only legacy
 analysis. It does not update agent registrations or make a future verification
 eligible.
 
+## Offline worker delivery
+
+When a worker can publish a Git commit but cannot reach the EFO workspace, use
+the explicit proxy path. It records the task owner as author and the real CLI
+caller as transport actor. It never fabricates a worker claim, lease, start, or
+submit command.
+
+The orchestrator first issues a one-time grant bound to the task, next attempt,
+transport actor, Git remote, branch, workspace, and expiration:
+
+```bash
+efo task proxy-authorize ./team-workspace \
+  --actor antigravity \
+  --id C1 \
+  --transport-actor antigravity \
+  --remote-url https://github.com/example/project.git \
+  --branch claude/C1 \
+  --commit FULL_COMMIT_OBJECT_ID
+```
+
+The transport then supplies a local repository plus a provenance manifest.
+Every claim-bearing artifact and raw output must match raw `git cat-file blob`
+bytes at the full commit ID. Checkout line-ending changes are rejected.
+
+```bash
+efo task proxy-submit ./team-workspace \
+  --actor antigravity \
+  --author claude \
+  --id C1 \
+  --proxy-token ONE_TIME_TOKEN \
+  --report reports/antigravity/C1.md \
+  --evidence reports/antigravity/C1.evidence.json \
+  --provenance reports/antigravity/C1.provenance.json \
+  --source-repository /path/to/local/repository
+```
+
+Verification independence is measured against the author. If the transport
+actor also verifies, the overlap is preserved in the signed result rather than
+hidden. See [Transparent Proxy Submission](docs/PROXY_SUBMISSION.md) for the
+trust boundary, provenance schema, and rejected alternatives.
+
 ## Dashboard
 
 Run the read-only operational dashboard:
@@ -365,8 +406,8 @@ npm run test:web
 
 The suite covers state transitions, evidence gates, concurrent claims, lease
 recovery, command adapters, legacy auditing, ledger tamper detection, the
-independent-identity attack cases, read-only server collector, and the signed
-Cloudflare ingest endpoint.
+independent-identity and proxy-delivery attack cases, read-only server
+collector, and the signed Cloudflare ingest endpoint.
 
 See [Architecture](docs/ARCHITECTURE.md), [Security](SECURITY.md), and
 [Contributing](CONTRIBUTING.md).

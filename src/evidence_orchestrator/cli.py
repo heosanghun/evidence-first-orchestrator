@@ -187,6 +187,35 @@ def _cmd_task_submit(args: argparse.Namespace) -> None:
     )
 
 
+def _cmd_task_proxy_authorize(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).authorize_proxy_submission(
+            actor=args.actor,
+            task_id=args.task_id,
+            transport_actor=args.transport_actor,
+            remote_url=args.remote_url,
+            branch=args.branch,
+            commit=args.commit,
+            duration_seconds=args.duration_seconds,
+        )
+    )
+
+
+def _cmd_task_proxy_submit(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).proxy_submit(
+            actor=args.actor,
+            author=args.author,
+            task_id=args.task_id,
+            proxy_token=args.proxy_token,
+            report_path=args.report,
+            manifest_path=args.evidence,
+            provenance_path=args.provenance,
+            source_repository=args.source_repository,
+        )
+    )
+
+
 def _cmd_task_verify(args: argparse.Namespace) -> None:
     _emit(
         _workspace(args.path).verify(
@@ -436,6 +465,35 @@ def build_parser() -> argparse.ArgumentParser:
     task_submit.add_argument("--report", required=True)
     task_submit.add_argument("--evidence", required=True)
     task_submit.set_defaults(handler=_cmd_task_submit)
+
+    task_proxy_authorize = task_sub.add_parser(
+        "proxy-authorize",
+        help="Issue a one-time grant for an offline worker delivery",
+    )
+    task_proxy_authorize.add_argument("path")
+    task_proxy_authorize.add_argument("--actor", required=True)
+    task_proxy_authorize.add_argument("--id", dest="task_id", required=True)
+    task_proxy_authorize.add_argument("--transport-actor", required=True)
+    task_proxy_authorize.add_argument("--remote-url", required=True)
+    task_proxy_authorize.add_argument("--branch", required=True)
+    task_proxy_authorize.add_argument("--commit", required=True)
+    task_proxy_authorize.add_argument("--duration-seconds", type=int)
+    task_proxy_authorize.set_defaults(handler=_cmd_task_proxy_authorize)
+
+    task_proxy_submit = task_sub.add_parser(
+        "proxy-submit",
+        help="Transport a Git-bound submission for an unreachable task owner",
+    )
+    task_proxy_submit.add_argument("path")
+    task_proxy_submit.add_argument("--actor", required=True)
+    task_proxy_submit.add_argument("--author", required=True)
+    task_proxy_submit.add_argument("--id", dest="task_id", required=True)
+    task_proxy_submit.add_argument("--proxy-token", required=True)
+    task_proxy_submit.add_argument("--report", required=True)
+    task_proxy_submit.add_argument("--evidence", required=True)
+    task_proxy_submit.add_argument("--provenance", required=True)
+    task_proxy_submit.add_argument("--source-repository", required=True)
+    task_proxy_submit.set_defaults(handler=_cmd_task_proxy_submit)
 
     task_verify = task_sub.add_parser("verify")
     task_verify.add_argument("path")

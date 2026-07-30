@@ -114,6 +114,35 @@ efo task add "E:\\agent-broker" \
 Workers use manual claim/start/submit commands, or command adapters if their
 installed CLI supports non-interactive execution.
 
+Workers that can publish Git but cannot connect to the workspace must not have
+their commands replayed with a forged `--actor`. Use a one-time proxy grant and
+the explicit transport path instead:
+
+```bash
+efo task proxy-authorize "E:\\agent-broker" \
+  --actor antigravity \
+  --id C1 \
+  --transport-actor antigravity \
+  --remote-url https://github.com/example/project.git \
+  --branch claude/C1 \
+  --commit FULL_COMMIT_OBJECT_ID
+
+efo task proxy-submit "E:\\agent-broker" \
+  --actor antigravity \
+  --author claude \
+  --id C1 \
+  --proxy-token ONE_TIME_TOKEN \
+  --report "E:\\agent-broker\\reports\\antigravity\\C1.md" \
+  --evidence "E:\\agent-broker\\reports\\antigravity\\C1.evidence.json" \
+  --provenance "E:\\agent-broker\\reports\\antigravity\\C1.provenance.json" \
+  --source-repository "E:\\deliveries\\C1"
+```
+
+The transport envelope belongs under the transport actor's report directory.
+Its claim-bearing files must be byte-identical to raw Git blobs. Do not copy
+them through a text-mode tool. See
+[Transparent Proxy Submission](PROXY_SUBMISSION.md).
+
 Keep `shared/FACTS.md` as a human-readable source during the transition. Once
 stable, store each proposed fact as a task claim with its evidence; update the
 human document only after the task reaches `VERIFIED`.

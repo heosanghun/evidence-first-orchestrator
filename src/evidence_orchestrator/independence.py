@@ -213,7 +213,7 @@ def audit_verification_events(
             continue
         attempt = int(task.get("attempt", 0))
         key = (task_id, attempt)
-        if event.get("action") == "task.submitted":
+        if event.get("action") in {"task.submitted", "task.proxy_submitted"}:
             authorship = task.get("result", {}).get("authorship", {})
             actor = str(authorship.get("actor") or event.get("actor") or task["owner"])
             snapshot = authorship.get("identity")

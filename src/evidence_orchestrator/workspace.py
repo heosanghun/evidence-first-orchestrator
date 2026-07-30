@@ -27,9 +27,15 @@ from .independence import (
 from .ledger import Ledger
 from .lock import FileLock
 from .model import lease_expired, lease_expiry, new_task, transition, validate_task
+from .provenance import (
+    validate_git_commit,
+    validate_git_provenance,
+    validate_git_source_claim,
+)
 from .util import (
     atomic_write_json,
     is_relative_to,
+    parse_utc,
     read_json,
     utc_now,
     validate_agent_id,
@@ -588,6 +594,127 @@ class Workspace:
     def _token_hash(token: str) -> str:
         return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
+    def authorize_proxy_submission(
+        self,
+        *,
+        actor: str,
+        task_id: str,
+        transport_actor: str,
+        remote_url: str,
+        branch: str,
+        commit: str,
+        duration_seconds: int | None = None,
+    ) -> dict[str, Any]:
+        """Issue a one-time signed grant for an offline worker delivery."""
+
+        self._require_orchestrator(actor)
+        transport_actor = validate_agent_id(transport_actor)
+        self.get_agent(transport_actor)
+        if transport_actor != self.orchestrator:
+            raise AuthorizationError(
+                "Proxy transport must be the workspace orchestrator"
+            )
+        normalized_remote, normalized_branch = validate_git_source_claim(
+            remote_url,
+            branch,
+        )
+        normalized_commit = validate_git_commit(commit)
+        duration = duration_seconds or int(
+            self.config["defaults"]["lease_seconds"]
+        )
+        now = utc_now()
+        token = secrets.token_urlsafe(24)
+        with self._task_lock(task_id):
+            task = self.get_task(task_id)
+            if task["state"] != "pending":
+                raise TransitionError(
+                    "Proxy authorization requires a pending task"
+                )
+            if task["owner"] == transport_actor:
+                raise AuthorizationError(
+                    "The task owner must use the normal submission path"
+                )
+            existing = task.get("proxy_grant")
+            if (
+                isinstance(existing, dict)
+                and existing.get("consumed_at") is None
+                and parse_utc(str(existing["expires_at"])) > parse_utc(now)
+            ):
+                raise TransitionError(
+                    "Task already has an active proxy authorization"
+                )
+            updated = deepcopy(task)
+            updated["proxy_grant"] = {
+                "schema_version": 1,
+                "workspace_id": self.config["workspace_id"],
+                "task_id": task_id,
+                "next_attempt": task["attempt"] + 1,
+                "author": task["owner"],
+                "transport_actor": transport_actor,
+                "remote_url": normalized_remote,
+                "branch": normalized_branch,
+                "commit": normalized_commit,
+                "issued_at": now,
+                "expires_at": lease_expiry(duration, now),
+                "token_hash": self._token_hash(token),
+                "consumed_at": None,
+                "consumed_by": None,
+            }
+            updated["revision"] += 1
+            updated["updated_at"] = now
+            projection = self._commit_task(
+                actor=actor,
+                action="task.proxy_authorized",
+                task=updated,
+                details={
+                    "author_actor": task["owner"],
+                    "transport_actor": transport_actor,
+                    "remote_url": normalized_remote,
+                    "branch": normalized_branch,
+                    "commit": normalized_commit,
+                },
+            )
+            return {"task": projection, "proxy_token": token}
+
+    def _require_proxy_grant(
+        self,
+        task: dict[str, Any],
+        *,
+        actor: str,
+        author: str,
+        proxy_token: str,
+    ) -> dict[str, Any]:
+        grant = task.get("proxy_grant")
+        if not isinstance(grant, dict):
+            raise AuthorizationError(
+                f"Task {task['id']} has no proxy authorization"
+            )
+        expected = {
+            "workspace_id": self.config["workspace_id"],
+            "task_id": task["id"],
+            "next_attempt": task["attempt"] + 1,
+            "author": author,
+            "transport_actor": actor,
+        }
+        mismatches = [
+            key for key, value in expected.items() if grant.get(key) != value
+        ]
+        if mismatches:
+            raise AuthorizationError(
+                "Proxy authorization does not match this submission: "
+                + ", ".join(mismatches)
+            )
+        if grant.get("consumed_at") is not None:
+            raise AuthorizationError("Proxy authorization was already consumed")
+        if parse_utc(str(grant["expires_at"])) <= parse_utc(utc_now()):
+            raise AuthorizationError("Proxy authorization has expired")
+        if not secrets.compare_digest(
+            str(grant.get("token_hash", "")),
+            self._token_hash(proxy_token),
+        ):
+            raise AuthorizationError("Proxy authorization token is invalid")
+        return deepcopy(grant)
+
     def claim(
         self,
         *,
@@ -835,6 +962,186 @@ class Workspace:
                 },
             )
 
+    def proxy_submit(
+        self,
+        *,
+        actor: str,
+        author: str,
+        task_id: str,
+        proxy_token: str,
+        report_path: str | Path,
+        manifest_path: str | Path,
+        provenance_path: str | Path,
+        source_repository: str | Path,
+    ) -> dict[str, Any]:
+        """Transport an unreachable worker's Git-bound evidence without impersonation."""
+
+        self._require_orchestrator(actor)
+        author = validate_agent_id(author)
+        if actor == author:
+            raise AuthorizationError(
+                "An author must use the normal claim/start/submit path"
+            )
+        author_identity = self._agent_identity(author)
+        transport_identity = self._agent_identity(actor)
+        if author_identity is None:
+            raise AuthorizationError(
+                f"Proxy author {author!r} needs a signed identity attestation"
+            )
+        if transport_identity is None:
+            raise AuthorizationError(
+                f"Transport actor {actor!r} needs a signed identity attestation"
+            )
+
+        report = Path(report_path).resolve()
+        manifest = Path(manifest_path).resolve()
+        transport_root = self.reports_dir / actor
+        if not is_relative_to(report, transport_root):
+            raise AuthorizationError(
+                "Proxy report must be under the transport actor's report "
+                f"directory: {transport_root}"
+            )
+        if not is_relative_to(manifest, transport_root):
+            raise AuthorizationError(
+                "Proxy manifest must be under the transport actor's report "
+                f"directory: {transport_root}"
+            )
+
+        task_for_validation = self.get_task(task_id)
+        if task_for_validation["owner"] != author:
+            raise AuthorizationError(
+                f"Proxy author {author!r} is not task owner "
+                f"{task_for_validation['owner']!r}"
+            )
+        grant = self._require_proxy_grant(
+            task_for_validation,
+            actor=actor,
+            author=author,
+            proxy_token=proxy_token,
+        )
+        evidence = validate_submission(
+            report,
+            manifest,
+            permissions=task_for_validation["permissions"],
+            gates=task_for_validation["gates"],
+        )
+        max_evidence_bytes = int(
+            self.config["defaults"].get(
+                "max_evidence_bytes",
+                50 * 1024 * 1024,
+            )
+        )
+        provenance = validate_git_provenance(
+            provenance_path,
+            source_repository=source_repository,
+            report_root=transport_root,
+            expected_author=author,
+            evidence=evidence,
+            max_blob_bytes=max_evidence_bytes,
+        )
+        if provenance["remote_url"] != grant["remote_url"]:
+            raise AuthorizationError(
+                "Git provenance remote_url differs from the proxy authorization"
+            )
+        if provenance["branch"] != grant["branch"]:
+            raise AuthorizationError(
+                "Git provenance branch differs from the proxy authorization"
+            )
+        if provenance["commit"] != grant["commit"]:
+            raise AuthorizationError(
+                "Git provenance commit differs from the proxy authorization"
+            )
+        evidence["authorship"] = {
+            "actor": author,
+            "identity": author_identity,
+            "method": "proxy",
+        }
+        evidence["transport"] = {
+            "actor": actor,
+            "identity": transport_identity,
+            "envelope_creator": actor,
+            "grant_event_hash": task_for_validation["last_event_hash"],
+        }
+        evidence["transport_independence"] = evaluate_independence(
+            author_identity,
+            transport_identity,
+        )
+        evidence["provenance"] = provenance
+
+        with self._task_lock(task_id):
+            task = self.get_task(task_id)
+            if task["state"] != "pending":
+                raise TransitionError(
+                    f"Proxy submission requires a pending task, observed "
+                    f"{task['state']}"
+                )
+            if task["owner"] != author:
+                raise AuthorizationError(
+                    f"Proxy author {author!r} is not task owner {task['owner']!r}"
+                )
+            grant = self._require_proxy_grant(
+                task,
+                actor=actor,
+                author=author,
+                proxy_token=proxy_token,
+            )
+            if provenance["remote_url"] != grant["remote_url"]:
+                raise AuthorizationError(
+                    "Git provenance remote_url differs from the proxy authorization"
+                )
+            if provenance["branch"] != grant["branch"]:
+                raise AuthorizationError(
+                    "Git provenance branch differs from the proxy authorization"
+                )
+            if provenance["commit"] != grant["commit"]:
+                raise AuthorizationError(
+                    "Git provenance commit differs from the proxy authorization"
+                )
+            attempt = int(grant["next_attempt"])
+            evidence["archive"] = archive_evidence_bundle(
+                submissions_root=self.submissions_dir,
+                task_id=task_id,
+                attempt=attempt,
+                label="proxy-worker",
+                report=evidence["report"],
+                manifest=evidence["manifest"],
+                max_artifact_bytes=max_evidence_bytes,
+                extra_files=[
+                    {
+                        "path": provenance["path"],
+                        "sha256": provenance["sha256"],
+                        "kind": "provenance_manifest",
+                        "force": True,
+                    }
+                ],
+            )
+            submitted = transition(
+                task,
+                "submitted",
+                attempt=attempt,
+                lease=None,
+                proxy_grant={
+                    **grant,
+                    "consumed_at": utc_now(),
+                    "consumed_by": actor,
+                },
+                result=evidence,
+                verification=None,
+            )
+            return self._commit_task(
+                actor=actor,
+                action="task.proxy_submitted",
+                task=submitted,
+                details={
+                    "author_actor": author,
+                    "transport_actor": actor,
+                    "report_sha256": evidence["report"]["sha256"],
+                    "manifest_sha256": evidence["manifest"]["sha256"],
+                    "provenance_sha256": provenance["sha256"],
+                    "source_commit": provenance["commit"],
+                },
+            )
+
     def verify(
         self,
         *,
@@ -867,6 +1174,20 @@ class Workspace:
                 "note": note.strip(),
                 "verified_at": utc_now(),
             }
+            transport = task.get("result", {}).get("transport")
+            if isinstance(transport, dict):
+                transport_identity = transport.get("identity")
+                if not isinstance(transport_identity, dict):
+                    transport_identity = None
+                transport_independence = evaluate_independence(
+                    transport_identity,
+                    verification["identity"],
+                )
+                verification["transport_overlap"] = not transport_independence[
+                    "independent"
+                ]
+                verification["transport_independence"] = transport_independence
+                verification["transport"] = deepcopy(transport)
             if task["gates"].get("require_independent_verification", True):
                 authorship = task.get("result", {}).get("authorship", {})
                 worker_identity = authorship.get("identity")

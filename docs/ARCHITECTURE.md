@@ -114,6 +114,27 @@ pairs without appending an event. A separate policy file may enrich legacy
 agents that predate signed identities; those overrides are audit-only and
 cannot authorize a live verification.
 
+### Proxy submission
+
+An offline worker may deliver commit-bound evidence through the orchestrator
+without giving the orchestrator a worker lease. `task.proxy_authorized` stores
+a one-time grant whose token is represented only by SHA-256. The grant binds
+the workspace, task, next attempt, owner, transport actor, expiration, Git
+remote, branch, and full commit ID. `task.proxy_submitted` uses the transport actor as the
+signed event actor while preserving the task owner and identity snapshot under
+`result.authorship`.
+
+The report and manifest are transport envelopes. Every artifact and raw output
+that supports a claim must match a raw blob in the declared full Git commit.
+The commit must be reachable from the preregistered branch in the supplied
+offline repository. No fetch occurs during validation.
+
+Independent verification compares the verifier with the author. Transport and
+verifier overlap is allowed only as an explicit, signed field because transport
+does not establish authorship and all source bytes are commit-bound. Projects
+requiring three separate principals can reject such overlap as a stricter
+local policy.
+
 ### Evidence retention
 
 Reports and manifests are always copied into an attempt-specific submission
@@ -130,6 +151,9 @@ between validation and archival rejects the submission.
 | Worker process crashes | Lease eventually expires to blocked |
 | Test skips | Submission rejected unless preregistered |
 | Same controller or model reviews itself under another name | Verification rejected |
+| Offline worker cannot reach the workspace | One-time proxy grant, distinct author and transport |
+| Checkout converts LF to CRLF | Raw Git blob SHA mismatch rejects transport |
+| Worker name is supplied by an arbitrary proxy | Only the orchestrator can authorize and transport; owner is task-bound |
 | Legacy verification has no identity snapshot | Read-only audit flags unknown identity |
 | Report lacks evidence | Submission rejected |
 | Task JSON is lost | Ledger retains complete snapshot |

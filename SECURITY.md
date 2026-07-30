@@ -10,6 +10,10 @@ private research data, or unpublished model artifacts in an issue.
 
 - External commands are launched with an argument list and `shell=False`.
 - Task lease tokens are stored only as SHA-256 digests.
+- Proxy grant tokens are one-time, task-bound, and stored only as SHA-256
+  digests.
+- Offline Git evidence is compared against raw blob bytes without checkout
+  conversion or network fetches.
 - The event ledger is hash-chained and HMAC-signed with a local key.
 - The dashboard is read-only and binds to loopback by default.
 - Worker reports and manifests must remain inside their owned report directory.
@@ -24,6 +28,12 @@ workers are not equally trusted.
 The local ledger signing key protects against edits by parties that cannot read
 the key. If every worker uses the same OS account, use an external append-only
 store or a key held only by the orchestrator for stronger guarantees.
+
+The orchestrator is the proxy-submission policy root. A signed proxy event
+proves what that orchestrator declared and transported; it does not
+cryptographically prove that a remote model authored the commit. Stronger
+deployments should require provider attestations or per-agent public-key
+signatures in addition to EFO's Git provenance checks.
 
 ## Credential handling
 
