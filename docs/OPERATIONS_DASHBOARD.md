@@ -39,6 +39,32 @@ Displayed progress is an **EFO workflow-phase indicator** derived from task
 states. It is not model accuracy, training completion, or a scientific
 performance result.
 
+## Agent-card projection
+
+Agent cards are a derived convenience view; the complete task table remains
+the canonical operational history. The collector assigns a task to a card
+only when the signed ledger is valid and either:
+
+- the task actor exactly matches the configured EFO agent ID; or
+- signed identity snapshots establish the same `control_principal` and
+  `model_family`, with a valid `alias_of` and `alias_chain`.
+
+Unknown, unattested, cyclic, self-referential, or inconsistent aliases are not
+merged. Signed verification activity can make a task relevant to a verifier's
+card without changing the task owner.
+
+Selection is deterministic. Live canonical work and transport observations
+take priority over terminal history. Within the same class, the newest signed
+timestamp wins and task ID resolves an exact tie. This prevents an old blocked
+probe from making an agent look currently blocked after newer work, while the
+old row and its alert remain visible.
+
+Each non-idle card binds its title, workflow progress, next action, status
+source, badge, and timestamp to a task ID in the same public snapshot. The
+Pages Function rejects missing tasks, mismatched values, extra card fields,
+and hidden state on an idle card. Transport badges describe an orchestrator
+observation; they never rewrite the canonical task state.
+
 ## Cloudflare Pages
 
 The repository's `wrangler.toml` is the source of truth for the Pages project

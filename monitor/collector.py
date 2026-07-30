@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Any, Iterable, Sequence
 
 SCHEMA_VERSION = "1.0"
-COLLECTOR_VERSION = "efo-monitor/1.1"
+COLLECTOR_VERSION = "efo-monitor/1.2"
 HISTORY_LIMIT = 60
 ACTIVITY_LIMIT = 300
 TASK_PROGRESS = {
@@ -64,6 +64,8 @@ TASK_NEXT = {
 }
 ACTIVE_STATES = {"claimed", "running"}
 TERMINAL_STATES = {"verified", "archived"}
+LIVE_CARD_STATES = {"pending", "claimed", "running", "submitted"}
+AGENT_STATES = {"working", "waiting", "blocked", "offline"}
 ACTIVITY_ACTIONS = {
     "workspace.initialized": ("워크스페이스 생성", "system"),
     "agent.added": ("에이전트 등록", "system"),
@@ -563,20 +565,158 @@ def lease_is_active(
     return expires > current
 
 
+def resolve_signed_identity_groups(
+    registered_agents: list[dict[str, Any]],
+    *,
+    ledger_valid: bool,
+) -> dict[str, frozenset[str]]:
+    """Resolve only complete, signed alias declarations into identity groups."""
+
+    if not ledger_valid:
+        return {}
+    records = {
+        str(agent["id"]): agent
+        for agent in registered_agents
+        if isinstance(agent, dict)
+        and isinstance(agent.get("id"), str)
+        and agent["id"]
+    }
+    expected_keys = {
+        "schema_version",
+        "control_principal",
+        "model_family",
+        "alias_of",
+        "alias_chain",
+    }
+    resolved: dict[str, tuple[str, str, tuple[str, ...]]] = {}
+    resolving: set[str] = set()
+
+    def resolve(agent_id: str) -> tuple[str, str, tuple[str, ...]] | None:
+        if agent_id in resolved:
+            return resolved[agent_id]
+        if agent_id in resolving:
+            return None
+        record = records.get(agent_id)
+        identity = record.get("identity") if isinstance(record, dict) else None
+        if not isinstance(identity, dict) or set(identity) != expected_keys:
+            return None
+        if identity.get("schema_version") != 1:
+            return None
+        principal = identity.get("control_principal")
+        model_family = identity.get("model_family")
+        alias_of = identity.get("alias_of")
+        alias_chain = identity.get("alias_chain")
+        if (
+            not isinstance(principal, str)
+            or not principal.strip()
+            or not isinstance(model_family, str)
+            or not model_family.strip()
+            or (alias_of is not None and not isinstance(alias_of, str))
+            or not isinstance(alias_chain, list)
+            or not all(isinstance(item, str) and item for item in alias_chain)
+            or len(alias_chain) != len(set(alias_chain))
+            or agent_id in alias_chain
+        ):
+            return None
+
+        resolving.add(agent_id)
+        try:
+            if alias_of is None:
+                if alias_chain:
+                    return None
+                value = (principal, model_family, ())
+            else:
+                if not alias_of or alias_of == agent_id:
+                    return None
+                target = resolve(alias_of)
+                if target is None:
+                    return None
+                target_principal, target_family, target_chain = target
+                expected_chain = (alias_of, *target_chain)
+                if (
+                    tuple(alias_chain) != expected_chain
+                    or principal != target_principal
+                    or model_family != target_family
+                ):
+                    return None
+                value = (principal, model_family, expected_chain)
+            resolved[agent_id] = value
+            return value
+        finally:
+            resolving.discard(agent_id)
+
+    for agent_id in sorted(records):
+        resolve(agent_id)
+
+    grouped: dict[tuple[str, str], set[str]] = {}
+    for agent_id, (principal, model_family, _chain) in resolved.items():
+        grouped.setdefault((principal, model_family), set()).add(agent_id)
+    return {
+        agent_id: frozenset(grouped[(principal, model_family)])
+        for agent_id, (principal, model_family, _chain) in resolved.items()
+    }
+
+
+def task_actor_ids(
+    raw_task: dict[str, Any],
+    trusted_secondary_actors: Iterable[str] = (),
+) -> frozenset[str]:
+    """Return signed actors for whom a task is relevant without exposing them."""
+
+    actors: set[str] = set()
+    trusted = set(trusted_secondary_actors)
+    owner = raw_task.get("owner")
+    if isinstance(owner, str) and owner:
+        actors.add(owner)
+
+    verification = raw_task.get("verification")
+    if (
+        isinstance(verification, dict)
+        and isinstance(verification.get("identity"), dict)
+        and isinstance(verification.get("actor"), str)
+        and verification["actor"]
+        and verification["actor"] in trusted
+    ):
+        actors.add(verification["actor"])
+
+    external = raw_task.get("external_status")
+    if (
+        isinstance(external, dict)
+        and isinstance(external.get("author_identity"), dict)
+        and isinstance(external.get("author"), str)
+        and external["author"]
+        and external["author"] in trusted
+    ):
+        actors.add(external["author"])
+    return frozenset(actors)
+
+
+def _task_timestamp(task: dict[str, Any]) -> float:
+    value = str(task.get("updated_at") or "")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return 0.0
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.timestamp()
+
+
 def choose_agent_task(tasks: list[dict[str, Any]]) -> dict[str, Any] | None:
     """Select the task that best describes an agent's current operational state."""
 
-    priority = {
-        "running": 0,
-        "claimed": 1,
-        "blocked": 2,
-        "submitted": 3,
-        "pending": 4,
-        "rejected": 5,
-        "verified": 6,
-        "archived": 7,
-    }
-    return min(tasks, key=lambda task: priority.get(task["state"], 99), default=None)
+    def sort_key(task: dict[str, Any]) -> tuple[int, float, str]:
+        is_live = (
+            task.get("external_phase") is not None
+            or task.get("state") in LIVE_CARD_STATES
+        )
+        return (
+            0 if is_live else 1,
+            -_task_timestamp(task),
+            str(task.get("id") or ""),
+        )
+
+    return min(tasks, key=sort_key, default=None)
 
 
 def agent_state(task: dict[str, Any] | None) -> str:
@@ -596,7 +736,7 @@ def agent_state(task: dict[str, Any] | None) -> str:
         return "blocked"
     if task_state in ACTIVE_STATES:
         return "working"
-    if task_state == "blocked":
+    if task_state in {"blocked", "rejected", "invalidated"}:
         return "blocked"
     return "waiting"
 
@@ -737,12 +877,22 @@ def collect_efo(
             }
         )
 
-    tasks = [task_to_view(task) for task in raw_tasks if isinstance(task, dict)]
+    task_records = [
+        (task, task_to_view(task))
+        for task in raw_tasks
+        if isinstance(task, dict)
+    ]
+    tasks = [view for _raw, view in task_records]
     registered_ids = {
         str(agent.get("id"))
         for agent in registered_agents
         if isinstance(agent, dict) and agent.get("id")
     }
+    ledger_valid = ledger.get("valid") is True
+    identity_groups = resolve_signed_identity_groups(
+        registered_agents,
+        ledger_valid=ledger_valid,
+    )
     profiles = config.get("agents") or [
         {
             "id": "codex",
@@ -772,9 +922,23 @@ def collect_efo(
     agents: list[dict[str, Any]] = []
     for profile in profiles:
         efo_id = str(profile.get("efo_id") or profile.get("id"))
-        owned = [task for task in tasks if task["owner"] == efo_id]
+        profile_id = str(profile.get("id") or efo_id)
+        relevant_actor_ids = {efo_id, profile_id}
+        relevant_actor_ids.update(identity_groups.get(efo_id, ()))
+        relevant_actor_ids.update(identity_groups.get(profile_id, ()))
+        owned = (
+            [
+                view
+                for raw, view in task_records
+                if task_actor_ids(raw, identity_groups) & relevant_actor_ids
+            ]
+            if ledger_valid
+            else []
+        )
         current = choose_agent_task(owned)
         configured_state = str(profile.get("state") or "").lower()
+        if configured_state not in {"waiting", "offline"}:
+            configured_state = ""
         missing_state = configured_state or (
             "waiting" if profile.get("allow_unregistered", True) else "offline"
         )
@@ -785,13 +949,17 @@ def collect_efo(
         )
         agents.append(
             {
-                "id": sanitize_label(profile.get("id"), efo_id),
+                "id": sanitize_label(profile_id, efo_id),
                 "name": sanitize_label(profile.get("name"), efo_id),
                 "role": sanitize_label(profile.get("role"), "작업자", 100),
                 "state": state,
                 "current": current["title"] if current else "배정 대기",
+                "current_task_id": current["id"] if current else None,
                 "next": current["next"] if current else "오케스트레이터 지시 대기",
                 "progress_percent": current["progress_percent"] if current else 0,
+                "status_source": current["status_source"] if current else "none",
+                "status_badge": current["status_badge"] if current else None,
+                "updated_at": current["updated_at"] if current else None,
             }
         )
     activity = (

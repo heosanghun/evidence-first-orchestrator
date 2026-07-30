@@ -118,6 +118,389 @@ class MonitorCollectorTests(unittest.TestCase):
         self.assertEqual(task["progress_percent"], 10)
         self.assertEqual(collector.agent_state(task), "blocked")
 
+    def test_signed_alias_projects_transport_work_to_display_agent(self) -> None:
+        status = {
+            "tasks": [
+                {
+                    "id": "P1b-8",
+                    "title": "Freeze run identity",
+                    "owner": "claude",
+                    "state": "pending",
+                    "lease": None,
+                    "updated_at": "2026-07-30T01:00:00Z",
+                    "external_status": {
+                        "phase": "working",
+                        "reported_at": "2026-07-30T02:00:00Z",
+                        "author": "claude",
+                        "author_identity": {
+                            "actor": "claude",
+                            "control_principal": "claude-a-control",
+                        },
+                    },
+                }
+            ],
+            "status": {"ledger": {"valid": True, "event_count": 20}},
+        }
+        registered = [
+            {
+                "id": "claude",
+                "identity": {
+                    "schema_version": 1,
+                    "control_principal": "claude-a-control",
+                    "model_family": "anthropic-claude",
+                    "alias_of": None,
+                    "alias_chain": [],
+                },
+            },
+            {
+                "id": "claude-a",
+                "identity": {
+                    "schema_version": 1,
+                    "control_principal": "claude-a-control",
+                    "model_family": "anthropic-claude",
+                    "alias_of": "claude",
+                    "alias_chain": ["claude"],
+                },
+            },
+        ]
+        config = {
+            "agents": [
+                {
+                    "id": "claude-a",
+                    "efo_id": "claude-a",
+                    "name": "Claude A",
+                    "role": "reviewer",
+                }
+            ]
+        }
+        with patch(
+            "monitor.collector.parse_json_command",
+            side_effect=[status, registered],
+        ):
+            agents, tasks, ledger, alerts, _activity = collector.collect_efo(config)
+
+        self.assertTrue(ledger["valid"])
+        self.assertEqual(alerts, [])
+        self.assertEqual(tasks[0]["owner"], "claude")
+        self.assertEqual(tasks[0]["state"], "pending")
+        self.assertEqual(tasks[0]["external_phase"], "working")
+        self.assertEqual(agents[0]["current_task_id"], "P1b-8")
+        self.assertEqual(agents[0]["current"], "Freeze run identity")
+        self.assertEqual(agents[0]["state"], "working")
+        self.assertEqual(agents[0]["progress_percent"], 40)
+        self.assertEqual(agents[0]["status_source"], "transport_assertion")
+        self.assertEqual(agents[0]["status_badge"], "운반자 보고")
+
+    def test_unattested_or_malformed_alias_does_not_merge(self) -> None:
+        malformed_agents = [
+            {
+                "id": "claude",
+                "identity": {
+                    "schema_version": 1,
+                    "control_principal": "claude-a-control",
+                    "model_family": "anthropic-claude",
+                    "alias_of": None,
+                    "alias_chain": [],
+                },
+            },
+            {
+                "id": "claude-a",
+                "identity": {
+                    "schema_version": 1,
+                    "control_principal": "claude-a-control",
+                    "model_family": "anthropic-claude",
+                    "alias_of": "missing-agent",
+                    "alias_chain": ["missing-agent"],
+                },
+            },
+        ]
+        groups = collector.resolve_signed_identity_groups(
+            malformed_agents,
+            ledger_valid=True,
+        )
+        self.assertEqual(groups["claude"], frozenset({"claude"}))
+        self.assertNotIn("claude-a", groups)
+        self.assertEqual(
+            collector.resolve_signed_identity_groups(
+                malformed_agents,
+                ledger_valid=False,
+            ),
+            {},
+        )
+        cyclic = [
+            {
+                "id": "alias-a",
+                "identity": {
+                    "schema_version": 1,
+                    "control_principal": "shared-control",
+                    "model_family": "family",
+                    "alias_of": "alias-b",
+                    "alias_chain": ["alias-b"],
+                },
+            },
+            {
+                "id": "alias-b",
+                "identity": {
+                    "schema_version": 1,
+                    "control_principal": "shared-control",
+                    "model_family": "family",
+                    "alias_of": "alias-a",
+                    "alias_chain": ["alias-a"],
+                },
+            },
+            {
+                "id": "self-alias",
+                "identity": {
+                    "schema_version": 1,
+                    "control_principal": "self-control",
+                    "model_family": "family",
+                    "alias_of": "self-alias",
+                    "alias_chain": ["self-alias"],
+                },
+            },
+        ]
+        self.assertEqual(
+            collector.resolve_signed_identity_groups(
+                cyclic,
+                ledger_valid=True,
+            ),
+            {},
+        )
+
+    def test_invalid_ledger_cannot_assign_even_an_exact_owner(self) -> None:
+        status = {
+            "tasks": [
+                {
+                    "id": "UNTRUSTED",
+                    "title": "Untrusted projection",
+                    "owner": "codex",
+                    "state": "running",
+                    "updated_at": "2026-07-30T01:00:00Z",
+                }
+            ],
+            "status": {"ledger": {"valid": False, "event_count": 20}},
+        }
+        registered = [{"id": "codex", "identity": None}]
+        with patch(
+            "monitor.collector.parse_json_command",
+            side_effect=[status, registered],
+        ):
+            agents, tasks, ledger, _alerts, activity = collector.collect_efo(
+                {
+                    "agents": [
+                        {
+                            "id": "codex",
+                            "efo_id": "codex",
+                            "name": "Codex",
+                            "role": "worker",
+                        }
+                    ]
+                }
+            )
+        self.assertFalse(ledger["valid"])
+        self.assertEqual(tasks[0]["id"], "UNTRUSTED")
+        self.assertIsNone(agents[0]["current_task_id"])
+        self.assertEqual(agents[0]["status_source"], "none")
+        self.assertEqual(agents[0]["progress_percent"], 0)
+        self.assertEqual(activity, [])
+
+    def test_unsigned_profile_state_cannot_invent_current_work(self) -> None:
+        status = {
+            "tasks": [],
+            "status": {"ledger": {"valid": True, "event_count": 20}},
+        }
+        registered = [{"id": "codex", "identity": None}]
+        with patch(
+            "monitor.collector.parse_json_command",
+            side_effect=[status, registered],
+        ):
+            agents, _tasks, _ledger, _alerts, _activity = collector.collect_efo(
+                {
+                    "agents": [
+                        {
+                            "id": "codex",
+                            "efo_id": "codex",
+                            "name": "Codex",
+                            "role": "worker",
+                            "state": "working",
+                        }
+                    ]
+                }
+            )
+        self.assertEqual(agents[0]["state"], "waiting")
+        self.assertIsNone(agents[0]["current_task_id"])
+        self.assertEqual(agents[0]["status_source"], "none")
+        self.assertEqual(agents[0]["progress_percent"], 0)
+
+    def test_newer_verified_activity_outranks_old_blocked_task(self) -> None:
+        status = {
+            "tasks": [
+                {
+                    "id": "DRYRUN",
+                    "title": "Old blocked probe",
+                    "owner": "codex",
+                    "state": "blocked",
+                    "updated_at": "2026-07-29T01:00:00Z",
+                },
+                {
+                    "id": "EFO-3",
+                    "title": "Monitor task projection",
+                    "owner": "claude-b",
+                    "state": "verified",
+                    "updated_at": "2026-07-30T01:00:00Z",
+                    "verification": {
+                        "actor": "codex-verifier",
+                        "identity": {
+                            "actor": "codex-verifier",
+                            "control_principal": "codex-meta-control",
+                        },
+                    },
+                },
+                {
+                    "id": "P1b-4",
+                    "title": "Old Claude B block",
+                    "owner": "claude-b",
+                    "state": "blocked",
+                    "updated_at": "2026-07-28T01:00:00Z",
+                },
+                {
+                    "id": "REVIEW-1",
+                    "title": "New Claude B verification",
+                    "owner": "claude",
+                    "state": "verified",
+                    "updated_at": "2026-07-30T02:00:00Z",
+                    "verification": {
+                        "actor": "claude-b",
+                        "identity": {
+                            "actor": "claude-b",
+                            "control_principal": "claude-b-control",
+                        },
+                    },
+                },
+            ],
+            "status": {"ledger": {"valid": True, "event_count": 30}},
+        }
+        registered = [
+            {
+                "id": "codex",
+                "identity": {
+                    "schema_version": 1,
+                    "control_principal": "codex-meta-control",
+                    "model_family": "openai-codex",
+                    "alias_of": None,
+                    "alias_chain": [],
+                },
+            },
+            {
+                "id": "codex-verifier",
+                "identity": {
+                    "schema_version": 1,
+                    "control_principal": "codex-meta-control",
+                    "model_family": "openai-codex",
+                    "alias_of": "codex",
+                    "alias_chain": ["codex"],
+                },
+            },
+            {
+                "id": "claude-b",
+                "identity": {
+                    "schema_version": 1,
+                    "control_principal": "claude-b-control",
+                    "model_family": "anthropic-claude",
+                    "alias_of": None,
+                    "alias_chain": [],
+                },
+            },
+        ]
+        config = {
+            "agents": [
+                {
+                    "id": "codex",
+                    "efo_id": "codex",
+                    "name": "Codex",
+                    "role": "worker",
+                },
+                {
+                    "id": "claude-b",
+                    "efo_id": "claude-b",
+                    "name": "Claude B",
+                    "role": "verifier",
+                },
+            ]
+        }
+        with patch(
+            "monitor.collector.parse_json_command",
+            side_effect=[status, registered],
+        ):
+            agents, tasks, _ledger, _alerts, _activity = collector.collect_efo(
+                config
+            )
+
+        self.assertEqual(agents[0]["current_task_id"], "EFO-3")
+        self.assertEqual(agents[0]["state"], "waiting")
+        self.assertEqual(agents[0]["progress_percent"], 100)
+        self.assertEqual(agents[1]["current_task_id"], "REVIEW-1")
+        self.assertEqual(agents[1]["state"], "waiting")
+        self.assertEqual(
+            {task["id"] for task in tasks},
+            {"DRYRUN", "EFO-3", "P1b-4", "REVIEW-1"},
+        )
+        self.assertEqual(
+            next(task for task in tasks if task["id"] == "DRYRUN")["state"],
+            "blocked",
+        )
+        self.assertEqual(
+            next(task for task in tasks if task["id"] == "P1b-4")["state"],
+            "blocked",
+        )
+
+    def test_live_task_outranks_newer_terminal_and_ties_use_task_id(self) -> None:
+        live = {
+            "id": "LIVE",
+            "state": "pending",
+            "external_phase": None,
+            "updated_at": "2026-07-29T01:00:00Z",
+        }
+        terminal = {
+            "id": "DONE",
+            "state": "verified",
+            "external_phase": None,
+            "updated_at": "2026-07-30T01:00:00Z",
+        }
+        self.assertEqual(
+            collector.choose_agent_task([terminal, live])["id"],
+            "LIVE",
+        )
+        same_time = "2026-07-30T02:00:00Z"
+        choices = [
+            {
+                "id": "TASK-B",
+                "state": "verified",
+                "external_phase": None,
+                "updated_at": same_time,
+            },
+            {
+                "id": "TASK-A",
+                "state": "verified",
+                "external_phase": None,
+                "updated_at": same_time,
+            },
+        ]
+        self.assertEqual(
+            collector.choose_agent_task(choices)["id"],
+            "TASK-A",
+        )
+        self.assertEqual(
+            collector.agent_state(
+                {
+                    "state": "rejected",
+                    "external_phase": None,
+                    "lease_active": False,
+                }
+            ),
+            "blocked",
+        )
+
     def test_running_task_without_lease_is_reported_as_blocked(self) -> None:
         task = collector.task_to_view(
             {

@@ -489,6 +489,12 @@ function renderAgents(snapshot) {
     .map((agent, index) => {
       const state = normalizeAgentState(agent.state);
       const progress = clamp(agent.progress_percent);
+      const transportBadge =
+        agent.status_source === "transport_assertion" && agent.status_badge
+          ? `<span class="transport-badge agent-transport-badge">${escapeHtml(
+              agent.status_badge,
+            )}</span>`
+          : "";
       return `
         <article class="agent-card" style="--agent-color: ${
           AGENT_COLORS[index % AGENT_COLORS.length]
@@ -505,6 +511,7 @@ function renderAgents(snapshot) {
           <div class="agent-current">
             <span>현재 수행</span>
             <strong>${escapeHtml(agent.current || "배정 대기")}</strong>
+            ${transportBadge}
           </div>
           <div class="agent-progress-row">
             <div class="progress-track" role="progressbar" aria-valuemin="0"

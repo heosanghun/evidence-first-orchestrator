@@ -108,6 +108,29 @@ const TASK_PROJECTION_KEYS = new Set([
   "updated_at",
 ]);
 
+const AGENT_PROJECTION_KEYS = new Set([
+  "id",
+  "name",
+  "role",
+  "state",
+  "current",
+  "current_task_id",
+  "next",
+  "progress_percent",
+  "status_source",
+  "status_badge",
+  "updated_at",
+]);
+
+const AGENT_STATES = new Set(["working", "waiting", "blocked", "offline"]);
+const AGENT_STATUS_SOURCES = new Set([
+  "none",
+  "canonical",
+  "transport_assertion",
+]);
+const IDLE_AGENT_CURRENT = "배정 대기";
+const IDLE_AGENT_NEXT = "오케스트레이터 지시 대기";
+
 const CANONICAL_TASK_PROGRESS = new Map([
   ["pending", 10],
   ["claimed", 25],
@@ -206,6 +229,120 @@ function validateTaskProjection(task) {
   return null;
 }
 
+function agentStateForTask(task) {
+  if (
+    task.state === "pending" &&
+    ["working", "reviewing", "ready"].includes(task.external_phase)
+  ) {
+    return "working";
+  }
+  if (task.state === "pending" && task.external_phase === "blocked") {
+    return "blocked";
+  }
+  if (["claimed", "running"].includes(task.state)) {
+    return task.lease_active ? "working" : "blocked";
+  }
+  if (["blocked", "rejected", "invalidated"].includes(task.state)) {
+    return "blocked";
+  }
+  return "waiting";
+}
+
+function validateAgentProjection(agent, tasksById) {
+  if (!agent || typeof agent !== "object" || Array.isArray(agent)) {
+    return "invalid agent projection";
+  }
+  const keys = Object.keys(agent);
+  if (
+    keys.length !== AGENT_PROJECTION_KEYS.size ||
+    keys.some((key) => !AGENT_PROJECTION_KEYS.has(key))
+  ) {
+    return "agent has unexpected or missing fields";
+  }
+  for (const [field, limit] of Object.entries({
+    id: 80,
+    name: 100,
+    role: 160,
+    current: 200,
+    next: 200,
+  })) {
+    if (
+      typeof agent[field] !== "string" ||
+      agent[field].length < 1 ||
+      agent[field].length > limit
+    ) {
+      return `agent has invalid ${field}`;
+    }
+  }
+  if (!AGENT_STATES.has(agent.state)) return "agent has invalid state";
+  if (
+    !isFiniteNumber(agent.progress_percent) ||
+    agent.progress_percent < 0 ||
+    agent.progress_percent > 100
+  ) {
+    return "agent has invalid progress_percent";
+  }
+  if (!AGENT_STATUS_SOURCES.has(agent.status_source)) {
+    return "agent has invalid status_source";
+  }
+  if (
+    agent.status_badge !== null &&
+    (typeof agent.status_badge !== "string" ||
+      agent.status_badge.length < 1 ||
+      agent.status_badge.length > 40)
+  ) {
+    return "agent has invalid status_badge";
+  }
+  if (
+    agent.current_task_id !== null &&
+    (typeof agent.current_task_id !== "string" ||
+      agent.current_task_id.length < 1 ||
+      agent.current_task_id.length > 80)
+  ) {
+    return "agent has invalid current_task_id";
+  }
+  if (
+    agent.updated_at !== null &&
+    (typeof agent.updated_at !== "string" ||
+      Number.isNaN(Date.parse(agent.updated_at)))
+  ) {
+    return "agent has invalid updated_at";
+  }
+
+  if (agent.status_source === "none") {
+    if (
+      !["waiting", "offline"].includes(agent.state) ||
+      agent.current_task_id !== null ||
+      agent.status_badge !== null ||
+      agent.updated_at !== null ||
+      agent.progress_percent !== 0 ||
+      agent.current !== IDLE_AGENT_CURRENT ||
+      agent.next !== IDLE_AGENT_NEXT
+    ) {
+      return "idle agent projection is inconsistent";
+    }
+    return null;
+  }
+
+  if (agent.current_task_id === null) {
+    return "active agent projection lacks current_task_id";
+  }
+  const task = tasksById.get(agent.current_task_id);
+  if (!task) return "agent references unknown current task";
+  if (
+    agent.current !== task.title ||
+    agent.next !== task.next ||
+    agent.progress_percent !== task.progress_percent ||
+    agent.status_source !== task.status_source ||
+    agent.status_badge !== task.status_badge ||
+    agent.updated_at !== task.updated_at ||
+    agent.state !== agentStateForTask(task)
+  ) {
+    return "agent projection conflicts with current task";
+  }
+  return null;
+}
+
 function validateSnapshot(snapshot) {
   if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) {
     return "body must be a JSON object";
@@ -230,9 +367,19 @@ function validateSnapshot(snapshot) {
     if (!Array.isArray(snapshot[key])) return `${key} must be an array`;
     if (snapshot[key].length > limit) return `${key} exceeds limit ${limit}`;
   }
+  const tasksById = new Map();
   for (const task of snapshot.tasks) {
     const taskError = validateTaskProjection(task);
     if (taskError) return taskError;
+    if (tasksById.has(task.id)) return "duplicate task ID";
+    tasksById.set(task.id, task);
+  }
+  const agentIds = new Set();
+  for (const agent of snapshot.agents) {
+    const agentError = validateAgentProjection(agent, tasksById);
+    if (agentError) return agentError;
+    if (agentIds.has(agent.id)) return "duplicate agent ID";
+    agentIds.add(agent.id);
   }
   if (snapshot.activity !== undefined) {
     if (!Array.isArray(snapshot.activity)) return "activity must be an array";
@@ -404,6 +551,8 @@ export const internals = {
   constantTimeEqual,
   hasForbiddenKey,
   hmacHex,
+  agentStateForTask,
+  validateAgentProjection,
   validateTaskProjection,
   validateSnapshot,
 };

@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { webcrypto } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 if (!globalThis.crypto) {
@@ -77,6 +78,39 @@ function validSnapshot() {
       },
     ],
     alerts: [],
+  };
+}
+
+function transportTask(id = "P1b-8") {
+  return {
+    id,
+    title: "Freeze run identity",
+    owner: "claude",
+    state: "pending",
+    canonical_state: "pending",
+    external_phase: "working",
+    status_source: "transport_assertion",
+    status_badge: "운반자 보고",
+    lease_active: false,
+    progress_percent: 40,
+    next: "외부 구현 결과 대기",
+    updated_at: "2026-07-30T02:00:00Z",
+  };
+}
+
+function projectedAgent(task) {
+  return {
+    id: "claude-a",
+    name: "Claude A",
+    role: "reviewer",
+    state: "working",
+    current: task.title,
+    current_task_id: task.id,
+    next: task.next,
+    progress_percent: task.progress_percent,
+    status_source: task.status_source,
+    status_badge: task.status_badge,
+    updated_at: task.updated_at,
   };
 }
 
@@ -176,6 +210,117 @@ test("transport-attested pending task is accepted without becoming running", asy
   assert.equal(stored.tasks[0].state, "pending");
   assert.equal(stored.tasks[0].external_phase, "working");
   assert.equal(stored.tasks[0].status_source, "transport_assertion");
+});
+
+test("agent card may reference a transport task without changing its row", async () => {
+  const snapshot = validSnapshot();
+  const task = transportTask();
+  snapshot.tasks.push(task);
+  snapshot.agents.push(projectedAgent(task));
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 200);
+  const stored = JSON.parse(await env.EFO_MONITOR_KV.get("snapshot:latest"));
+  assert.equal(stored.tasks[0].state, "pending");
+  assert.equal(stored.tasks[0].external_phase, "working");
+  assert.equal(stored.agents[0].current_task_id, "P1b-8");
+  assert.equal(stored.agents[0].status_badge, "운반자 보고");
+  assert.equal(stored.agents[0].progress_percent, 40);
+});
+
+test("browser renders a distinct transport badge on agent cards", async () => {
+  const source = await readFile(
+    new URL("../public/assets/app.js", import.meta.url),
+    "utf8",
+  );
+  assert.match(source, /agent\.status_source === "transport_assertion"/);
+  assert.match(source, /agent-transport-badge/);
+  assert.match(source, /escapeHtml\(\s*agent\.status_badge/);
+});
+
+test("agent card cannot invent or contradict current work", async () => {
+  const cases = [
+    (snapshot) => {
+      snapshot.agents.push(projectedAgent(transportTask("UNKNOWN")));
+    },
+    (snapshot) => {
+      const task = transportTask();
+      const agent = projectedAgent(task);
+      agent.progress_percent = 99;
+      snapshot.tasks.push(task);
+      snapshot.agents.push(agent);
+    },
+    (snapshot) => {
+      const task = transportTask();
+      const agent = projectedAgent(task);
+      agent.state = "waiting";
+      snapshot.tasks.push(task);
+      snapshot.agents.push(agent);
+    },
+    (snapshot) => {
+      const task = transportTask();
+      const agent = projectedAgent(task);
+      agent.private_report = "/server/private/report.json";
+      snapshot.tasks.push(task);
+      snapshot.agents.push(agent);
+    },
+  ];
+  for (const mutate of cases) {
+    const snapshot = validSnapshot();
+    mutate(snapshot);
+    const response = await onRequestPost({
+      request: await signedRequest(snapshot),
+      env: {
+        EFO_MONITOR_KV: new MemoryKv(),
+        EFO_INGEST_SECRET: "test-secret",
+      },
+    });
+    assert.equal(response.status, 400);
+    assert.match((await response.json()).detail, /agent/);
+  }
+});
+
+test("idle agent projection cannot carry hidden task state", async () => {
+  for (const mutate of [
+    (agent) => {
+      agent.progress_percent = 10;
+    },
+    (agent) => {
+      agent.state = "working";
+    },
+  ]) {
+    const snapshot = validSnapshot();
+    const agent = {
+      id: "antigravity",
+      name: "Antigravity",
+      role: "transport",
+      state: "waiting",
+      current: "배정 대기",
+      current_task_id: null,
+      next: "오케스트레이터 지시 대기",
+      progress_percent: 0,
+      status_source: "none",
+      status_badge: null,
+      updated_at: null,
+    };
+    mutate(agent);
+    snapshot.agents.push(agent);
+    const response = await onRequestPost({
+      request: await signedRequest(snapshot),
+      env: {
+        EFO_MONITOR_KV: new MemoryKv(),
+        EFO_INGEST_SECRET: "test-secret",
+      },
+    });
+    assert.equal(response.status, 400);
+    assert.match((await response.json()).detail, /idle agent projection/);
+  }
 });
 
 test("transport assertion cannot contradict canonical task state", async () => {

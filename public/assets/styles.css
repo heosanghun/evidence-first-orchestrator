@@ -394,7 +394,7 @@ h2 {
 }
 
 .agent-current {
-  min-height: 52px;
+  min-height: 70px;
   margin: 20px 0 13px;
 }
 
@@ -1191,6 +1191,10 @@ tbody tr:last-child td {
   font-size: 9px;
   font-weight: 700;
   white-space: nowrap;
+}
+
+.agent-transport-badge {
+  margin-top: 7px;
 }
 
 .state-label.blocked,
