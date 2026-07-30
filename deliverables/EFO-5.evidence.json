@@ -20,16 +20,16 @@
                           "id":  "source_manifest",
                           "path":  "EFO-5.source-manifest.json",
                           "kind":  "structured_data",
-                          "sha256":  "51a3546073373feb6fb2cbe3df7bf823b59e5513d1196121323b830a08083642",
-                          "bytes":  1516,
+                          "sha256":  "ee49116125c97456bb1f007b7245fc4f47ad3954f4b9e34531ed9a34b34e89c6",
+                          "bytes":  1487,
                           "description":  "Exact base, head, changed blobs, and clean-worktree record."
                       },
                       {
                           "id":  "python_tests",
                           "path":  "EFO-5.python-tests.txt",
                           "kind":  "raw_output",
-                          "sha256":  "469d7163d069bcd327f2c28a28989d54e053e774df86b2cc84a824ecf21268a3",
-                          "bytes":  15185,
+                          "sha256":  "c5d8e347e71ecd91d7a112fde96c6db60f7946f1b3a8eb864aafe498f75308d3",
+                          "bytes":  15082,
                           "description":  "Full Python worker regression transcript."
                       },
                       {
@@ -44,8 +44,8 @@
                           "id":  "static_checks",
                           "path":  "EFO-5.static-checks.txt",
                           "kind":  "raw_output",
-                          "sha256":  "772b9c9ca0d696ecf8ef2a677688f220c65622ab670f3511748b09ded4dcd643",
-                          "bytes":  291,
+                          "sha256":  "ba63c7f92507969f82cdd92caa9232a493a1f1ed06b785d6b2a6a3eee9d63919",
+                          "bytes":  281,
                           "description":  "Compile, syntax, scope, diff, head, and clean-worktree checks."
                       },
                       {
@@ -60,8 +60,8 @@
                           "id":  "claude_markdown",
                           "path":  "EFO-5.claude-b-worker.md",
                           "kind":  "worker_output",
-                          "sha256":  "2ac6a9e7076702f02998842e537a47820855630a20242b022297dcd26e09779e",
-                          "bytes":  7102,
+                          "sha256":  "a7bdddd4dabef7c3a89e308075141aaf28b2da6b778920f13bb95e1c6e9b2f63",
+                          "bytes":  7033,
                           "description":  "Verbatim Claude B final report."
                       },
                       {
@@ -89,7 +89,7 @@
                                              ],
                             "checks_run":  98,
                             "raw_output_path":  "EFO-5.python-tests.txt",
-                            "raw_output_sha256":  "469d7163d069bcd327f2c28a28989d54e053e774df86b2cc84a824ecf21268a3"
+                            "raw_output_sha256":  "c5d8e347e71ecd91d7a112fde96c6db60f7946f1b3a8eb864aafe498f75308d3"
                         },
                         {
                             "id":  "node_regression",
@@ -123,7 +123,7 @@
                                              ],
                             "checks_run":  7,
                             "raw_output_path":  "EFO-5.static-checks.txt",
-                            "raw_output_sha256":  "772b9c9ca0d696ecf8ef2a677688f220c65622ab670f3511748b09ded4dcd643"
+                            "raw_output_sha256":  "ba63c7f92507969f82cdd92caa9232a493a1f1ed06b785d6b2a6a3eee9d63919"
                         },
                         {
                             "id":  "actual_worker",
