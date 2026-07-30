@@ -39,6 +39,27 @@ entrypoint code, which this review did not examine.
 
 Raw output: `raw/raw-attack2-cef5623.txt`, `raw/raw-recheck-cef5623.txt`.
 
+### Executable reproducer for P1-1
+
+`test_p1_1.py` in this directory pins the finding as a stdlib `unittest`.
+Deliberately **not** placed under `tests/`, so it cannot turn the suite red;
+move it there once `audit_independence` is fixed.
+
+```
+PYTHONPATH=src python3 -m unittest reviews.claude-b.PR2.test_p1_1 -v
+Ran 3 tests   FAILED (failures=2)   exit=1
+```
+
+| Test | at `cef5623` | Meaning |
+|---|---|---|
+| `test_the_bypass_itself_reproduces` | **ok** | harness control — the bypass is real and the fixture is sound |
+| `test_audit_flags_independence_that_rested_on_a_mutated_declaration` | **FAIL** — `'independent' == 'independent'` | P1-1 proper |
+| `test_reverting_the_declaration_does_not_launder_the_record` | **FAIL** — `0 not greater than or equal to 1` | same root cause, frozen-profile path |
+
+The two failures are the finding, not a broken test: they assert the behaviour
+`META_ORCHESTRATION_V2.md:69-70` already promises. Raw output:
+`raw-p1-1-regression.txt`.
+
 > No PR-side action was taken: no approval, no merge, no comment, no server
 > deploy, no orchestrator handover. Per the assignment, none of the PR's own
 > test results or Codex's internal review were reused as evidence — every
@@ -400,6 +421,8 @@ All paths relative to this directory. Reproduce with
 | `raw/raw-attack2-cef5623.txt` | `2d82415ef4005a3273546bb1f2a46b58e801a949434523256b47b06fe3742dfc` |
 | `raw/raw-recheck-cef5623.txt` | `3f5acae762e6460eb858ff32c8df6d39879aea9ed6c35f387ff40e7d5c502b81` |
 | `raw/attack2_cef.sh` | `b46504a1393b0de30ac2b3d33fec43bbf9776bd587be489cea88b5f20e99c318` |
+| `test_p1_1.py` | `3c9f3329ec84588de7bc5c658ca48435bbc59fce2d68a48bf241b9e25738d958` |
+| `raw-p1-1-regression.txt` | `54487c46d7be2aed1b89b4d5a45484450f768a032aa9f22667eeadf843b21f1b` |
 
 Subject under review: `heosanghun/evidence-first-orchestrator` @
 `4aa47ca602d36c22cbaf2ce63fa442ee398c317e`, working tree clean.

@@ -1,0 +1,29 @@
+test_audit_flags_independence_that_rested_on_a_mutated_declaration (_t.ForgedIndependenceRegressionTest.test_audit_flags_independence_that_rested_on_a_mutated_declaration)
+FAILS at cef5623. This is finding P1-1. ... FAIL
+test_reverting_the_declaration_does_not_launder_the_record (_t.ForgedIndependenceRegressionTest.test_reverting_the_declaration_does_not_launder_the_record)
+FAILS at cef5623, for the same root cause. ... FAIL
+test_the_bypass_itself_reproduces (_t.ForgedIndependenceRegressionTest.test_the_bypass_itself_reproduces)
+Passes today. Documents the bypass the audit must later catch. ... ok
+
+======================================================================
+FAIL: test_audit_flags_independence_that_rested_on_a_mutated_declaration (_t.ForgedIndependenceRegressionTest.test_audit_flags_independence_that_rested_on_a_mutated_declaration)
+FAILS at cef5623. This is finding P1-1.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/efo-cef5623/_t.py", line 265, in test_audit_flags_independence_that_rested_on_a_mutated_declaration
+    self.assertNotEqual(
+AssertionError: 'independent' == 'independent' : a verification whose independence was created by editing the declaration must not be reported as independent
+
+======================================================================
+FAIL: test_reverting_the_declaration_does_not_launder_the_record (_t.ForgedIndependenceRegressionTest.test_reverting_the_declaration_does_not_launder_the_record)
+FAILS at cef5623, for the same root cause.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/tmp/efo-cef5623/_t.py", line 308, in test_reverting_the_declaration_does_not_launder_the_record
+    self.assertGreaterEqual(audit["summary"]["action_required"], 1)
+AssertionError: 0 not greater than or equal to 1
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.913s
+
+FAILED (failures=2)
