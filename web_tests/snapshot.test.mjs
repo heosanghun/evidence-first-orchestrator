@@ -209,6 +209,103 @@ test("transport assertion cannot contradict canonical task state", async () => {
   );
 });
 
+test("transport assertion rejects forged progress and lease", async () => {
+  const snapshot = validSnapshot();
+  snapshot.tasks.push({
+    id: "P1b-8",
+    title: "Freeze run identity",
+    owner: "claude",
+    state: "pending",
+    canonical_state: "pending",
+    external_phase: "ready",
+    status_source: "transport_assertion",
+    status_badge: "운반자 보고",
+    lease_active: true,
+    progress_percent: 100,
+    next: "대리 제출 및 증거 검증",
+    updated_at: new Date().toISOString(),
+  });
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 400);
+  assert.match(
+    (await response.json()).detail,
+    /external status conflicts with canonical state/,
+  );
+});
+
+test("task projection rejects private transport fields", async () => {
+  const snapshot = validSnapshot();
+  snapshot.tasks.push({
+    id: "P1b-8",
+    title: "Freeze run identity",
+    owner: "claude",
+    state: "pending",
+    canonical_state: "pending",
+    external_phase: "ready",
+    status_source: "transport_assertion",
+    status_badge: "운반자 보고",
+    lease_active: false,
+    progress_percent: 85,
+    next: "대리 제출 및 증거 검증",
+    updated_at: new Date().toISOString(),
+    external_status: {
+      reference: "private-dispatch",
+      note: "private note",
+    },
+  });
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 400);
+  assert.match(
+    (await response.json()).detail,
+    /unexpected or missing fields/,
+  );
+});
+
+test("canonical state mismatch is rejected without an external phase", async () => {
+  const snapshot = validSnapshot();
+  snapshot.tasks.push({
+    id: "P1b-7",
+    title: "Dataset identity gate",
+    owner: "claude",
+    state: "verified",
+    canonical_state: "pending",
+    external_phase: null,
+    status_source: "canonical",
+    status_badge: null,
+    lease_active: false,
+    progress_percent: 100,
+    next: "완료 결과 보존",
+    updated_at: new Date().toISOString(),
+  });
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 400);
+  assert.match(
+    (await response.json()).detail,
+    /canonical_state conflicts with state/,
+  );
+});
+
 test("invalid signature is rejected before parsing", async () => {
   const env = {
     EFO_MONITOR_KV: new MemoryKv(),

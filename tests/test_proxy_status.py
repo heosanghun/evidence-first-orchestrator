@@ -190,6 +190,30 @@ class ProxyStatusTests(unittest.TestCase):
         with self.assertRaisesRegex(TransitionError, "pending task"):
             self.report("dispatched")
 
+    def test_requeue_expires_old_dispatch_projection(self) -> None:
+        self.report("dispatched", reference="dispatch-001")
+        self.report("working", reference="dispatch-001")
+        claim = self.workspace.claim(actor="claude", task_id="C1")
+        self.workspace.block(
+            actor="claude",
+            task_id="C1",
+            lease_token=claim["lease_token"],
+            reason="Retry with a fresh dispatch.",
+        )
+        pending = self.workspace.requeue(
+            actor="antigravity",
+            task_id="C1",
+            reason="Issue a new transport dispatch.",
+        )
+        self.assertEqual(pending["state"], "pending")
+        self.assertNotIn("external_status", pending)
+
+        new_dispatch = self.report("dispatched", reference="dispatch-002")
+        self.assertEqual(
+            new_dispatch["external_status"]["reference"],
+            "dispatch-002",
+        )
+
     def test_ready_pending_task_can_follow_existing_proxy_submit_path(self) -> None:
         self.report("dispatched")
         self.report("working")
@@ -255,6 +279,8 @@ class ProxyStatusTests(unittest.TestCase):
             submitted["result"]["transport"]["actor"],
             "antigravity",
         )
+        with self.assertRaisesRegex(TransitionError, "pending task"):
+            self.report("ready")
 
 
 if __name__ == "__main__":

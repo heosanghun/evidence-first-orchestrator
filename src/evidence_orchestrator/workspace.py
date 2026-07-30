@@ -1412,6 +1412,7 @@ class Workspace:
                 verification=None,
                 blocked_reason=None,
             )
+            pending.pop("external_status", None)
             return self._commit_task(
                 actor=actor,
                 action="task.requeued",

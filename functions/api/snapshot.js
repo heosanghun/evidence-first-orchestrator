@@ -93,14 +93,66 @@ function isFiniteNumber(value) {
   return typeof value === "number" && Number.isFinite(value);
 }
 
+const TASK_PROJECTION_KEYS = new Set([
+  "id",
+  "title",
+  "owner",
+  "state",
+  "canonical_state",
+  "external_phase",
+  "status_source",
+  "status_badge",
+  "lease_active",
+  "progress_percent",
+  "next",
+  "updated_at",
+]);
+
+const CANONICAL_TASK_PROGRESS = new Map([
+  ["pending", 10],
+  ["claimed", 20],
+  ["running", 50],
+  ["blocked", 15],
+  ["submitted", 80],
+  ["rejected", 60],
+  ["verified", 100],
+  ["archived", 100],
+  ["invalidated", 0],
+]);
+
+const EXTERNAL_TASK_STATUS = new Map([
+  ["dispatched", { progress: 15, next: "외부 작업자 수신 확인" }],
+  ["working", { progress: 40, next: "외부 구현 결과 대기" }],
+  ["reviewing", { progress: 70, next: "독립 검토 결과 대기" }],
+  ["ready", { progress: 85, next: "대리 제출 및 증거 검증" }],
+  ["blocked", { progress: 10, next: "운반자 보고 차단 사유 확인" }],
+]);
+
 function validateTaskProjection(task) {
   if (!task || typeof task !== "object" || Array.isArray(task)) {
     return "invalid task projection";
   }
+  const keys = Object.keys(task);
+  if (
+    keys.length !== TASK_PROJECTION_KEYS.size ||
+    keys.some((key) => !TASK_PROJECTION_KEYS.has(key))
+  ) {
+    return "task has unexpected or missing fields";
+  }
   for (const field of ["id", "title", "owner", "state", "next"]) {
-    if (typeof task[field] !== "string" || task[field].length > 200) {
+    if (
+      typeof task[field] !== "string" ||
+      task[field].length < 1 ||
+      task[field].length > 200
+    ) {
       return `task has invalid ${field}`;
     }
+  }
+  if (!CANONICAL_TASK_PROGRESS.has(task.state)) {
+    return "task has invalid state";
+  }
+  if (task.canonical_state !== task.state) {
+    return "task canonical_state conflicts with state";
   }
   if (
     !isFiniteNumber(task.progress_percent) ||
@@ -116,36 +168,40 @@ function validateTaskProjection(task) {
     return "task has invalid updated_at";
   }
 
-  const externalPhases = new Set([
-    "dispatched",
-    "working",
-    "reviewing",
-    "ready",
-    "blocked",
-  ]);
   const externalPhase = task.external_phase;
   if (
     externalPhase !== null &&
-    externalPhase !== undefined &&
-    !externalPhases.has(externalPhase)
+    !EXTERNAL_TASK_STATUS.has(externalPhase)
   ) {
     return "task has invalid external_phase";
   }
-  if (externalPhase !== null && externalPhase !== undefined) {
+  if (externalPhase !== null) {
+    const expected = EXTERNAL_TASK_STATUS.get(externalPhase);
     if (
       task.state !== "pending" ||
-      task.canonical_state !== "pending" ||
       task.status_source !== "transport_assertion" ||
-      typeof task.status_badge !== "string" ||
-      task.status_badge.length > 80
+      task.status_badge !== "운반자 보고" ||
+      task.lease_active !== false ||
+      task.progress_percent !== expected.progress ||
+      task.next !== expected.next
     ) {
       return "task external status conflicts with canonical state";
     }
-  } else if (
-    task.status_source !== undefined &&
-    task.status_source !== "canonical"
-  ) {
-    return "task has invalid status_source";
+  } else {
+    if (
+      task.status_source !== "canonical" ||
+      task.status_badge !== null ||
+      task.progress_percent !== CANONICAL_TASK_PROGRESS.get(task.state)
+    ) {
+      return "task canonical projection is inconsistent";
+    }
+    if (
+      task.lease_active &&
+      task.state !== "claimed" &&
+      task.state !== "running"
+    ) {
+      return "task lease conflicts with canonical state";
+    }
   }
   return null;
 }
