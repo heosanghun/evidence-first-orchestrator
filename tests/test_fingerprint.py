@@ -4,6 +4,9 @@ import contextlib
 import hashlib
 import io
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -77,6 +80,28 @@ class WorkspaceFingerprintTests(unittest.TestCase):
         )
         self.assertEqual(result["workspace"]["ledger"]["events"], 4)
         self.assertEqual(result["workspace"]["tasks"]["states"], {})
+
+    def test_module_entrypoint_emits_fingerprint_json(self) -> None:
+        completed = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "evidence_orchestrator",
+                "workspace",
+                "fingerprint",
+                str(self.root),
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            env=os.environ,
+        )
+
+        result = json.loads(completed.stdout)
+        self.assertEqual(
+            result["workspace"]["workspace_id"],
+            self.workspace.config["workspace_id"],
+        )
 
 
 if __name__ == "__main__":

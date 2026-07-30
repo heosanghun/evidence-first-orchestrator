@@ -29,6 +29,13 @@ read-only identity packet:
 efo workspace fingerprint /home/shoon/efo_ws
 ```
 
+When reviewing an uninstalled checkout, bind the command to that exact source:
+
+```bash
+PYTHONPATH=/path/to/evidence-first-orchestrator/src \
+  python3 -m evidence_orchestrator workspace fingerprint /home/shoon/efo_ws
+```
+
 Compare `hostname`, `user`, `runtime.efo_version`, `runtime.package_path`,
 `workspace.workspace_id`, the canonical root path, ledger SHA-256 and head,
 agent IDs, and task IDs with the approved baseline. Stop on any unexplained
