@@ -1,0 +1,66 @@
+{
+  "endpoint": "https://evidence-first-orchestrator.pages.dev/api/snapshot",
+  "ingest_secret_file": "/home/shoon/.config/efo-monitor/ingest-secret",
+  "efo_workspace": "/home/shoon/efo_ws",
+  "efo_command": [
+    "/home/shoon/.local/bin/efo"
+  ],
+  "history_file": "/home/shoon/.local/state/efo-monitor/history.json",
+  "disk_path": "/home/shoon",
+  "display_host": "System1.5 A6000 cluster",
+  "collection_interval_seconds": 120,
+  "collect_container_progress": true,
+  "workspace": {
+    "name": "System 1.5",
+    "objective": "검증 가능한 근거를 남기며 System 1.5 연구를 완성합니다.",
+    "next_milestone": "현재 EFO 작업의 독립 검증"
+  },
+  "agents": [
+    {
+      "id": "codex",
+      "efo_id": "codex",
+      "name": "Codex",
+      "role": "메타 오케스트레이터",
+      "allow_unregistered": true
+    },
+    {
+      "id": "claude-a",
+      "efo_id": "claude-a",
+      "name": "Claude A",
+      "role": "연구·분석 작업자",
+      "allow_unregistered": true
+    },
+    {
+      "id": "claude-b",
+      "efo_id": "claude-b",
+      "name": "Claude B",
+      "role": "구현·검증 작업자",
+      "allow_unregistered": true
+    },
+    {
+      "id": "antigravity",
+      "efo_id": "antigravity",
+      "name": "Antigravity",
+      "role": "연구 운영·기록",
+      "allow_unregistered": true
+    }
+  ],
+  "project_aliases": [
+    {
+      "pattern": "system1|equi|thought|deq",
+      "name": "System 1.5"
+    },
+    {
+      "pattern": "system25|system2\\.5",
+      "name": "System 2.5"
+    },
+    {
+      "pattern": "system3",
+      "name": "System 3"
+    },
+    {
+      "pattern": "cts",
+      "name": "CTS"
+    }
+  ]
+}

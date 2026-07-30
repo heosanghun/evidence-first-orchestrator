@@ -1,0 +1,262 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-07-30T05:30:00Z",
+  "collection_interval_seconds": 120,
+  "source": {
+    "mode": "demo",
+    "host": "SSH GPU 서버 (예시)",
+    "collector": "demo-snapshot",
+    "ledger": {
+      "valid": true,
+      "event_count": 18
+    }
+  },
+  "workspace": {
+    "name": "System 1.5",
+    "objective": "검증 가능한 근거를 남기며 System 1.5 연구를 완성합니다.",
+    "next_milestone": "실시간 SSH 수집기 연결",
+    "workflow_progress_percent": 58
+  },
+  "agents": [
+    {
+      "id": "codex",
+      "name": "Codex",
+      "role": "메타 오케스트레이터",
+      "state": "working",
+      "current": "작업 분배, 증거 검증, 운영 화면 구축",
+      "next": "제출 증거 독립 검증",
+      "progress_percent": 72
+    },
+    {
+      "id": "claude-a",
+      "name": "Claude A",
+      "role": "연구·분석 작업자",
+      "state": "working",
+      "current": "DEQ 설계 근거와 실패 원인 정리",
+      "next": "검증 가능한 실험 명세 제출",
+      "progress_percent": 64
+    },
+    {
+      "id": "claude-b",
+      "name": "Claude B",
+      "role": "구현·검증 작업자",
+      "state": "waiting",
+      "current": "백본 검증 도구 결과 대기",
+      "next": "독립 단위 테스트",
+      "progress_percent": 41
+    },
+    {
+      "id": "antigravity",
+      "name": "Antigravity",
+      "role": "연구 운영·기록",
+      "state": "waiting",
+      "current": "EFO 원장과 다음 과제 확인",
+      "next": "검증 결과를 FACTS에 반영",
+      "progress_percent": 53
+    }
+  ],
+  "tasks": [
+    {
+      "id": "OPS-DASH-1",
+      "title": "실시간 운영 대시보드",
+      "owner": "codex",
+      "state": "running",
+      "progress_percent": 72,
+      "next": "Cloudflare API 연결",
+      "updated_at": "2026-07-30T05:28:00Z"
+    },
+    {
+      "id": "C1",
+      "title": "공통 백본 진입 검증",
+      "owner": "claude-b",
+      "state": "pending",
+      "progress_percent": 35,
+      "next": "알려진 값 대조",
+      "updated_at": "2026-07-30T05:20:00Z"
+    },
+    {
+      "id": "P1b-3",
+      "title": "통계 프로토콜 사전등록",
+      "owner": "claude-a",
+      "state": "submitted",
+      "progress_percent": 90,
+      "next": "오케스트레이터 독립 검증",
+      "updated_at": "2026-07-30T05:15:00Z"
+    },
+    {
+      "id": "LEDGER-SYNC",
+      "title": "검증 사실 원장 반영",
+      "owner": "antigravity",
+      "state": "pending",
+      "progress_percent": 20,
+      "next": "검증 결과 대기",
+      "updated_at": "2026-07-30T05:10:00Z"
+    }
+  ],
+  "gpus": [
+    {
+      "index": 0,
+      "name": "NVIDIA RTX A6000",
+      "utilization_percent": 94,
+      "memory_used_mib": 38912,
+      "memory_total_mib": 49140,
+      "temperature_c": 72,
+      "power_w": 278,
+      "projects": [{ "name": "System1.5 / seed13" }]
+    },
+    {
+      "index": 1,
+      "name": "NVIDIA RTX A6000",
+      "utilization_percent": 96,
+      "memory_used_mib": 40218,
+      "memory_total_mib": 49140,
+      "temperature_c": 74,
+      "power_w": 284,
+      "projects": [{ "name": "System2.5 / train" }]
+    },
+    {
+      "index": 2,
+      "name": "NVIDIA RTX A6000",
+      "utilization_percent": 4,
+      "memory_used_mib": 732,
+      "memory_total_mib": 49140,
+      "temperature_c": 43,
+      "power_w": 72,
+      "projects": []
+    },
+    {
+      "index": 3,
+      "name": "NVIDIA RTX A6000",
+      "utilization_percent": 88,
+      "memory_used_mib": 37684,
+      "memory_total_mib": 49140,
+      "temperature_c": 70,
+      "power_w": 265,
+      "projects": [{ "name": "System1.5 / G1 gate" }]
+    },
+    {
+      "index": 4,
+      "name": "NVIDIA RTX A6000",
+      "utilization_percent": 0,
+      "memory_used_mib": 22,
+      "memory_total_mib": 49140,
+      "temperature_c": 35,
+      "power_w": 49,
+      "projects": []
+    },
+    {
+      "index": 5,
+      "name": "NVIDIA RTX A6000",
+      "utilization_percent": 0,
+      "memory_used_mib": 22,
+      "memory_total_mib": 49140,
+      "temperature_c": 36,
+      "power_w": 51,
+      "projects": []
+    },
+    {
+      "index": 6,
+      "name": "NVIDIA RTX A6000",
+      "utilization_percent": 0,
+      "memory_used_mib": 22,
+      "memory_total_mib": 49140,
+      "temperature_c": 34,
+      "power_w": 47,
+      "projects": []
+    },
+    {
+      "index": 7,
+      "name": "NVIDIA RTX A6000",
+      "utilization_percent": 0,
+      "memory_used_mib": 22,
+      "memory_total_mib": 49140,
+      "temperature_c": 35,
+      "power_w": 48,
+      "projects": []
+    }
+  ],
+  "system": {
+    "hostname": "gpu-server-demo",
+    "load_1m": 9.42,
+    "uptime_seconds": 884400,
+    "memory": {
+      "used_gib": 164.8,
+      "total_gib": 251.6,
+      "percent": 65.5
+    },
+    "disk": {
+      "used_gib": 2870.4,
+      "total_gib": 7460.0,
+      "free_gib": 4589.6,
+      "percent": 38.5
+    }
+  },
+  "history": [
+    {
+      "at": "2026-07-30T03:30:00Z",
+      "gpus": [
+        { "index": 0, "utilization_percent": 88, "temperature_c": 68 },
+        { "index": 1, "utilization_percent": 94, "temperature_c": 71 },
+        { "index": 2, "utilization_percent": 0, "temperature_c": 40 },
+        { "index": 3, "utilization_percent": 79, "temperature_c": 66 },
+        { "index": 4, "utilization_percent": 0, "temperature_c": 35 },
+        { "index": 5, "utilization_percent": 0, "temperature_c": 36 },
+        { "index": 6, "utilization_percent": 0, "temperature_c": 34 },
+        { "index": 7, "utilization_percent": 0, "temperature_c": 35 }
+      ]
+    },
+    {
+      "at": "2026-07-30T04:00:00Z",
+      "gpus": [
+        { "index": 0, "utilization_percent": 93, "temperature_c": 70 },
+        { "index": 1, "utilization_percent": 97, "temperature_c": 73 },
+        { "index": 2, "utilization_percent": 2, "temperature_c": 42 },
+        { "index": 3, "utilization_percent": 84, "temperature_c": 68 },
+        { "index": 4, "utilization_percent": 0, "temperature_c": 35 },
+        { "index": 5, "utilization_percent": 0, "temperature_c": 36 },
+        { "index": 6, "utilization_percent": 0, "temperature_c": 34 },
+        { "index": 7, "utilization_percent": 0, "temperature_c": 35 }
+      ]
+    },
+    {
+      "at": "2026-07-30T04:30:00Z",
+      "gpus": [
+        { "index": 0, "utilization_percent": 96, "temperature_c": 72 },
+        { "index": 1, "utilization_percent": 91, "temperature_c": 72 },
+        { "index": 2, "utilization_percent": 0, "temperature_c": 41 },
+        { "index": 3, "utilization_percent": 90, "temperature_c": 70 },
+        { "index": 4, "utilization_percent": 0, "temperature_c": 35 },
+        { "index": 5, "utilization_percent": 0, "temperature_c": 36 },
+        { "index": 6, "utilization_percent": 0, "temperature_c": 34 },
+        { "index": 7, "utilization_percent": 0, "temperature_c": 35 }
+      ]
+    },
+    {
+      "at": "2026-07-30T05:00:00Z",
+      "gpus": [
+        { "index": 0, "utilization_percent": 92, "temperature_c": 71 },
+        { "index": 1, "utilization_percent": 96, "temperature_c": 74 },
+        { "index": 2, "utilization_percent": 3, "temperature_c": 42 },
+        { "index": 3, "utilization_percent": 87, "temperature_c": 69 },
+        { "index": 4, "utilization_percent": 0, "temperature_c": 35 },
+        { "index": 5, "utilization_percent": 0, "temperature_c": 36 },
+        { "index": 6, "utilization_percent": 0, "temperature_c": 34 },
+        { "index": 7, "utilization_percent": 0, "temperature_c": 35 }
+      ]
+    },
+    {
+      "at": "2026-07-30T05:30:00Z",
+      "gpus": [
+        { "index": 0, "utilization_percent": 94, "temperature_c": 72 },
+        { "index": 1, "utilization_percent": 96, "temperature_c": 74 },
+        { "index": 2, "utilization_percent": 4, "temperature_c": 43 },
+        { "index": 3, "utilization_percent": 88, "temperature_c": 70 },
+        { "index": 4, "utilization_percent": 0, "temperature_c": 35 },
+        { "index": 5, "utilization_percent": 0, "temperature_c": 36 },
+        { "index": 6, "utilization_percent": 0, "temperature_c": 34 },
+        { "index": 7, "utilization_percent": 0, "temperature_c": 35 }
+      ]
+    }
+  ],
+  "alerts": []
+}

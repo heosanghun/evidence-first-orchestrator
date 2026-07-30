@@ -1,0 +1,8 @@
+{
+  "name": "evidence-first-orchestrator-operations",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:web": "node --test web_tests/snapshot.test.mjs"
+  }
+}

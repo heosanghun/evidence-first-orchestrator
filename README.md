@@ -216,6 +216,26 @@ efo serve ./team-workspace
 Open `http://127.0.0.1:8765`. Remote binding is rejected unless
 `--allow-remote` is explicitly supplied.
 
+### Cloudflare operations dashboard
+
+The repository also includes a responsive, read-only operations dashboard in
+`public/`. It combines:
+
+- Codex, Claude A, Claude B, and Antigravity role and task state;
+- EFO task transitions and signed-ledger health;
+- physical GPU 0-N utilization, VRAM, temperature, power, and project mapping;
+- host memory, disk, load, uptime, alerts, and rolling charts.
+
+The SSH collector in `monitor/` only reads `nvidia-smi`, Docker status/logs,
+procfs, and EFO JSON output. It never starts, stops, restarts, or allocates a
+container or GPU. Public snapshots omit passwords, secrets, environment
+variables, command lines, PIDs, and GPU UUIDs.
+
+Cloudflare Pages deployment and collector installation are documented in
+[Operations Dashboard](docs/OPERATIONS_DASHBOARD.md). Until the API is
+configured, the page visibly identifies its bundled sample as `DEMO`; it never
+passes sample data off as live telemetry.
+
 ## Recovery and audit
 
 ```bash
@@ -277,10 +297,12 @@ See [Migration Guide](docs/MIGRATION.md) for a staged adoption path.
 
 ```bash
 python -m unittest discover -s tests -t . -v
+npm run test:web
 ```
 
 The suite covers state transitions, evidence gates, concurrent claims, lease
-recovery, command adapters, legacy auditing, and ledger tamper detection.
+recovery, command adapters, legacy auditing, ledger tamper detection, the
+read-only server collector, and the signed Cloudflare ingest endpoint.
 
 See [Architecture](docs/ARCHITECTURE.md), [Security](SECURITY.md), and
 [Contributing](CONTRIBUTING.md).

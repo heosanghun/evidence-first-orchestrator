@@ -1,0 +1,17 @@
+[Unit]
+Description=Evidence First Orchestrator read-only operations snapshot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/evidence-first-orchestrator
+ExecStart=/usr/bin/python3 -m monitor.collector --config %h/.config/efo-monitor/config.json
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/state/efo-monitor
+
+[Install]
+WantedBy=default.target

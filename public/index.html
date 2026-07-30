@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#172126">
+  <meta name="description" content="Evidence First Orchestrator 실시간 운영 현황">
+  <title>EFO Operations</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="EFO Operations 홈">
+      <span class="brand-mark" aria-hidden="true">E</span>
+      <span>
+        <strong>EFO Operations</strong>
+        <small id="workspace-name">System 1.5</small>
+      </span>
+    </a>
+    <div class="topbar-actions">
+      <div class="freshness" id="freshness">
+        <span class="status-dot" id="live-dot" aria-hidden="true"></span>
+        <span id="live-label">연결 중</span>
+        <time id="last-updated">-</time>
+      </div>
+      <button class="icon-button" id="refresh-button" type="button"
+              aria-label="지금 새로고침" title="지금 새로고침">
+        <span aria-hidden="true">↻</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="mission-band" aria-labelledby="objective-label">
+      <div class="mission-copy">
+        <p class="eyebrow" id="objective-label">최종 목표</p>
+        <h1 id="objective">검증 가능한 근거를 남기며 System 1.5 연구를 완성합니다.</h1>
+      </div>
+      <div class="mission-progress">
+        <div class="metric-line">
+          <span>검증 워크플로 진행률</span>
+          <strong id="overall-progress-label">0%</strong>
+        </div>
+        <div class="progress-track progress-large" role="progressbar"
+             aria-label="검증 워크플로 진행률" aria-valuemin="0"
+             aria-valuemax="100" aria-valuenow="0">
+          <span id="overall-progress"></span>
+        </div>
+        <p id="next-milestone">다음 단계 확인 중</p>
+      </div>
+    </section>
+
+    <section class="kpi-grid" aria-label="운영 핵심 지표">
+      <article class="kpi">
+        <span class="kpi-label">활성 에이전트</span>
+        <strong id="kpi-agents">0 / 4</strong>
+        <span class="kpi-note" id="kpi-agents-note">연결 확인 중</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">진행 중 작업</span>
+        <strong id="kpi-tasks">0</strong>
+        <span class="kpi-note" id="kpi-tasks-note">대기 0</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">평균 GPU 사용률</span>
+        <strong id="kpi-gpu">0%</strong>
+        <span class="kpi-note" id="kpi-gpu-note">0 / 0 활성</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">GPU 메모리</span>
+        <strong id="kpi-vram">0%</strong>
+        <span class="kpi-note" id="kpi-vram-note">0 / 0 GiB</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">서버 저장공간</span>
+        <strong id="kpi-disk">0%</strong>
+        <span class="kpi-note" id="kpi-disk-note">0 GiB 사용 가능</span>
+      </article>
+      <article class="kpi">
+        <span class="kpi-label">주의 항목</span>
+        <strong id="kpi-alerts">0</strong>
+        <span class="kpi-note" id="kpi-alerts-note">정상</span>
+      </article>
+    </section>
+
+    <section class="section-band" aria-labelledby="agents-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">협업 상태</p>
+          <h2 id="agents-heading">에이전트별 현재 작업</h2>
+        </div>
+        <span class="section-meta" id="ledger-status">원장 확인 중</span>
+      </div>
+      <div class="agent-grid" id="agent-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="section-band" aria-labelledby="gpu-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">SSH 서버</p>
+          <h2 id="gpu-heading">GPU 배치와 상태</h2>
+        </div>
+        <span class="section-meta" id="gpu-host">호스트 확인 중</span>
+      </div>
+      <div class="gpu-list" id="gpu-list"></div>
+    </section>
+
+    <section class="chart-band" aria-label="시간 변화 그래프">
+      <article class="chart-panel">
+        <div class="chart-heading">
+          <div>
+            <p class="eyebrow">GPU 사용률</p>
+            <h2>최근 추이</h2>
+          </div>
+          <span id="util-range">최근 2시간</span>
+        </div>
+        <div class="chart-wrap">
+          <svg id="utilization-chart" class="line-chart" role="img"
+               aria-label="GPU 사용률 시간 변화"></svg>
+        </div>
+        <div class="legend" id="utilization-legend"></div>
+      </article>
+      <article class="chart-panel">
+        <div class="chart-heading">
+          <div>
+            <p class="eyebrow">GPU 온도</p>
+            <h2>열 상태</h2>
+          </div>
+          <span id="temperature-peak">최고 0°C</span>
+        </div>
+        <div class="chart-wrap">
+          <svg id="temperature-chart" class="line-chart" role="img"
+               aria-label="GPU 온도 시간 변화"></svg>
+        </div>
+        <div class="legend" id="temperature-legend"></div>
+      </article>
+    </section>
+
+    <section class="resource-band" aria-label="서버 자원">
+      <article class="resource-block">
+        <div>
+          <p class="eyebrow">시스템 메모리</p>
+          <h2 id="memory-title">0 / 0 GiB</h2>
+        </div>
+        <svg class="ring-chart" id="memory-ring" viewBox="0 0 120 120"
+             role="img" aria-label="시스템 메모리 사용률">
+          <circle class="ring-base" cx="60" cy="60" r="48"></circle>
+          <circle class="ring-value" cx="60" cy="60" r="48"></circle>
+          <text x="60" y="64" text-anchor="middle" id="memory-ring-label">0%</text>
+        </svg>
+      </article>
+      <article class="resource-block">
+        <div>
+          <p class="eyebrow">저장공간</p>
+          <h2 id="disk-title">0 / 0 GiB</h2>
+        </div>
+        <svg class="ring-chart ring-disk" id="disk-ring" viewBox="0 0 120 120"
+             role="img" aria-label="저장공간 사용률">
+          <circle class="ring-base" cx="60" cy="60" r="48"></circle>
+          <circle class="ring-value" cx="60" cy="60" r="48"></circle>
+          <text x="60" y="64" text-anchor="middle" id="disk-ring-label">0%</text>
+        </svg>
+      </article>
+      <article class="resource-block resource-details">
+        <div class="resource-row">
+          <span>시스템 부하</span>
+          <strong id="system-load">0.00</strong>
+        </div>
+        <div class="resource-row">
+          <span>가동 시간</span>
+          <strong id="system-uptime">-</strong>
+        </div>
+        <div class="resource-row">
+          <span>수집 주기</span>
+          <strong id="collection-interval">-</strong>
+        </div>
+      </article>
+    </section>
+
+    <section class="section-band" aria-labelledby="tasks-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">작업 원장</p>
+          <h2 id="tasks-heading">현재 작업과 다음 단계</h2>
+        </div>
+        <span class="section-meta" id="task-count">0개 작업</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>작업</th>
+              <th>담당</th>
+              <th>상태</th>
+              <th>진행률</th>
+              <th>다음 단계</th>
+              <th>최근 변경</th>
+            </tr>
+          </thead>
+          <tbody id="task-table"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section-band alerts-band" id="alerts-section"
+             aria-labelledby="alerts-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">운영 신호</p>
+          <h2 id="alerts-heading">주의가 필요한 항목</h2>
+        </div>
+      </div>
+      <div id="alerts-list" class="alerts-list"></div>
+    </section>
+  </main>
+
+  <footer>
+    <span>Evidence First Orchestrator</span>
+    <span id="source-mode">데이터 소스 확인 중</span>
+    <span id="schema-version">Schema -</span>
+  </footer>
+
+  <dialog id="access-dialog">
+    <form method="dialog" id="access-form">
+      <p class="eyebrow">보호된 모니터</p>
+      <h2>접근 키 입력</h2>
+      <label for="access-token">Dashboard access key</label>
+      <input id="access-token" name="access-token" type="password"
+             autocomplete="one-time-code" required>
+      <p class="form-error" id="access-error" aria-live="polite"></p>
+      <div class="dialog-actions">
+        <button class="command-button" value="submit" type="submit">연결</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
