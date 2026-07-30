@@ -363,7 +363,10 @@ function renderKpis(snapshot, alerts) {
     (gpu) =>
       number(gpu.utilization_percent) >= 5 ||
       number(gpu.memory_used_mib) >= 1024 ||
-      (Array.isArray(gpu.projects) && gpu.projects.length > 0),
+      (Array.isArray(gpu.projects) &&
+        gpu.projects.some(
+          (project) => typeof project === "object" && project.active === true,
+        )),
   ).length;
   const averageGpu =
     gpuCount > 0
@@ -486,9 +489,14 @@ function renderGpus(snapshot) {
                   typeof project === "object" && project.eta
                     ? ` · ETA ${project.eta}`
                     : "";
-                return `<span class="project-label" title="${escapeHtml(
-                  `${name}${progress}${eta}`,
-                )}">${escapeHtml(`${name}${progress}`)}</span>`;
+                const reserved =
+                  typeof project === "object" && project.active === false;
+                const activity = reserved ? " · 대기" : "";
+                return `<span class="project-label${
+                  reserved ? " reserved" : ""
+                }" title="${escapeHtml(
+                  `${name}${progress}${eta}${activity}`,
+                )}">${escapeHtml(`${name}${progress}${activity}`)}</span>`;
               })
               .join("")
           : '<span class="project-label idle">유휴 또는 매핑 없음</span>';

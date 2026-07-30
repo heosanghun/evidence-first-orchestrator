@@ -561,6 +561,12 @@ h2 {
   border-style: dashed;
 }
 
+.project-label.reserved {
+  color: #655619;
+  background: #fff7dd;
+  border-color: #e4c970;
+}
+
 .chart-band {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

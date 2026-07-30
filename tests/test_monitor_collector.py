@@ -5,7 +5,9 @@ import hmac
 import json
 import tempfile
 import unittest
+from datetime import datetime, timezone
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from monitor import collector
@@ -77,6 +79,39 @@ class MonitorCollectorTests(unittest.TestCase):
         self.assertFalse(task["lease_active"])
         self.assertEqual(task["next"], "임대 만료 상태 확인")
         self.assertEqual(collector.agent_state(task), "blocked")
+
+    def test_expired_lease_is_not_active(self) -> None:
+        now = datetime(2026, 7, 30, tzinfo=timezone.utc)
+        self.assertFalse(
+            collector.lease_is_active(
+                {"expires_at": "2026-07-29T07:00:08Z"},
+                now=now,
+            )
+        )
+        self.assertTrue(
+            collector.lease_is_active(
+                {"expires_at": "2026-07-31T07:00:08Z"},
+                now=now,
+            )
+        )
+
+    @patch("monitor.collector.read_uptime", return_value=10)
+    @patch("monitor.collector.read_meminfo", return_value={})
+    @patch("monitor.collector.shutil.disk_usage")
+    def test_disk_pressure_uses_user_available_capacity(
+        self,
+        disk_usage_mock,
+        _meminfo_mock,
+        _uptime_mock,
+    ) -> None:
+        gib = 1024**3
+        disk_usage_mock.return_value = SimpleNamespace(
+            total=100 * gib,
+            used=90 * gib,
+            free=5 * gib,
+        )
+        system = collector.collect_system({"disk_path": "/"})
+        self.assertEqual(system["disk"]["percent"], 94.74)
 
     def test_history_is_bounded_and_owner_only(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

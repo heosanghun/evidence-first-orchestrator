@@ -97,9 +97,21 @@ systemctl --user list-timers efo-monitor.timer
 journalctl --user -u efo-monitor.service --no-pager -n 30
 ```
 
-If the server does not keep user services alive after logout, the administrator
-must enable user lingering for the `shoon` account or schedule the same
-one-shot command with the site's approved scheduler.
+Check whether user services remain alive after logout:
+
+```bash
+loginctl show-user "$USER" -p Linger --value
+```
+
+If the result is `no`, either ask the administrator to enable lingering or use
+the included user-cron installer. It adds one marker-delimited, idempotent
+entry, uses `flock` to prevent overlapping runs, and performs an immediate
+signed submission:
+
+```bash
+bash monitor/install_cron_service.sh "$HOME/evidence-first-orchestrator"
+tail -n 20 "$HOME/.local/state/efo-monitor/collector.log"
+```
 
 ## Collector permissions
 

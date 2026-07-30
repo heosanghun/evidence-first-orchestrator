@@ -337,16 +337,21 @@ def map_projects_to_gpus(
 
     for container in containers:
         process_ids = container_process_ids(container["id"])
-        indexes = {
+        active_indexes = {
             uuid_to_index[app["gpu_uuid"]]
             for app in applications
             if app["process_id"] in process_ids and app["gpu_uuid"] in uuid_to_index
         }
+        indexes = set(active_indexes)
         indexes.update(container_device_indices(container["id"], uuid_to_index))
         if not indexes:
             continue
         label = project_name(container["name"], aliases)
-        progress = container_progress(container["id"]) if collect_progress else None
+        progress = (
+            container_progress(container["id"])
+            if collect_progress and active_indexes
+            else None
+        )
         project: dict[str, Any] = {"name": label}
         if progress:
             project["progress_percent"] = round(progress["percent"], 2)
@@ -355,7 +360,9 @@ def map_projects_to_gpus(
         for index in sorted(indexes):
             if index not in gpu_by_index or label in seen[index]:
                 continue
-            gpu_by_index[index]["projects"].append(dict(project))
+            gpu_by_index[index]["projects"].append(
+                {**project, "active": index in active_indexes}
+            )
             seen[index].add(label)
 
     matched_process_ids = {
@@ -369,7 +376,9 @@ def map_projects_to_gpus(
         index = uuid_to_index.get(app["gpu_uuid"])
         if index is None or "호스트 GPU 작업" in seen[index]:
             continue
-        gpu_by_index[index]["projects"].append({"name": "호스트 GPU 작업"})
+        gpu_by_index[index]["projects"].append(
+            {"name": "호스트 GPU 작업", "active": True}
+        )
         seen[index].add("호스트 GPU 작업")
 
 
@@ -413,6 +422,8 @@ def collect_system(config: dict[str, Any]) -> dict[str, Any]:
     gib = 1024**3
     disk_total = usage.total / gib
     disk_used = usage.used / gib
+    disk_available = usage.free / gib
+    usable_capacity = disk_used + disk_available
     try:
         load_1m = os.getloadavg()[0]
     except (AttributeError, OSError):
@@ -425,8 +436,12 @@ def collect_system(config: dict[str, Any]) -> dict[str, Any]:
         "disk": {
             "used_gib": round(disk_used, 2),
             "total_gib": round(disk_total, 2),
-            "free_gib": round(usage.free / gib, 2),
-            "percent": round(disk_used / disk_total * 100, 2) if disk_total else 0.0,
+            "free_gib": round(disk_available, 2),
+            "percent": (
+                round(disk_used / usable_capacity * 100, 2)
+                if usable_capacity
+                else 0.0
+            ),
         },
     }
 
@@ -453,7 +468,7 @@ def task_to_view(task: dict[str, Any]) -> dict[str, Any]:
     """Reduce an EFO task projection to public operational fields."""
 
     state = str(task.get("state") or "pending").lower()
-    lease_active = bool(task.get("lease"))
+    lease_active = lease_is_active(task.get("lease"))
     next_action = TASK_NEXT.get(state, "오케스트레이터 확인")
     if state in ACTIVE_STATES and not lease_active:
         next_action = "임대 만료 상태 확인"
@@ -467,6 +482,27 @@ def task_to_view(task: dict[str, Any]) -> dict[str, Any]:
         "next": next_action,
         "updated_at": task.get("updated_at") or task.get("created_at") or utc_now(),
     }
+
+
+def lease_is_active(
+    lease: Any,
+    now: datetime | None = None,
+) -> bool:
+    """Return whether an EFO lease exists and has not expired."""
+
+    if not isinstance(lease, dict):
+        return False
+    expires_at = str(lease.get("expires_at") or "")
+    try:
+        expires = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    current = now or datetime.now(timezone.utc)
+    if expires.tzinfo is None:
+        expires = expires.replace(tzinfo=timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=timezone.utc)
+    return expires > current
 
 
 def choose_agent_task(tasks: list[dict[str, Any]]) -> dict[str, Any] | None:
