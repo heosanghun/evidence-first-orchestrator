@@ -63,6 +63,19 @@ function validSnapshot() {
       disk: { used_gib: 2, total_gib: 10, free_gib: 8, percent: 20 },
     },
     history: [],
+    activity: [
+      {
+        sequence: 18,
+        at: new Date().toISOString(),
+        actor: "codex",
+        actor_name: "Codex",
+        action: "task.verified",
+        label: "검증 통과",
+        category: "success",
+        task_id: "P1b-2",
+        title: "Cluster-aware significance tests",
+      },
+    ],
     alerts: [],
   };
 }
@@ -116,6 +129,22 @@ test("signed snapshot is validated, stored, and served", async () => {
   assert.equal(stored.source.mode, "live");
   assert.match(stored.source.received_at, /^\d{4}-\d{2}-\d{2}T/);
   assert.equal(stored.gpus[0].index, 0);
+  assert.equal(stored.activity[0].label, "검증 통과");
+});
+
+test("malformed activity history is rejected", async () => {
+  const snapshot = validSnapshot();
+  snapshot.activity[0].sequence = "18";
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 400);
+  assert.match((await response.json()).detail, /invalid activity event/);
 });
 
 test("invalid signature is rejected before parsing", async () => {

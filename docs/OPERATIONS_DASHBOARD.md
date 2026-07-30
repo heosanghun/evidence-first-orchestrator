@@ -22,6 +22,19 @@ The function rejects a snapshot containing a key named `password`, `secret`,
 `authorization`, including nested values. The collector uses process IDs and
 GPU UUIDs only for local correlation and removes them before serialization.
 
+The hourly activity view is a bounded projection of the signed EFO ledger. It
+keeps at most 300 recent events and exposes only:
+
+- event sequence and timestamp;
+- a configured display alias for the actor;
+- the state-transition action and display category;
+- task ID and title.
+
+It never exports the ledger payload, description, previous/event hash,
+signature, lease data, report paths, evidence paths, or signing key. The
+dashboard groups this projection into one-hour buckets for selectable 24-hour,
+72-hour, and 7-day views.
+
 Displayed progress is an **EFO workflow-phase indicator** derived from task
 states. It is not model accuracy, training completion, or a scientific
 performance result.
@@ -120,6 +133,7 @@ The service executes only observational operations:
 - `nvidia-smi --query-gpu` and `--query-compute-apps`;
 - `docker ps`, `docker top`, `docker inspect`, and `docker logs --tail`;
 - EFO `status` and `agent list`;
+- a sanitized projection of `ledger/events.jsonl`;
 - reads from `/proc`, plus disk usage;
 - one HTTPS POST to the configured Pages Function.
 

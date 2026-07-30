@@ -122,6 +122,50 @@ class MonitorCollectorTests(unittest.TestCase):
             self.assertEqual(len(stored), collector.HISTORY_LIMIT)
             self.assertEqual(stored[0]["at"], "40")
 
+    def test_activity_projection_excludes_ledger_payload_and_secrets(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            ledger = Path(directory) / "events.jsonl"
+            ledger.write_text(
+                json.dumps(
+                    {
+                        "sequence": 1,
+                        "timestamp": "2026-07-30T01:00:00Z",
+                        "actor": "codex",
+                        "action": "task.submitted",
+                        "task_id": "T-1",
+                        "payload": {
+                            "task": {
+                                "id": "T-1",
+                                "title": "Evidence bundle",
+                                "description": "must stay private",
+                            },
+                            "password": "must-not-leave-server",
+                        },
+                        "event_hash": "private-hash",
+                        "signature": "private-signature",
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            activity = collector.collect_activity(
+                {
+                    "efo_ledger_file": str(ledger),
+                    "activity_actor_aliases": {"codex": "Codex"},
+                },
+                directory,
+                [],
+            )
+        self.assertEqual(len(activity), 1)
+        self.assertEqual(activity[0]["actor_name"], "Codex")
+        self.assertEqual(activity[0]["label"], "증거 제출")
+        self.assertEqual(activity[0]["title"], "Evidence bundle")
+        serialized = json.dumps(activity, ensure_ascii=False)
+        self.assertNotIn("must-not-leave-server", serialized)
+        self.assertNotIn("private-signature", serialized)
+        self.assertNotIn("description", serialized)
+
     @patch("monitor.collector.urllib.request.urlopen")
     @patch("monitor.collector.time.time", return_value=1000)
     def test_submit_hmac_covers_timestamp_and_exact_body(

@@ -16,14 +16,16 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
+from collections import deque
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
 SCHEMA_VERSION = "1.0"
-COLLECTOR_VERSION = "efo-monitor/1.0"
+COLLECTOR_VERSION = "efo-monitor/1.1"
 HISTORY_LIMIT = 60
+ACTIVITY_LIMIT = 300
 TASK_PROGRESS = {
     "pending": 10,
     "claimed": 25,
@@ -48,6 +50,21 @@ TASK_NEXT = {
 }
 ACTIVE_STATES = {"claimed", "running"}
 TERMINAL_STATES = {"verified", "archived"}
+ACTIVITY_ACTIONS = {
+    "workspace.initialized": ("워크스페이스 생성", "system"),
+    "agent.added": ("에이전트 등록", "system"),
+    "task.created": ("작업 생성", "planning"),
+    "task.claimed": ("작업 할당", "work"),
+    "task.started": ("작업 시작", "work"),
+    "task.heartbeat": ("진행 신호", "work"),
+    "task.blocked": ("작업 차단", "issue"),
+    "task.submitted": ("증거 제출", "evidence"),
+    "task.verified": ("검증 통과", "success"),
+    "task.rejected": ("검증 반려", "issue"),
+    "task.requeued": ("작업 재대기", "planning"),
+    "task.archived": ("작업 완료·보관", "success"),
+    "task.lease_expired": ("임대 만료", "issue"),
+}
 SAFE_LABEL_RE = re.compile(r"[^0-9A-Za-z가-힣._:+/@ -]+")
 TQDM_RE = re.compile(
     r"(?P<percent>\d{1,3})%\|[^|]*\|\s*(?P<current>[\d,]+)"
@@ -546,9 +563,96 @@ def workflow_progress(tasks: list[dict[str, Any]]) -> float:
     )
 
 
+def collect_activity(
+    config: dict[str, Any],
+    workspace_path: str,
+    tasks: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Read a bounded, sanitized projection of signed EFO ledger events."""
+
+    ledger_path = Path(
+        config.get("efo_ledger_file")
+        or Path(workspace_path) / "ledger" / "events.jsonl"
+    ).expanduser()
+    task_titles = {
+        str(task.get("id")): str(task.get("title"))
+        for task in tasks
+        if task.get("id") and task.get("title")
+    }
+    actor_aliases = {
+        str(key): sanitize_label(value, str(key), 60)
+        for key, value in (config.get("activity_actor_aliases") or {}).items()
+    }
+    events: deque[dict[str, Any]] = deque(maxlen=ACTIVITY_LIMIT)
+    try:
+        ledger_handle = ledger_path.open("r", encoding="utf-8")
+    except OSError:
+        return []
+
+    with ledger_handle:
+        for line in ledger_handle:
+            if not line.strip():
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(event, dict):
+                continue
+            timestamp = str(event.get("timestamp") or "")
+            try:
+                datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+            except ValueError:
+                continue
+            action = sanitize_label(event.get("action"), "ledger.event", 60)
+            label, category = ACTIVITY_ACTIONS.get(
+                action,
+                ("원장 이벤트", "system"),
+            )
+            actor = sanitize_label(event.get("actor"), "system", 60)
+            task_id = sanitize_label(event.get("task_id"), "", 80)
+            payload = (
+                event.get("payload") if isinstance(event.get("payload"), dict) else {}
+            )
+            task_snapshot = (
+                payload.get("task") if isinstance(payload.get("task"), dict) else {}
+            )
+            title = sanitize_label(
+                task_snapshot.get("title") or task_titles.get(task_id),
+                "",
+                160,
+            )
+            try:
+                sequence = int(event.get("sequence"))
+            except (TypeError, ValueError):
+                continue
+            if sequence < 1:
+                continue
+            events.append(
+                {
+                    "sequence": sequence,
+                    "at": timestamp,
+                    "actor": actor,
+                    "actor_name": actor_aliases.get(actor, actor),
+                    "action": action,
+                    "label": label,
+                    "category": category,
+                    "task_id": task_id or None,
+                    "title": title or None,
+                }
+            )
+    return list(events)
+
+
 def collect_efo(
     config: dict[str, Any],
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any], list[dict[str, Any]]]:
+) -> tuple[
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    dict[str, Any],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+]:
     """Read EFO agents, tasks, and signed ledger state."""
 
     workspace_path = str(config.get("efo_workspace") or "/home/shoon/efo_ws")
@@ -632,7 +736,12 @@ def collect_efo(
                 "progress_percent": current["progress_percent"] if current else 0,
             }
         )
-    return agents, tasks, ledger, alerts
+    activity = (
+        collect_activity(config, workspace_path, tasks)
+        if ledger.get("valid") is True
+        else []
+    )
+    return agents, tasks, ledger, alerts, activity
 
 
 def history_point(gpus: list[dict[str, Any]], at: str) -> dict[str, Any]:
@@ -734,7 +843,7 @@ def collect_snapshot(config: dict[str, Any]) -> dict[str, Any]:
     gpus, gpu_alerts = query_gpus()
     map_projects_to_gpus(gpus, config)
     system = collect_system(config)
-    agents, tasks, ledger, efo_alerts = collect_efo(config)
+    agents, tasks, ledger, efo_alerts, activity = collect_efo(config)
     history_path = Path(
         config.get("history_file")
         or "~/.local/state/efo-monitor/history.json"
@@ -782,6 +891,7 @@ def collect_snapshot(config: dict[str, Any]) -> dict[str, Any]:
         },
         "agents": agents,
         "tasks": tasks,
+        "activity": activity,
         "gpus": safe_gpus,
         "system": system,
         "history": history,

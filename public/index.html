@@ -97,6 +97,79 @@
       <div class="agent-grid" id="agent-grid" aria-live="polite"></div>
     </section>
 
+    <section class="section-band activity-band" aria-labelledby="activity-heading">
+      <div class="section-heading activity-heading">
+        <div>
+          <p class="eyebrow">서명 원장</p>
+          <h2 id="activity-heading">시간별 작업 히스토리</h2>
+        </div>
+        <div class="activity-heading-actions">
+          <span class="section-meta" id="activity-range-label">최근 24시간 · 0건</span>
+          <div class="segmented-control" aria-label="작업 히스토리 조회 기간">
+            <button class="segment-button active" type="button"
+                    data-activity-hours="24" aria-pressed="true">24시간</button>
+            <button class="segment-button" type="button"
+                    data-activity-hours="72" aria-pressed="false">72시간</button>
+            <button class="segment-button" type="button"
+                    data-activity-hours="168" aria-pressed="false">7일</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="activity-summary" aria-label="선택 기간 작업 요약">
+        <div class="activity-stat">
+          <span>원장 이벤트</span>
+          <strong id="activity-total">0</strong>
+        </div>
+        <div class="activity-stat">
+          <span>참여 에이전트</span>
+          <strong id="activity-actors">0</strong>
+        </div>
+        <div class="activity-stat">
+          <span>검증·완료</span>
+          <strong id="activity-completed">0</strong>
+        </div>
+        <div class="activity-stat">
+          <span>차단·반려</span>
+          <strong id="activity-issues">0</strong>
+        </div>
+      </div>
+
+      <div class="activity-layout">
+        <article class="activity-panel">
+          <div class="activity-subheading">
+            <div>
+              <strong>시간대별 활동량</strong>
+              <span>각 막대는 1시간 동안 기록된 이벤트 수입니다. 최근 최대 300건 기준입니다.</span>
+            </div>
+            <span id="activity-peak">최대 0건/시간</span>
+          </div>
+          <div class="activity-chart-scroll">
+            <div class="activity-histogram" id="activity-histogram"
+                 role="img" aria-label="시간대별 작업 이벤트 막대그래프"></div>
+          </div>
+          <div class="activity-legend" aria-label="이벤트 유형">
+            <span><i class="activity-dot work"></i>수행</span>
+            <span><i class="activity-dot evidence"></i>증거</span>
+            <span><i class="activity-dot success"></i>검증·완료</span>
+            <span><i class="activity-dot issue"></i>문제</span>
+            <span><i class="activity-dot planning"></i>계획·시스템</span>
+          </div>
+        </article>
+
+        <article class="activity-panel">
+          <div class="activity-subheading">
+            <div>
+              <strong>시간순 원장 기록</strong>
+              <span>최근 기록부터 시간대별로 묶어 표시합니다.</span>
+            </div>
+            <span id="activity-visible-count">0건 표시</span>
+          </div>
+          <div class="activity-feed" id="activity-feed" aria-live="polite"></div>
+        </article>
+      </div>
+    </section>
+
     <section class="section-band" aria-labelledby="gpu-heading">
       <div class="section-heading">
         <div>

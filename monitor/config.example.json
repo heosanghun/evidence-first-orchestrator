@@ -2,6 +2,7 @@
   "endpoint": "https://evidence-first-orchestrator.pages.dev/api/snapshot",
   "ingest_secret_file": "/home/shoon/.config/efo-monitor/ingest-secret",
   "efo_workspace": "/home/shoon/efo_ws",
+  "efo_ledger_file": "/home/shoon/efo_ws/ledger/events.jsonl",
   "efo_command": [
     "/home/shoon/.local/bin/efo"
   ],
@@ -45,6 +46,15 @@
       "allow_unregistered": true
     }
   ],
+  "activity_actor_aliases": {
+    "codex": "Codex",
+    "codex-verifier": "Codex",
+    "claude": "Claude A",
+    "claude-a": "Claude A",
+    "claude-b": "Claude B",
+    "antigravity": "Antigravity",
+    "antigravity-worker": "Antigravity"
+  },
   "project_aliases": [
     {
       "pattern": "deq_revival|cts",

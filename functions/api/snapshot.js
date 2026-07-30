@@ -2,6 +2,7 @@ const LATEST_KEY = "snapshot:latest";
 const MAX_BODY_BYTES = 900_000;
 const MAX_CLOCK_SKEW_SECONDS = 300;
 const HISTORY_LIMIT = 60;
+const ACTIVITY_LIMIT = 300;
 const FORBIDDEN_KEYS = new Set([
   "password",
   "passwd",
@@ -115,6 +116,37 @@ function validateSnapshot(snapshot) {
   for (const [key, limit] of Object.entries(arrayLimits)) {
     if (!Array.isArray(snapshot[key])) return `${key} must be an array`;
     if (snapshot[key].length > limit) return `${key} exceeds limit ${limit}`;
+  }
+  if (snapshot.activity !== undefined) {
+    if (!Array.isArray(snapshot.activity)) return "activity must be an array";
+    if (snapshot.activity.length > ACTIVITY_LIMIT) {
+      return `activity exceeds limit ${ACTIVITY_LIMIT}`;
+    }
+    for (const event of snapshot.activity) {
+      if (
+        !event ||
+        typeof event !== "object" ||
+        !Number.isInteger(event.sequence) ||
+        event.sequence < 1 ||
+        Number.isNaN(Date.parse(event.at))
+      ) {
+        return "invalid activity event";
+      }
+      for (const field of ["actor", "actor_name", "action", "label", "category"]) {
+        if (typeof event[field] !== "string" || event[field].length > 160) {
+          return `activity event has invalid ${field}`;
+        }
+      }
+      for (const field of ["task_id", "title"]) {
+        if (
+          event[field] !== null &&
+          event[field] !== undefined &&
+          (typeof event[field] !== "string" || event[field].length > 200)
+        ) {
+          return `activity event has invalid ${field}`;
+        }
+      }
+    }
   }
   const indexes = new Set();
   for (const gpu of snapshot.gpus) {
@@ -237,6 +269,9 @@ export async function onRequestPost(context) {
     received_at: new Date().toISOString(),
   };
   snapshot.history = snapshot.history.slice(-HISTORY_LIMIT);
+  snapshot.activity = Array.isArray(snapshot.activity)
+    ? snapshot.activity.slice(-ACTIVITY_LIMIT)
+    : [];
   await env.EFO_MONITOR_KV.put(LATEST_KEY, JSON.stringify(snapshot), {
     expirationTtl: 604800,
   });

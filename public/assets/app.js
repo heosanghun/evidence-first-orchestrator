@@ -3,6 +3,20 @@ const DEMO_URL = "/data/demo.json";
 const REFRESH_INTERVAL_MS = 15_000;
 const TOKEN_KEY = "efo-view-token";
 const SVG_NS = "http://www.w3.org/2000/svg";
+const HOUR_MS = 60 * 60 * 1000;
+const ACTIVITY_RANGE_LABELS = {
+  24: "최근 24시간",
+  72: "최근 72시간",
+  168: "최근 7일",
+};
+const ACTIVITY_CATEGORIES = ["work", "evidence", "success", "issue", "planning"];
+const ACTIVITY_CATEGORY_LABELS = {
+  work: "수행",
+  evidence: "증거",
+  success: "검증·완료",
+  issue: "문제",
+  planning: "계획·시스템",
+};
 const GPU_COLORS = [
   "#168363",
   "#2878a8",
@@ -41,6 +55,15 @@ const elements = Object.fromEntries(
     "kpi-alerts-note",
     "ledger-status",
     "agent-grid",
+    "activity-range-label",
+    "activity-total",
+    "activity-actors",
+    "activity-completed",
+    "activity-issues",
+    "activity-peak",
+    "activity-histogram",
+    "activity-visible-count",
+    "activity-feed",
     "gpu-host",
     "gpu-list",
     "util-range",
@@ -78,6 +101,7 @@ const elements = Object.fromEntries(
 let lastSnapshot = null;
 let refreshTimer = null;
 let toastTimer = null;
+let activityRangeHours = 24;
 
 function clamp(value, minimum = 0, maximum = 100) {
   const number = Number(value);
@@ -116,6 +140,41 @@ function formatClock(value) {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function formatActivityHour(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "long",
+    day: "numeric",
+    hour: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function formatActivityTick(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function formatMinute(value) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    minute: "2-digit",
     hour12: false,
   }).format(date);
 }
@@ -195,6 +254,7 @@ function normalizeSnapshot(raw) {
   const agents = Array.isArray(snapshot.agents) ? snapshot.agents : [];
   const tasks = Array.isArray(snapshot.tasks) ? snapshot.tasks : [];
   const history = Array.isArray(snapshot.history) ? snapshot.history : [];
+  const activity = Array.isArray(snapshot.activity) ? snapshot.activity : [];
   const alerts = Array.isArray(snapshot.alerts) ? snapshot.alerts : [];
 
   return {
@@ -221,6 +281,7 @@ function normalizeSnapshot(raw) {
     gpus,
     system: snapshot.system || {},
     history,
+    activity,
     alerts,
   };
 }
@@ -295,6 +356,10 @@ function renderUnavailable(reason) {
     '<div class="empty-state">모니터링 데이터를 불러오지 못했습니다.</div>';
   elements.gpuList.innerHTML =
     '<div class="empty-state">SSH 서버 상태를 확인할 수 없습니다.</div>';
+  elements.activityHistogram.innerHTML =
+    '<div class="empty-state">작업 히스토리를 불러오지 못했습니다.</div>';
+  elements.activityFeed.innerHTML =
+    '<div class="empty-state">원장 기록을 확인할 수 없습니다.</div>';
   elements.sourceMode.textContent = `연결 오류: ${reason}`;
 }
 
@@ -304,6 +369,7 @@ function render(snapshot) {
   const derivedAlerts = buildAlerts(snapshot);
   renderKpis(snapshot, derivedAlerts);
   renderAgents(snapshot);
+  renderActivity(snapshot);
   renderGpus(snapshot);
   renderCharts(snapshot);
   renderResources(snapshot);
@@ -452,6 +518,175 @@ function renderAgents(snapshot) {
             ${escapeHtml(agent.next || "오케스트레이터 지시 대기")}
           </div>
         </article>
+      `;
+    })
+    .join("");
+}
+
+function normalizedActivityCategory(value) {
+  const category = String(value || "").toLowerCase();
+  if (ACTIVITY_CATEGORIES.includes(category)) return category;
+  return "planning";
+}
+
+function activityWindow(snapshot) {
+  const generatedAt = new Date(snapshot.generated_at).getTime();
+  const fallback = Date.now();
+  const reference = Number.isFinite(generatedAt) ? generatedAt : fallback;
+  const end = Math.floor(reference / HOUR_MS) * HOUR_MS + HOUR_MS;
+  const start = end - activityRangeHours * HOUR_MS;
+  const events = snapshot.activity
+    .map((event) => ({
+      ...event,
+      timestamp: new Date(event.at).getTime(),
+      category: normalizedActivityCategory(event.category),
+    }))
+    .filter(
+      (event) =>
+        Number.isFinite(event.timestamp) &&
+        event.timestamp >= start &&
+        event.timestamp < end,
+    )
+    .sort((left, right) => left.timestamp - right.timestamp);
+  const buckets = Array.from({ length: activityRangeHours }, (_value, index) => ({
+    at: start + index * HOUR_MS,
+    events: [],
+    counts: Object.fromEntries(ACTIVITY_CATEGORIES.map((category) => [category, 0])),
+  }));
+
+  events.forEach((event) => {
+    const index = Math.floor((event.timestamp - start) / HOUR_MS);
+    if (index < 0 || index >= buckets.length) return;
+    buckets[index].events.push(event);
+    buckets[index].counts[event.category] += 1;
+  });
+  return { start, end, events, buckets };
+}
+
+function renderActivity(snapshot) {
+  const { events, buckets } = activityWindow(snapshot);
+  const rangeLabel = ACTIVITY_RANGE_LABELS[activityRangeHours];
+  const actors = new Set(events.map((event) => event.actor).filter(Boolean));
+  const completed = events.filter((event) =>
+    ["task.verified", "task.archived"].includes(String(event.action)),
+  ).length;
+  const issues = events.filter((event) =>
+    ["task.blocked", "task.rejected", "task.lease_expired"].includes(
+      String(event.action),
+    ),
+  ).length;
+  const peak = Math.max(0, ...buckets.map((bucket) => bucket.events.length));
+
+  elements.activityRangeLabel.textContent = `${rangeLabel} · ${events.length}건`;
+  elements.activityTotal.textContent = String(events.length);
+  elements.activityActors.textContent = String(actors.size);
+  elements.activityCompleted.textContent = String(completed);
+  elements.activityIssues.textContent = String(issues);
+  elements.activityPeak.textContent = `최대 ${peak}건/시간`;
+
+  document.querySelectorAll("[data-activity-hours]").forEach((button) => {
+    const selected = number(button.dataset.activityHours) === activityRangeHours;
+    button.classList.toggle("active", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
+
+  renderActivityHistogram(buckets, peak);
+  renderActivityFeed(events);
+}
+
+function renderActivityHistogram(buckets, peak) {
+  if (buckets.length === 0) {
+    elements.activityHistogram.innerHTML =
+      '<div class="empty-state">표시할 시간대가 없습니다.</div>';
+    return;
+  }
+
+  const labelEvery = activityRangeHours <= 24 ? 3 : activityRangeHours <= 72 ? 6 : 12;
+  elements.activityHistogram.style.setProperty("--activity-hours", buckets.length);
+  elements.activityHistogram.setAttribute(
+    "aria-label",
+    `${ACTIVITY_RANGE_LABELS[activityRangeHours]} 시간대별 원장 이벤트, 최대 ${peak}건`,
+  );
+  elements.activityHistogram.innerHTML = buckets
+    .map((bucket, index) => {
+      const count = bucket.events.length;
+      const showLabel =
+        index === 0 || index === buckets.length - 1 || index % labelEvery === 0;
+      const segments = ACTIVITY_CATEGORIES.map((category) => {
+        const categoryCount = bucket.counts[category];
+        if (categoryCount === 0 || peak === 0) return "";
+        const height = (categoryCount / peak) * 100;
+        return `<span class="activity-bar-segment ${category}"
+                      style="height:${height}%"
+                      title="${escapeHtml(ACTIVITY_CATEGORY_LABELS[category])} ${categoryCount}건"></span>`;
+      }).join("");
+      return `
+        <div class="activity-hour" title="${escapeHtml(
+          `${formatActivityHour(bucket.at)} · ${count}건`,
+        )}">
+          <span class="activity-hour-count">${count > 0 ? count : ""}</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack${count === 0 ? " empty" : ""}">
+              ${segments}
+            </div>
+          </div>
+          <time class="activity-hour-label" datetime="${new Date(bucket.at).toISOString()}">
+            ${showLabel ? escapeHtml(formatActivityTick(bucket.at)) : ""}
+          </time>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function renderActivityFeed(events) {
+  const visible = [...events].sort((left, right) => right.timestamp - left.timestamp).slice(0, 120);
+  elements.activityVisibleCount.textContent = `${visible.length}건 표시`;
+  if (visible.length === 0) {
+    elements.activityFeed.innerHTML =
+      '<div class="empty-state">선택한 기간에 기록된 원장 이벤트가 없습니다.</div>';
+    return;
+  }
+
+  const groups = new Map();
+  visible.forEach((event) => {
+    const hour = Math.floor(event.timestamp / HOUR_MS) * HOUR_MS;
+    if (!groups.has(hour)) groups.set(hour, []);
+    groups.get(hour).push(event);
+  });
+  elements.activityFeed.innerHTML = [...groups.entries()]
+    .map(([hour, group]) => {
+      const rows = group
+        .map((event) => {
+          const detail =
+            event.task_id || event.title
+              ? [event.task_id, event.title].filter(Boolean).join(" · ")
+              : "시스템 원장";
+          return `
+            <div class="activity-event">
+              <time class="activity-event-time" datetime="${escapeHtml(event.at)}">
+                ${escapeHtml(formatMinute(event.at))}
+              </time>
+              <div class="activity-event-main">
+                <div class="activity-event-head">
+                  <span class="activity-actor">${escapeHtml(
+                    event.actor_name || event.actor || "system",
+                  )}</span>
+                  <span class="activity-event-label ${event.category}">${escapeHtml(
+                    event.label || event.action,
+                  )}</span>
+                </div>
+                <span class="activity-event-detail">${escapeHtml(detail)}</span>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+      return `
+        <section class="activity-group">
+          <h3>${escapeHtml(formatActivityHour(hour))}<span>${group.length}건</span></h3>
+          ${rows}
+        </section>
       `;
     })
     .join("");
@@ -874,6 +1109,12 @@ function renderAlerts(alerts) {
 }
 
 elements.refreshButton.addEventListener("click", () => refresh({ announce: true }));
+document.querySelectorAll("[data-activity-hours]").forEach((button) => {
+  button.addEventListener("click", () => {
+    activityRangeHours = number(button.dataset.activityHours, 24);
+    if (lastSnapshot) renderActivity(lastSnapshot);
+  });
+});
 elements.accessForm.addEventListener("submit", async (event) => {
   event.preventDefault();
   const token = elements.accessToken.value.trim();

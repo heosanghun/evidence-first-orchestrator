@@ -223,13 +223,17 @@ The repository also includes a responsive, read-only operations dashboard in
 
 - Codex, Claude A, Claude B, and Antigravity role and task state;
 - EFO task transitions and signed-ledger health;
+- 24-hour, 72-hour, and 7-day hourly activity history projected from the
+  signed ledger;
 - physical GPU 0-N utilization, VRAM, temperature, power, and project mapping;
 - host memory, disk, load, uptime, alerts, and rolling charts.
 
 The SSH collector in `monitor/` only reads `nvidia-smi`, Docker status/logs,
 procfs, and EFO JSON output. It never starts, stops, restarts, or allocates a
 container or GPU. Public snapshots omit passwords, secrets, environment
-variables, command lines, PIDs, and GPU UUIDs.
+variables, command lines, PIDs, GPU UUIDs, ledger signatures, hashes, and event
+payloads. Activity history contains only event time, sequence, actor alias,
+transition label, task ID, and task title.
 
 Cloudflare Pages deployment and collector installation are documented in
 [Operations Dashboard](docs/OPERATIONS_DASHBOARD.md). Until the API is
