@@ -18,6 +18,12 @@ from .errors import (
     TransitionError,
 )
 from .evidence import validate_manifest, validate_submission
+from .independence import (
+    audit_verification_events,
+    build_identity,
+    evaluate_independence,
+    identity_snapshot,
+)
 from .ledger import Ledger
 from .lock import FileLock
 from .model import lease_expired, lease_expiry, new_task, transition, validate_task
@@ -88,6 +94,8 @@ class Workspace:
         *,
         name: str,
         orchestrator: str = "antigravity",
+        orchestrator_control_principal: str | None = None,
+        orchestrator_model_family: str | None = None,
         preset: str | None = None,
     ) -> Workspace:
         """Create a workspace and its initial orchestrator identity."""
@@ -149,16 +157,28 @@ class Workspace:
             task_id=None,
             payload={"config": config},
         )
+        orchestrator_identity = None
+        if orchestrator_control_principal or orchestrator_model_family:
+            if not orchestrator_control_principal or not orchestrator_model_family:
+                raise ConfigurationError(
+                    "Both orchestrator_control_principal and "
+                    "orchestrator_model_family are required together"
+                )
+            orchestrator_identity = build_identity(
+                control_principal=orchestrator_control_principal,
+                model_family=orchestrator_model_family,
+            )
         workspace._commit_agent(
             actor=orchestrator,
             record={
-                "schema_version": 1,
+                "schema_version": 2,
                 "id": orchestrator,
                 "role": "orchestrator",
                 "mode": "manual",
                 "command": None,
                 "created_at": utc_now(),
                 "write_roots": ["tasks", "shared", "archive"],
+                "identity": orchestrator_identity,
             },
         )
         if preset == "antigravity-codex-claude":
@@ -167,12 +187,16 @@ class Workspace:
                 agent_id="codex",
                 role="worker",
                 mode="manual",
+                control_principal="codex",
+                model_family="openai-codex",
             )
             workspace.add_agent(
                 actor=orchestrator,
                 agent_id="claude",
                 role="worker",
                 mode="manual",
+                control_principal="claude",
+                model_family="anthropic-claude",
             )
         elif preset is not None:
             raise ConfigurationError(f"Unknown workspace preset: {preset}")
@@ -204,10 +228,16 @@ class Workspace:
         (self.runs_dir / record["id"]).mkdir(parents=True, exist_ok=True)
         atomic_write_json(path, record)
 
-    def _commit_agent(self, *, actor: str, record: dict[str, Any]) -> dict[str, Any]:
+    def _commit_agent(
+        self,
+        *,
+        actor: str,
+        record: dict[str, Any],
+        action: str = "agent.added",
+    ) -> dict[str, Any]:
         self.ledger.append(
             actor=actor,
-            action="agent.added",
+            action=action,
             task_id=None,
             payload={"agent": record},
         )
@@ -218,7 +248,10 @@ class Workspace:
         self.ledger.verify()
         signed: dict[str, dict[str, Any]] = {}
         for event in self.ledger.read():
-            if event.get("action") != "agent.added":
+            if event.get("action") not in {
+                "agent.added",
+                "agent.identity_attested",
+            }:
                 continue
             record = event.get("payload", {}).get("agent")
             if isinstance(record, dict) and isinstance(record.get("id"), str):
@@ -271,6 +304,9 @@ class Workspace:
         mode: str = "manual",
         command: list[str] | None = None,
         write_roots: list[str] | None = None,
+        control_principal: str | None = None,
+        model_family: str | None = None,
+        alias_of: str | None = None,
     ) -> dict[str, Any]:
         """Register a worker or verifier. Only the orchestrator may do this."""
 
@@ -286,20 +322,133 @@ class Workspace:
             or not all(isinstance(item, str) and item for item in command)
         ):
             raise ConfigurationError("Command-mode agents need a non-empty command list")
+        identity = self._prepare_identity(
+            agent_id=agent_id,
+            control_principal=control_principal,
+            model_family=model_family,
+            alias_of=alias_of,
+        )
         record = {
-            "schema_version": 1,
+            "schema_version": 2,
             "id": agent_id,
             "role": role,
             "mode": mode,
             "command": command,
             "created_at": utc_now(),
             "write_roots": write_roots or [f"reports/{agent_id}", f"runs/{agent_id}"],
+            "identity": identity,
         }
         with self._agent_lock():
             path = self._agent_path(agent_id)
             if path.exists() or agent_id in self._signed_agents():
                 raise ConfigurationError(f"Agent already exists: {agent_id}")
             return self._commit_agent(actor=actor, record=record)
+
+    def _prepare_identity(
+        self,
+        *,
+        agent_id: str,
+        control_principal: str | None,
+        model_family: str | None,
+        alias_of: str | None,
+    ) -> dict[str, Any] | None:
+        if alias_of:
+            if control_principal or model_family:
+                raise ConfigurationError(
+                    "Alias identity inherits control principal and model family"
+                )
+            target_id = validate_agent_id(alias_of)
+            if target_id == agent_id:
+                raise ConfigurationError("Agent cannot alias itself")
+            target = self.get_agent(target_id)
+            target_identity = identity_snapshot(
+                target_id,
+                target.get("identity"),
+            )
+            if target_identity is None:
+                raise ConfigurationError(
+                    f"Alias target {target_id!r} has no attested identity"
+                )
+            alias_chain = [target_id, *target_identity.get("alias_chain", [])]
+            if agent_id in alias_chain:
+                raise ConfigurationError("Agent identity alias chain contains a cycle")
+            return build_identity(
+                control_principal=target_identity["control_principal"],
+                model_family=target_identity["model_family"],
+                alias_of=target_id,
+                alias_chain=alias_chain,
+            )
+        if control_principal is None and model_family is None:
+            return None
+        if not control_principal or not model_family:
+            raise ConfigurationError(
+                "Both control_principal and model_family are required together"
+            )
+        return build_identity(
+            control_principal=control_principal,
+            model_family=model_family,
+        )
+
+    def attest_agent_identity(
+        self,
+        *,
+        actor: str,
+        agent_id: str,
+        control_principal: str | None = None,
+        model_family: str | None = None,
+        alias_of: str | None = None,
+    ) -> dict[str, Any]:
+        """Append a signed, prospective identity declaration for an agent."""
+
+        self._require_orchestrator(actor)
+        agent_id = validate_agent_id(agent_id)
+        with self._agent_lock():
+            current = self.get_agent(agent_id)
+            current_identity = current.get("identity")
+            current_alias = (
+                current_identity.get("alias_of")
+                if isinstance(current_identity, dict)
+                else None
+            )
+            if current_alias and alias_of != current_alias:
+                raise ConfigurationError(
+                    "An attested alias lineage cannot be removed or reparented; "
+                    "register a new agent identity instead"
+                )
+            identity = self._prepare_identity(
+                agent_id=agent_id,
+                control_principal=control_principal,
+                model_family=model_family,
+                alias_of=alias_of,
+            )
+            if identity is None:
+                raise ConfigurationError("Identity attestation cannot be empty")
+            updated = deepcopy(current)
+            updated.update(
+                {
+                    "schema_version": 2,
+                    "identity": identity,
+                    "identity_attested_at": utc_now(),
+                    "identity_attested_by": actor,
+                }
+            )
+            return self._commit_agent(
+                actor=actor,
+                action="agent.identity_attested",
+                record=updated,
+            )
+
+    def _agent_identity(self, actor: str) -> dict[str, Any] | None:
+        agent = self.get_agent(actor)
+        return identity_snapshot(actor, agent.get("identity"))
+
+    def _require_verifier(self, actor: str) -> dict[str, Any]:
+        agent = self.get_agent(actor)
+        if agent["role"] not in {"orchestrator", "verifier"}:
+            raise AuthorizationError(
+                "Only an orchestrator or registered verifier may verify a task"
+            )
+        return agent
 
     def get_task(self, task_id: str) -> dict[str, Any]:
         """Return one task projection after matching it to the signed ledger."""
@@ -615,6 +764,7 @@ class Workspace:
     ) -> dict[str, Any]:
         """Submit a passing evidence bundle for independent verification."""
 
+        author_identity = self._agent_identity(actor)
         report = Path(report_path).resolve()
         manifest = Path(manifest_path).resolve()
         owned_report_root = self.reports_dir / actor
@@ -633,6 +783,21 @@ class Workspace:
             permissions=task_for_validation["permissions"],
             gates=task_for_validation["gates"],
         )
+        if (
+            task_for_validation["gates"].get(
+                "require_independent_verification",
+                True,
+            )
+            and author_identity is None
+        ):
+            raise AuthorizationError(
+                f"Agent {actor!r} needs a signed identity attestation before "
+                "submitting work that requires independent verification"
+            )
+        evidence["authorship"] = {
+            "actor": actor,
+            "identity": author_identity,
+        }
         with self._task_lock(task_id):
             task = self.get_task(task_id)
             if task["state"] != "running":
@@ -681,7 +846,7 @@ class Workspace:
     ) -> dict[str, Any]:
         """Accept or reject a submitted task after independent verification."""
 
-        self._require_orchestrator(actor)
+        verifier_agent = self._require_verifier(actor)
         if decision not in {"accept", "reject"}:
             raise ConfigurationError("Verification decision must be accept or reject")
         if not note.strip():
@@ -694,10 +859,31 @@ class Workspace:
                 )
             verification: dict[str, Any] = {
                 "actor": actor,
+                "identity": identity_snapshot(
+                    actor,
+                    verifier_agent.get("identity"),
+                ),
                 "decision": decision,
                 "note": note.strip(),
                 "verified_at": utc_now(),
             }
+            if task["gates"].get("require_independent_verification", True):
+                authorship = task.get("result", {}).get("authorship", {})
+                worker_identity = authorship.get("identity")
+                if not isinstance(worker_identity, dict):
+                    worker_identity = None
+                verifier_identity = verification["identity"]
+                independence = evaluate_independence(
+                    worker_identity,
+                    verifier_identity,
+                )
+                verification["independence"] = independence
+                if not independence["independent"]:
+                    reasons = ", ".join(independence["reasons"])
+                    raise AuthorizationError(
+                        "Independent verification could not be established: "
+                        f"{reasons}"
+                    )
             if decision == "accept":
                 if task["gates"].get("require_independent_verification", True):
                     if verification_manifest is None:
@@ -708,7 +894,7 @@ class Workspace:
                     verifier_root = self.reports_dir / actor
                     if not is_relative_to(verification_path, verifier_root):
                         raise AuthorizationError(
-                            "Verification manifest must be under the orchestrator's "
+                            "Verification manifest must be under the verifier's "
                             f"report directory: {verifier_root}"
                         )
                     verification["evidence"] = validate_manifest(
@@ -850,6 +1036,21 @@ class Workspace:
                 "Projection repair requires repair_projections(actor=...)"
             )
         return self._audit_projections(repair=False)
+
+    def audit_independence(
+        self,
+        *,
+        identity_policy: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Read historical verification events without changing the ledger."""
+
+        self.ledger.verify()
+        agents = {agent["id"]: agent for agent in self.list_agents()}
+        return audit_verification_events(
+            self.ledger.read(),
+            agents,
+            policy=identity_policy,
+        )
 
     def _audit_projections(self, *, repair: bool) -> dict[str, Any]:
         ledger_status = self.ledger.verify()

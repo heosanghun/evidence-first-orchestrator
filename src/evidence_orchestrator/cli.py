@@ -48,6 +48,8 @@ def _cmd_init(args: argparse.Namespace) -> None:
         args.path,
         name=args.name,
         orchestrator=args.orchestrator,
+        orchestrator_control_principal=args.control_principal,
+        orchestrator_model_family=args.model_family,
         preset=args.preset,
     )
     _emit(workspace.status())
@@ -67,8 +69,24 @@ def _cmd_agent_add(args: argparse.Namespace) -> None:
         mode=args.mode,
         command=_parse_command(args.command_json),
         write_roots=args.write_root,
+        control_principal=args.control_principal,
+        model_family=args.model_family,
+        alias_of=args.alias_of,
     )
     _emit(record)
+
+
+def _cmd_agent_attest(args: argparse.Namespace) -> None:
+    workspace = _workspace(args.path)
+    _emit(
+        workspace.attest_agent_identity(
+            actor=args.actor,
+            agent_id=args.agent_id,
+            control_principal=args.control_principal,
+            model_family=args.model_family,
+            alias_of=args.alias_of,
+        )
+    )
 
 
 def _cmd_agent_list(args: argparse.Namespace) -> None:
@@ -216,6 +234,17 @@ def _cmd_projection_repair(args: argparse.Namespace) -> None:
     _emit(_workspace(args.path).repair_projections(actor=args.actor))
 
 
+def _cmd_independence_audit(args: argparse.Namespace) -> None:
+    policy = None
+    if args.identity_policy:
+        policy = json.loads(Path(args.identity_policy).read_text(encoding="utf-8"))
+    _emit(
+        _workspace(args.path).audit_independence(
+            identity_policy=policy,
+        )
+    )
+
+
 def _cmd_doctor(args: argparse.Namespace) -> None:
     _emit(
         audit_workspace(
@@ -297,6 +326,8 @@ def build_parser() -> argparse.ArgumentParser:
     init.add_argument("path")
     init.add_argument("--name", required=True)
     init.add_argument("--orchestrator", default="antigravity")
+    init.add_argument("--control-principal")
+    init.add_argument("--model-family")
     init.add_argument(
         "--preset",
         choices=["antigravity-codex-claude"],
@@ -320,7 +351,18 @@ def build_parser() -> argparse.ArgumentParser:
         help='Command argv as JSON, for example ["codex","exec","{prompt}"]',
     )
     agent_add.add_argument("--write-root", action="append", default=[])
+    agent_add.add_argument("--control-principal")
+    agent_add.add_argument("--model-family")
+    agent_add.add_argument("--alias-of")
     agent_add.set_defaults(handler=_cmd_agent_add)
+    agent_attest = agent_sub.add_parser("attest")
+    agent_attest.add_argument("path")
+    agent_attest.add_argument("--actor", required=True)
+    agent_attest.add_argument("--id", dest="agent_id", required=True)
+    agent_attest.add_argument("--control-principal")
+    agent_attest.add_argument("--model-family")
+    agent_attest.add_argument("--alias-of")
+    agent_attest.set_defaults(handler=_cmd_agent_attest)
     agent_list = agent_sub.add_parser("list")
     agent_list.add_argument("path")
     agent_list.set_defaults(handler=_cmd_agent_list)
@@ -434,6 +476,10 @@ def build_parser() -> argparse.ArgumentParser:
     projection_repair.add_argument("path")
     projection_repair.add_argument("--actor", required=True)
     projection_repair.set_defaults(handler=_cmd_projection_repair)
+    independence_audit = ledger_sub.add_parser("audit-independence")
+    independence_audit.add_argument("path")
+    independence_audit.add_argument("--identity-policy")
+    independence_audit.set_defaults(handler=_cmd_independence_audit)
 
     doctor = subparsers.add_parser("doctor", help="Audit a broker workspace")
     doctor.add_argument("path")

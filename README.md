@@ -52,7 +52,21 @@ From the repository:
 python -m pip install -e .
 efo init ./team-workspace \
   --name "Research team" \
+  --control-principal antigravity-control \
+  --model-family antigravity-runtime \
   --preset antigravity-codex-claude
+```
+
+Register a verifier whose control principal and model family differ from the
+worker it will review:
+
+```bash
+efo agent add ./team-workspace \
+  --actor antigravity \
+  --id claude-verifier \
+  --role verifier \
+  --control-principal claude-b-control \
+  --model-family anthropic-claude
 ```
 
 The orchestrator creates a task. GPU, network, performance metrics, skipped
@@ -90,16 +104,16 @@ efo task submit ./team-workspace \
   --evidence ./team-workspace/reports/codex/P1b-2.evidence.json
 ```
 
-The orchestrator reruns the checks and records a separate manifest under its
-own report directory:
+An independently registered verifier reruns the checks and records a separate
+manifest under its own report directory:
 
 ```bash
 efo task verify ./team-workspace \
-  --actor antigravity \
+  --actor claude-verifier \
   --id P1b-2 \
   --decision accept \
   --note "Independent known-answer tests reproduced." \
-  --evidence ./team-workspace/reports/antigravity/P1b-2.verify.evidence.json
+  --evidence ./team-workspace/reports/claude-verifier/P1b-2.verify.evidence.json
 ```
 
 ## Command adapters
@@ -205,6 +219,48 @@ Default rejection conditions include:
 - an unmeasured value that is not exactly `[FILL]`;
 - reuse of the worker's manifest as independent verification.
 
+## Independent identity
+
+Different actor names do not prove independent review. Each agent therefore has
+a signed identity declaration with:
+
+- `control_principal`: the human, service, or session that controls the agent;
+- `model_family`: a stable coarse label shared by runs of the same base model;
+- `alias_of`: an optional signed alias link that inherits both fields.
+
+Submission binds the worker identity snapshot to that attempt. A later identity
+change cannot rewrite authorship. Verification fails closed when the worker or
+verifier identity is unknown, the actor is the same, the control principal is
+the same, the model family is the same, or their alias lineages intersect.
+Once declared, an alias cannot be detached or reparented under the same agent
+ID; register a new agent ID when control genuinely changes.
+
+Existing agents can receive a prospective signed attestation:
+
+```bash
+efo agent attest ./team-workspace \
+  --actor antigravity \
+  --id codex \
+  --control-principal codex-control \
+  --model-family openai-codex
+
+efo agent attest ./team-workspace \
+  --actor antigravity \
+  --id codex-helper \
+  --alias-of codex
+```
+
+Audit historical verification decisions without changing the ledger:
+
+```bash
+efo ledger audit-independence ./team-workspace \
+  --identity-policy ./legacy-identities.json
+```
+
+The optional policy supplies identity declarations only for read-only legacy
+analysis. It does not update agent registrations or make a future verification
+eligible.
+
 ## Dashboard
 
 Run the read-only operational dashboard:
@@ -295,6 +351,9 @@ See [Migration Guide](docs/MIGRATION.md) for a staged adoption path.
 - It cannot prove that every natural-language claim was declared in the
   manifest. The independent verifier must compare the report against the claim
   list before acceptance.
+- Agent identity declarations are signed policy inputs, not hardware or
+  provider attestations. Unknown identity fails closed, but a dishonest
+  orchestrator can still misdeclare a controller or model family.
 - It never stores SSH passwords or API tokens in task files.
 
 ## Development
@@ -306,7 +365,8 @@ npm run test:web
 
 The suite covers state transitions, evidence gates, concurrent claims, lease
 recovery, command adapters, legacy auditing, ledger tamper detection, the
-read-only server collector, and the signed Cloudflare ingest endpoint.
+independent-identity attack cases, read-only server collector, and the signed
+Cloudflare ingest endpoint.
 
 See [Architecture](docs/ARCHITECTURE.md), [Security](SECURITY.md), and
 [Contributing](CONTRIBUTING.md).

@@ -26,6 +26,8 @@ Create the broker next to, not inside, the active workspace:
 ```bash
 efo init "E:\\agent-broker" \
   --name "Research collaboration" \
+  --control-principal antigravity-control \
+  --model-family antigravity-runtime \
   --preset antigravity-codex-claude
 ```
 
@@ -60,9 +62,45 @@ typical probe includes:
 Use SSH keys or an agent. Do not place passwords in commands, prompts, reports,
 or EFO configuration.
 
+Before accepting new work, attest every legacy agent's controller and model
+family. Aliases inherit the identity of their root:
+
+```bash
+efo agent attest "E:\\agent-broker" \
+  --actor antigravity \
+  --id codex \
+  --control-principal codex-control \
+  --model-family openai-codex
+
+efo agent attest "E:\\agent-broker" \
+  --actor antigravity \
+  --id codex-helper \
+  --alias-of codex
+```
+
+Audit prior verification events separately. The optional policy is read-only
+and does not authorize future work:
+
+```bash
+efo ledger audit-independence "E:\\agent-broker" \
+  --identity-policy legacy-identities.json
+```
+
 ## Phase 3: move task control
 
-The orchestrator becomes the only creator and verifier:
+The orchestrator remains the only task creator. Register at least one verifier
+with a different control principal and model family from each worker it reviews:
+
+```bash
+efo agent add "E:\\agent-broker" \
+  --actor antigravity \
+  --id claude-verifier \
+  --role verifier \
+  --control-principal claude-b-control \
+  --model-family anthropic-claude
+```
+
+Then create the task:
 
 ```bash
 efo task add "E:\\agent-broker" \
@@ -90,9 +128,10 @@ instead of letting multiple processes append to one Markdown file.
 
 | Actor | Broker actions | Project writes |
 |---|---|---|
-| Antigravity | create, recover, requeue, verify, archive | shared facts and task definitions |
+| Antigravity | create, recover, requeue, attest identities, archive | shared facts and task definitions |
 | Codex | claim, start, heartbeat, block, submit | Codex-owned implementation and reports |
 | Claude Code | claim, start, heartbeat, block, submit | Claude-owned implementation and reports |
+| Independent verifier | reproduce, accept, or reject | verifier-owned reports only |
 
 The two workers should never be assigned overlapping write roots. A dependent
 task should name the earlier task as a prerequisite instead of editing the same

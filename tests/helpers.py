@@ -15,6 +15,8 @@ def make_workspace(root: Path, *, preset: bool = True) -> Workspace:
         root,
         name="test-workspace",
         orchestrator="antigravity",
+        orchestrator_control_principal="antigravity-control",
+        orchestrator_model_family="antigravity-model",
         preset="antigravity-codex-claude" if preset else None,
     )
 

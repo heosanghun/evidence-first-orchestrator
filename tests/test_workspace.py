@@ -80,7 +80,7 @@ class WorkspaceLifecycleTests(unittest.TestCase):
                 decision="accept",
                 note="Reproduced.",
             )
-        with self.assertRaisesRegex(AuthorizationError, "orchestrator's report"):
+        with self.assertRaisesRegex(AuthorizationError, "verifier's report"):
             self.workspace.verify(
                 actor="antigravity",
                 task_id="T1",

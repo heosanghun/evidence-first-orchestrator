@@ -4,7 +4,9 @@
 
 Evidence First Orchestrator is a local broker. It assumes:
 
-- the orchestrator controls task creation and final verification;
+- the orchestrator controls task creation and agent identity attestations;
+- registered verifiers, including an eligible orchestrator, make final
+  verification decisions;
 - workers may be unreliable, interrupted, or mistaken;
 - multiple workers may race for the same task;
 - the filesystem may retain partial output after a crash;
@@ -27,7 +29,8 @@ flowchart LR
     A2 --> R
     R --> G
     G --> V["Submitted"]
-    O --> V
+    I["Signed identity policy"] --> V
+    X["Independent verifier"] --> V
     V --> F["Verified or rejected"]
 ```
 
@@ -52,10 +55,11 @@ Each JSONL event contains:
 The private local key is stored at `.efo/ledger.key`. It is runtime state and
 must never be committed. Before appending, the existing chain is verified.
 
-The complete initial workspace configuration and every agent registration are
-also signed events. Their JSON projections are compared to those events before
-authorization decisions, so directly changing the orchestrator or a worker role
-does not grant permissions.
+The complete initial workspace configuration, every agent registration, and
+every identity attestation are also signed events. Their JSON projections are
+compared to those events before authorization decisions, so directly changing
+the orchestrator, a worker role, controller, model family, or alias link does
+not grant permissions.
 
 ### Task projections
 
@@ -87,9 +91,28 @@ cannot relax them during submission.
 
 ### Independent verification
 
-A worker can only reach `submitted`. The orchestrator must provide a separate
-verification manifest from its own report directory. Reusing the worker
-manifest is rejected.
+A worker can only reach `submitted`. A registered verifier or the orchestrator
+must provide a separate verification manifest from its own report directory.
+Reusing the worker manifest is rejected.
+
+Actor names are not the independence boundary. Agent registrations may carry a
+signed `control_principal`, `model_family`, and flattened alias chain. Submission
+stores an immutable snapshot of the author's declared identity. Acceptance is
+rejected when either identity is unknown or when worker and verifier share an
+actor, control principal, model family, or alias ancestor. Alias lineages are
+immutable for an agent ID, so a root re-attestation cannot turn an existing
+alias into an independent reviewer.
+
+Identity declarations are policy attestations, not provider-backed proof. EFO
+can enforce and audit the declared graph, including nested aliases, but it
+cannot detect a deliberately false declaration by the trusted registration
+authority. Harder deployments should bind these fields to provider or
+hardware-backed attestations.
+
+`ledger audit-independence` reconstructs historical submission and verification
+pairs without appending an event. A separate policy file may enrich legacy
+agents that predate signed identities; those overrides are audit-only and
+cannot authorize a live verification.
 
 ### Evidence retention
 
@@ -106,6 +129,8 @@ between validation and archival rejects the submission.
 | Two simultaneous claims | One atomic claim succeeds |
 | Worker process crashes | Lease eventually expires to blocked |
 | Test skips | Submission rejected unless preregistered |
+| Same controller or model reviews itself under another name | Verification rejected |
+| Legacy verification has no identity snapshot | Read-only audit flags unknown identity |
 | Report lacks evidence | Submission rejected |
 | Task JSON is lost | Ledger retains complete snapshot |
 | Ledger line is edited | Hash or HMAC verification fails |
