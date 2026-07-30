@@ -727,20 +727,26 @@ class Workspace:
         agent = self.get_agent(actor)
         if agent["role"] not in {"worker", "verifier"}:
             raise AuthorizationError("Only worker or verifier agents may claim tasks")
-        candidates = (
-            [self.get_task(task_id)]
+        candidate_ids = (
+            [validate_task_id(task_id)]
             if task_id is not None
-            else self.list_tasks(state="pending", owner=actor)
+            else [
+                validate_task_id(path.stem)
+                for path in sorted(self.tasks_dir.glob("*.json"))
+            ]
         )
-        for candidate in candidates:
-            if candidate["owner"] != actor:
-                if task_id is not None:
-                    raise AuthorizationError(
-                        f"Task {candidate['id']} is owned by {candidate['owner']}"
-                    )
-                continue
-            with self._task_lock(candidate["id"]):
-                task = self.get_task(candidate["id"])
+        for candidate_id in candidate_ids:
+            # Read the ledger-backed projection only after acquiring the task
+            # lock. Otherwise a concurrent commit can expose the new ledger
+            # event before its projection file is atomically replaced.
+            with self._task_lock(candidate_id):
+                task = self.get_task(candidate_id)
+                if task["owner"] != actor:
+                    if task_id is not None:
+                        raise AuthorizationError(
+                            f"Task {task['id']} is owned by {task['owner']}"
+                        )
+                    continue
                 if task["state"] != "pending":
                     if task_id is not None:
                         raise TransitionError(
