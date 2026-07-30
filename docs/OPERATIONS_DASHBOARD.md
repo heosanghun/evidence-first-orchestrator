@@ -28,11 +28,13 @@ performance result.
 
 ## Cloudflare Pages
 
-For the Git-connected Pages project:
+The repository's `wrangler.toml` is the source of truth for the Pages project
+name, compatibility date, and `public/` output directory. For the
+Git-connected Pages project:
 
 1. Set the production branch to `main`.
 2. Leave the build command empty.
-3. Set the build output directory to `public`.
+3. Confirm the detected build output directory is `public`.
 4. Create a KV namespace for the latest monitor snapshot.
 5. Add the Pages Functions KV binding `EFO_MONITOR_KV`.
 6. Add an encrypted variable named `EFO_INGEST_SECRET`.
