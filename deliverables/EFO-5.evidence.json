@@ -1,0 +1,281 @@
+{
+    "schema_version":  1,
+    "task":  "EFO-5",
+    "title":  "Claude B EFO-5 worker evidence",
+    "generated_by":  "claude-b",
+    "transported_by":  "antigravity",
+    "base_commit":  "0828c0b6ff792da29317228679f7e962aec457ad",
+    "head_commit":  "5a7f7f60e4a30dbfd9c9da82e9dfee3eb959fcb4",
+    "branch":  "claude-b/EFO-5-agent-attribution-hardening",
+    "artifacts":  [
+                      {
+                          "id":  "report",
+                          "path":  "EFO-5.md",
+                          "kind":  "report",
+                          "sha256":  "3723a1ee6335f067d0204a5180c75fa8095907351ee918917146cb45ce7e1b44",
+                          "bytes":  3235,
+                          "description":  "Six-section Claude B worker report."
+                      },
+                      {
+                          "id":  "source_manifest",
+                          "path":  "EFO-5.source-manifest.json",
+                          "kind":  "structured_data",
+                          "sha256":  "51a3546073373feb6fb2cbe3df7bf823b59e5513d1196121323b830a08083642",
+                          "bytes":  1516,
+                          "description":  "Exact base, head, changed blobs, and clean-worktree record."
+                      },
+                      {
+                          "id":  "python_tests",
+                          "path":  "EFO-5.python-tests.txt",
+                          "kind":  "raw_output",
+                          "sha256":  "469d7163d069bcd327f2c28a28989d54e053e774df86b2cc84a824ecf21268a3",
+                          "bytes":  15185,
+                          "description":  "Full Python worker regression transcript."
+                      },
+                      {
+                          "id":  "node_tests",
+                          "path":  "EFO-5.node-tests.txt",
+                          "kind":  "raw_output",
+                          "sha256":  "048108cc5129ec4d8106a8313def04dcf677055cb8740d5fd71537be7b77d006",
+                          "bytes":  3099,
+                          "description":  "Full Node contract regression transcript."
+                      },
+                      {
+                          "id":  "static_checks",
+                          "path":  "EFO-5.static-checks.txt",
+                          "kind":  "raw_output",
+                          "sha256":  "772b9c9ca0d696ecf8ef2a677688f220c65622ab670f3511748b09ded4dcd643",
+                          "bytes":  291,
+                          "description":  "Compile, syntax, scope, diff, head, and clean-worktree checks."
+                      },
+                      {
+                          "id":  "claude_raw",
+                          "path":  "EFO-5.claude-b-worker.json",
+                          "kind":  "raw_output",
+                          "sha256":  "75f347bcd064ee080ec956e441415d5c3b09cbdf6779159fc2bfe03032567ef4",
+                          "bytes":  8742,
+                          "description":  "Actual Claude Code Opus worker envelope."
+                      },
+                      {
+                          "id":  "claude_markdown",
+                          "path":  "EFO-5.claude-b-worker.md",
+                          "kind":  "worker_output",
+                          "sha256":  "2ac6a9e7076702f02998842e537a47820855630a20242b022297dcd26e09779e",
+                          "bytes":  7102,
+                          "description":  "Verbatim Claude B final report."
+                      },
+                      {
+                          "id":  "worker_prompt",
+                          "path":  "EFO-5-worker-prompt.txt",
+                          "kind":  "input",
+                          "sha256":  "45ebc14375db9e4273fdb374b71d100fc059342c5c785c7d491a008b3b5e8efe",
+                          "bytes":  2577,
+                          "description":  "Exact worker instructions and frozen safety constraints."
+                      }
+                  ],
+    "validations":  [
+                        {
+                            "id":  "python_regression",
+                            "name":  "Full Python regression",
+                            "description":  "All collector and EFO tests on exact committed state.",
+                            "command":  "PYTHONPATH=src python -m unittest discover -s tests -t . -v",
+                            "interpreter":  "CPython 3.13",
+                            "exit_code":  0,
+                            "passed":  98,
+                            "failed":  0,
+                            "skipped":  0,
+                            "skip_reasons":  [
+
+                                             ],
+                            "checks_run":  98,
+                            "raw_output_path":  "EFO-5.python-tests.txt",
+                            "raw_output_sha256":  "469d7163d069bcd327f2c28a28989d54e053e774df86b2cc84a824ecf21268a3"
+                        },
+                        {
+                            "id":  "node_regression",
+                            "name":  "Full Node contract regression",
+                            "description":  "API and browser contract suite unchanged and passing.",
+                            "command":  "node --test web_tests/snapshot.test.mjs",
+                            "interpreter":  "Node.js 20",
+                            "exit_code":  0,
+                            "passed":  18,
+                            "failed":  0,
+                            "skipped":  0,
+                            "skip_reasons":  [
+
+                                             ],
+                            "checks_run":  18,
+                            "raw_output_path":  "EFO-5.node-tests.txt",
+                            "raw_output_sha256":  "048108cc5129ec4d8106a8313def04dcf677055cb8740d5fd71537be7b77d006"
+                        },
+                        {
+                            "id":  "static_scope",
+                            "name":  "Static and source-scope checks",
+                            "description":  "Compile, two Node syntax checks, Git diff, exact scope, clean tree, exact head.",
+                            "command":  "py_compile; node --check x2; git diff --check; exact scope; clean tree; exact head",
+                            "interpreter":  "CPython, Node.js, Git",
+                            "exit_code":  0,
+                            "passed":  7,
+                            "failed":  0,
+                            "skipped":  0,
+                            "skip_reasons":  [
+
+                                             ],
+                            "checks_run":  7,
+                            "raw_output_path":  "EFO-5.static-checks.txt",
+                            "raw_output_sha256":  "772b9c9ca0d696ecf8ef2a677688f220c65622ab670f3511748b09ded4dcd643"
+                        },
+                        {
+                            "id":  "actual_worker",
+                            "name":  "Actual Claude B ready gate",
+                            "description":  "Claude Code Opus completed implementation and returned RESULT READY.",
+                            "command":  "claude -p --model opus --effort high --output-format json",
+                            "interpreter":  "Claude Code 2.1.220 / claude-opus-5",
+                            "exit_code":  0,
+                            "passed":  1,
+                            "failed":  0,
+                            "skipped":  0,
+                            "skip_reasons":  [
+
+                                             ],
+                            "checks_run":  1,
+                            "raw_output_path":  "EFO-5.claude-b-worker.json",
+                            "raw_output_sha256":  "75f347bcd064ee080ec956e441415d5c3b09cbdf6779159fc2bfe03032567ef4"
+                        }
+                    ],
+    "known_answer_checks":  [
+                                {
+                                    "id":  "missing_verifier_identity",
+                                    "name":  "Unregistered verifier without identity",
+                                    "expected":  "no card assignment",
+                                    "observed":  "no card assignment",
+                                    "passed":  true,
+                                    "raw_output_path":  "EFO-5.python-tests.txt"
+                                },
+                                {
+                                    "id":  "missing_external_identity",
+                                    "name":  "External author without identity",
+                                    "expected":  "no card assignment",
+                                    "observed":  "no card assignment",
+                                    "passed":  true,
+                                    "raw_output_path":  "EFO-5.python-tests.txt"
+                                },
+                                {
+                                    "id":  "display_id_collision",
+                                    "name":  "Display ID collision",
+                                    "expected":  "does not widen attribution",
+                                    "observed":  "does not widen attribution",
+                                    "passed":  true,
+                                    "raw_output_path":  "EFO-5.python-tests.txt"
+                                },
+                                {
+                                    "id":  "newer_block",
+                                    "name":  "Newer block versus older live",
+                                    "expected":  "newer blocked card",
+                                    "observed":  "newer blocked card",
+                                    "passed":  true,
+                                    "raw_output_path":  "EFO-5.python-tests.txt"
+                                },
+                                {
+                                    "id":  "newer_recovery",
+                                    "name":  "Newer live or verified versus old block",
+                                    "expected":  "newer activity card, old row retained",
+                                    "observed":  "newer activity card, old row retained",
+                                    "passed":  true,
+                                    "raw_output_path":  "EFO-5.python-tests.txt"
+                                },
+                                {
+                                    "id":  "equal_timestamp",
+                                    "name":  "Equal timestamp order",
+                                    "expected":  "attention, live, terminal, then task ID",
+                                    "observed":  "attention, live, terminal, then task ID",
+                                    "passed":  true,
+                                    "raw_output_path":  "EFO-5.python-tests.txt"
+                                },
+                                {
+                                    "id":  "card_task_binding",
+                                    "name":  "Non-idle card task binding",
+                                    "expected":  "task ID retained in same snapshot",
+                                    "observed":  "task ID retained in same snapshot",
+                                    "passed":  true,
+                                    "raw_output_path":  "EFO-5.python-tests.txt"
+                                }
+                            ],
+    "claims":  [
+                   {
+                       "id":  "fail_closed_identity",
+                       "name":  "Secondary identity attribution fails closed",
+                       "kind":  "functional",
+                       "measured":  true,
+                       "value":  "Only a complete exact current signed identity dict can attest a secondary actor.",
+                       "basis":  "Synthetic worker regressions.",
+                       "evidence":  [
+                                        "EFO-5.python-tests.txt",
+                                        "EFO-5.source-manifest.json"
+                                    ]
+                   },
+                   {
+                       "id":  "display_only_id",
+                       "name":  "Display labels do not confer ownership",
+                       "kind":  "functional",
+                       "measured":  true,
+                       "value":  "Profile id does not widen attribution beyond efo_id and its signed alias group.",
+                       "basis":  "Display collision regression.",
+                       "evidence":  [
+                                        "EFO-5.python-tests.txt"
+                                    ]
+                   },
+                   {
+                       "id":  "recency_order",
+                       "name":  "Card selection is recency-first and deterministic",
+                       "kind":  "functional",
+                       "measured":  true,
+                       "value":  "New blocks and recoveries order by timestamp, class, then task ID.",
+                       "basis":  "Frozen ordering regressions.",
+                       "evidence":  [
+                                        "EFO-5.python-tests.txt"
+                                    ]
+                   },
+                   {
+                       "id":  "exact_scope",
+                       "name":  "Source change is exactly scoped",
+                       "kind":  "provenance",
+                       "measured":  true,
+                       "value":  "Commit 5a7f7f60e4a30dbfd9c9da82e9dfee3eb959fcb4 changes exactly three authorized files from 0828c0b.",
+                       "basis":  "Git blob manifest and static checks.",
+                       "evidence":  [
+                                        "EFO-5.source-manifest.json",
+                                        "EFO-5.static-checks.txt"
+                                    ]
+                   }
+               ],
+    "provenance":  {
+                       "worker_identity":  "claude-b",
+                       "worker_model_family":  "anthropic-claude",
+                       "actual_worker_model":  "claude-opus-5",
+                       "actual_worker_session":  "a7006ebe-0021-4f7b-bcb8-2267bc7e9466",
+                       "transport_identity":  "antigravity",
+                       "transport_control_principal":  "codex-meta-control",
+                       "transport_overlap":  false,
+                       "gpu_used":  false,
+                       "project_network_used":  false,
+                       "worker_control_plane_network_used":  true,
+                       "web_search_requests":  0,
+                       "web_fetch_requests":  0,
+                       "packages_installed":  false,
+                       "real_dataset_accessed":  false,
+                       "benchmark_outcomes_accessed":  false,
+                       "performance_metrics_measured":  false,
+                       "checks_skipped":  0,
+                       "project_commit":  "5a7f7f60e4a30dbfd9c9da82e9dfee3eb959fcb4"
+                   },
+    "performance_claims_note":  "None. Dashboard workflow percentages are not measured performance.",
+    "unknowns":  [
+                     "Independent Codex verdict is pending."
+                 ],
+    "limitations":  [
+                        "Worker evidence is not independent verification.",
+                        "Claude A shares the worker model family and cannot be the formal verifier.",
+                        "No production deployment is authorized by this submission."
+                    ]
+}

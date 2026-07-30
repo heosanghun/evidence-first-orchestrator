@@ -1,0 +1,66 @@
+You are Claude B, the implementation worker for EFO task EFO-5.
+
+Work in this exact isolated repository:
+D:\AI\System1.5 - Codex\.efo-deliveries\EFO-5-source
+
+Starting HEAD must be:
+0828c0b6ff792da29317228679f7e962aec457ad
+
+The frozen task specification is:
+D:\AI\System1.5 - Codex\.efo-deliveries\EFO-5.task.md
+
+Read the specification in full, inspect the current implementation and tests,
+then implement every frozen known answer. You own only these source paths:
+
+- monitor/collector.py
+- tests/test_monitor_collector.py
+- docs/OPERATIONS_DASHBOARD.md
+
+Do not modify any other tracked source path. Evidence files belong outside
+this repository and will be packaged by the orchestrator.
+
+Required engineering behavior:
+
+1. Eliminate the `None == None` attribution path. A secondary verification
+   or transport actor must resolve in the signed identity registry, and both
+   identity snapshots must be dicts exactly equal to that resolved identity.
+2. Treat profile `id` as display-only. Attribution uses configured `efo_id`
+   plus its validated signed alias group, never an unrelated display ID.
+3. Make card selection recency-first across live, attention, and terminal
+   records. For equal timestamps use a documented deterministic class
+   priority and then lexicographic task ID.
+4. Preserve canonical task rows, history, alerts, privacy, the exact 11-field
+   agent-card shape, API compatibility, and the EFO-3 task projection.
+
+Add targeted synthetic tests for all seven frozen known answers. Run:
+
+- PYTHONPATH=src python -m unittest discover -s tests -t . -v
+- node --test web_tests/snapshot.test.mjs
+- python -m py_compile monitor/collector.py tests/test_monitor_collector.py
+- node --check functions/api/snapshot.js
+- node --check public/assets/app.js
+- git diff --check 0828c0b6ff792da29317228679f7e962aec457ad..HEAD
+
+Also confirm `git diff --name-only` contains only the three authorized paths.
+Zero skips are allowed. Do not install packages, use network/web search,
+inspect production, access GPU state, read datasets/benchmarks, or calculate
+performance metrics.
+
+When all checks pass, commit the exact source state on the current branch with
+a concise message. Finish with Markdown sections:
+
+# Worker Metadata
+# Implementation
+# Tests
+# Known Answers
+# Source Scope
+# Result
+
+The final line must be exactly one of:
+
+RESULT: READY
+RESULT: BLOCKED
+
+Use READY only after a clean committed worktree and all required commands pass
+with zero failures and zero skips. Do not claim EFO verification; submission
+and independent verification happen after your work.

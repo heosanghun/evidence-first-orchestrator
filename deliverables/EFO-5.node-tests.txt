@@ -1,0 +1,100 @@
+TAP version 13
+# Subtest: health reports missing configuration without exposing secrets
+ok 1 - health reports missing configuration without exposing secrets
+  ---
+  duration_ms: 14.4308
+  ...
+# Subtest: signed snapshot is validated, stored, and served
+ok 2 - signed snapshot is validated, stored, and served
+  ---
+  duration_ms: 6.7948
+  ...
+# Subtest: malformed activity history is rejected
+ok 3 - malformed activity history is rejected
+  ---
+  duration_ms: 1.1296
+  ...
+# Subtest: transport-attested pending task is accepted without becoming running
+ok 4 - transport-attested pending task is accepted without becoming running
+  ---
+  duration_ms: 1.1477
+  ...
+# Subtest: agent card may reference a transport task without changing its row
+ok 5 - agent card may reference a transport task without changing its row
+  ---
+  duration_ms: 2.0064
+  ...
+# Subtest: browser renders a distinct transport badge on agent cards
+ok 6 - browser renders a distinct transport badge on agent cards
+  ---
+  duration_ms: 0.9337
+  ...
+# Subtest: agent card cannot invent or contradict current work
+ok 7 - agent card cannot invent or contradict current work
+  ---
+  duration_ms: 4.5584
+  ...
+# Subtest: idle agent projection cannot carry hidden task state
+ok 8 - idle agent projection cannot carry hidden task state
+  ---
+  duration_ms: 1.9531
+  ...
+# Subtest: legacy collector agents are normalized to safe idle cards
+ok 9 - legacy collector agents are normalized to safe idle cards
+  ---
+  duration_ms: 1.4891
+  ...
+# Subtest: current collector cannot downgrade to the legacy agent contract
+ok 10 - current collector cannot downgrade to the legacy agent contract
+  ---
+  duration_ms: 1.5615
+  ...
+# Subtest: transport assertion cannot contradict canonical task state
+ok 11 - transport assertion cannot contradict canonical task state
+  ---
+  duration_ms: 1.0963
+  ...
+# Subtest: transport assertion rejects forged progress and lease
+ok 12 - transport assertion rejects forged progress and lease
+  ---
+  duration_ms: 1.5872
+  ...
+# Subtest: task projection rejects private transport fields
+ok 13 - task projection rejects private transport fields
+  ---
+  duration_ms: 0.8808
+  ...
+# Subtest: canonical state mismatch is rejected without an external phase
+ok 14 - canonical state mismatch is rejected without an external phase
+  ---
+  duration_ms: 0.8079
+  ...
+# Subtest: all collector canonical progress projections satisfy the API contract
+ok 15 - all collector canonical progress projections satisfy the API contract
+  ---
+  duration_ms: 4.8112
+  ...
+# Subtest: invalid signature is rejected before parsing
+ok 16 - invalid signature is rejected before parsing
+  ---
+  duration_ms: 0.9035
+  ...
+# Subtest: sensitive fields are rejected even with a valid signature
+ok 17 - sensitive fields are rejected even with a valid signature
+  ---
+  duration_ms: 0.7502
+  ...
+# Subtest: view token protects reads but not health status
+ok 18 - view token protects reads but not health status
+  ---
+  duration_ms: 0.593
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 18
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 163.2082

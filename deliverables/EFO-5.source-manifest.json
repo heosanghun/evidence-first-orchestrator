@@ -1,0 +1,29 @@
+{
+    "schema_version":  1,
+    "task":  "EFO-5",
+    "base_commit":  "0828c0b6ff792da29317228679f7e962aec457ad",
+    "head_commit":  "5a7f7f60e4a30dbfd9c9da82e9dfee3eb959fcb4",
+    "parent_commit":  "0828c0b6ff792da29317228679f7e962aec457ad",
+    "branch":  "claude-b/EFO-5-agent-attribution-hardening",
+    "clean_worktree":  true,
+    "changed_files":  [
+                          {
+                              "path":  "docs/OPERATIONS_DASHBOARD.md",
+                              "bytes":  8100,
+                              "sha256":  "63fe6fe8b9b1a91c8eedef81257999e210c6b97667e489485b173a0e648f55d9",
+                              "git_blob":  "bd4ababfaf271cd317011eefb187d7849c783180"
+                          },
+                          {
+                              "path":  "monitor/collector.py",
+                              "bytes":  44614,
+                              "sha256":  "c52207cf4789421930afe4ef1388bdb6c144fa6c9291d6913fc3bc3140941315",
+                              "git_blob":  "23b42d08b55723a390297b4d85dffc7e0efb4ee5"
+                          },
+                          {
+                              "path":  "tests/test_monitor_collector.py",
+                              "bytes":  49083,
+                              "sha256":  "e0de7cd978b6f7242facbd0be19df972c6a064bfc050f23b61945b9e643cfe48",
+                              "git_blob":  "ed5abd88f15ff095cf150eb052610f1d25134aa0"
+                          }
+                      ]
+}

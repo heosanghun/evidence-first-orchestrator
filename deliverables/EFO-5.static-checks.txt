@@ -1,0 +1,10 @@
+python_compile_exit=0
+node_api_check_exit=0
+node_app_check_exit=0
+git_diff_check_exit=0
+write_scope_exit=0
+changed=docs/OPERATIONS_DASHBOARD.md
+changed=monitor/collector.py
+changed=tests/test_monitor_collector.py
+clean_worktree_exit=0
+head=5a7f7f60e4a30dbfd9c9da82e9dfee3eb959fcb4
