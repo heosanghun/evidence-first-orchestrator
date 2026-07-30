@@ -1,4 +1,4 @@
-"""Run the command-line interface with ``python -m evidence_orchestrator``."""
+"""Module entry point for ``python -m evidence_orchestrator``."""
 
 from .cli import main
 

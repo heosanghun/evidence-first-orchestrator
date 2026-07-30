@@ -91,7 +91,7 @@ DASHBOARD_HTML = """<!doctype html>
     .state { font-weight: 650; }
     .verified { color: var(--green); }
     .submitted, .running, .claimed { color: var(--blue); }
-    .blocked, .rejected { color: var(--red); }
+    .revoking, .blocked, .rejected, .invalidated { color: var(--red); }
     .pending { color: var(--amber); }
     code { font-family: ui-monospace, "Cascadia Code", monospace; font-size: 12px; }
     @media (max-width: 760px) {
@@ -131,13 +131,15 @@ DASHBOARD_HTML = """<!doctype html>
       document.getElementById("workspace").textContent = data.status.workspace;
       document.getElementById("updated").textContent = new Date().toLocaleString();
       document.getElementById("ledger").textContent =
-        `Ledger verified · ${data.status.ledger.events} events`;
+        `Ledger verified - ${data.status.ledger.events} events`;
       const states = data.status.states;
       const metrics = [
         ["Running", states.running],
+        ["Stopping", states.revoking],
         ["Pending", states.pending],
         ["Awaiting verification", states.submitted],
         ["Blocked", states.blocked],
+        ["Invalidated", states.invalidated],
         ["Verified", states.verified + states.archived],
       ];
       document.getElementById("summary").innerHTML = metrics.map(([label, value]) =>
