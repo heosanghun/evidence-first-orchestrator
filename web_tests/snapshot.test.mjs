@@ -323,6 +323,71 @@ test("idle agent projection cannot carry hidden task state", async () => {
   }
 });
 
+test("legacy collector agents are normalized to safe idle cards", async () => {
+  const snapshot = validSnapshot();
+  snapshot.source.collector = "efo-monitor/1.1";
+  snapshot.agents.push({
+    id: "claude-a",
+    name: "Claude A",
+    role: "verifier",
+    state: "working",
+    current: "Unverifiable legacy work",
+    next: "Legacy next action",
+    progress_percent: 75,
+  });
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).legacy_agents_normalized, 1);
+  const stored = JSON.parse(await env.EFO_MONITOR_KV.get("snapshot:latest"));
+  assert.deepEqual(stored.agents[0], {
+    id: "claude-a",
+    name: "Claude A",
+    role: "verifier",
+    state: "waiting",
+    current: "배정 대기",
+    current_task_id: null,
+    next: "오케스트레이터 지시 대기",
+    progress_percent: 0,
+    status_source: "none",
+    status_badge: null,
+    updated_at: null,
+  });
+  assert.equal(stored.source.agent_projection_compat, "legacy_idle");
+});
+
+test("current collector cannot downgrade to the legacy agent contract", async () => {
+  const snapshot = validSnapshot();
+  snapshot.source.collector = "efo-monitor/1.2";
+  snapshot.agents.push({
+    id: "claude-a",
+    name: "Claude A",
+    role: "verifier",
+    state: "working",
+    current: "Missing task binding",
+    next: "Missing task binding",
+    progress_percent: 75,
+  });
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env: {
+      EFO_MONITOR_KV: new MemoryKv(),
+      EFO_INGEST_SECRET: "test-secret",
+    },
+  });
+  assert.equal(response.status, 400);
+  assert.match(
+    (await response.json()).detail,
+    /agent has unexpected or missing fields/,
+  );
+});
+
 test("transport assertion cannot contradict canonical task state", async () => {
   const snapshot = validSnapshot();
   snapshot.tasks.push({

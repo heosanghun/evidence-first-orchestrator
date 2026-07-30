@@ -134,7 +134,11 @@ class MonitorCollectorTests(unittest.TestCase):
                         "author": "claude",
                         "author_identity": {
                             "actor": "claude",
+                            "schema_version": 1,
                             "control_principal": "claude-a-control",
+                            "model_family": "anthropic-claude",
+                            "alias_of": None,
+                            "alias_chain": [],
                         },
                     },
                 }
@@ -267,6 +271,116 @@ class MonitorCollectorTests(unittest.TestCase):
             {},
         )
 
+    def test_unlinked_roots_with_shared_control_do_not_merge(self) -> None:
+        registered = [
+            {
+                "id": agent_id,
+                "identity": {
+                    "schema_version": 1,
+                    "control_principal": "shared-control",
+                    "model_family": "shared-family",
+                    "alias_of": None,
+                    "alias_chain": [],
+                },
+            }
+            for agent_id in ("claude-a", "claude-b")
+        ]
+        groups = collector.resolve_signed_identity_groups(
+            registered,
+            ledger_valid=True,
+        )
+        self.assertEqual(groups["claude-a"], frozenset({"claude-a"}))
+        self.assertEqual(groups["claude-b"], frozenset({"claude-b"}))
+
+        status = {
+            "tasks": [
+                {
+                    "id": "CLAUDE-B-WORK",
+                    "title": "Claude B work",
+                    "owner": "claude-b",
+                    "state": "running",
+                    "lease": {
+                        "expires_at": "2099-01-01T00:00:00Z",
+                    },
+                    "updated_at": "2026-07-30T01:00:00Z",
+                }
+            ],
+            "status": {"ledger": {"valid": True, "event_count": 20}},
+        }
+        with patch(
+            "monitor.collector.parse_json_command",
+            side_effect=[status, registered],
+        ):
+            agents, _tasks, _ledger, _alerts, _activity = collector.collect_efo(
+                {
+                    "agents": [
+                        {
+                            "id": "claude-a",
+                            "efo_id": "claude-a",
+                            "name": "Claude A",
+                            "role": "verifier",
+                        },
+                        {
+                            "id": "claude-b",
+                            "efo_id": "claude-b",
+                            "name": "Claude B",
+                            "role": "worker",
+                        },
+                    ]
+                }
+            )
+        self.assertIsNone(agents[0]["current_task_id"])
+        self.assertEqual(agents[1]["current_task_id"], "CLAUDE-B-WORK")
+
+    def test_incomplete_task_identity_cannot_assign_secondary_actor(self) -> None:
+        status = {
+            "tasks": [
+                {
+                    "id": "OTHER-WORK",
+                    "title": "Other work",
+                    "owner": "other",
+                    "state": "verified",
+                    "updated_at": "2026-07-30T01:00:00Z",
+                    "verification": {
+                        "actor": "claude-a",
+                        "identity": {},
+                    },
+                }
+            ],
+            "status": {"ledger": {"valid": True, "event_count": 20}},
+        }
+        registered = [
+            {
+                "id": agent_id,
+                "identity": {
+                    "schema_version": 1,
+                    "control_principal": f"{agent_id}-control",
+                    "model_family": "test-family",
+                    "alias_of": None,
+                    "alias_chain": [],
+                },
+            }
+            for agent_id in ("other", "claude-a")
+        ]
+        with patch(
+            "monitor.collector.parse_json_command",
+            side_effect=[status, registered],
+        ):
+            agents, _tasks, _ledger, _alerts, _activity = collector.collect_efo(
+                {
+                    "agents": [
+                        {
+                            "id": "claude-a",
+                            "efo_id": "claude-a",
+                            "name": "Claude A",
+                            "role": "verifier",
+                        }
+                    ]
+                }
+            )
+        self.assertIsNone(agents[0]["current_task_id"])
+        self.assertEqual(agents[0]["status_source"], "none")
+
     def test_invalid_ledger_cannot_assign_even_an_exact_owner(self) -> None:
         status = {
             "tasks": [
@@ -352,7 +466,11 @@ class MonitorCollectorTests(unittest.TestCase):
                         "actor": "codex-verifier",
                         "identity": {
                             "actor": "codex-verifier",
+                            "schema_version": 1,
                             "control_principal": "codex-meta-control",
+                            "model_family": "openai-codex",
+                            "alias_of": "codex",
+                            "alias_chain": ["codex"],
                         },
                     },
                 },
@@ -373,7 +491,11 @@ class MonitorCollectorTests(unittest.TestCase):
                         "actor": "claude-b",
                         "identity": {
                             "actor": "claude-b",
+                            "schema_version": 1,
                             "control_principal": "claude-b-control",
+                            "model_family": "anthropic-claude",
+                            "alias_of": None,
+                            "alias_chain": [],
                         },
                     },
                 },

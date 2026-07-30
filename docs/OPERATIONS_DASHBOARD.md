@@ -57,13 +57,22 @@ Selection is deterministic. Live canonical work and transport observations
 take priority over terminal history. Within the same class, the newest signed
 timestamp wins and task ID resolves an exact tie. This prevents an old blocked
 probe from making an agent look currently blocked after newer work, while the
-old row and its alert remain visible.
+old row remains visible in the complete task table.
 
 Each non-idle card binds its title, workflow progress, next action, status
 source, badge, and timestamp to a task ID in the same public snapshot. The
 Pages Function rejects missing tasks, mismatched values, extra card fields,
 and hidden state on an idle card. Transport badges describe an orchestrator
 observation; they never rewrite the canonical task state.
+
+Collector versions `1.0` and `1.1` did not bind cards to task IDs. During a
+rolling release, the Pages Function accepts their exact seven-field card
+shape but normalizes each card to a safe waiting/offline projection with no
+current task, zero workflow progress, and `status_source=none`. It marks the
+stored source as `agent_projection_compat=legacy_idle`. Extra legacy fields
+and legacy-shaped cards claiming to be collector `1.2` still fail closed.
+Once collector `1.2` uploads, full task-bound cards replace the compatibility
+projection.
 
 ## Cloudflare Pages
 

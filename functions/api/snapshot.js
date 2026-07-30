@@ -122,6 +122,21 @@ const AGENT_PROJECTION_KEYS = new Set([
   "updated_at",
 ]);
 
+const LEGACY_AGENT_PROJECTION_KEYS = new Set([
+  "id",
+  "name",
+  "role",
+  "state",
+  "current",
+  "next",
+  "progress_percent",
+]);
+
+const LEGACY_COLLECTORS = new Set([
+  "efo-monitor/1.0",
+  "efo-monitor/1.1",
+]);
+
 const AGENT_STATES = new Set(["working", "waiting", "blocked", "offline"]);
 const AGENT_STATUS_SOURCES = new Set([
   "none",
@@ -130,6 +145,47 @@ const AGENT_STATUS_SOURCES = new Set([
 ]);
 const IDLE_AGENT_CURRENT = "배정 대기";
 const IDLE_AGENT_NEXT = "오케스트레이터 지시 대기";
+
+function hasExactKeys(value, expected) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const keys = Object.keys(value);
+  return (
+    keys.length === expected.size &&
+    keys.every((key) => expected.has(key))
+  );
+}
+
+function normalizeLegacyAgentProjections(snapshot) {
+  const collector = snapshot?.source?.collector;
+  if (
+    !LEGACY_COLLECTORS.has(collector) ||
+    !Array.isArray(snapshot?.agents)
+  ) {
+    return { snapshot, normalized: 0 };
+  }
+  let normalized = 0;
+  const agents = snapshot.agents.map((agent) => {
+    if (!hasExactKeys(agent, LEGACY_AGENT_PROJECTION_KEYS)) return agent;
+    normalized += 1;
+    return {
+      id: agent.id,
+      name: agent.name,
+      role: agent.role,
+      state: agent.state === "offline" ? "offline" : "waiting",
+      current: IDLE_AGENT_CURRENT,
+      current_task_id: null,
+      next: IDLE_AGENT_NEXT,
+      progress_percent: 0,
+      status_source: "none",
+      status_badge: null,
+      updated_at: null,
+    };
+  });
+  return {
+    snapshot: normalized ? { ...snapshot, agents } : snapshot,
+    normalized,
+  };
+}
 
 const CANONICAL_TASK_PROGRESS = new Map([
   ["pending", 10],
@@ -522,6 +578,8 @@ export async function onRequestPost(context) {
   } catch {
     return jsonResponse({ error: "invalid_json" }, 400);
   }
+  const compatibility = normalizeLegacyAgentProjections(snapshot);
+  snapshot = compatibility.snapshot;
   const validationError = validateSnapshot(snapshot);
   if (validationError) {
     return jsonResponse({ error: "invalid_snapshot", detail: validationError }, 400);
@@ -531,6 +589,9 @@ export async function onRequestPost(context) {
     ...(snapshot.source || {}),
     mode: "live",
     received_at: new Date().toISOString(),
+    ...(compatibility.normalized
+      ? { agent_projection_compat: "legacy_idle" }
+      : {}),
   };
   snapshot.history = snapshot.history.slice(-HISTORY_LIMIT);
   snapshot.activity = Array.isArray(snapshot.activity)
@@ -544,6 +605,7 @@ export async function onRequestPost(context) {
     generated_at: snapshot.generated_at,
     gpu_count: snapshot.gpus.length,
     task_count: snapshot.tasks.length,
+    legacy_agents_normalized: compatibility.normalized,
   });
 }
 
@@ -552,6 +614,7 @@ export const internals = {
   hasForbiddenKey,
   hmacHex,
   agentStateForTask,
+  normalizeLegacyAgentProjections,
   validateAgentProjection,
   validateTaskProjection,
   validateSnapshot,

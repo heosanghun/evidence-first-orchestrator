@@ -65,7 +65,6 @@ TASK_NEXT = {
 ACTIVE_STATES = {"claimed", "running"}
 TERMINAL_STATES = {"verified", "archived"}
 LIVE_CARD_STATES = {"pending", "claimed", "running", "submitted"}
-AGENT_STATES = {"working", "waiting", "blocked", "offline"}
 ACTIVITY_ACTIONS = {
     "workspace.initialized": ("워크스페이스 생성", "system"),
     "agent.added": ("에이전트 등록", "system"),
@@ -565,15 +564,15 @@ def lease_is_active(
     return expires > current
 
 
-def resolve_signed_identity_groups(
+def _resolve_signed_identity_registry(
     registered_agents: list[dict[str, Any]],
     *,
     ledger_valid: bool,
-) -> dict[str, frozenset[str]]:
-    """Resolve only complete, signed alias declarations into identity groups."""
+) -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
+    """Resolve complete signed identities and their declared alias roots."""
 
     if not ledger_valid:
-        return {}
+        return {}, {}
     records = {
         str(agent["id"]): agent
         for agent in registered_agents
@@ -588,20 +587,27 @@ def resolve_signed_identity_groups(
         "alias_of",
         "alias_chain",
     }
-    resolved: dict[str, tuple[str, str, tuple[str, ...]]] = {}
+    resolved: dict[str, tuple[dict[str, Any], str]] = {}
     resolving: set[str] = set()
+    invalid: set[str] = set()
 
-    def resolve(agent_id: str) -> tuple[str, str, tuple[str, ...]] | None:
+    def reject(agent_id: str) -> None:
+        invalid.add(agent_id)
+        return None
+
+    def resolve(agent_id: str) -> tuple[dict[str, Any], str] | None:
         if agent_id in resolved:
             return resolved[agent_id]
-        if agent_id in resolving:
+        if agent_id in invalid:
             return None
+        if agent_id in resolving:
+            return reject(agent_id)
         record = records.get(agent_id)
         identity = record.get("identity") if isinstance(record, dict) else None
         if not isinstance(identity, dict) or set(identity) != expected_keys:
-            return None
+            return reject(agent_id)
         if identity.get("schema_version") != 1:
-            return None
+            return reject(agent_id)
         principal = identity.get("control_principal")
         model_family = identity.get("model_family")
         alias_of = identity.get("alias_of")
@@ -617,75 +623,101 @@ def resolve_signed_identity_groups(
             or len(alias_chain) != len(set(alias_chain))
             or agent_id in alias_chain
         ):
-            return None
+            return reject(agent_id)
 
         resolving.add(agent_id)
         try:
             if alias_of is None:
                 if alias_chain:
-                    return None
-                value = (principal, model_family, ())
+                    return reject(agent_id)
+                root_id = agent_id
             else:
                 if not alias_of or alias_of == agent_id:
-                    return None
+                    return reject(agent_id)
                 target = resolve(alias_of)
                 if target is None:
-                    return None
-                target_principal, target_family, target_chain = target
-                expected_chain = (alias_of, *target_chain)
+                    return reject(agent_id)
+                target_identity, root_id = target
+                expected_chain = (
+                    alias_of,
+                    *tuple(target_identity["alias_chain"]),
+                )
                 if (
                     tuple(alias_chain) != expected_chain
-                    or principal != target_principal
-                    or model_family != target_family
+                    or principal != target_identity["control_principal"]
+                    or model_family != target_identity["model_family"]
                 ):
-                    return None
-                value = (principal, model_family, expected_chain)
-            resolved[agent_id] = value
-            return value
+                    return reject(agent_id)
+            snapshot = {
+                "actor": agent_id,
+                "schema_version": 1,
+                "control_principal": principal,
+                "model_family": model_family,
+                "alias_of": alias_of,
+                "alias_chain": list(alias_chain),
+            }
+            resolved[agent_id] = (snapshot, root_id)
+            return resolved[agent_id]
         finally:
             resolving.discard(agent_id)
 
     for agent_id in sorted(records):
         resolve(agent_id)
 
-    grouped: dict[tuple[str, str], set[str]] = {}
-    for agent_id, (principal, model_family, _chain) in resolved.items():
-        grouped.setdefault((principal, model_family), set()).add(agent_id)
+    return (
+        {agent_id: snapshot for agent_id, (snapshot, _root) in resolved.items()},
+        {agent_id: root for agent_id, (_snapshot, root) in resolved.items()},
+    )
+
+
+def resolve_signed_identity_groups(
+    registered_agents: list[dict[str, Any]],
+    *,
+    ledger_valid: bool,
+) -> dict[str, frozenset[str]]:
+    """Resolve groups only through an explicit, valid signed alias lineage."""
+
+    _registry, roots = _resolve_signed_identity_registry(
+        registered_agents,
+        ledger_valid=ledger_valid,
+    )
+    grouped: dict[str, set[str]] = {}
+    for agent_id, root_id in roots.items():
+        grouped.setdefault(root_id, set()).add(agent_id)
     return {
-        agent_id: frozenset(grouped[(principal, model_family)])
-        for agent_id, (principal, model_family, _chain) in resolved.items()
+        agent_id: frozenset(grouped[root_id])
+        for agent_id, root_id in roots.items()
     }
 
 
 def task_actor_ids(
     raw_task: dict[str, Any],
-    trusted_secondary_actors: Iterable[str] = (),
+    identity_registry: dict[str, dict[str, Any]],
+    registered_ids: Iterable[str],
 ) -> frozenset[str]:
     """Return signed actors for whom a task is relevant without exposing them."""
 
     actors: set[str] = set()
-    trusted = set(trusted_secondary_actors)
+    registered = set(registered_ids)
     owner = raw_task.get("owner")
-    if isinstance(owner, str) and owner:
+    if isinstance(owner, str) and owner in registered:
         actors.add(owner)
 
     verification = raw_task.get("verification")
     if (
         isinstance(verification, dict)
-        and isinstance(verification.get("identity"), dict)
         and isinstance(verification.get("actor"), str)
-        and verification["actor"]
-        and verification["actor"] in trusted
+        and verification.get("identity")
+        == identity_registry.get(verification["actor"])
     ):
         actors.add(verification["actor"])
 
     external = raw_task.get("external_status")
     if (
         isinstance(external, dict)
-        and isinstance(external.get("author_identity"), dict)
         and isinstance(external.get("author"), str)
-        and external["author"]
-        and external["author"] in trusted
+        and external.get("author_identity")
+        == identity_registry.get(external["author"])
     ):
         actors.add(external["author"])
     return frozenset(actors)
@@ -889,10 +921,17 @@ def collect_efo(
         if isinstance(agent, dict) and agent.get("id")
     }
     ledger_valid = ledger.get("valid") is True
-    identity_groups = resolve_signed_identity_groups(
+    identity_registry, identity_roots = _resolve_signed_identity_registry(
         registered_agents,
         ledger_valid=ledger_valid,
     )
+    grouped_ids: dict[str, set[str]] = {}
+    for agent_id, root_id in identity_roots.items():
+        grouped_ids.setdefault(root_id, set()).add(agent_id)
+    identity_groups = {
+        agent_id: frozenset(grouped_ids[root_id])
+        for agent_id, root_id in identity_roots.items()
+    }
     profiles = config.get("agents") or [
         {
             "id": "codex",
@@ -930,7 +969,12 @@ def collect_efo(
             [
                 view
                 for raw, view in task_records
-                if task_actor_ids(raw, identity_groups) & relevant_actor_ids
+                if task_actor_ids(
+                    raw,
+                    identity_registry,
+                    registered_ids,
+                )
+                & relevant_actor_ids
             ]
             if ledger_valid
             else []

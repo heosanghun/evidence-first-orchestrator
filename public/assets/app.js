@@ -491,9 +491,10 @@ function renderAgents(snapshot) {
       const progress = clamp(agent.progress_percent);
       const transportBadge =
         agent.status_source === "transport_assertion" && agent.status_badge
-          ? `<span class="transport-badge agent-transport-badge">${escapeHtml(
-              agent.status_badge,
-            )}</span>`
+          ? `<span class="transport-badge agent-transport-badge"
+              title="정식 claim이나 heartbeat가 아닌 오케스트레이터 관찰 보고">${escapeHtml(
+                agent.status_badge,
+              )}</span>`
           : "";
       return `
         <article class="agent-card" style="--agent-color: ${
