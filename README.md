@@ -263,6 +263,29 @@ Available placeholders are:
 Use the actual non-interactive syntax supported by the installed agent CLI.
 EFO does not guess a vendor's flags.
 
+For a CLI such as Claude Code that accepts piped context rather than a
+`--prompt-file` option, configure an existing signed profile without recreating
+its identity:
+
+```bash
+efo agent delivery ./team-workspace \
+  --actor antigravity \
+  --id claude-a \
+  --mode command \
+  --prompt-stdin \
+  --command-json '[
+    "claude",
+    "-p",
+    "Execute the complete EFO task supplied on stdin.",
+    "--output-format",
+    "text"
+  ]'
+```
+
+The delivery update is rejected while that agent owns a claimed, running, or
+revoking task. The generated prompt includes the signed actor and orchestrator
+profiles and forbids the worker from assuming another identity.
+
 The adapter:
 
 1. atomically claims the task;
@@ -271,6 +294,9 @@ The adapter:
 4. records stdout and stderr;
 5. detects writes outside the agent's workspace ownership;
 6. submits only if the evidence gates pass.
+
+See [Automated Agent Delivery](docs/AUTOMATED_DELIVERY.md) for the no-copy/paste
+Claude A/Claude B setup and its one-time authentication boundary.
 
 ## Evidence manifest
 

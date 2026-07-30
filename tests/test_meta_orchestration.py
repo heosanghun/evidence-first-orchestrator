@@ -168,6 +168,62 @@ class MetaOrchestrationTests(unittest.TestCase):
             "unknown",
         )
 
+    def test_orchestrator_can_sign_command_delivery_for_existing_agent(self) -> None:
+        record = self.workspace.configure_agent_delivery(
+            actor="antigravity",
+            agent_id="codex",
+            mode="command",
+            command=[
+                sys.executable,
+                "-c",
+                "print('consume the EFO task from stdin')",
+            ],
+            prompt_stdin=True,
+        )
+        self.assertEqual(record["mode"], "command")
+        self.assertTrue(record["prompt_stdin"])
+        self.assertEqual(
+            self.workspace.get_agent("codex")["command"],
+            record["command"],
+        )
+        self.assertEqual(
+            self.workspace.ledger.read()[-1]["action"],
+            "agent.updated",
+        )
+
+    def test_delivery_change_is_rejected_while_agent_owns_active_task(self) -> None:
+        self.workspace.create_task(
+            actor="antigravity",
+            task_id="ACTIVE-DELIVERY",
+            title="Hold delivery stable",
+            description="A claimed task freezes the delivery configuration.",
+            owner="codex",
+        )
+        self.workspace.claim(actor="codex", task_id="ACTIVE-DELIVERY")
+        with self.assertRaisesRegex(
+            ConfigurationError,
+            "owns active tasks: ACTIVE-DELIVERY",
+        ):
+            self.workspace.configure_agent_delivery(
+                actor="antigravity",
+                agent_id="codex",
+                mode="command",
+                command=[sys.executable, "-c", "print('unsafe update')"],
+                prompt_stdin=True,
+            )
+
+    def test_manual_delivery_rejects_prompt_stdin(self) -> None:
+        with self.assertRaisesRegex(
+            ConfigurationError,
+            "Manual-mode delivery",
+        ):
+            self.workspace.configure_agent_delivery(
+                actor="antigravity",
+                agent_id="codex",
+                mode="manual",
+                prompt_stdin=True,
+            )
+
     def _add_claude_pair(self) -> None:
         self.workspace.add_agent(
             actor="antigravity",

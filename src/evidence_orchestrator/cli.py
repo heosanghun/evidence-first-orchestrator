@@ -73,6 +73,7 @@ def _cmd_agent_add(args: argparse.Namespace) -> None:
         role=args.role,
         mode=args.mode,
         command=_parse_command(args.command_json),
+        prompt_stdin=args.prompt_stdin,
         write_roots=args.write_root,
         controller_id=args.controller_id,
         provider=args.provider,
@@ -95,6 +96,18 @@ def _cmd_agent_update(args: argparse.Namespace) -> None:
             capabilities=args.capability,
             max_concurrency=args.max_concurrency,
             active=not args.inactive,
+        )
+    )
+
+
+def _cmd_agent_delivery(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).configure_agent_delivery(
+            actor=args.actor,
+            agent_id=args.agent_id,
+            mode=args.mode,
+            command=_parse_command(args.command_json),
+            prompt_stdin=args.prompt_stdin,
         )
     )
 
@@ -460,6 +473,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--command-json",
         help='Command argv as JSON, for example ["codex","exec","{prompt}"]',
     )
+    agent_add.add_argument(
+        "--prompt-stdin",
+        action="store_true",
+        help="Pipe the generated task prompt to the command's standard input",
+    )
     agent_add.add_argument("--write-root", action="append", default=[])
     agent_add.add_argument("--controller-id")
     agent_add.add_argument("--provider", default="unknown")
@@ -479,6 +497,22 @@ def build_parser() -> argparse.ArgumentParser:
     agent_update.add_argument("--max-concurrency", type=int, default=1)
     agent_update.add_argument("--inactive", action="store_true")
     agent_update.set_defaults(handler=_cmd_agent_update)
+
+    agent_delivery = agent_sub.add_parser(
+        "delivery",
+        help="Configure signed manual or command delivery for an existing agent",
+    )
+    agent_delivery.add_argument("path")
+    agent_delivery.add_argument("--actor", required=True)
+    agent_delivery.add_argument("--id", dest="agent_id", required=True)
+    agent_delivery.add_argument(
+        "--mode",
+        choices=["manual", "command"],
+        required=True,
+    )
+    agent_delivery.add_argument("--command-json")
+    agent_delivery.add_argument("--prompt-stdin", action="store_true")
+    agent_delivery.set_defaults(handler=_cmd_agent_delivery)
     agent_list = agent_sub.add_parser("list")
     agent_list.add_argument("path")
     agent_list.set_defaults(handler=_cmd_agent_list)

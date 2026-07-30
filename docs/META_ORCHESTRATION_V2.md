@@ -110,6 +110,12 @@ declare the actual runtime identity before strict verification.
 The current orchestrator performs profile registration and the signed handoff.
 No other actor should issue these commands under the orchestrator's name.
 
+Per-task prompt relay by the user is not part of steady-state operation. After
+the signed profiles are registered, configure each provider CLI as a command
+consumer using [Automated Agent Delivery](AUTOMATED_DELIVERY.md). Claude A must
+remain `claude-a`; an idle Antigravity process does not authorize Claude A to
+use the `antigravity` actor, report directory, lease, or verification power.
+
 ```bash
 efo agent update /home/shoon/efo_ws \
   --actor antigravity \

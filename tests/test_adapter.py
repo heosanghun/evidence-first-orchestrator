@@ -69,7 +69,22 @@ class CommandAdapterTests(unittest.TestCase):
                     import hashlib
                     import json
                     import os
+                    import sys
                     from pathlib import Path
+
+                    prompt = sys.stdin.read()
+                    required_prompt_text = (
+                        "# Task AUTO: Automated worker",
+                        "## Signed identity boundary",
+                        '"id": "codex"',
+                        "Workspace orchestrator:",
+                        "You are only the registered EFO actor `codex`",
+                    )
+                    missing = [
+                        item for item in required_prompt_text if item not in prompt
+                    ]
+                    if missing:
+                        raise RuntimeError(f"missing prompt identity fields: {missing}")
 
                     report = Path(os.environ["EFO_REPORT"])
                     evidence = Path(os.environ["EFO_EVIDENCE"])
@@ -135,6 +150,7 @@ class CommandAdapterTests(unittest.TestCase):
                 role="worker",
                 mode="command",
                 command=[sys.executable, str(helper)],
+                prompt_stdin=True,
             )
             workspace.create_task(
                 actor="antigravity",
@@ -156,6 +172,11 @@ class CommandAdapterTests(unittest.TestCase):
                 )
             self.assertEqual(result["state"], "submitted", result)
             self.assertEqual(workspace.get_task("AUTO")["state"], "submitted")
+            prompt_paths = list((root / "runs" / "codex" / "AUTO").glob("*/prompt.md"))
+            self.assertEqual(len(prompt_paths), 1)
+            prompt_text = prompt_paths[0].read_text(encoding="utf-8")
+            self.assertIn('"role": "worker"', prompt_text)
+            self.assertIn('"id": "antigravity"', prompt_text)
 
     def test_revocation_stops_process_before_releasing_resource_lock(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

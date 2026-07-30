@@ -14,7 +14,8 @@ from pathlib import Path
 from typing import Any
 
 from .errors import ConfigurationError, EFOError, LeaseError, TransitionError
-from .job_runner import COMMAND_ENV
+from .identity import profile_snapshot
+from .job_runner import COMMAND_ENV, PROMPT_STDIN_ENV
 from .util import sha256_file, utc_now
 from .workspace import Workspace
 
@@ -320,6 +321,18 @@ def render_task_prompt(
 ) -> str:
     """Render a self-contained prompt for an external agent process."""
 
+    agent = workspace.get_agent(str(task["owner"]))
+    orchestrator = workspace.get_agent(workspace.orchestrator)
+    agent_profile = json.dumps(
+        profile_snapshot(agent),
+        indent=2,
+        sort_keys=True,
+    )
+    orchestrator_profile = json.dumps(
+        profile_snapshot(orchestrator),
+        indent=2,
+        sort_keys=True,
+    )
     permissions = json.dumps(task["permissions"], indent=2, sort_keys=True)
     gates = json.dumps(task["gates"], indent=2, sort_keys=True)
     verification_policy = json.dumps(
@@ -335,6 +348,14 @@ def render_task_prompt(
     return (
         f"# Task {task['id']}: {task['title']}\n\n"
         f"{task['description']}\n\n"
+        "## Signed identity boundary\n"
+        f"Registered execution actor:\n```json\n{agent_profile}\n```\n\n"
+        f"Workspace orchestrator:\n```json\n{orchestrator_profile}\n```\n\n"
+        f"You are only the registered EFO actor `{agent['id']}` for this run. "
+        f"Do not claim, sign, submit, attest, verify, or operate as "
+        f"`{orchestrator['id']}` or any other actor. Task ownership does not "
+        "grant orchestrator authority. A submitted result is not a verified "
+        "result, and you must not independently finalize your own output.\n\n"
         "## Ownership\n"
         f"- Agent: {task['owner']}\n"
         f"- Task type: {task.get('task_type', 'general')}\n"
@@ -709,6 +730,7 @@ def _run_once_serialized(
         "EFO_PROMPT": str(prompt_path),
         "EFO_REPORT": str(report_path),
         "EFO_EVIDENCE": str(evidence_path),
+        PROMPT_STDIN_ENV: "1" if agent.get("prompt_stdin", False) else "0",
     }
 
     exit_code: int | None = None

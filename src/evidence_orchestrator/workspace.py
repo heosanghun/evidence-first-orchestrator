@@ -368,6 +368,7 @@ class Workspace:
         role: str = "worker",
         mode: str = "manual",
         command: list[str] | None = None,
+        prompt_stdin: bool = False,
         write_roots: list[str] | None = None,
         controller_id: str | None = None,
         provider: str = "unknown",
@@ -390,6 +391,10 @@ class Workspace:
             or not all(isinstance(item, str) and item for item in command)
         ):
             raise ConfigurationError("Command-mode agents need a non-empty command list")
+        if mode == "manual" and prompt_stdin:
+            raise ConfigurationError(
+                "Manual-mode agents cannot receive prompts on command stdin"
+            )
         if max_concurrency < 1:
             raise ConfigurationError("Agent max_concurrency must be positive")
         record = {
@@ -398,6 +403,7 @@ class Workspace:
             "role": role,
             "mode": mode,
             "command": command,
+            "prompt_stdin": prompt_stdin,
             "created_at": utc_now(),
             "write_roots": write_roots or [f"reports/{agent_id}", f"runs/{agent_id}"],
             "identity": {
@@ -422,6 +428,55 @@ class Workspace:
             return self._commit_agent(
                 actor=actor,
                 record=record,
+                require_orchestrator=True,
+            )
+
+    def configure_agent_delivery(
+        self,
+        *,
+        actor: str,
+        agent_id: str,
+        mode: str,
+        command: list[str] | None = None,
+        prompt_stdin: bool = False,
+    ) -> dict[str, Any]:
+        """Append a signed update to an agent's task-delivery configuration."""
+
+        self._require_orchestrator(actor)
+        if mode not in {"manual", "command"}:
+            raise ConfigurationError("Agent mode must be manual or command")
+        if mode == "command" and (
+            not isinstance(command, list)
+            or not command
+            or not all(isinstance(item, str) and item for item in command)
+        ):
+            raise ConfigurationError("Command-mode agents need a non-empty command list")
+        if mode == "manual" and (command is not None or prompt_stdin):
+            raise ConfigurationError(
+                "Manual-mode delivery cannot define a command or prompt stdin"
+            )
+
+        with self._agent_lock():
+            record = deepcopy(self.get_agent(agent_id))
+            active = [
+                task["id"]
+                for task in self.list_tasks()
+                if task.get("owner") == agent_id
+                and task.get("state") in {"claimed", "running", "revoking"}
+            ]
+            if active:
+                raise ConfigurationError(
+                    "Cannot change delivery while the agent owns active tasks: "
+                    + ", ".join(sorted(active))
+                )
+            record["mode"] = mode
+            record["command"] = command if mode == "command" else None
+            record["prompt_stdin"] = prompt_stdin if mode == "command" else False
+            record["updated_at"] = utc_now()
+            return self._commit_agent(
+                actor=actor,
+                record=record,
+                action="agent.updated",
                 require_orchestrator=True,
             )
 
