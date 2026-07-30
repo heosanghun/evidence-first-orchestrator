@@ -576,7 +576,7 @@ class MonitorCollectorTests(unittest.TestCase):
             "blocked",
         )
 
-    def test_live_task_outranks_newer_terminal_and_ties_use_task_id(self) -> None:
+    def test_card_selection_is_recency_first_across_state_classes(self) -> None:
         live = {
             "id": "LIVE",
             "state": "pending",
@@ -591,26 +591,13 @@ class MonitorCollectorTests(unittest.TestCase):
         }
         self.assertEqual(
             collector.choose_agent_task([terminal, live])["id"],
-            "LIVE",
+            "DONE",
         )
-        same_time = "2026-07-30T02:00:00Z"
-        choices = [
-            {
-                "id": "TASK-B",
-                "state": "verified",
-                "external_phase": None,
-                "updated_at": same_time,
-            },
-            {
-                "id": "TASK-A",
-                "state": "verified",
-                "external_phase": None,
-                "updated_at": same_time,
-            },
-        ]
         self.assertEqual(
-            collector.choose_agent_task(choices)["id"],
-            "TASK-A",
+            collector.choose_agent_task(
+                [terminal, {**live, "updated_at": "2026-07-31T01:00:00Z"}]
+            )["id"],
+            "LIVE",
         )
         self.assertEqual(
             collector.agent_state(
@@ -621,6 +608,56 @@ class MonitorCollectorTests(unittest.TestCase):
                 }
             ),
             "blocked",
+        )
+
+    def test_card_state_class_follows_rendered_card_urgency(self) -> None:
+        self.assertEqual(
+            collector.card_state_class(
+                {"state": "blocked", "external_phase": None}
+            ),
+            "attention",
+        )
+        self.assertEqual(
+            collector.card_state_class(
+                {"state": "pending", "external_phase": "blocked"}
+            ),
+            "attention",
+        )
+        self.assertEqual(
+            collector.card_state_class(
+                {
+                    "state": "running",
+                    "external_phase": None,
+                    "lease_active": False,
+                }
+            ),
+            "attention",
+        )
+        self.assertEqual(
+            collector.card_state_class(
+                {
+                    "state": "running",
+                    "external_phase": None,
+                    "lease_active": True,
+                }
+            ),
+            "live",
+        )
+        self.assertEqual(
+            collector.card_state_class(
+                {"state": "pending", "external_phase": "working"}
+            ),
+            "live",
+        )
+        self.assertEqual(
+            collector.card_state_class(
+                {"state": "verified", "external_phase": None}
+            ),
+            "terminal",
+        )
+        self.assertEqual(
+            collector.CARD_CLASS_PRIORITY,
+            {"attention": 0, "live": 1, "terminal": 2},
         )
 
     def test_running_task_without_lease_is_reported_as_blocked(self) -> None:
@@ -787,6 +824,515 @@ class MonitorCollectorTests(unittest.TestCase):
         ).hexdigest()
         self.assertEqual(request.headers["X-efo-signature"], f"sha256={expected}")
         self.assertNotIn(b"secret", request.data)
+
+
+class FrozenKnownAnswerTests(unittest.TestCase):
+    """Synthetic regressions for the seven EFO-5 frozen known answers."""
+
+    @staticmethod
+    def _registered(
+        agent_id: str,
+        *,
+        principal: str | None = None,
+        alias_of: str | None = None,
+        alias_chain: tuple[str, ...] = (),
+    ) -> dict[str, object]:
+        return {
+            "id": agent_id,
+            "identity": {
+                "schema_version": 1,
+                "control_principal": principal or f"{agent_id}-control",
+                "model_family": "test-family",
+                "alias_of": alias_of,
+                "alias_chain": list(alias_chain),
+            },
+        }
+
+    @classmethod
+    def _identity_snapshot(
+        cls,
+        agent_id: str,
+        *,
+        principal: str | None = None,
+        alias_of: str | None = None,
+        alias_chain: tuple[str, ...] = (),
+    ) -> dict[str, object]:
+        record = cls._registered(
+            agent_id,
+            principal=principal,
+            alias_of=alias_of,
+            alias_chain=alias_chain,
+        )
+        return {"actor": agent_id, **record["identity"]}
+
+    @staticmethod
+    def _profile(profile_id: str, efo_id: str | None = None) -> dict[str, str]:
+        return {
+            "id": profile_id,
+            "efo_id": efo_id or profile_id,
+            "name": profile_id.title(),
+            "role": "worker",
+        }
+
+    @staticmethod
+    def _collect(
+        raw_tasks: list[dict[str, object]],
+        registered: list[dict[str, object]],
+        profiles: list[dict[str, str]],
+    ):
+        status = {
+            "tasks": raw_tasks,
+            "status": {"ledger": {"valid": True, "event_count": 30}},
+        }
+        with patch(
+            "monitor.collector.parse_json_command",
+            side_effect=[status, registered],
+        ):
+            return collector.collect_efo({"agents": profiles})
+
+    def _assert_idle(self, card: dict[str, object]) -> None:
+        self.assertIsNone(card["current_task_id"])
+        self.assertEqual(card["state"], "waiting")
+        self.assertEqual(card["status_source"], "none")
+        self.assertIsNone(card["status_badge"])
+        self.assertIsNone(card["updated_at"])
+        self.assertEqual(card["progress_percent"], 0)
+        self.assertEqual(card["current"], "배정 대기")
+        self.assertEqual(card["next"], "오케스트레이터 지시 대기")
+
+    def test_known_answer_1_unregistered_verifier_without_identity(self) -> None:
+        raw_task = {
+            "id": "OTHER-WORK",
+            "title": "Other work",
+            "owner": "owner-agent",
+            "state": "verified",
+            "updated_at": "2026-07-30T01:00:00Z",
+            "verification": {"actor": "ghost-verifier"},
+        }
+        agents, tasks, _ledger, _alerts, _activity = self._collect(
+            [raw_task],
+            [self._registered("owner-agent")],
+            [self._profile("ghost-verifier")],
+        )
+        self._assert_idle(agents[0])
+        self.assertEqual([task["id"] for task in tasks], ["OTHER-WORK"])
+        self.assertEqual(
+            collector.task_actor_ids(raw_task, {}, {"owner-agent"}),
+            frozenset({"owner-agent"}),
+        )
+
+    def test_known_answer_1_partial_and_arbitrary_identity_never_attest(self) -> None:
+        registry = {"claude-a": self._identity_snapshot("claude-a")}
+        exact = registry["claude-a"]
+        for claimed in (
+            None,
+            {},
+            {"actor": "claude-a"},
+            {key: value for key, value in exact.items() if key != "alias_chain"},
+            {**exact, "extra": "field"},
+            {**exact, "control_principal": "other-control"},
+            [*exact],
+            "claude-a",
+        ):
+            with self.subTest(claimed=claimed):
+                record = {"actor": "claude-a"}
+                if claimed is not None:
+                    record["identity"] = claimed
+                self.assertIsNone(
+                    collector.attested_actor(
+                        record,
+                        "actor",
+                        "identity",
+                        registry,
+                    )
+                )
+        self.assertEqual(
+            collector.attested_actor(
+                {"actor": "claude-a", "identity": dict(exact)},
+                "actor",
+                "identity",
+                registry,
+            ),
+            "claude-a",
+        )
+        self.assertIsNone(
+            collector.attested_actor(
+                {"actor": "unregistered", "identity": dict(exact)},
+                "actor",
+                "identity",
+                registry,
+            )
+        )
+
+    def test_known_answer_2_external_author_without_author_identity(self) -> None:
+        raw_task = {
+            "id": "TRANSPORTED",
+            "title": "Externally dispatched work",
+            "owner": "owner-agent",
+            "state": "pending",
+            "lease": None,
+            "updated_at": "2026-07-29T01:00:00Z",
+            "external_status": {
+                "phase": "working",
+                "reported_at": "2026-07-30T02:00:00Z",
+                "author": "ghost-transport",
+            },
+        }
+        agents, tasks, _ledger, _alerts, _activity = self._collect(
+            [raw_task],
+            [self._registered("owner-agent")],
+            [self._profile("ghost-transport")],
+        )
+        self._assert_idle(agents[0])
+        self.assertEqual(tasks[0]["external_phase"], "working")
+        self.assertEqual(tasks[0]["status_source"], "transport_assertion")
+        self.assertEqual(
+            collector.task_actor_ids(raw_task, {}, {"owner-agent"}),
+            frozenset({"owner-agent"}),
+        )
+
+    def test_known_answer_2_registered_author_needs_exact_identity(self) -> None:
+        def transported(author_identity: dict[str, object]) -> dict[str, object]:
+            return {
+                "id": "TRANSPORTED",
+                "title": "Externally dispatched work",
+                "owner": "owner-agent",
+                "state": "pending",
+                "lease": None,
+                "updated_at": "2026-07-29T01:00:00Z",
+                "external_status": {
+                    "phase": "working",
+                    "reported_at": "2026-07-30T02:00:00Z",
+                    "author": "antigravity",
+                    "author_identity": author_identity,
+                },
+            }
+
+        registered = [
+            self._registered("owner-agent"),
+            self._registered("antigravity"),
+        ]
+        exact = self._identity_snapshot("antigravity")
+        partial = {key: value for key, value in exact.items() if key != "alias_of"}
+        agents, _tasks, _ledger, _alerts, _activity = self._collect(
+            [transported(partial)],
+            registered,
+            [self._profile("antigravity")],
+        )
+        self._assert_idle(agents[0])
+
+        agents, _tasks, _ledger, _alerts, _activity = self._collect(
+            [transported(dict(exact))],
+            registered,
+            [self._profile("antigravity")],
+        )
+        self.assertEqual(agents[0]["current_task_id"], "TRANSPORTED")
+        self.assertEqual(agents[0]["state"], "working")
+        self.assertEqual(agents[0]["status_source"], "transport_assertion")
+
+    def test_known_answer_3_display_id_collision_does_not_widen(self) -> None:
+        raw_tasks = [
+            {
+                "id": "VICTIM-WORK",
+                "title": "Victim work",
+                "owner": "victim",
+                "state": "running",
+                "lease": {"expires_at": "2099-01-01T00:00:00Z"},
+                "updated_at": "2026-07-30T01:00:00Z",
+            }
+        ]
+        registered = [
+            self._registered("victim"),
+            self._registered("real"),
+        ]
+        agents, tasks, _ledger, _alerts, _activity = self._collect(
+            raw_tasks,
+            registered,
+            [self._profile("victim", "real")],
+        )
+        self.assertEqual(agents[0]["id"], "victim")
+        self.assertEqual(agents[0]["name"], "Victim")
+        self._assert_idle(agents[0])
+        self.assertEqual([task["id"] for task in tasks], ["VICTIM-WORK"])
+
+        agents, _tasks, _ledger, _alerts, _activity = self._collect(
+            raw_tasks,
+            registered,
+            [self._profile("victim")],
+        )
+        self.assertEqual(agents[0]["current_task_id"], "VICTIM-WORK")
+
+    def test_known_answer_4_newer_block_outranks_older_live_task(self) -> None:
+        agents, tasks, _ledger, _alerts, _activity = self._collect(
+            [
+                {
+                    "id": "OLD-PENDING",
+                    "title": "Older pending work",
+                    "owner": "claude-b",
+                    "state": "pending",
+                    "lease": None,
+                    "updated_at": "2026-07-01T00:00:00Z",
+                },
+                {
+                    "id": "NEW-BLOCK",
+                    "title": "Newer blocked work",
+                    "owner": "claude-b",
+                    "state": "blocked",
+                    "updated_at": "2026-07-30T00:00:00Z",
+                },
+            ],
+            [self._registered("claude-b")],
+            [self._profile("claude-b")],
+        )
+        self.assertEqual(agents[0]["current_task_id"], "NEW-BLOCK")
+        self.assertEqual(agents[0]["state"], "blocked")
+        self.assertEqual(agents[0]["updated_at"], "2026-07-30T00:00:00Z")
+        self.assertEqual(
+            {task["id"]: task["state"] for task in tasks},
+            {"OLD-PENDING": "pending", "NEW-BLOCK": "blocked"},
+        )
+
+    def test_known_answer_5_newer_live_or_verified_outranks_older_block(self) -> None:
+        old_block = {
+            "id": "OLD-BLOCK",
+            "title": "Older blocked work",
+            "owner": "claude-b",
+            "state": "blocked",
+            "updated_at": "2026-07-01T00:00:00Z",
+        }
+        newer_pending = {
+            "id": "NEW-PENDING",
+            "title": "Newer pending work",
+            "owner": "claude-b",
+            "state": "pending",
+            "lease": None,
+            "updated_at": "2026-07-30T00:00:00Z",
+        }
+        newer_verified = {
+            "id": "NEW-VERIFIED",
+            "title": "Newer verified work",
+            "owner": "claude-b",
+            "state": "verified",
+            "updated_at": "2026-07-30T00:00:00Z",
+        }
+        for newer, expected_state in (
+            (newer_pending, "waiting"),
+            (newer_verified, "waiting"),
+        ):
+            with self.subTest(task=newer["id"]):
+                agents, tasks, _ledger, _alerts, _activity = self._collect(
+                    [old_block, newer],
+                    [self._registered("claude-b")],
+                    [self._profile("claude-b")],
+                )
+                self.assertEqual(agents[0]["current_task_id"], newer["id"])
+                self.assertEqual(agents[0]["state"], expected_state)
+                self.assertEqual(agents[0]["updated_at"], "2026-07-30T00:00:00Z")
+                self.assertEqual(
+                    next(
+                        task for task in tasks if task["id"] == "OLD-BLOCK"
+                    )["state"],
+                    "blocked",
+                )
+
+    def test_known_answer_6_equal_timestamps_use_class_then_task_id(self) -> None:
+        same_time = "2026-07-30T02:00:00Z"
+
+        def candidate(task_id: str, state: str, **extra: object) -> dict[str, object]:
+            return {
+                "id": task_id,
+                "state": state,
+                "external_phase": None,
+                "updated_at": same_time,
+                **extra,
+            }
+
+        # Class priority decides before the task ID: the attention record wins
+        # even though its ID sorts after the live and terminal records.
+        self.assertEqual(
+            collector.choose_agent_task(
+                [
+                    candidate("A-LIVE", "pending"),
+                    candidate("Z-BLOCK", "blocked"),
+                ]
+            )["id"],
+            "Z-BLOCK",
+        )
+        self.assertEqual(
+            collector.choose_agent_task(
+                [
+                    candidate("A-DONE", "verified"),
+                    candidate("Z-LIVE", "pending"),
+                ]
+            )["id"],
+            "Z-LIVE",
+        )
+        # Within one class the lexicographically lower task ID wins.
+        for state in ("blocked", "pending", "verified"):
+            with self.subTest(state=state):
+                self.assertEqual(
+                    collector.choose_agent_task(
+                        [
+                            candidate("TASK-B", state),
+                            candidate("TASK-A", state),
+                        ]
+                    )["id"],
+                    "TASK-A",
+                )
+
+        agents, _tasks, _ledger, _alerts, _activity = self._collect(
+            [
+                {
+                    "id": "TIE-A-PENDING",
+                    "title": "Tied pending work",
+                    "owner": "claude-b",
+                    "state": "pending",
+                    "lease": None,
+                    "updated_at": same_time,
+                },
+                {
+                    "id": "TIE-Z-BLOCK",
+                    "title": "Tied blocked work",
+                    "owner": "claude-b",
+                    "state": "blocked",
+                    "updated_at": same_time,
+                },
+            ],
+            [self._registered("claude-b")],
+            [self._profile("claude-b")],
+        )
+        self.assertEqual(agents[0]["current_task_id"], "TIE-Z-BLOCK")
+        self.assertEqual(agents[0]["state"], "blocked")
+
+    def test_known_answer_7_every_non_idle_card_names_a_retained_task(self) -> None:
+        registered = [
+            self._registered("codex"),
+            self._registered(
+                "codex-verifier",
+                principal="codex-control",
+                alias_of="codex",
+                alias_chain=("codex",),
+            ),
+            self._registered("claude-b"),
+            self._registered("victim"),
+        ]
+        raw_tasks = [
+            {
+                "id": "AAA-OLD-BLOCK",
+                "title": "Old Claude B block",
+                "owner": "claude-b",
+                "state": "blocked",
+                "updated_at": "2026-07-01T00:00:00Z",
+            },
+            {
+                "id": "MMM-LIVE",
+                "title": "Current Claude B work",
+                "owner": "claude-b",
+                "state": "running",
+                "lease": {"expires_at": "2099-01-01T00:00:00Z"},
+                "updated_at": "2026-07-30T00:00:00Z",
+            },
+            {
+                "id": "ZZZ-VERIFIED",
+                "title": "Codex verified work",
+                "owner": "claude-b",
+                "state": "verified",
+                "updated_at": "2026-07-31T00:00:00Z",
+                "verification": {
+                    "actor": "codex-verifier",
+                    "identity": self._identity_snapshot(
+                        "codex-verifier",
+                        principal="codex-control",
+                        alias_of="codex",
+                        alias_chain=("codex",),
+                    ),
+                },
+            },
+            {
+                "id": "GHOST-WORK",
+                "title": "Unattested transport report",
+                "owner": "victim",
+                "state": "pending",
+                "lease": None,
+                "updated_at": "2026-07-31T06:00:00Z",
+                "external_status": {
+                    "phase": "working",
+                    "reported_at": "2026-07-31T07:00:00Z",
+                    "author": "ghost-transport",
+                },
+            },
+        ]
+        profiles = [
+            self._profile("codex"),
+            self._profile("claude-b"),
+            self._profile("ghost-transport"),
+            self._profile("display-victim", "real"),
+        ]
+        agents, tasks, _ledger, _alerts, _activity = self._collect(
+            raw_tasks,
+            registered,
+            profiles,
+        )
+        retained = {task["id"] for task in tasks}
+        self.assertEqual(
+            retained,
+            {"AAA-OLD-BLOCK", "MMM-LIVE", "ZZZ-VERIFIED", "GHOST-WORK"},
+        )
+        non_idle = 0
+        for card in agents:
+            self.assertEqual(len(card), 11)
+            if card["status_source"] == "none":
+                self._assert_idle(card)
+                continue
+            non_idle += 1
+            self.assertIn(card["current_task_id"], retained)
+            task = next(
+                item for item in tasks if item["id"] == card["current_task_id"]
+            )
+            self.assertEqual(card["current"], task["title"])
+            self.assertEqual(card["next"], task["next"])
+            self.assertEqual(card["progress_percent"], task["progress_percent"])
+            self.assertEqual(card["status_source"], task["status_source"])
+            self.assertEqual(card["status_badge"], task["status_badge"])
+            self.assertEqual(card["updated_at"], task["updated_at"])
+            self.assertEqual(card["state"], collector.agent_state(task))
+        self.assertEqual(non_idle, 2)
+        self.assertEqual(agents[0]["current_task_id"], "ZZZ-VERIFIED")
+        self.assertEqual(agents[1]["current_task_id"], "ZZZ-VERIFIED")
+        self._assert_idle(agents[2])
+        self._assert_idle(agents[3])
+
+    def test_agent_card_keeps_exact_eleven_field_projection(self) -> None:
+        agents, _tasks, _ledger, _alerts, _activity = self._collect(
+            [
+                {
+                    "id": "CARD-SHAPE",
+                    "title": "Card shape",
+                    "owner": "claude-b",
+                    "state": "running",
+                    "lease": {"expires_at": "2099-01-01T00:00:00Z"},
+                    "updated_at": "2026-07-30T00:00:00Z",
+                }
+            ],
+            [self._registered("claude-b")],
+            [self._profile("claude-b")],
+        )
+        self.assertEqual(
+            list(agents[0]),
+            [
+                "id",
+                "name",
+                "role",
+                "state",
+                "current",
+                "current_task_id",
+                "next",
+                "progress_percent",
+                "status_source",
+                "status_badge",
+                "updated_at",
+            ],
+        )
 
 
 if __name__ == "__main__":

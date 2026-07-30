@@ -65,6 +65,9 @@ TASK_NEXT = {
 ACTIVE_STATES = {"claimed", "running"}
 TERMINAL_STATES = {"verified", "archived"}
 LIVE_CARD_STATES = {"pending", "claimed", "running", "submitted"}
+# Preregistered equal-timestamp ordering. Recency decides first; only an exact
+# timestamp tie falls back to this class priority and then to the task ID.
+CARD_CLASS_PRIORITY = {"attention": 0, "live": 1, "terminal": 2}
 ACTIVITY_ACTIONS = {
     "workspace.initialized": ("워크스페이스 생성", "system"),
     "agent.added": ("에이전트 등록", "system"),
@@ -690,6 +693,28 @@ def resolve_signed_identity_groups(
     }
 
 
+def attested_actor(
+    record: Any,
+    actor_field: str,
+    identity_field: str,
+    identity_registry: dict[str, dict[str, Any]],
+) -> str | None:
+    """Return an actor only when it carries its own complete signed identity."""
+
+    if not isinstance(record, dict):
+        return None
+    actor = record.get(actor_field)
+    if not isinstance(actor, str) or not actor:
+        return None
+    resolved = identity_registry.get(actor)
+    if not isinstance(resolved, dict):
+        return None
+    claimed = record.get(identity_field)
+    if not isinstance(claimed, dict) or claimed != resolved:
+        return None
+    return actor
+
+
 def task_actor_ids(
     raw_task: dict[str, Any],
     identity_registry: dict[str, dict[str, Any]],
@@ -703,23 +728,18 @@ def task_actor_ids(
     if isinstance(owner, str) and owner in registered:
         actors.add(owner)
 
-    verification = raw_task.get("verification")
-    if (
-        isinstance(verification, dict)
-        and isinstance(verification.get("actor"), str)
-        and verification.get("identity")
-        == identity_registry.get(verification["actor"])
+    for record_field, actor_field, identity_field in (
+        ("verification", "actor", "identity"),
+        ("external_status", "author", "author_identity"),
     ):
-        actors.add(verification["actor"])
-
-    external = raw_task.get("external_status")
-    if (
-        isinstance(external, dict)
-        and isinstance(external.get("author"), str)
-        and external.get("author_identity")
-        == identity_registry.get(external["author"])
-    ):
-        actors.add(external["author"])
+        actor = attested_actor(
+            raw_task.get(record_field),
+            actor_field,
+            identity_field,
+            identity_registry,
+        )
+        if actor is not None:
+            actors.add(actor)
     return frozenset(actors)
 
 
@@ -732,23 +752,6 @@ def _task_timestamp(task: dict[str, Any]) -> float:
     if parsed.tzinfo is None:
         parsed = parsed.replace(tzinfo=timezone.utc)
     return parsed.timestamp()
-
-
-def choose_agent_task(tasks: list[dict[str, Any]]) -> dict[str, Any] | None:
-    """Select the task that best describes an agent's current operational state."""
-
-    def sort_key(task: dict[str, Any]) -> tuple[int, float, str]:
-        is_live = (
-            task.get("external_phase") is not None
-            or task.get("state") in LIVE_CARD_STATES
-        )
-        return (
-            0 if is_live else 1,
-            -_task_timestamp(task),
-            str(task.get("id") or ""),
-        )
-
-    return min(tasks, key=sort_key, default=None)
 
 
 def agent_state(task: dict[str, Any] | None) -> str:
@@ -771,6 +774,39 @@ def agent_state(task: dict[str, Any] | None) -> str:
     if task_state in {"blocked", "rejected", "invalidated"}:
         return "blocked"
     return "waiting"
+
+
+def card_state_class(task: dict[str, Any]) -> str:
+    """Classify a task by the operational urgency of the card it would render."""
+
+    if agent_state(task) == "blocked":
+        return "attention"
+    if (
+        task.get("external_phase") is not None
+        or task.get("state") in LIVE_CARD_STATES
+    ):
+        return "live"
+    return "terminal"
+
+
+def choose_agent_task(tasks: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """Select the task that best describes an agent's current operational state.
+
+    Selection is recency-first: the newest signed timestamp wins regardless of
+    state class, so a newer block outranks older live work and newer live work
+    outranks an older block. Only an exact timestamp tie falls back to the
+    preregistered class priority in CARD_CLASS_PRIORITY and then to the
+    lexicographically lower task ID.
+    """
+
+    def sort_key(task: dict[str, Any]) -> tuple[float, int, str]:
+        return (
+            -_task_timestamp(task),
+            CARD_CLASS_PRIORITY[card_state_class(task)],
+            str(task.get("id") or ""),
+        )
+
+    return min(tasks, key=sort_key, default=None)
 
 
 def workflow_progress(tasks: list[dict[str, Any]]) -> float:
@@ -961,10 +997,10 @@ def collect_efo(
     agents: list[dict[str, Any]] = []
     for profile in profiles:
         efo_id = str(profile.get("efo_id") or profile.get("id"))
+        # The profile's display ID never widens attribution; only the
+        # configured EFO ID and its validated signed alias group can.
         profile_id = str(profile.get("id") or efo_id)
-        relevant_actor_ids = {efo_id, profile_id}
-        relevant_actor_ids.update(identity_groups.get(efo_id, ()))
-        relevant_actor_ids.update(identity_groups.get(profile_id, ()))
+        relevant_actor_ids = {efo_id, *identity_groups.get(efo_id, ())}
         owned = (
             [
                 view

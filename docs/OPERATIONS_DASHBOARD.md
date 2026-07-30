@@ -53,11 +53,27 @@ Unknown, unattested, cyclic, self-referential, or inconsistent aliases are not
 merged. Signed verification activity can make a task relevant to a verifier's
 card without changing the task owner.
 
-Selection is deterministic. Live canonical work and transport observations
-take priority over terminal history. Within the same class, the newest signed
-timestamp wins and task ID resolves an exact tie. This prevents an old blocked
-probe from making an agent look currently blocked after newer work, while the
-old row remains visible in the complete task table.
+Attribution is fail-closed. A secondary verification or transport actor counts
+only when the actor resolves in the signed identity registry **and** the task's
+own identity snapshot is a dict exactly equal to that resolved identity. A
+missing snapshot, an unregistered actor, a partial object, a superset, or any
+other dict attests nothing, so two absent identities never match each other.
+
+A profile's `id` is display only. Attribution uses the configured `efo_id` and
+its validated signed alias group, never the display ID. A profile whose display
+ID collides with an unrelated registered agent therefore cannot inherit that
+agent's tasks.
+
+Selection is deterministic and recency-first across live, attention, and
+terminal records. The newest signed timestamp always wins, so a newer blocked,
+rejected, or invalidated record outranks older live work, and newer live or
+verified activity outranks an older block. Only an exact timestamp tie falls
+back to the preregistered class priority `attention` (0) < `live` (1) <
+`terminal` (2), and then to the lexicographically lower task ID. A record is
+`attention` when the card it renders would read blocked, `live` when it is
+pending, claimed, running, or submitted work or carries a transport phase, and
+`terminal` otherwise. Card selection never edits the complete task table: the
+old blocked row, the task history, and the alerts remain unchanged.
 
 Each non-idle card binds its title, workflow progress, next action, status
 source, badge, and timestamp to a task ID in the same public snapshot. The
