@@ -37,6 +37,20 @@ TASK_PROGRESS = {
     "archived": 100,
     "invalidated": 0,
 }
+EXTERNAL_PROGRESS = {
+    "dispatched": 15,
+    "working": 40,
+    "reviewing": 70,
+    "ready": 85,
+    "blocked": 10,
+}
+EXTERNAL_NEXT = {
+    "dispatched": "외부 작업자 수신 확인",
+    "working": "외부 구현 결과 대기",
+    "reviewing": "독립 검토 결과 대기",
+    "ready": "대리 제출 및 증거 검증",
+    "blocked": "운반자 보고 차단 사유 확인",
+}
 TASK_NEXT = {
     "pending": "작업을 claim하고 시작",
     "claimed": "작업 실행 시작",
@@ -59,6 +73,9 @@ ACTIVITY_ACTIONS = {
     "task.heartbeat": ("진행 신호", "work"),
     "task.blocked": ("작업 차단", "issue"),
     "task.submitted": ("증거 제출", "evidence"),
+    "task.proxy_authorized": ("대리 제출 승인", "planning"),
+    "task.proxy_status_reported": ("외부 진행상태 보고", "work"),
+    "task.proxy_submitted": ("대리 증거 제출", "evidence"),
     "task.verified": ("검증 통과", "success"),
     "task.rejected": ("검증 반려", "issue"),
     "task.requeued": ("작업 재대기", "planning"),
@@ -487,17 +504,41 @@ def task_to_view(task: dict[str, Any]) -> dict[str, Any]:
     state = str(task.get("state") or "pending").lower()
     lease_active = lease_is_active(task.get("lease"))
     next_action = TASK_NEXT.get(state, "오케스트레이터 확인")
+    external_phase: str | None = None
+    external_status = task.get("external_status")
+    if state == "pending" and isinstance(external_status, dict):
+        candidate = str(external_status.get("phase") or "").lower()
+        if candidate in EXTERNAL_PROGRESS:
+            external_phase = candidate
+            next_action = EXTERNAL_NEXT[candidate]
     if state in ACTIVE_STATES and not lease_active:
         next_action = "임대 만료 상태 확인"
+    progress = (
+        EXTERNAL_PROGRESS[external_phase]
+        if external_phase is not None
+        else TASK_PROGRESS.get(state, 0)
+    )
     return {
         "id": sanitize_label(task.get("id"), "task"),
         "title": sanitize_label(task.get("title"), "Untitled task", 140),
         "owner": sanitize_label(task.get("owner"), "unassigned"),
         "state": state,
+        "canonical_state": state,
+        "external_phase": external_phase,
+        "status_source": (
+            "transport_assertion" if external_phase is not None else "canonical"
+        ),
+        "status_badge": "운반자 보고" if external_phase is not None else None,
         "lease_active": lease_active,
-        "progress_percent": TASK_PROGRESS.get(state, 0),
+        "progress_percent": progress,
         "next": next_action,
-        "updated_at": task.get("updated_at") or task.get("created_at") or utc_now(),
+        "updated_at": (
+            external_status.get("reported_at")
+            if external_phase is not None
+            else task.get("updated_at")
+        )
+        or task.get("created_at")
+        or utc_now(),
     }
 
 
@@ -542,6 +583,15 @@ def agent_state(task: dict[str, Any] | None) -> str:
     """Map an EFO task state to a dashboard agent state."""
 
     task_state = task.get("state") if task else None
+    external_phase = task.get("external_phase") if task else None
+    if task_state == "pending" and external_phase == "blocked":
+        return "blocked"
+    if task_state == "pending" and external_phase in {
+        "working",
+        "reviewing",
+        "ready",
+    }:
+        return "working"
     if task_state in ACTIVE_STATES and not task.get("lease_active", False):
         return "blocked"
     if task_state in ACTIVE_STATES:
@@ -557,7 +607,15 @@ def workflow_progress(tasks: list[dict[str, Any]]) -> float:
     if not tasks:
         return 0.0
     return round(
-        sum(TASK_PROGRESS.get(str(task.get("state")), 0) for task in tasks)
+        sum(
+            float(
+                task.get(
+                    "progress_percent",
+                    TASK_PROGRESS.get(str(task.get("state")), 0),
+                )
+            )
+            for task in tasks
+        )
         / len(tasks),
         2,
     )

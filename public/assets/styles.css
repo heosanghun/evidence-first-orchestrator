@@ -1180,6 +1180,19 @@ tbody tr:last-child td {
   border-color: #e8cfaa;
 }
 
+.transport-badge {
+  display: inline-block;
+  margin-top: 4px;
+  padding: 2px 5px;
+  border: 1px dashed #8aa9b8;
+  border-radius: 4px;
+  color: #315f73;
+  background: #edf7fb;
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .state-label.blocked,
 .state-label.rejected,
 .state-label.revoking,

@@ -147,6 +147,68 @@ test("malformed activity history is rejected", async () => {
   assert.match((await response.json()).detail, /invalid activity event/);
 });
 
+test("transport-attested pending task is accepted without becoming running", async () => {
+  const snapshot = validSnapshot();
+  snapshot.tasks.push({
+    id: "P1b-8",
+    title: "Freeze run identity",
+    owner: "claude",
+    state: "pending",
+    canonical_state: "pending",
+    external_phase: "working",
+    status_source: "transport_assertion",
+    status_badge: "운반자 보고",
+    lease_active: false,
+    progress_percent: 40,
+    next: "외부 구현 결과 대기",
+    updated_at: new Date().toISOString(),
+  });
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 200);
+  const stored = JSON.parse(await env.EFO_MONITOR_KV.get("snapshot:latest"));
+  assert.equal(stored.tasks[0].state, "pending");
+  assert.equal(stored.tasks[0].external_phase, "working");
+  assert.equal(stored.tasks[0].status_source, "transport_assertion");
+});
+
+test("transport assertion cannot contradict canonical task state", async () => {
+  const snapshot = validSnapshot();
+  snapshot.tasks.push({
+    id: "P1b-8",
+    title: "Freeze run identity",
+    owner: "claude",
+    state: "running",
+    canonical_state: "running",
+    external_phase: "working",
+    status_source: "transport_assertion",
+    status_badge: "운반자 보고",
+    lease_active: false,
+    progress_percent: 40,
+    next: "외부 구현 결과 대기",
+    updated_at: new Date().toISOString(),
+  });
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 400);
+  assert.match(
+    (await response.json()).detail,
+    /external status conflicts with canonical state/,
+  );
+});
+
 test("invalid signature is rejected before parsing", async () => {
   const env = {
     EFO_MONITOR_KV: new MemoryKv(),

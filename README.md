@@ -297,6 +297,28 @@ efo task proxy-submit ./team-workspace \
   --source-repository /path/to/local/repository
 ```
 
+An orchestrator may publish an explicitly transport-attested progress phase
+while the unreachable worker is still preparing that Git delivery:
+
+```bash
+efo task proxy-status ./team-workspace \
+  --actor antigravity \
+  --author claude \
+  --id C1 \
+  --phase working \
+  --reference external-dispatch-123 \
+  --note "Worker output has been observed; evidence is not submitted yet."
+```
+
+This signed event does **not** claim that the worker accepted the task. It does
+not create a worker claim, lease, start, heartbeat, completion, or verification
+eligibility, and the task's canonical state remains `pending`. The dashboard
+shows a separate `운반자 보고` badge and a visualization-only phase estimate.
+The same reference must progress through `dispatched`, `working`, `reviewing`,
+and `ready` (with a reversible `blocked` phase). A normal proxy authorization,
+byte-exact provenance check, evidence validation, and independent verification
+are still required.
+
 Verification independence is measured against the author. If the transport
 actor also verifies, the overlap is preserved in the signed result rather than
 hidden. See [Transparent Proxy Submission](docs/PROXY_SUBMISSION.md) for the

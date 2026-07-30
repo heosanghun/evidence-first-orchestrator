@@ -201,6 +201,19 @@ def _cmd_task_proxy_authorize(args: argparse.Namespace) -> None:
     )
 
 
+def _cmd_task_proxy_status(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).report_proxy_status(
+            actor=args.actor,
+            author=args.author,
+            task_id=args.task_id,
+            phase=args.phase,
+            reference=args.reference,
+            note=args.note,
+        )
+    )
+
+
 def _cmd_task_proxy_submit(args: argparse.Namespace) -> None:
     _emit(
         _workspace(args.path).proxy_submit(
@@ -479,6 +492,26 @@ def build_parser() -> argparse.ArgumentParser:
     task_proxy_authorize.add_argument("--commit", required=True)
     task_proxy_authorize.add_argument("--duration-seconds", type=int)
     task_proxy_authorize.set_defaults(handler=_cmd_task_proxy_authorize)
+
+    task_proxy_status = task_sub.add_parser(
+        "proxy-status",
+        help=(
+            "Record an orchestrator-observed external phase without creating "
+            "a worker claim or lease"
+        ),
+    )
+    task_proxy_status.add_argument("path")
+    task_proxy_status.add_argument("--actor", required=True)
+    task_proxy_status.add_argument("--author", required=True)
+    task_proxy_status.add_argument("--id", dest="task_id", required=True)
+    task_proxy_status.add_argument(
+        "--phase",
+        choices=["dispatched", "working", "reviewing", "ready", "blocked"],
+        required=True,
+    )
+    task_proxy_status.add_argument("--reference", required=True)
+    task_proxy_status.add_argument("--note", required=True)
+    task_proxy_status.set_defaults(handler=_cmd_task_proxy_status)
 
     task_proxy_submit = task_sub.add_parser(
         "proxy-submit",

@@ -93,6 +93,63 @@ function isFiniteNumber(value) {
   return typeof value === "number" && Number.isFinite(value);
 }
 
+function validateTaskProjection(task) {
+  if (!task || typeof task !== "object" || Array.isArray(task)) {
+    return "invalid task projection";
+  }
+  for (const field of ["id", "title", "owner", "state", "next"]) {
+    if (typeof task[field] !== "string" || task[field].length > 200) {
+      return `task has invalid ${field}`;
+    }
+  }
+  if (
+    !isFiniteNumber(task.progress_percent) ||
+    task.progress_percent < 0 ||
+    task.progress_percent > 100
+  ) {
+    return "task has invalid progress_percent";
+  }
+  if (typeof task.lease_active !== "boolean") {
+    return "task has invalid lease_active";
+  }
+  if (Number.isNaN(Date.parse(task.updated_at))) {
+    return "task has invalid updated_at";
+  }
+
+  const externalPhases = new Set([
+    "dispatched",
+    "working",
+    "reviewing",
+    "ready",
+    "blocked",
+  ]);
+  const externalPhase = task.external_phase;
+  if (
+    externalPhase !== null &&
+    externalPhase !== undefined &&
+    !externalPhases.has(externalPhase)
+  ) {
+    return "task has invalid external_phase";
+  }
+  if (externalPhase !== null && externalPhase !== undefined) {
+    if (
+      task.state !== "pending" ||
+      task.canonical_state !== "pending" ||
+      task.status_source !== "transport_assertion" ||
+      typeof task.status_badge !== "string" ||
+      task.status_badge.length > 80
+    ) {
+      return "task external status conflicts with canonical state";
+    }
+  } else if (
+    task.status_source !== undefined &&
+    task.status_source !== "canonical"
+  ) {
+    return "task has invalid status_source";
+  }
+  return null;
+}
+
 function validateSnapshot(snapshot) {
   if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) {
     return "body must be a JSON object";
@@ -116,6 +173,10 @@ function validateSnapshot(snapshot) {
   for (const [key, limit] of Object.entries(arrayLimits)) {
     if (!Array.isArray(snapshot[key])) return `${key} must be an array`;
     if (snapshot[key].length > limit) return `${key} exceeds limit ${limit}`;
+  }
+  for (const task of snapshot.tasks) {
+    const taskError = validateTaskProjection(task);
+    if (taskError) return taskError;
   }
   if (snapshot.activity !== undefined) {
     if (!Array.isArray(snapshot.activity)) return "activity must be an array";
@@ -287,5 +348,6 @@ export const internals = {
   constantTimeEqual,
   hasForbiddenKey,
   hmacHex,
+  validateTaskProjection,
   validateSnapshot,
 };

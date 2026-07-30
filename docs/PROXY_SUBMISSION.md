@@ -96,9 +96,55 @@ not authorship, the source bytes are commit-bound, and the verifier still must
 provide a separate manifest and rerun the checks. Deployments that require a
 third independent actor can reject any verification with transport overlap.
 
+## Transport-Attested Progress
+
+An offline worker cannot honestly produce workspace claim, lease, start, or
+heartbeat events. The orchestrator may instead append
+`task.proxy_status_reported`, which is explicitly an observation made by the
+transport:
+
+```json
+{
+  "phase": "working",
+  "reference": "external-dispatch-123",
+  "reported_by": "antigravity",
+  "author": "claude",
+  "assertion": "transport_observation"
+}
+```
+
+The canonical task state remains `pending` and the lease remains absent. The
+event stores both signed identity snapshots and a stable, non-secret dispatch
+reference. Legal phase order is:
+
+```text
+dispatched -> working -> reviewing -> ready
+      |           |          |          |
+      +--------> blocked <----+----------+
+                    |
+                    +-------> working
+```
+
+Repeated reports of the same phase are allowed, but a reference cannot change
+and a phase cannot silently regress. Reports stop once canonical submission or
+another state transition occurs. `ready` does not authorize submission and is
+not completion evidence.
+
+The public monitor retains `canonical_state=pending` and labels the overlay as
+`status_source=transport_assertion`. Its progress percentage is only a workflow
+visualization hint, never a scientific or worker-authenticated metric.
+
 ## CLI Workflow
 
 ```bash
+efo task proxy-status WORKSPACE \
+  --actor antigravity \
+  --author claude \
+  --id C1 \
+  --phase dispatched \
+  --reference external-dispatch-123 \
+  --note "Prompt delivered by the orchestrator."
+
 efo task proxy-authorize WORKSPACE \
   --actor antigravity \
   --id C1 \

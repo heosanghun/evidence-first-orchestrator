@@ -594,6 +594,119 @@ class Workspace:
     def _token_hash(token: str) -> str:
         return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
+    def report_proxy_status(
+        self,
+        *,
+        actor: str,
+        author: str,
+        task_id: str,
+        phase: str,
+        reference: str,
+        note: str,
+    ) -> dict[str, Any]:
+        """Record an orchestrator-observed external phase without a worker lease."""
+
+        self._require_orchestrator(actor)
+        author = validate_agent_id(author)
+        normalized_phase = str(phase).strip().lower()
+        phases = {"dispatched", "working", "reviewing", "ready", "blocked"}
+        if normalized_phase not in phases:
+            raise ConfigurationError(
+                "Proxy status phase must be dispatched, working, reviewing, "
+                "ready, or blocked"
+            )
+        if not isinstance(reference, str):
+            raise ConfigurationError("Proxy status reference must be a string")
+        normalized_reference = reference.strip()
+        if not normalized_reference or len(normalized_reference) > 200:
+            raise ConfigurationError(
+                "Proxy status reference must be 1 to 200 characters"
+            )
+        if not isinstance(note, str):
+            raise ConfigurationError("Proxy status note must be a string")
+        normalized_note = note.strip()
+        if not normalized_note or len(normalized_note) > 500:
+            raise ConfigurationError("Proxy status note must be 1 to 500 characters")
+
+        author_identity = self._agent_identity(author)
+        transport_identity = self._agent_identity(actor)
+        if author_identity is None:
+            raise AuthorizationError(
+                f"Proxy author {author!r} needs a signed identity attestation"
+            )
+        if transport_identity is None:
+            raise AuthorizationError(
+                f"Transport actor {actor!r} needs a signed identity attestation"
+            )
+
+        allowed_next = {
+            "dispatched": {"dispatched", "working", "blocked"},
+            "working": {"working", "reviewing", "blocked"},
+            "reviewing": {"reviewing", "ready", "blocked"},
+            "ready": {"ready", "blocked"},
+            "blocked": {"blocked", "working"},
+        }
+        now = utc_now()
+        with self._task_lock(task_id):
+            task = self.get_task(task_id)
+            if task["state"] != "pending":
+                raise TransitionError(
+                    "Proxy status reports require a pending task and never "
+                    f"replace canonical state transitions; observed {task['state']}"
+                )
+            if task["owner"] != author:
+                raise AuthorizationError(
+                    f"Proxy author {author!r} is not task owner {task['owner']!r}"
+                )
+            current = task.get("external_status")
+            if current is None:
+                if normalized_phase != "dispatched":
+                    raise TransitionError(
+                        "The first proxy status phase must be dispatched"
+                    )
+            elif isinstance(current, dict):
+                if current.get("reference") != normalized_reference:
+                    raise AuthorizationError(
+                        "Proxy status reference cannot change during a dispatch"
+                    )
+                current_phase = str(current.get("phase") or "")
+                if normalized_phase not in allowed_next.get(current_phase, set()):
+                    raise TransitionError(
+                        "Proxy status phase cannot regress "
+                        f"{current_phase!r} -> {normalized_phase!r}"
+                    )
+            else:
+                raise IntegrityError("Task external_status projection is malformed")
+
+            status = {
+                "schema_version": 1,
+                "phase": normalized_phase,
+                "reference": normalized_reference,
+                "note": normalized_note,
+                "reported_at": now,
+                "reported_by": actor,
+                "author": author,
+                "transport_identity": transport_identity,
+                "author_identity": author_identity,
+                "assertion": "transport_observation",
+            }
+            updated = deepcopy(task)
+            updated["external_status"] = status
+            updated["revision"] += 1
+            updated["updated_at"] = now
+            return self._commit_task(
+                actor=actor,
+                action="task.proxy_status_reported",
+                task=updated,
+                details={
+                    "author_actor": author,
+                    "transport_actor": actor,
+                    "phase": normalized_phase,
+                    "reference": normalized_reference,
+                    "assertion": "transport_observation",
+                },
+            )
+
     def authorize_proxy_submission(
         self,
         *,

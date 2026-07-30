@@ -992,6 +992,12 @@ function renderTasks(snapshot) {
     .map((task) => {
       const progress = clamp(task.progress_percent);
       const state = String(task.state || "pending").toLowerCase();
+      const statusBadge =
+        task.status_source === "transport_assertion" && task.status_badge
+          ? `<span class="transport-badge" title="정식 claim이나 heartbeat가 아닌 오케스트레이터 관찰 보고">${escapeHtml(
+              task.status_badge,
+            )}</span>`
+          : "";
       return `
         <tr>
           <td>
@@ -999,9 +1005,12 @@ function renderTasks(snapshot) {
             <span class="task-id">${escapeHtml(task.id || "-")}</span>
           </td>
           <td>${escapeHtml(task.owner || "미지정")}</td>
-          <td><span class="state-label ${escapeHtml(state)}">${escapeHtml(
-            stateLabel(state),
-          )}</span></td>
+          <td>
+            <span class="state-label ${escapeHtml(state)}">${escapeHtml(
+              stateLabel(state),
+            )}</span>
+            ${statusBadge}
+          </td>
           <td>
             <div class="table-progress">
               <div class="progress-track" role="progressbar" aria-valuemin="0"

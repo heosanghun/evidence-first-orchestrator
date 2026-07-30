@@ -66,6 +66,58 @@ class MonitorCollectorTests(unittest.TestCase):
         self.assertEqual(task["next"], "독립 검증")
         self.assertEqual(collector.workflow_progress([task]), 80)
 
+    def test_transport_assertion_overlays_pending_without_changing_state(self) -> None:
+        task = collector.task_to_view(
+            {
+                "id": "P1b-8",
+                "title": "Freeze run identity",
+                "owner": "claude",
+                "state": "pending",
+                "lease": None,
+                "updated_at": "2026-07-30T01:00:00Z",
+                "external_status": {
+                    "phase": "working",
+                    "reported_at": "2026-07-30T02:00:00Z",
+                    "reference": "private-dispatch-reference",
+                    "note": "private transport note",
+                    "transport_identity": {"control_principal": "private-control"},
+                },
+            }
+        )
+        self.assertEqual(task["state"], "pending")
+        self.assertEqual(task["canonical_state"], "pending")
+        self.assertEqual(task["external_phase"], "working")
+        self.assertEqual(task["status_source"], "transport_assertion")
+        self.assertEqual(task["status_badge"], "운반자 보고")
+        self.assertEqual(task["progress_percent"], 40)
+        self.assertEqual(task["next"], "외부 구현 결과 대기")
+        self.assertEqual(task["updated_at"], "2026-07-30T02:00:00Z")
+        self.assertEqual(collector.agent_state(task), "working")
+        self.assertEqual(collector.workflow_progress([task]), 40)
+        serialized = json.dumps(task, ensure_ascii=False)
+        self.assertNotIn("private-dispatch-reference", serialized)
+        self.assertNotIn("private transport note", serialized)
+        self.assertNotIn("private-control", serialized)
+
+    def test_transport_reported_block_is_not_a_canonical_block(self) -> None:
+        task = collector.task_to_view(
+            {
+                "id": "P1b-8",
+                "title": "Freeze run identity",
+                "owner": "claude",
+                "state": "pending",
+                "lease": None,
+                "external_status": {
+                    "phase": "blocked",
+                    "reported_at": "2026-07-30T02:00:00Z",
+                },
+            }
+        )
+        self.assertEqual(task["state"], "pending")
+        self.assertEqual(task["external_phase"], "blocked")
+        self.assertEqual(task["progress_percent"], 10)
+        self.assertEqual(collector.agent_state(task), "blocked")
+
     def test_running_task_without_lease_is_reported_as_blocked(self) -> None:
         task = collector.task_to_view(
             {
@@ -165,6 +217,39 @@ class MonitorCollectorTests(unittest.TestCase):
         self.assertNotIn("must-not-leave-server", serialized)
         self.assertNotIn("private-signature", serialized)
         self.assertNotIn("description", serialized)
+
+    def test_proxy_status_event_is_visible_as_transport_report(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            ledger = Path(directory) / "events.jsonl"
+            ledger.write_text(
+                json.dumps(
+                    {
+                        "sequence": 2,
+                        "timestamp": "2026-07-30T02:00:00Z",
+                        "actor": "antigravity",
+                        "action": "task.proxy_status_reported",
+                        "task_id": "P1b-8",
+                        "payload": {
+                            "task": {
+                                "id": "P1b-8",
+                                "title": "Freeze run identity",
+                            },
+                        },
+                    },
+                    ensure_ascii=False,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            activity = collector.collect_activity(
+                {"efo_ledger_file": str(ledger)},
+                directory,
+                [],
+            )
+        self.assertEqual(len(activity), 1)
+        self.assertEqual(activity[0]["label"], "외부 진행상태 보고")
+        self.assertEqual(activity[0]["category"], "work")
+        self.assertEqual(activity[0]["task_id"], "P1b-8")
 
     @patch("monitor.collector.urllib.request.urlopen")
     @patch("monitor.collector.time.time", return_value=1000)
