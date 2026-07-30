@@ -110,11 +110,11 @@ const TASK_PROJECTION_KEYS = new Set([
 
 const CANONICAL_TASK_PROGRESS = new Map([
   ["pending", 10],
-  ["claimed", 20],
-  ["running", 50],
-  ["blocked", 15],
+  ["claimed", 25],
+  ["running", 55],
+  ["blocked", 45],
   ["submitted", 80],
-  ["rejected", 60],
+  ["rejected", 65],
   ["verified", 100],
   ["archived", 100],
   ["invalidated", 0],

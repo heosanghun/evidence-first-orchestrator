@@ -306,6 +306,51 @@ test("canonical state mismatch is rejected without an external phase", async () 
   );
 });
 
+test("all collector canonical progress projections satisfy the API contract", async () => {
+  const canonicalProgress = new Map([
+    ["pending", 10],
+    ["claimed", 25],
+    ["running", 55],
+    ["blocked", 45],
+    ["submitted", 80],
+    ["rejected", 65],
+    ["verified", 100],
+    ["archived", 100],
+    ["invalidated", 0],
+  ]);
+  for (const [state, progress] of canonicalProgress) {
+    const snapshot = validSnapshot();
+    snapshot.tasks.push({
+      id: `contract-${state}`,
+      title: `Canonical ${state}`,
+      owner: "codex",
+      state,
+      canonical_state: state,
+      external_phase: null,
+      status_source: "canonical",
+      status_badge: null,
+      lease_active: false,
+      progress_percent: progress,
+      next: "오케스트레이터 확인",
+      updated_at: new Date().toISOString(),
+    });
+    const env = {
+      EFO_MONITOR_KV: new MemoryKv(),
+      EFO_INGEST_SECRET: "test-secret",
+    };
+    const response = await onRequestPost({
+      request: await signedRequest(snapshot),
+      env,
+    });
+    assert.equal(response.status, 200, `collector state ${state} was rejected`);
+    assert.notEqual(
+      await env.EFO_MONITOR_KV.get("snapshot:latest"),
+      null,
+      `collector state ${state} was not stored`,
+    );
+  }
+});
+
 test("invalid signature is rejected before parsing", async () => {
   const env = {
     EFO_MONITOR_KV: new MemoryKv(),
