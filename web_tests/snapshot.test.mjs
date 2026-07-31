@@ -42,6 +42,21 @@ function validSnapshot() {
       next_milestone: "Independent verification",
       workflow_progress_percent: 50,
     },
+    projects: [
+      {
+        id: "system-1-5",
+        name: "System 1.5",
+        objective: "Thought-Slot DEQ with evidence gates",
+        phase: "Operator audit",
+        next_milestone: "Trainability gate",
+        progress_percent: 25,
+        task_count: 4,
+        verified_count: 1,
+        active_task_count: 0,
+        blocked_task_count: 0,
+        active_gpu_indexes: [],
+      },
+    ],
     agents: [],
     tasks: [],
     gpus: [
@@ -164,6 +179,67 @@ test("signed snapshot is validated, stored, and served", async () => {
   assert.match(stored.source.received_at, /^\d{4}-\d{2}-\d{2}T/);
   assert.equal(stored.gpus[0].index, 0);
   assert.equal(stored.activity[0].label, "검증 통과");
+  assert.equal(stored.projects[0].name, "System 1.5");
+});
+
+test("legacy snapshots may omit the optional project portfolio", async () => {
+  const snapshot = validSnapshot();
+  delete snapshot.projects;
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 200);
+  const stored = JSON.parse(await env.EFO_MONITOR_KV.get("snapshot:latest"));
+  assert.equal(stored.projects, undefined);
+});
+
+test("project portfolio rejects forged fields, counts, and GPU indexes", async () => {
+  const mutations = [
+    (project) => {
+      project.color = "url(https://attacker.invalid)";
+    },
+    (project) => {
+      project.verified_count = project.task_count + 1;
+    },
+    (project) => {
+      project.active_gpu_indexes = [0, 0];
+    },
+    (project) => {
+      project.progress_percent = 101;
+    },
+  ];
+  for (const mutate of mutations) {
+    const snapshot = validSnapshot();
+    mutate(snapshot.projects[0]);
+    const response = await onRequestPost({
+      request: await signedRequest(snapshot),
+      env: {
+        EFO_MONITOR_KV: new MemoryKv(),
+        EFO_INGEST_SECRET: "test-secret",
+      },
+    });
+    assert.equal(response.status, 400);
+    assert.match((await response.json()).detail, /project/);
+  }
+});
+
+test("CSP-safe visual fills use native progress and no inline styles", async () => {
+  const [app, html, headers] = await Promise.all([
+    readFile(new URL("../public/assets/app.js", import.meta.url), "utf8"),
+    readFile(new URL("../public/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/_headers", import.meta.url), "utf8"),
+  ]);
+  assert.doesNotMatch(app, /\.style\b|style\s*=/);
+  assert.doesNotMatch(html, /style\s*=/);
+  assert.match(app, /<progress class="progress-track/);
+  assert.match(html, /<progress class="progress-track progress-large"/);
+  assert.match(headers, /style-src 'self'/);
+  assert.doesNotMatch(headers, /unsafe-inline/);
 });
 
 test("malformed activity history is rejected", async () => {

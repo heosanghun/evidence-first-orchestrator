@@ -17,6 +17,34 @@
     "next_milestone": "실시간 SSH 수집기 연결",
     "workflow_progress_percent": 58
   },
+  "projects": [
+    {
+      "id": "cts",
+      "name": "CTS",
+      "objective": "전용 latent 상태공간에서 반복 깊이의 유효성을 증거 게이트로 검증합니다.",
+      "phase": "연산자·통계 사전등록",
+      "next_milestone": "연산자 학습성 및 디코드 품질 게이트",
+      "progress_percent": 62.5,
+      "task_count": 8,
+      "verified_count": 4,
+      "active_task_count": 1,
+      "blocked_task_count": 1,
+      "active_gpu_indexes": []
+    },
+    {
+      "id": "system-1-5",
+      "name": "System 1.5",
+      "objective": "Thought-Slot DEQ를 단계별 Go/No-Go 게이트로 재구축합니다.",
+      "phase": "Thought-Slot 구현 감사",
+      "next_milestone": "T>1 유효성 소규모 파일럿",
+      "progress_percent": 28.57,
+      "task_count": 7,
+      "verified_count": 1,
+      "active_task_count": 1,
+      "blocked_task_count": 0,
+      "active_gpu_indexes": [0, 3]
+    }
+  ],
   "agents": [
     {
       "id": "codex",

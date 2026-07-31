@@ -41,6 +41,8 @@ const elements = Object.fromEntries(
     "overall-progress-label",
     "overall-progress",
     "next-milestone",
+    "project-count",
+    "project-grid",
     "kpi-agents",
     "kpi-agents-note",
     "kpi-tasks",
@@ -239,9 +241,9 @@ function showToast(message, tone = "default") {
 
 function setProgress(element, value) {
   const progress = clamp(value);
-  element.style.width = `${progress}%`;
-  const container = element.closest('[role="progressbar"]');
-  if (container) container.setAttribute("aria-valuenow", String(Math.round(progress)));
+  element.value = progress;
+  element.textContent = formatPercent(progress);
+  element.setAttribute("aria-valuenow", String(Math.round(progress)));
 }
 
 function sourceIsDemo(snapshot) {
@@ -253,6 +255,7 @@ function normalizeSnapshot(raw) {
   const gpus = Array.isArray(snapshot.gpus) ? snapshot.gpus : [];
   const agents = Array.isArray(snapshot.agents) ? snapshot.agents : [];
   const tasks = Array.isArray(snapshot.tasks) ? snapshot.tasks : [];
+  const projects = Array.isArray(snapshot.projects) ? snapshot.projects : [];
   const history = Array.isArray(snapshot.history) ? snapshot.history : [];
   const activity = Array.isArray(snapshot.activity) ? snapshot.activity : [];
   const alerts = Array.isArray(snapshot.alerts) ? snapshot.alerts : [];
@@ -278,6 +281,7 @@ function normalizeSnapshot(raw) {
     },
     agents,
     tasks,
+    projects,
     gpus,
     system: snapshot.system || {},
     history,
@@ -366,6 +370,7 @@ function renderUnavailable(reason) {
 function render(snapshot) {
   renderFreshness(snapshot);
   renderMission(snapshot);
+  renderProjects(snapshot);
   const derivedAlerts = buildAlerts(snapshot);
   renderKpis(snapshot, derivedAlerts);
   renderAgents(snapshot);
@@ -412,6 +417,84 @@ function renderMission(snapshot) {
   elements.overallProgressLabel.textContent = formatPercent(progress);
   setProgress(elements.overallProgress, progress);
   elements.nextMilestone.textContent = `다음 단계: ${snapshot.workspace.next_milestone}`;
+}
+
+function projectPortfolio(snapshot) {
+  if (snapshot.projects.length > 0) return snapshot.projects;
+  return [
+    {
+      id: "workspace",
+      name: snapshot.workspace.name,
+      objective: snapshot.workspace.objective,
+      phase: "EFO 검증 워크플로",
+      next_milestone: snapshot.workspace.next_milestone,
+      progress_percent: snapshot.workspace.workflow_progress_percent,
+      task_count: snapshot.tasks.length,
+      verified_count: snapshot.tasks.filter((task) =>
+        ["verified", "archived"].includes(String(task.state).toLowerCase()),
+      ).length,
+      active_task_count: snapshot.tasks.filter((task) =>
+        ["claimed", "running", "submitted"].includes(String(task.state).toLowerCase()),
+      ).length,
+      blocked_task_count: snapshot.tasks.filter((task) =>
+        ["blocked", "rejected", "invalidated"].includes(
+          String(task.state).toLowerCase(),
+        ),
+      ).length,
+      active_gpu_indexes: [],
+    },
+  ];
+}
+
+function renderProjects(snapshot) {
+  const projects = projectPortfolio(snapshot);
+  elements.projectCount.textContent = `${projects.length}개 프로젝트 · EFO 게이트 기준`;
+  elements.projectGrid.innerHTML = projects
+    .map((project, index) => {
+      const progress = clamp(project.progress_percent);
+      const taskCount = Math.max(0, Math.round(number(project.task_count)));
+      const verified = Math.max(0, Math.round(number(project.verified_count)));
+      const active = Math.max(0, Math.round(number(project.active_task_count)));
+      const blocked = Math.max(0, Math.round(number(project.blocked_task_count)));
+      const gpuIndexes = Array.isArray(project.active_gpu_indexes)
+        ? project.active_gpu_indexes
+            .map((value) => Math.round(number(value, -1)))
+            .filter((value) => value >= 0)
+        : [];
+      const gpuLabel =
+        gpuIndexes.length > 0
+          ? `활성 GPU ${gpuIndexes.join(", ")}`
+          : "활성 GPU 없음";
+      return `
+        <article class="project-card project-tone-${index % 4}">
+          <div class="project-card-head">
+            <div>
+              <strong class="project-name">${escapeHtml(project.name || project.id)}</strong>
+              <span class="project-phase">${escapeHtml(project.phase || "단계 확인 중")}</span>
+            </div>
+            <span class="project-gpu">${escapeHtml(gpuLabel)}</span>
+          </div>
+          <p class="project-objective">${escapeHtml(project.objective || "목표 확인 중")}</p>
+          <div class="project-progress-line">
+            <span>EFO 워크플로 진행률</span>
+            <strong>${formatPercent(progress)}</strong>
+          </div>
+          <progress class="progress-track progress-large"
+                    aria-label="${escapeHtml(project.name || project.id)} EFO 워크플로 진행률"
+                    max="100" value="${progress}">${formatPercent(progress)}</progress>
+          <div class="project-stats">
+            <span>검증 ${verified} / ${taskCount}</span>
+            <span>진행 ${active}</span>
+            <span>차단 ${blocked}</span>
+          </div>
+          <div class="project-next">
+            <strong>다음 게이트</strong>
+            <span>${escapeHtml(project.next_milestone || "다음 단계 확인 중")}</span>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
 }
 
 function renderKpis(snapshot, alerts) {
@@ -497,9 +580,7 @@ function renderAgents(snapshot) {
               )}</span>`
           : "";
       return `
-        <article class="agent-card" style="--agent-color: ${
-          AGENT_COLORS[index % AGENT_COLORS.length]
-        }">
+        <article class="agent-card agent-color-${index % AGENT_COLORS.length}">
           <div class="agent-card-head">
             <div>
               <strong class="agent-name">${escapeHtml(agent.name || agent.id)}</strong>
@@ -515,10 +596,9 @@ function renderAgents(snapshot) {
             ${transportBadge}
           </div>
           <div class="agent-progress-row">
-            <div class="progress-track" role="progressbar" aria-valuemin="0"
-                 aria-valuemax="100" aria-valuenow="${Math.round(progress)}">
-              <span style="width:${progress}%"></span>
-            </div>
+            <progress class="progress-track"
+                      aria-label="${escapeHtml(agent.name || agent.id)} 작업 진행률"
+                      max="100" value="${progress}">${formatPercent(progress)}</progress>
             <small>${Math.round(progress)}%</small>
           </div>
           <div class="agent-next">
@@ -610,7 +690,9 @@ function renderActivityHistogram(buckets, peak) {
   }
 
   const labelEvery = activityRangeHours <= 24 ? 3 : activityRangeHours <= 72 ? 6 : 12;
-  elements.activityHistogram.style.setProperty("--activity-hours", buckets.length);
+  elements.activityHistogram.classList.remove("range-72", "range-168");
+  if (activityRangeHours === 72) elements.activityHistogram.classList.add("range-72");
+  if (activityRangeHours === 168) elements.activityHistogram.classList.add("range-168");
   elements.activityHistogram.setAttribute(
     "aria-label",
     `${ACTIVITY_RANGE_LABELS[activityRangeHours]} 시간대별 원장 이벤트, 최대 ${peak}건`,
@@ -620,13 +702,17 @@ function renderActivityHistogram(buckets, peak) {
       const count = bucket.events.length;
       const showLabel =
         index === 0 || index === buckets.length - 1 || index % labelEvery === 0;
+      let segmentTop = 100;
       const segments = ACTIVITY_CATEGORIES.map((category) => {
         const categoryCount = bucket.counts[category];
         if (categoryCount === 0 || peak === 0) return "";
         const height = (categoryCount / peak) * 100;
-        return `<span class="activity-bar-segment ${category}"
-                      style="height:${height}%"
-                      title="${escapeHtml(ACTIVITY_CATEGORY_LABELS[category])} ${categoryCount}건"></span>`;
+        segmentTop -= height;
+        return `<rect class="activity-bar-segment ${category}"
+                      x="0" y="${segmentTop.toFixed(3)}" width="12"
+                      height="${height.toFixed(3)}">
+                  <title>${escapeHtml(ACTIVITY_CATEGORY_LABELS[category])} ${categoryCount}건</title>
+                </rect>`;
       }).join("");
       return `
         <div class="activity-hour" title="${escapeHtml(
@@ -635,7 +721,12 @@ function renderActivityHistogram(buckets, peak) {
           <span class="activity-hour-count">${count > 0 ? count : ""}</span>
           <div class="activity-bar-slot">
             <div class="activity-bar-stack${count === 0 ? " empty" : ""}">
-              ${segments}
+              ${
+                count > 0
+                  ? `<svg class="activity-bar-svg" viewBox="0 0 12 100"
+                          preserveAspectRatio="none" aria-hidden="true">${segments}</svg>`
+                  : ""
+              }
             </div>
           </div>
           <time class="activity-hour-label" datetime="${new Date(bucket.at).toISOString()}">
@@ -753,10 +844,11 @@ function renderGpus(snapshot) {
             <div class="bar-metric-head">
               <span>사용률</span><strong>${formatPercent(utilization)}</strong>
             </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0"
-                 aria-valuemax="100" aria-valuenow="${Math.round(utilization)}">
-              <span style="width:${utilization}%"></span>
-            </div>
+            <progress class="progress-track" aria-label="GPU ${number(
+              gpu.index,
+            )} 사용률" max="100" value="${utilization}">${formatPercent(
+              utilization,
+            )}</progress>
           </div>
           <div class="bar-metric memory">
             <div class="bar-metric-head">
@@ -765,10 +857,11 @@ function renderGpus(snapshot) {
                 memoryTotal / 1024
               ).toFixed(1)} GiB</strong>
             </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0"
-                 aria-valuemax="100" aria-valuenow="${Math.round(memoryPercent)}">
-              <span style="width:${clamp(memoryPercent)}%"></span>
-            </div>
+            <progress class="progress-track" aria-label="GPU ${number(
+              gpu.index,
+            )} VRAM 사용률" max="100" value="${clamp(
+              memoryPercent,
+            )}">${formatPercent(memoryPercent)}</progress>
           </div>
           <div class="thermal ${thermalClass}">
             온도<strong>${temperature.toFixed(0)}°C</strong>
@@ -869,7 +962,7 @@ function renderLineChart(svg, legend, series, options) {
       (options.max - options.min)) *
       plotHeight;
 
-  series.forEach((item) => {
+  series.forEach((item, seriesIndex) => {
     const segments = [];
     let current = [];
     item.points.forEach((point, index) => {
@@ -908,7 +1001,9 @@ function renderLineChart(svg, legend, series, options) {
 
     const legendItem = document.createElement("span");
     legendItem.className = "legend-item";
-    legendItem.innerHTML = `<span class="legend-swatch" style="--swatch:${item.color}"></span>${escapeHtml(
+    legendItem.innerHTML = `<span class="legend-swatch legend-color-${
+      seriesIndex % GPU_COLORS.length
+    }"></span>${escapeHtml(
       item.name,
     )}`;
     legend.append(legendItem);
@@ -965,9 +1060,10 @@ function setRing(ring, label, percent) {
   const normalized = clamp(percent);
   const circumference = 2 * Math.PI * 48;
   const value = ring.querySelector(".ring-value");
-  value.style.strokeDasharray = String(circumference);
-  value.style.strokeDashoffset = String(
-    circumference - (normalized / 100) * circumference,
+  value.setAttribute("stroke-dasharray", String(circumference));
+  value.setAttribute(
+    "stroke-dashoffset",
+    String(circumference - (normalized / 100) * circumference),
   );
   label.textContent = formatPercent(normalized);
 }
@@ -1021,10 +1117,9 @@ function renderTasks(snapshot) {
           </td>
           <td>
             <div class="table-progress">
-              <div class="progress-track" role="progressbar" aria-valuemin="0"
-                   aria-valuemax="100" aria-valuenow="${Math.round(progress)}">
-                <span style="width:${progress}%"></span>
-              </div>
+              <progress class="progress-track"
+                        aria-label="${escapeHtml(task.id || "작업")} 진행률"
+                        max="100" value="${progress}">${formatPercent(progress)}</progress>
               <small>${Math.round(progress)}%</small>
             </div>
           </td>
@@ -1147,7 +1242,6 @@ elements.accessForm.addEventListener("submit", async (event) => {
     elements.accessToken.value = "";
   }
 });
-
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) refresh();
 });

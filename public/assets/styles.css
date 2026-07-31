@@ -248,24 +248,168 @@ h2 {
 }
 
 .progress-track {
-  position: relative;
+  --progress-color: var(--green);
+  display: block;
   width: 100%;
   height: 7px;
+  padding: 0;
   overflow: hidden;
+  appearance: none;
   background: #e1e5e2;
+  border: 0;
   border-radius: 2px;
+  color: var(--progress-color);
 }
 
-.progress-track > span {
-  display: block;
-  width: 0;
-  height: 100%;
-  background: var(--green);
-  transition: width 280ms ease;
+.progress-track::-webkit-progress-bar {
+  background: #e1e5e2;
+}
+
+.progress-track::-webkit-progress-value {
+  background: var(--progress-color);
+  transition: inline-size 280ms ease;
+}
+
+.progress-track::-moz-progress-bar {
+  background: var(--progress-color);
 }
 
 .progress-large {
   height: 10px;
+}
+
+.portfolio-band {
+  padding: 22px 0 8px;
+}
+
+.portfolio-note {
+  margin: -4px 0 14px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.project-card {
+  --project-color: var(--green);
+  --progress-color: var(--project-color);
+  min-width: 0;
+  padding: 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--project-color);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+}
+
+.project-tone-0 {
+  --project-color: var(--green);
+}
+
+.project-tone-1 {
+  --project-color: var(--blue);
+}
+
+.project-tone-2 {
+  --project-color: var(--amber);
+}
+
+.project-tone-3 {
+  --project-color: var(--violet);
+}
+
+.project-card-head,
+.project-progress-line,
+.project-stats,
+.project-next {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.project-card-head {
+  align-items: flex-start;
+}
+
+.project-name {
+  display: block;
+  font-size: 17px;
+  font-weight: 780;
+}
+
+.project-phase {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.project-gpu {
+  flex: 0 0 auto;
+  padding: 3px 6px;
+  color: var(--muted);
+  background: #f5f7f5;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.project-objective {
+  min-height: 38px;
+  margin: 12px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.project-progress-line {
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.project-progress-line strong {
+  color: var(--ink);
+  font-size: 16px;
+}
+
+.project-stats {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  margin: 9px 0 12px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.project-stats span {
+  padding-right: 10px;
+  border-right: 1px solid var(--line);
+}
+
+.project-stats span:last-child {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.project-next {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding-top: 10px;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+}
+
+.project-next strong {
+  flex: 0 0 auto;
+  color: var(--ink);
+  font-size: 10px;
+  text-transform: uppercase;
 }
 
 .kpi-grid {
@@ -334,6 +478,8 @@ h2 {
 }
 
 .agent-card {
+  --agent-color: var(--green);
+  --progress-color: var(--agent-color);
   position: relative;
   min-height: 206px;
   padding: 15px;
@@ -342,6 +488,18 @@ h2 {
   border-top: 3px solid var(--agent-color, var(--green));
   border-radius: 6px;
   box-shadow: var(--shadow);
+}
+
+.agent-color-1 {
+  --agent-color: var(--blue);
+}
+
+.agent-color-2 {
+  --agent-color: var(--violet);
+}
+
+.agent-color-3 {
+  --agent-color: var(--amber);
 }
 
 .agent-card-head {
@@ -581,6 +739,14 @@ h2 {
   padding: 15px 14px 10px;
 }
 
+.activity-histogram.range-72 {
+  --activity-hours: 72;
+}
+
+.activity-histogram.range-168 {
+  --activity-hours: 168;
+}
+
 .activity-hour {
   display: grid;
   min-width: 0;
@@ -633,6 +799,13 @@ h2 {
   justify-content: flex-start;
 }
 
+.activity-bar-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
 .activity-bar-stack.empty::after {
   display: block;
   width: 100%;
@@ -643,34 +816,36 @@ h2 {
 }
 
 .activity-bar-segment {
-  display: block;
-  min-height: 3px;
-  flex: 0 0 auto;
-  background: var(--blue);
+  fill: var(--blue);
 }
 
 .activity-bar-segment.work,
 .activity-dot.work {
+  fill: var(--blue);
   background: var(--blue);
 }
 
 .activity-bar-segment.evidence,
 .activity-dot.evidence {
+  fill: var(--violet);
   background: var(--violet);
 }
 
 .activity-bar-segment.success,
 .activity-dot.success {
+  fill: var(--green);
   background: var(--green);
 }
 
 .activity-bar-segment.issue,
 .activity-dot.issue {
+  fill: var(--red);
   background: var(--red);
 }
 
 .activity-bar-segment.planning,
 .activity-dot.planning {
+  fill: var(--amber);
   background: var(--amber);
 }
 
@@ -884,12 +1059,12 @@ h2 {
   font-size: 11px;
 }
 
-.bar-metric.utilization .progress-track > span {
-  background: var(--blue);
+.bar-metric.utilization .progress-track {
+  --progress-color: var(--blue);
 }
 
-.bar-metric.memory .progress-track > span {
-  background: var(--violet);
+.bar-metric.memory .progress-track {
+  --progress-color: var(--violet);
 }
 
 .thermal,
@@ -1014,7 +1189,35 @@ h2 {
 .legend-swatch {
   width: 13px;
   height: 3px;
-  background: var(--swatch);
+  background: var(--green);
+}
+
+.legend-color-1 {
+  background: var(--blue);
+}
+
+.legend-color-2 {
+  background: var(--amber);
+}
+
+.legend-color-3 {
+  background: var(--violet);
+}
+
+.legend-color-4 {
+  background: var(--teal);
+}
+
+.legend-color-5 {
+  background: var(--red);
+}
+
+.legend-color-6 {
+  background: #4f6b7b;
+}
+
+.legend-color-7 {
+  background: #8b6f3d;
 }
 
 .resource-band {
@@ -1404,12 +1607,17 @@ dialog input:focus {
   .project-list {
     grid-column: 2 / -1;
   }
+
 }
 
 @media (max-width: 820px) {
   .mission-band {
     grid-template-columns: 1fr;
     gap: 21px;
+  }
+
+  .project-grid {
+    grid-template-columns: 1fr;
   }
 
   .chart-band,
@@ -1480,6 +1688,17 @@ dialog input:focus {
   .kpi-grid,
   .agent-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-card-head {
+    gap: 8px;
+  }
+
+  .project-gpu {
+    max-width: 46%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .kpi {

@@ -39,6 +39,19 @@ Displayed progress is an **EFO workflow-phase indicator** derived from task
 states. It is not model accuracy, training completion, or a scientific
 performance result.
 
+The optional `project_portfolios` collector configuration freezes each
+project's denominator as an explicit list of EFO task IDs. A configured task
+that does not exist yet remains at zero percent and is not silently removed.
+This lets the top portfolio show CTS and System 1.5 without implying that a
+verified preparatory task equals a successful model result. The public
+projection contains only sanitized labels, state counts, workflow progress,
+and GPU indexes with an actually active mapped workload.
+
+The Pages content security policy intentionally rejects inline styles. All
+percentage fills use native `<progress>` elements styled by the external
+stylesheet; resource rings use SVG attributes; hourly bars use SVG geometry.
+Do not add `unsafe-inline` to make a visual fill work.
+
 ## Agent-card projection
 
 Agent cards are a derived convenience view; the complete task table remains
@@ -120,6 +133,32 @@ install -m 600 /dev/null "$HOME/.config/efo-monitor/ingest-secret"
 Place the same random value used for the Cloudflare encrypted variable in
 `~/.config/efo-monitor/ingest-secret`, then edit `config.json` to match the EFO
 workspace and public project aliases.
+
+Project portfolio definitions are explicit and describe workflow gates, not
+accuracy:
+
+```json
+{
+  "project_portfolios": [
+    {
+      "id": "cts",
+      "name": "CTS",
+      "objective": "Validate the latent operator through preregistered gates.",
+      "phase": "Operator validity",
+      "next_milestone": "Decode-quality gate",
+      "task_ids": ["C1", "P1b-2", "P1b-9", "CTS-R1", "CTS-R2"]
+    },
+    {
+      "id": "system-1-5",
+      "name": "System 1.5",
+      "objective": "Rebuild and validate Thought-Slot DEQ.",
+      "phase": "Thought-Slot audit",
+      "next_milestone": "T>1 pilot",
+      "task_ids": ["A-G1", "S15-TS-AUDIT", "S15-TS-OPERATOR", "S15-TS-PILOT"]
+    }
+  ]
+}
+```
 
 Run one local, non-submitting check first:
 

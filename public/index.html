@@ -44,13 +44,24 @@
           <span>검증 워크플로 진행률</span>
           <strong id="overall-progress-label">0%</strong>
         </div>
-        <div class="progress-track progress-large" role="progressbar"
-             aria-label="검증 워크플로 진행률" aria-valuemin="0"
-             aria-valuemax="100" aria-valuenow="0">
-          <span id="overall-progress"></span>
-        </div>
+        <progress class="progress-track progress-large" id="overall-progress"
+                  aria-label="검증 워크플로 진행률" max="100" value="0">0%</progress>
         <p id="next-milestone">다음 단계 확인 중</p>
       </div>
+    </section>
+
+    <section class="portfolio-band" aria-labelledby="portfolio-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">연구 포트폴리오</p>
+          <h2 id="portfolio-heading">프로젝트 전체 진행률</h2>
+        </div>
+        <span class="section-meta" id="project-count">프로젝트 확인 중</span>
+      </div>
+      <p class="portfolio-note">
+        아래 비율은 모델 정확도가 아니라, 사전등록된 EFO 검증 게이트의 완료 상태입니다.
+      </p>
+      <div class="project-grid" id="project-grid" aria-live="polite"></div>
     </section>
 
     <section class="kpi-grid" aria-label="운영 핵심 지표">
@@ -288,6 +299,7 @@
       </div>
       <div id="alerts-list" class="alerts-list"></div>
     </section>
+
   </main>
 
   <footer>
