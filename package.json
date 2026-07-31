@@ -3,6 +3,6 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:web": "node --test web_tests/snapshot.test.mjs"
+    "test:web": "node --test web_tests/snapshot.test.mjs web_tests/chat.test.mjs web_tests/local-health.test.mjs"
   }
 }

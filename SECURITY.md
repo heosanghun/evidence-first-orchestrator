@@ -16,6 +16,16 @@ private research data, or unpublished model artifacts in an issue.
   conversion or network fetches.
 - The event ledger is hash-chained and HMAC-signed with a local key.
 - The dashboard is read-only and binds to loopback by default.
+- Cloudflare snapshot and local-health ingestion use independent HMAC secrets;
+  replay windows, bounded payloads, strict schemas, and constant-time signature
+  checks are enforced before data is stored.
+- Local Windows telemetry is aggregate-only: no hostname, user name, process
+  name, command line, environment variable, or file path is accepted.
+- The operations assistant receives a bounded, sanitized snapshot and exposes
+  no mutation tools. Infrastructure-control requests are refused.
+- Optional model-backed chat is disabled unless both the explicit enable flag
+  and viewer authentication are configured; deterministic snapshot answers
+  remain available without an API key.
 - Worker reports and manifests must remain inside their owned report directory.
 - Task permissions default to no GPU, no network, and no performance metrics.
 
@@ -43,6 +53,8 @@ Never commit:
 - SSH passwords or private keys;
 - API tokens;
 - cloud credentials;
+- dashboard ingestion or viewer secrets;
+- model API keys;
 - private benchmark data;
 - raw model checkpoints.
 

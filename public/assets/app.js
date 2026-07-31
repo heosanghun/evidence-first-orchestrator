@@ -1,7 +1,11 @@
 const API_URL = "/api/snapshot";
+const CHAT_API_URL = "/api/chat";
+const LOCAL_HEALTH_API_URL = "/api/local-health";
 const DEMO_URL = "/data/demo.json";
 const REFRESH_INTERVAL_MS = 15_000;
 const TOKEN_KEY = "efo-view-token";
+const CHAT_HISTORY_KEY = "efo-chat-history";
+const CHAT_HISTORY_LIMIT = 20;
 const SVG_NS = "http://www.w3.org/2000/svg";
 const HOUR_MS = 60 * 60 * 1000;
 const ACTIVITY_RANGE_LABELS = {
@@ -41,6 +45,8 @@ const elements = Object.fromEntries(
     "overall-progress-label",
     "overall-progress",
     "next-milestone",
+    "project-count",
+    "project-grid",
     "kpi-agents",
     "kpi-agents-note",
     "kpi-tasks",
@@ -81,10 +87,30 @@ const elements = Object.fromEntries(
     "system-load",
     "system-uptime",
     "collection-interval",
+    "local-health-updated",
+    "local-stress-card",
+    "local-stress-label",
+    "local-stress",
+    "local-stress-status",
+    "local-cpu-label",
+    "local-cpu",
+    "local-memory-label",
+    "local-memory",
+    "local-disk-label",
+    "local-disk",
+    "local-device",
+    "local-uptime",
+    "local-processes",
     "task-count",
     "task-table",
     "alerts-section",
     "alerts-list",
+    "chat-mode",
+    "chat-log",
+    "chat-form",
+    "chat-input",
+    "chat-send",
+    "chat-status",
     "source-mode",
     "schema-version",
     "access-dialog",
@@ -102,6 +128,7 @@ let lastSnapshot = null;
 let refreshTimer = null;
 let toastTimer = null;
 let activityRangeHours = 24;
+let chatHistory = loadChatHistory();
 
 function clamp(value, minimum = 0, maximum = 100) {
   const number = Number(value);
@@ -237,11 +264,90 @@ function showToast(message, tone = "default") {
   toastTimer = setTimeout(() => elements.toast.classList.remove("visible"), 3200);
 }
 
+function loadChatHistory() {
+  try {
+    const stored = JSON.parse(sessionStorage.getItem(CHAT_HISTORY_KEY) || "[]");
+    if (!Array.isArray(stored)) return [];
+    return stored
+      .slice(-CHAT_HISTORY_LIMIT)
+      .filter(
+        (item) =>
+          ["user", "assistant"].includes(item?.role) &&
+          typeof item?.content === "string",
+      )
+      .map((item) => ({
+        role: item.role,
+        content: item.content.slice(0, 6000),
+        at: item.at || new Date().toISOString(),
+        mode: item.mode || "",
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function saveChatHistory() {
+  try {
+    sessionStorage.setItem(
+      CHAT_HISTORY_KEY,
+      JSON.stringify(chatHistory.slice(-CHAT_HISTORY_LIMIT)),
+    );
+  } catch {
+    // Session storage can be unavailable in hardened browsers.
+  }
+}
+
+function appendChatMessage(role, content, { at, mode } = {}) {
+  const article = document.createElement("article");
+  article.className = `chat-message ${role === "user" ? "user" : "assistant"}`;
+
+  const meta = document.createElement("div");
+  meta.className = "chat-message-meta";
+  const speaker = document.createElement("strong");
+  speaker.textContent =
+    role === "user" ? "사용자" : "Codex 운영 어시스턴트";
+  const detail = document.createElement("span");
+  const labels = {
+    openai: "OpenAI + EFO",
+    snapshot: "EFO 스냅샷",
+    error: "연결 오류",
+  };
+  detail.textContent =
+    labels[mode] || (at ? formatClock(at) : role === "user" ? "질문" : "답변");
+  meta.append(speaker, detail);
+
+  const paragraph = document.createElement("p");
+  paragraph.textContent = content;
+  article.append(meta, paragraph);
+  elements.chatLog.append(article);
+  elements.chatLog.scrollTop = elements.chatLog.scrollHeight;
+}
+
+function renderStoredChat() {
+  if (chatHistory.length === 0) return;
+  elements.chatLog.replaceChildren();
+  for (const item of chatHistory) {
+    appendChatMessage(item.role, item.content, item);
+  }
+}
+
+function recordChatMessage(role, content, mode = "") {
+  const item = {
+    role,
+    content,
+    at: new Date().toISOString(),
+    mode,
+  };
+  chatHistory = [...chatHistory, item].slice(-CHAT_HISTORY_LIMIT);
+  saveChatHistory();
+  appendChatMessage(role, content, item);
+}
+
 function setProgress(element, value) {
   const progress = clamp(value);
-  element.style.width = `${progress}%`;
-  const container = element.closest('[role="progressbar"]');
-  if (container) container.setAttribute("aria-valuenow", String(Math.round(progress)));
+  element.value = progress;
+  element.textContent = formatPercent(progress);
+  element.setAttribute("aria-valuenow", String(Math.round(progress)));
 }
 
 function sourceIsDemo(snapshot) {
@@ -253,6 +359,7 @@ function normalizeSnapshot(raw) {
   const gpus = Array.isArray(snapshot.gpus) ? snapshot.gpus : [];
   const agents = Array.isArray(snapshot.agents) ? snapshot.agents : [];
   const tasks = Array.isArray(snapshot.tasks) ? snapshot.tasks : [];
+  const projects = Array.isArray(snapshot.projects) ? snapshot.projects : [];
   const history = Array.isArray(snapshot.history) ? snapshot.history : [];
   const activity = Array.isArray(snapshot.activity) ? snapshot.activity : [];
   const alerts = Array.isArray(snapshot.alerts) ? snapshot.alerts : [];
@@ -278,6 +385,7 @@ function normalizeSnapshot(raw) {
     },
     agents,
     tasks,
+    projects,
     gpus,
     system: snapshot.system || {},
     history,
@@ -311,6 +419,134 @@ async function requestDemo() {
   return response.json();
 }
 
+async function requestLocalHealth() {
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await fetch(LOCAL_HEALTH_API_URL, {
+    headers,
+    cache: "no-store",
+  });
+  if (response.status === 401) {
+    const error = new Error("access-required");
+    error.code = 401;
+    throw error;
+  }
+  if (!response.ok) throw new Error(`local-health-${response.status}`);
+  return response.json();
+}
+
+function localPressureClass(value) {
+  const pressure = number(value);
+  if (pressure >= 90) return "pressure-critical";
+  if (pressure >= 75) return "pressure-high";
+  if (pressure >= 50) return "pressure-moderate";
+  return "pressure-low";
+}
+
+function renderLocalHealthUnavailable(message = "수집기 연결 대기") {
+  elements.localHealthUpdated.textContent = message;
+  elements.localStressCard.className = "local-stress-summary stress-unavailable";
+  elements.localStressLabel.textContent = "연결 대기";
+  setProgress(elements.localStress, 0);
+  elements.localStressStatus.textContent = "수집되지 않음";
+  for (const [label, progress] of [
+    [elements.localCpuLabel, elements.localCpu],
+    [elements.localMemoryLabel, elements.localMemory],
+    [elements.localDiskLabel, elements.localDisk],
+  ]) {
+    label.textContent = "-";
+    progress.className = "progress-track local-progress";
+    setProgress(progress, 0);
+  }
+  elements.localDevice.textContent = "장치: -";
+  elements.localUptime.textContent = "가동 시간: -";
+  elements.localProcesses.textContent = "프로세스: -";
+}
+
+function renderLocalHealth(health) {
+  const stress = clamp(health.stress_index);
+  const stressLabels = {
+    low: "낮음",
+    moderate: "보통",
+    high: "높음",
+    critical: "매우 높음",
+  };
+  const status = ["low", "moderate", "high", "critical"].includes(
+    health.stress_status,
+  )
+    ? health.stress_status
+    : "moderate";
+  const generatedAt = new Date(health.generated_at);
+  const ageSeconds = Math.max(0, (Date.now() - generatedAt.getTime()) / 1000);
+  const staleAfter = Math.max(
+    number(health.collection_interval_seconds, 120) * 2.5,
+    300,
+  );
+  const stale = !Number.isFinite(ageSeconds) || ageSeconds > staleAfter;
+
+  elements.localHealthUpdated.textContent = stale
+    ? `수집 지연 · ${formatClock(health.generated_at)}`
+    : `실시간 · ${formatClock(health.generated_at)}`;
+  elements.localStressCard.className = `local-stress-summary stress-${status}${
+    stale ? " stress-stale" : ""
+  }`;
+  elements.localStressLabel.textContent = formatPercent(stress, 1);
+  setProgress(elements.localStress, stress);
+  elements.localStressStatus.textContent = stale
+    ? `수집 지연 · ${stressLabels[status]}`
+    : stressLabels[status];
+
+  const metrics = [
+    {
+      value: health.cpu_percent,
+      label: elements.localCpuLabel,
+      progress: elements.localCpu,
+      text: formatPercent(health.cpu_percent, 1),
+    },
+    {
+      value: health.memory?.percent,
+      label: elements.localMemoryLabel,
+      progress: elements.localMemory,
+      text: `${formatPercent(health.memory?.percent, 1)} · ${formatGiB(
+        health.memory?.used_gib,
+      )} / ${formatGiB(health.memory?.total_gib)}`,
+    },
+    {
+      value: health.disk?.percent,
+      label: elements.localDiskLabel,
+      progress: elements.localDisk,
+      text: `${formatPercent(health.disk?.percent, 1)} · ${formatGiB(
+        health.disk?.free_gib,
+      )} 여유`,
+    },
+  ];
+  for (const metric of metrics) {
+    const value = clamp(metric.value);
+    metric.label.textContent = metric.text;
+    metric.progress.className = `progress-track local-progress ${localPressureClass(
+      value,
+    )}`;
+    setProgress(metric.progress, value);
+  }
+  elements.localDevice.textContent = `장치: ${health.device_alias || "로컬 PC"}`;
+  elements.localUptime.textContent = `가동 시간: ${formatDuration(
+    health.uptime_seconds,
+  )}`;
+  elements.localProcesses.textContent = `프로세스: ${number(
+    health.process_count,
+  ).toFixed(0)}개`;
+}
+
+async function refreshLocalHealth() {
+  try {
+    renderLocalHealth(await requestLocalHealth());
+  } catch (error) {
+    renderLocalHealthUnavailable(
+      error.code === 401 ? "접근 키 필요" : "로컬 수집기 연결 대기",
+    );
+  }
+}
+
 async function refresh({ announce = false } = {}) {
   elements.refreshButton.classList.add("loading");
   elements.refreshButton.disabled = true;
@@ -338,6 +574,7 @@ async function refresh({ announce = false } = {}) {
       renderUnavailable(error.message);
     }
   } finally {
+    await refreshLocalHealth();
     elements.refreshButton.classList.remove("loading");
     elements.refreshButton.disabled = false;
   }
@@ -360,12 +597,14 @@ function renderUnavailable(reason) {
     '<div class="empty-state">작업 히스토리를 불러오지 못했습니다.</div>';
   elements.activityFeed.innerHTML =
     '<div class="empty-state">원장 기록을 확인할 수 없습니다.</div>';
+  elements.chatStatus.textContent = "최신 스냅샷 연결 실패";
   elements.sourceMode.textContent = `연결 오류: ${reason}`;
 }
 
 function render(snapshot) {
   renderFreshness(snapshot);
   renderMission(snapshot);
+  renderProjects(snapshot);
   const derivedAlerts = buildAlerts(snapshot);
   renderKpis(snapshot, derivedAlerts);
   renderAgents(snapshot);
@@ -375,6 +614,7 @@ function render(snapshot) {
   renderResources(snapshot);
   renderTasks(snapshot);
   renderAlerts(derivedAlerts);
+  elements.chatStatus.textContent = `스냅샷 ${formatClock(snapshot.generated_at)}`;
   elements.sourceMode.textContent = sourceIsDemo(snapshot)
     ? "DEMO 데이터 · 실시간 수집 아님"
     : `LIVE · ${snapshot.source.collector}`;
@@ -412,6 +652,84 @@ function renderMission(snapshot) {
   elements.overallProgressLabel.textContent = formatPercent(progress);
   setProgress(elements.overallProgress, progress);
   elements.nextMilestone.textContent = `다음 단계: ${snapshot.workspace.next_milestone}`;
+}
+
+function projectPortfolio(snapshot) {
+  if (snapshot.projects.length > 0) return snapshot.projects;
+  return [
+    {
+      id: "workspace",
+      name: snapshot.workspace.name,
+      objective: snapshot.workspace.objective,
+      phase: "EFO 검증 워크플로",
+      next_milestone: snapshot.workspace.next_milestone,
+      progress_percent: snapshot.workspace.workflow_progress_percent,
+      task_count: snapshot.tasks.length,
+      verified_count: snapshot.tasks.filter((task) =>
+        ["verified", "archived"].includes(String(task.state).toLowerCase()),
+      ).length,
+      active_task_count: snapshot.tasks.filter((task) =>
+        ["claimed", "running", "submitted"].includes(String(task.state).toLowerCase()),
+      ).length,
+      blocked_task_count: snapshot.tasks.filter((task) =>
+        ["blocked", "rejected", "invalidated"].includes(
+          String(task.state).toLowerCase(),
+        ),
+      ).length,
+      active_gpu_indexes: [],
+    },
+  ];
+}
+
+function renderProjects(snapshot) {
+  const projects = projectPortfolio(snapshot);
+  elements.projectCount.textContent = `${projects.length}개 프로젝트 · EFO 게이트 기준`;
+  elements.projectGrid.innerHTML = projects
+    .map((project, index) => {
+      const progress = clamp(project.progress_percent);
+      const taskCount = Math.max(0, Math.round(number(project.task_count)));
+      const verified = Math.max(0, Math.round(number(project.verified_count)));
+      const active = Math.max(0, Math.round(number(project.active_task_count)));
+      const blocked = Math.max(0, Math.round(number(project.blocked_task_count)));
+      const gpuIndexes = Array.isArray(project.active_gpu_indexes)
+        ? project.active_gpu_indexes
+            .map((value) => Math.round(number(value, -1)))
+            .filter((value) => value >= 0)
+        : [];
+      const gpuLabel =
+        gpuIndexes.length > 0
+          ? `활성 GPU ${gpuIndexes.join(", ")}`
+          : "활성 GPU 없음";
+      return `
+        <article class="project-card project-tone-${index % 4}">
+          <div class="project-card-head">
+            <div>
+              <strong class="project-name">${escapeHtml(project.name || project.id)}</strong>
+              <span class="project-phase">${escapeHtml(project.phase || "단계 확인 중")}</span>
+            </div>
+            <span class="project-gpu">${escapeHtml(gpuLabel)}</span>
+          </div>
+          <p class="project-objective">${escapeHtml(project.objective || "목표 확인 중")}</p>
+          <div class="project-progress-line">
+            <span>EFO 워크플로 진행률</span>
+            <strong>${formatPercent(progress)}</strong>
+          </div>
+          <progress class="progress-track progress-large"
+                    aria-label="${escapeHtml(project.name || project.id)} EFO 워크플로 진행률"
+                    max="100" value="${progress}">${formatPercent(progress)}</progress>
+          <div class="project-stats">
+            <span>검증 ${verified} / ${taskCount}</span>
+            <span>진행 ${active}</span>
+            <span>차단 ${blocked}</span>
+          </div>
+          <div class="project-next">
+            <strong>다음 게이트</strong>
+            <span>${escapeHtml(project.next_milestone || "다음 단계 확인 중")}</span>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
 }
 
 function renderKpis(snapshot, alerts) {
@@ -497,9 +815,7 @@ function renderAgents(snapshot) {
               )}</span>`
           : "";
       return `
-        <article class="agent-card" style="--agent-color: ${
-          AGENT_COLORS[index % AGENT_COLORS.length]
-        }">
+        <article class="agent-card agent-color-${index % AGENT_COLORS.length}">
           <div class="agent-card-head">
             <div>
               <strong class="agent-name">${escapeHtml(agent.name || agent.id)}</strong>
@@ -515,10 +831,9 @@ function renderAgents(snapshot) {
             ${transportBadge}
           </div>
           <div class="agent-progress-row">
-            <div class="progress-track" role="progressbar" aria-valuemin="0"
-                 aria-valuemax="100" aria-valuenow="${Math.round(progress)}">
-              <span style="width:${progress}%"></span>
-            </div>
+            <progress class="progress-track"
+                      aria-label="${escapeHtml(agent.name || agent.id)} 작업 진행률"
+                      max="100" value="${progress}">${formatPercent(progress)}</progress>
             <small>${Math.round(progress)}%</small>
           </div>
           <div class="agent-next">
@@ -610,7 +925,9 @@ function renderActivityHistogram(buckets, peak) {
   }
 
   const labelEvery = activityRangeHours <= 24 ? 3 : activityRangeHours <= 72 ? 6 : 12;
-  elements.activityHistogram.style.setProperty("--activity-hours", buckets.length);
+  elements.activityHistogram.classList.remove("range-72", "range-168");
+  if (activityRangeHours === 72) elements.activityHistogram.classList.add("range-72");
+  if (activityRangeHours === 168) elements.activityHistogram.classList.add("range-168");
   elements.activityHistogram.setAttribute(
     "aria-label",
     `${ACTIVITY_RANGE_LABELS[activityRangeHours]} 시간대별 원장 이벤트, 최대 ${peak}건`,
@@ -620,13 +937,17 @@ function renderActivityHistogram(buckets, peak) {
       const count = bucket.events.length;
       const showLabel =
         index === 0 || index === buckets.length - 1 || index % labelEvery === 0;
+      let segmentTop = 100;
       const segments = ACTIVITY_CATEGORIES.map((category) => {
         const categoryCount = bucket.counts[category];
         if (categoryCount === 0 || peak === 0) return "";
         const height = (categoryCount / peak) * 100;
-        return `<span class="activity-bar-segment ${category}"
-                      style="height:${height}%"
-                      title="${escapeHtml(ACTIVITY_CATEGORY_LABELS[category])} ${categoryCount}건"></span>`;
+        segmentTop -= height;
+        return `<rect class="activity-bar-segment ${category}"
+                      x="0" y="${segmentTop.toFixed(3)}" width="12"
+                      height="${height.toFixed(3)}">
+                  <title>${escapeHtml(ACTIVITY_CATEGORY_LABELS[category])} ${categoryCount}건</title>
+                </rect>`;
       }).join("");
       return `
         <div class="activity-hour" title="${escapeHtml(
@@ -635,7 +956,12 @@ function renderActivityHistogram(buckets, peak) {
           <span class="activity-hour-count">${count > 0 ? count : ""}</span>
           <div class="activity-bar-slot">
             <div class="activity-bar-stack${count === 0 ? " empty" : ""}">
-              ${segments}
+              ${
+                count > 0
+                  ? `<svg class="activity-bar-svg" viewBox="0 0 12 100"
+                          preserveAspectRatio="none" aria-hidden="true">${segments}</svg>`
+                  : ""
+              }
             </div>
           </div>
           <time class="activity-hour-label" datetime="${new Date(bucket.at).toISOString()}">
@@ -753,10 +1079,11 @@ function renderGpus(snapshot) {
             <div class="bar-metric-head">
               <span>사용률</span><strong>${formatPercent(utilization)}</strong>
             </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0"
-                 aria-valuemax="100" aria-valuenow="${Math.round(utilization)}">
-              <span style="width:${utilization}%"></span>
-            </div>
+            <progress class="progress-track" aria-label="GPU ${number(
+              gpu.index,
+            )} 사용률" max="100" value="${utilization}">${formatPercent(
+              utilization,
+            )}</progress>
           </div>
           <div class="bar-metric memory">
             <div class="bar-metric-head">
@@ -765,10 +1092,11 @@ function renderGpus(snapshot) {
                 memoryTotal / 1024
               ).toFixed(1)} GiB</strong>
             </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0"
-                 aria-valuemax="100" aria-valuenow="${Math.round(memoryPercent)}">
-              <span style="width:${clamp(memoryPercent)}%"></span>
-            </div>
+            <progress class="progress-track" aria-label="GPU ${number(
+              gpu.index,
+            )} VRAM 사용률" max="100" value="${clamp(
+              memoryPercent,
+            )}">${formatPercent(memoryPercent)}</progress>
           </div>
           <div class="thermal ${thermalClass}">
             온도<strong>${temperature.toFixed(0)}°C</strong>
@@ -869,7 +1197,7 @@ function renderLineChart(svg, legend, series, options) {
       (options.max - options.min)) *
       plotHeight;
 
-  series.forEach((item) => {
+  series.forEach((item, seriesIndex) => {
     const segments = [];
     let current = [];
     item.points.forEach((point, index) => {
@@ -908,7 +1236,9 @@ function renderLineChart(svg, legend, series, options) {
 
     const legendItem = document.createElement("span");
     legendItem.className = "legend-item";
-    legendItem.innerHTML = `<span class="legend-swatch" style="--swatch:${item.color}"></span>${escapeHtml(
+    legendItem.innerHTML = `<span class="legend-swatch legend-color-${
+      seriesIndex % GPU_COLORS.length
+    }"></span>${escapeHtml(
       item.name,
     )}`;
     legend.append(legendItem);
@@ -965,9 +1295,10 @@ function setRing(ring, label, percent) {
   const normalized = clamp(percent);
   const circumference = 2 * Math.PI * 48;
   const value = ring.querySelector(".ring-value");
-  value.style.strokeDasharray = String(circumference);
-  value.style.strokeDashoffset = String(
-    circumference - (normalized / 100) * circumference,
+  value.setAttribute("stroke-dasharray", String(circumference));
+  value.setAttribute(
+    "stroke-dashoffset",
+    String(circumference - (normalized / 100) * circumference),
   );
   label.textContent = formatPercent(normalized);
 }
@@ -1021,10 +1352,9 @@ function renderTasks(snapshot) {
           </td>
           <td>
             <div class="table-progress">
-              <div class="progress-track" role="progressbar" aria-valuemin="0"
-                   aria-valuemax="100" aria-valuenow="${Math.round(progress)}">
-                <span style="width:${progress}%"></span>
-              </div>
+              <progress class="progress-track"
+                        aria-label="${escapeHtml(task.id || "작업")} 진행률"
+                        max="100" value="${progress}">${formatPercent(progress)}</progress>
               <small>${Math.round(progress)}%</small>
             </div>
           </td>
@@ -1125,6 +1455,68 @@ function renderAlerts(alerts) {
     .join("");
 }
 
+async function requestChat(message, history) {
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  const headers = {
+    "content-type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+  const response = await fetch(CHAT_API_URL, {
+    method: "POST",
+    headers,
+    cache: "no-store",
+    body: JSON.stringify({ message, history }),
+  });
+  if (response.status === 401) {
+    const error = new Error("access-required");
+    error.code = 401;
+    throw error;
+  }
+  if (!response.ok) throw new Error(`chat-${response.status}`);
+  return response.json();
+}
+
+async function submitChat() {
+  const message = elements.chatInput.value.trim();
+  if (!message || elements.chatSend.disabled) return;
+
+  const previousHistory = chatHistory
+    .slice(-8)
+    .map((item) => ({ role: item.role, content: item.content }));
+  recordChatMessage("user", message);
+  elements.chatInput.value = "";
+  elements.chatSend.disabled = true;
+  elements.chatInput.disabled = true;
+  elements.chatStatus.textContent = "최신 상태를 확인해 답변 중";
+
+  try {
+    const reply = await requestChat(message, previousHistory);
+    const mode = reply.mode === "openai" ? "openai" : "snapshot";
+    recordChatMessage("assistant", String(reply.answer || "답변이 비어 있습니다."), mode);
+    elements.chatMode.textContent =
+      mode === "openai" ? "OpenAI + 라이브 스냅샷" : "라이브 스냅샷";
+    elements.chatStatus.textContent = reply.snapshot_generated_at
+      ? `근거 시각 ${formatClock(reply.snapshot_generated_at)}`
+      : "답변 완료";
+  } catch (error) {
+    if (error.code === 401) {
+      elements.chatStatus.textContent = "접근 키가 필요합니다";
+      openAccessDialog();
+    } else {
+      recordChatMessage(
+        "assistant",
+        "현재 대화 API에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요. 위 대시보드의 스냅샷은 계속 확인할 수 있습니다.",
+        "error",
+      );
+      elements.chatStatus.textContent = "대화 연결 오류";
+    }
+  } finally {
+    elements.chatSend.disabled = false;
+    elements.chatInput.disabled = false;
+    elements.chatInput.focus();
+  }
+}
+
 elements.refreshButton.addEventListener("click", () => refresh({ announce: true }));
 document.querySelectorAll("[data-activity-hours]").forEach((button) => {
   button.addEventListener("click", () => {
@@ -1147,11 +1539,28 @@ elements.accessForm.addEventListener("submit", async (event) => {
     elements.accessToken.value = "";
   }
 });
+document.querySelectorAll("[data-chat-prompt]").forEach((button) => {
+  button.addEventListener("click", () => {
+    elements.chatInput.value = button.dataset.chatPrompt || "";
+    elements.chatForm.requestSubmit();
+  });
+});
+elements.chatForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await submitChat();
+});
+elements.chatInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    elements.chatForm.requestSubmit();
+  }
+});
 
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) refresh();
 });
 
+renderStoredChat();
 refresh();
 refreshTimer = setInterval(refresh, REFRESH_INTERVAL_MS);
 window.addEventListener("beforeunload", () => clearInterval(refreshTimer));

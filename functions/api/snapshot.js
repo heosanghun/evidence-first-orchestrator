@@ -122,6 +122,20 @@ const AGENT_PROJECTION_KEYS = new Set([
   "updated_at",
 ]);
 
+const PROJECT_PROJECTION_KEYS = new Set([
+  "id",
+  "name",
+  "objective",
+  "phase",
+  "next_milestone",
+  "progress_percent",
+  "task_count",
+  "verified_count",
+  "active_task_count",
+  "blocked_task_count",
+  "active_gpu_indexes",
+]);
+
 const LEGACY_AGENT_PROJECTION_KEYS = new Set([
   "id",
   "name",
@@ -399,6 +413,73 @@ function validateAgentProjection(agent, tasksById) {
   return null;
 }
 
+function validateProjectProjection(project) {
+  if (!hasExactKeys(project, PROJECT_PROJECTION_KEYS)) {
+    return "project has unexpected or missing fields";
+  }
+  for (const [field, limit] of Object.entries({
+    id: 80,
+    name: 100,
+    objective: 240,
+    phase: 120,
+    next_milestone: 180,
+  })) {
+    if (
+      typeof project[field] !== "string" ||
+      project[field].length < 1 ||
+      project[field].length > limit
+    ) {
+      return `project has invalid ${field}`;
+    }
+  }
+  if (
+    !isFiniteNumber(project.progress_percent) ||
+    project.progress_percent < 0 ||
+    project.progress_percent > 100
+  ) {
+    return "project has invalid progress_percent";
+  }
+  for (const field of [
+    "task_count",
+    "verified_count",
+    "active_task_count",
+    "blocked_task_count",
+  ]) {
+    if (
+      !Number.isInteger(project[field]) ||
+      project[field] < 0 ||
+      project[field] > 500
+    ) {
+      return `project has invalid ${field}`;
+    }
+  }
+  if (
+    project.verified_count > project.task_count ||
+    project.active_task_count > project.task_count ||
+    project.blocked_task_count > project.task_count ||
+    project.verified_count +
+      project.active_task_count +
+      project.blocked_task_count >
+      project.task_count
+  ) {
+    return "project task counts are inconsistent";
+  }
+  if (
+    !Array.isArray(project.active_gpu_indexes) ||
+    project.active_gpu_indexes.length > 32
+  ) {
+    return "project has invalid active_gpu_indexes";
+  }
+  const indexes = new Set();
+  for (const index of project.active_gpu_indexes) {
+    if (!Number.isInteger(index) || index < 0 || index > 31 || indexes.has(index)) {
+      return "project has invalid active GPU index";
+    }
+    indexes.add(index);
+  }
+  return null;
+}
+
 function validateSnapshot(snapshot) {
   if (!snapshot || typeof snapshot !== "object" || Array.isArray(snapshot)) {
     return "body must be a JSON object";
@@ -436,6 +517,17 @@ function validateSnapshot(snapshot) {
     if (agentError) return agentError;
     if (agentIds.has(agent.id)) return "duplicate agent ID";
     agentIds.add(agent.id);
+  }
+  if (snapshot.projects !== undefined) {
+    if (!Array.isArray(snapshot.projects)) return "projects must be an array";
+    if (snapshot.projects.length > 12) return "projects exceeds limit 12";
+    const projectIds = new Set();
+    for (const project of snapshot.projects) {
+      const projectError = validateProjectProjection(project);
+      if (projectError) return projectError;
+      if (projectIds.has(project.id)) return "duplicate project ID";
+      projectIds.add(project.id);
+    }
   }
   if (snapshot.activity !== undefined) {
     if (!Array.isArray(snapshot.activity)) return "activity must be an array";
@@ -616,6 +708,7 @@ export const internals = {
   agentStateForTask,
   normalizeLegacyAgentProjections,
   validateAgentProjection,
+  validateProjectProjection,
   validateTaskProjection,
   validateSnapshot,
 };

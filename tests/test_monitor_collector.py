@@ -756,6 +756,379 @@ class MonitorCollectorTests(unittest.TestCase):
         self.assertEqual(activity[0]["category"], "work")
         self.assertEqual(activity[0]["task_id"], "P1b-8")
 
+    def test_portfolio_progress_averages_canonical_task_gates(self) -> None:
+        tasks = [
+            collector.task_to_view(
+                {
+                    "id": "EFO-1",
+                    "title": "Verified gate",
+                    "owner": "claude-a",
+                    "state": "verified",
+                }
+            ),
+            collector.task_to_view(
+                {
+                    "id": "EFO-2",
+                    "title": "Running gate",
+                    "owner": "claude-a",
+                    "state": "running",
+                    "lease": {"expires_at": "2099-01-01T00:00:00Z"},
+                }
+            ),
+            collector.task_to_view(
+                {
+                    "id": "EFO-3",
+                    "title": "Blocked gate",
+                    "owner": "claude-b",
+                    "state": "blocked",
+                }
+            ),
+            collector.task_to_view(
+                {
+                    "id": "EFO-4",
+                    "title": "Expired lease gate",
+                    "owner": "claude-b",
+                    "state": "claimed",
+                    "lease": {"expires_at": "2020-01-01T00:00:00Z"},
+                }
+            ),
+            collector.task_to_view(
+                {
+                    "id": "EFO-5",
+                    "title": "Transport reported gate",
+                    "owner": "antigravity",
+                    "state": "pending",
+                    "external_status": {
+                        "phase": "ready",
+                        "reported_at": "2026-07-30T02:00:00Z",
+                    },
+                }
+            ),
+            collector.task_to_view(
+                {
+                    "id": "EFO-6",
+                    "title": "Archived verified gate",
+                    "owner": "antigravity",
+                    "state": "archived",
+                }
+            ),
+            collector.task_to_view(
+                {
+                    "id": "EFO-OTHER",
+                    "title": "Unlisted gate",
+                    "owner": "codex",
+                    "state": "verified",
+                }
+            ),
+        ]
+        config = {
+            "project_portfolios": [
+                {
+                    "id": "portfolio-1",
+                    "name": "Bandit study",
+                    "objective": "Complete the preregistered comparison.",
+                    "phase": "P1b",
+                    "next_milestone": "Independent verification",
+                    "task_ids": [
+                        "EFO-1",
+                        "EFO-2",
+                        "EFO-3",
+                        "EFO-4",
+                        "EFO-5",
+                        "EFO-6",
+                        "EFO-1",
+                    ],
+                }
+            ]
+        }
+        projects = collector.collect_project_portfolios(config, tasks, [])
+        self.assertEqual(len(projects), 1)
+        project = projects[0]
+        self.assertEqual(project["id"], "portfolio-1")
+        self.assertEqual(project["name"], "Bandit study")
+        self.assertEqual(project["phase"], "P1b")
+        self.assertEqual(project["next_milestone"], "Independent verification")
+        self.assertEqual(project["task_count"], 6)
+        self.assertEqual(project["verified_count"], 2)
+        self.assertEqual(project["active_task_count"], 2)
+        self.assertEqual(project["blocked_task_count"], 2)
+        self.assertEqual(project["active_gpu_indexes"], [])
+        # Canonical progress ignores the transport "ready" overlay.
+        self.assertEqual(project["progress_percent"], 55.83)
+        self.assertEqual(collector.canonical_task_progress(tasks[4]), 10.0)
+        self.assertEqual(tasks[4]["progress_percent"], 85)
+
+    def test_portfolio_keeps_missing_task_id_in_denominator(self) -> None:
+        tasks = [
+            collector.task_to_view(
+                {
+                    "id": "EFO-1",
+                    "title": "Verified gate",
+                    "owner": "claude-a",
+                    "state": "verified",
+                }
+            )
+        ]
+        config = {
+            "project_portfolios": [
+                {
+                    "id": "portfolio-1",
+                    "name": "Bandit study",
+                    "task_ids": ["EFO-1", "EFO-MISSING"],
+                }
+            ]
+        }
+        project = collector.collect_project_portfolios(config, tasks, [])[0]
+        self.assertEqual(project["task_count"], 2)
+        self.assertEqual(project["verified_count"], 1)
+        self.assertEqual(project["active_task_count"], 0)
+        self.assertEqual(project["blocked_task_count"], 0)
+        self.assertEqual(project["progress_percent"], 50.0)
+        self.assertEqual(collector.canonical_task_progress(None), 0.0)
+
+    def test_portfolio_requires_explicit_configuration(self) -> None:
+        tasks = [
+            collector.task_to_view(
+                {
+                    "id": "EFO-1",
+                    "title": "Verified gate",
+                    "owner": "claude-a",
+                    "state": "verified",
+                }
+            )
+        ]
+        gpus = [
+            {
+                "index": 0,
+                "projects": [{"name": "Bandit study", "active": True}],
+            }
+        ]
+        self.assertEqual(collector.collect_project_portfolios({}, tasks, gpus), [])
+        self.assertEqual(
+            collector.collect_project_portfolios(
+                {"project_portfolios": []},
+                tasks,
+                gpus,
+            ),
+            [],
+        )
+        self.assertEqual(
+            collector.collect_project_portfolios(
+                {"project_portfolios": "Bandit study"},
+                tasks,
+                gpus,
+            ),
+            [],
+        )
+        # Entries without an explicit identifier are dropped, not guessed.
+        self.assertEqual(
+            collector.collect_project_portfolios(
+                {
+                    "project_portfolios": [
+                        None,
+                        {"name": "Bandit study", "task_ids": ["EFO-1"]},
+                        {"id": "   ", "task_ids": ["EFO-1"]},
+                    ]
+                },
+                tasks,
+                gpus,
+            ),
+            [],
+        )
+
+    def test_portfolio_fields_are_sanitized_and_bounded(self) -> None:
+        config = {
+            "project_portfolios": [
+                {
+                    "id": "portfolio-1;rm -rf /",
+                    "name": "A" * 200,
+                    "objective": "B" * 400,
+                    "phase": "C" * 200,
+                    "next_milestone": "D" * 400,
+                    "task_ids": [
+                        *[f"EFO-{index}" for index in range(400)],
+                        "",
+                        None,
+                        {"id": "EFO-1"},
+                    ],
+                },
+                {
+                    "id": "portfolio-1;rm -rf /",
+                    "name": "Duplicate identifier",
+                },
+                *[
+                    {"id": f"extra-{index}", "name": f"Extra {index}"}
+                    for index in range(collector.PORTFOLIO_LIMIT + 5)
+                ],
+            ]
+        }
+        projects = collector.collect_project_portfolios(config, [], [])
+        self.assertEqual(len(projects), collector.PORTFOLIO_LIMIT)
+        project = projects[0]
+        self.assertEqual(
+            sorted(project),
+            [
+                "active_gpu_indexes",
+                "active_task_count",
+                "blocked_task_count",
+                "id",
+                "name",
+                "next_milestone",
+                "objective",
+                "phase",
+                "progress_percent",
+                "task_count",
+                "verified_count",
+            ],
+        )
+        self.assertEqual(project["id"], "portfolio-1rm -rf /"[:80])
+        self.assertNotIn(";", project["id"])
+        self.assertEqual(len(project["name"]), 80)
+        self.assertEqual(len(project["objective"]), 240)
+        self.assertEqual(len(project["phase"]), 80)
+        self.assertEqual(len(project["next_milestone"]), 180)
+        self.assertEqual(project["task_count"], collector.PORTFOLIO_TASK_LIMIT)
+        self.assertEqual(project["progress_percent"], 0.0)
+        self.assertEqual(
+            [entry["id"] for entry in projects[1:3]],
+            ["extra-0", "extra-1"],
+        )
+        empty = collector.collect_project_portfolios(
+            {"project_portfolios": [{"id": "portfolio-2"}]},
+            [],
+            [],
+        )[0]
+        self.assertEqual(empty["name"], "portfolio-2")
+        self.assertEqual(empty["objective"], "-")
+        self.assertEqual(empty["phase"], "-")
+        self.assertEqual(empty["progress_percent"], 0.0)
+        self.assertEqual(empty["task_count"], 0)
+
+    def test_active_gpu_indexes_require_exact_active_project_match(self) -> None:
+        gpus = [
+            {
+                "index": 0,
+                "projects": [{"name": "Bandit study", "active": True}],
+            },
+            {
+                "index": 1,
+                "projects": [{"name": "Bandit study", "active": False}],
+            },
+            {
+                "index": 2,
+                "projects": [{"name": "Bandit study v2", "active": True}],
+            },
+            {
+                "index": 3,
+                "projects": [
+                    {"name": "호스트 GPU 작업", "active": True},
+                    {"name": "Bandit study", "active": True},
+                ],
+            },
+            {
+                "index": "four",
+                "projects": [{"name": "Bandit study", "active": True}],
+            },
+            {
+                "index": 5,
+                "projects": [
+                    "Bandit study",
+                    {"name": "Bandit study", "active": "true"},
+                ],
+            },
+        ]
+        config = {
+            "project_portfolios": [
+                {"id": "portfolio-1", "name": "Bandit study"},
+                {"id": "portfolio-2", "name": "Unmapped study"},
+            ]
+        }
+        projects = collector.collect_project_portfolios(config, [], gpus)
+        self.assertEqual(projects[0]["active_gpu_indexes"], [0, 3])
+        self.assertEqual(projects[1]["active_gpu_indexes"], [])
+        self.assertEqual(collector.project_gpu_indexes("Bandit study", []), [])
+
+    @patch("monitor.collector.save_history")
+    @patch("monitor.collector.load_history", return_value=[])
+    @patch("monitor.collector.collect_system")
+    @patch("monitor.collector.map_projects_to_gpus")
+    @patch("monitor.collector.query_gpus")
+    def test_snapshot_exposes_top_level_projects(
+        self,
+        query_gpus_mock,
+        _map_mock,
+        collect_system_mock,
+        _load_history_mock,
+        _save_history_mock,
+    ) -> None:
+        query_gpus_mock.return_value = (
+            [
+                {
+                    "index": 0,
+                    "_uuid": "GPU-one",
+                    "name": "NVIDIA RTX A6000",
+                    "utilization_percent": 91.0,
+                    "memory_used_mib": 39000.0,
+                    "memory_total_mib": 49140.0,
+                    "temperature_c": 72.0,
+                    "power_w": 281.0,
+                    "projects": [{"name": "Bandit study", "active": True}],
+                }
+            ],
+            [],
+        )
+        collect_system_mock.return_value = {
+            "hostname": "gpu-server",
+            "load_1m": 0.0,
+            "uptime_seconds": 10,
+            "memory": {"used_gib": 0.0, "total_gib": 0.0, "percent": 0.0},
+            "disk": {
+                "used_gib": 0.0,
+                "total_gib": 0.0,
+                "free_gib": 0.0,
+                "percent": 0.0,
+            },
+        }
+        status = {
+            "tasks": [
+                {
+                    "id": "EFO-1",
+                    "title": "Verified gate",
+                    "owner": "claude-a",
+                    "state": "verified",
+                    "updated_at": "2026-07-30T01:00:00Z",
+                }
+            ],
+            "status": {"ledger": {"valid": True, "event_count": 5}},
+        }
+        config = {
+            "history_file": "unused-history.json",
+            "project_portfolios": [
+                {
+                    "id": "portfolio-1",
+                    "name": "Bandit study",
+                    "objective": "Complete the preregistered comparison.",
+                    "phase": "P1b",
+                    "next_milestone": "Independent verification",
+                    "task_ids": ["EFO-1", "EFO-MISSING"],
+                }
+            ],
+        }
+        with patch(
+            "monitor.collector.parse_json_command",
+            side_effect=[status, []],
+        ):
+            snapshot = collector.collect_snapshot(config)
+
+        self.assertIn("projects", snapshot)
+        project = snapshot["projects"][0]
+        self.assertEqual(project["id"], "portfolio-1")
+        self.assertEqual(project["task_count"], 2)
+        self.assertEqual(project["verified_count"], 1)
+        self.assertEqual(project["progress_percent"], 50.0)
+        self.assertEqual(project["active_gpu_indexes"], [0])
+        self.assertNotIn("_uuid", json.dumps(snapshot, ensure_ascii=False))
+
     @patch("monitor.collector.urllib.request.urlopen")
     @patch("monitor.collector.time.time", return_value=1000)
     def test_submit_hmac_covers_timestamp_and_exact_body(

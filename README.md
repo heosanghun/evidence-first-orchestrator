@@ -344,8 +344,14 @@ The repository also includes a responsive, read-only operations dashboard in
 - EFO task transitions and signed-ledger health;
 - 24-hour, 72-hour, and 7-day hourly activity history projected from the
   signed ledger;
+- project-level progress for CTS and the System series, separated from
+  individual task and agent progress;
 - physical GPU 0-N utilization, VRAM, temperature, power, and project mapping;
-- host memory, disk, load, uptime, alerts, and rolling charts.
+- host memory, disk, load, uptime, alerts, and rolling charts;
+- an optional privacy-minimized Windows PC load panel with CPU, aggregate
+  memory, system-disk pressure, uptime, and an operational load index;
+- a bottom-of-page operations assistant that answers progress questions from
+  the latest published snapshot and refuses infrastructure mutations.
 
 The SSH collector in `monitor/` only reads `nvidia-smi`, Docker status/logs,
 procfs, and EFO JSON output. It never starts, stops, restarts, or allocates a
@@ -358,6 +364,13 @@ Cloudflare Pages deployment and collector installation are documented in
 [Operations Dashboard](docs/OPERATIONS_DASHBOARD.md). Until the API is
 configured, the page visibly identifies its bundled sample as `DEMO`; it never
 passes sample data off as live telemetry.
+
+The Windows operational load index is a dashboard heuristic, not a medical
+stress score or a hardware-lifetime diagnosis. Local collection sends no
+hostname, process names, command lines, or file paths. The assistant works in a
+deterministic, snapshot-grounded mode by default. Optional model-backed answers
+require an explicit paid-API opt-in and a protected viewer token; no dashboard
+chat path can claim, start, stop, or verify EFO work.
 
 ## Recovery and audit
 

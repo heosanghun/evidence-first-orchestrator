@@ -64,7 +64,12 @@ TASK_NEXT = {
 }
 ACTIVE_STATES = {"claimed", "running"}
 TERMINAL_STATES = {"verified", "archived"}
+BLOCKED_STATES = {"blocked", "rejected", "invalidated"}
 LIVE_CARD_STATES = {"pending", "claimed", "running", "submitted"}
+PORTFOLIO_ACTIVE_STATES = {"claimed", "running", "submitted"}
+PORTFOLIO_EXTERNAL_ACTIVE_PHASES = {"working", "reviewing", "ready"}
+PORTFOLIO_LIMIT = 12
+PORTFOLIO_TASK_LIMIT = 200
 ACTIVITY_ACTIONS = {
     "workspace.initialized": ("워크스페이스 생성", "system"),
     "agent.added": ("에이전트 등록", "system"),
@@ -793,6 +798,140 @@ def workflow_progress(tasks: list[dict[str, Any]]) -> float:
     )
 
 
+def canonical_task_progress(task: dict[str, Any] | None) -> float:
+    """Return canonical gate progress, ignoring transport-reported phases."""
+
+    if not isinstance(task, dict):
+        return 0.0
+    state = str(task.get("canonical_state") or task.get("state") or "")
+    return float(TASK_PROGRESS.get(state, 0))
+
+
+def portfolio_task_ids(entry: dict[str, Any]) -> list[str]:
+    """Return the explicitly configured task identifiers of one portfolio."""
+
+    ordered: list[str] = []
+    seen: set[str] = set()
+    configured = entry.get("task_ids")
+    if not isinstance(configured, list):
+        return ordered
+    for candidate in configured:
+        if not isinstance(candidate, str):
+            continue
+        task_id = sanitize_label(candidate, "")
+        if not task_id or task_id in seen:
+            continue
+        seen.add(task_id)
+        ordered.append(task_id)
+        if len(ordered) >= PORTFOLIO_TASK_LIMIT:
+            break
+    return ordered
+
+
+def project_gpu_indexes(name: str, gpus: Iterable[dict[str, Any]]) -> list[int]:
+    """Return GPU indexes whose active public project label matches exactly."""
+
+    indexes: set[int] = set()
+    for gpu in gpus:
+        if not isinstance(gpu, dict):
+            continue
+        try:
+            index = int(gpu.get("index"))
+        except (TypeError, ValueError):
+            continue
+        for project in gpu.get("projects") or []:
+            if not isinstance(project, dict):
+                continue
+            if project.get("active") is not True:
+                continue
+            if sanitize_label(project.get("name"), "") == name:
+                indexes.add(index)
+    return sorted(indexes)
+
+
+def collect_project_portfolios(
+    config: dict[str, Any],
+    tasks: list[dict[str, Any]],
+    gpus: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Project explicitly configured portfolios from canonical EFO gate state."""
+
+    entries = config.get("project_portfolios")
+    if not isinstance(entries, list):
+        return []
+    task_index = {
+        str(task.get("id")): task
+        for task in tasks
+        if isinstance(task, dict) and task.get("id")
+    }
+    portfolios: list[dict[str, Any]] = []
+    used_ids: set[str] = set()
+    for entry in entries:
+        if len(portfolios) >= PORTFOLIO_LIMIT:
+            break
+        if not isinstance(entry, dict) or not isinstance(entry.get("id"), str):
+            continue
+        portfolio_id = sanitize_label(entry.get("id"), "")
+        if not portfolio_id or portfolio_id in used_ids:
+            continue
+        used_ids.add(portfolio_id)
+        name = sanitize_label(entry.get("name"), portfolio_id)
+        task_ids = portfolio_task_ids(entry)
+        # A configured identifier the EFO ledger does not know stays in the
+        # denominator at 0 percent instead of disappearing from the average.
+        matched = [task_index.get(task_id) for task_id in task_ids]
+        progress = (
+            sum(canonical_task_progress(task) for task in matched) / len(matched)
+            if matched
+            else 0.0
+        )
+        verified_count = 0
+        active_count = 0
+        blocked_count = 0
+        for task in matched:
+            if task is None:
+                continue
+            state = str(task.get("canonical_state") or task.get("state") or "")
+            external_phase = str(task.get("external_phase") or "")
+            if state in TERMINAL_STATES:
+                verified_count += 1
+            elif (
+                state == "pending"
+                and external_phase in PORTFOLIO_EXTERNAL_ACTIVE_PHASES
+            ):
+                active_count += 1
+            elif state in PORTFOLIO_ACTIVE_STATES and (
+                state == "submitted" or task.get("lease_active") is True
+            ):
+                active_count += 1
+            elif (
+                state in BLOCKED_STATES
+                or state in {"claimed", "running"}
+                or (state == "pending" and external_phase == "blocked")
+            ):
+                blocked_count += 1
+        portfolios.append(
+            {
+                "id": portfolio_id,
+                "name": name,
+                "objective": sanitize_label(entry.get("objective"), "-", 240),
+                "phase": sanitize_label(entry.get("phase"), "-", 80),
+                "next_milestone": sanitize_label(
+                    entry.get("next_milestone"),
+                    "다음 EFO 검증 게이트",
+                    180,
+                ),
+                "progress_percent": round(min(100.0, max(0.0, progress)), 2),
+                "task_count": len(task_ids),
+                "verified_count": verified_count,
+                "active_task_count": active_count,
+                "blocked_task_count": blocked_count,
+                "active_gpu_indexes": project_gpu_indexes(name, gpus),
+            }
+        )
+    return portfolios
+
+
 def collect_activity(
     config: dict[str, Any],
     workspace_path: str,
@@ -1160,6 +1299,7 @@ def collect_snapshot(config: dict[str, Any]) -> dict[str, Any]:
             "workflow_progress_percent": workflow_progress(tasks),
         },
         "agents": agents,
+        "projects": collect_project_portfolios(config, tasks, safe_gpus),
         "tasks": tasks,
         "activity": activity,
         "gpus": safe_gpus,
