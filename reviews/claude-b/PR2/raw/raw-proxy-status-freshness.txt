@@ -1,0 +1,58 @@
+########## A. the phase machine ##########
+  [ok] first phase = working
+        expected: first proxy status phase must be dispatched
+        observed: rejected (The first proxy status phase must be dispatched)
+  [ok] first phase = dispatched
+        expected: accepted
+        observed: accepted
+  [ok] reference swapped mid-dispatch
+        expected: reference cannot change
+        observed: rejected (Proxy status reference cannot change during a dispatch)
+  [ok] working -> ready must pass through reviewing
+        expected: n/a
+        observed: n/a
+  [ok] phase regression ready -> working
+        expected: cannot regress
+        observed: rejected (Proxy status phase cannot regress 'ready' -> 'working')
+  [ok] canonical state is untouched by the report
+        expected: pending
+        observed: state=pending
+
+########## B. how the monitor renders it ##########
+  [ok] progress overridden by the transport report
+        expected: 85
+        observed: progress_percent=85 (canonical 'pending' would be 10)
+  [ok] the override is labelled
+        expected: transport_assertion
+        observed: status_source=transport_assertion badge=운반자 보고 canonical_state=pending
+
+########## C. freshness: the asymmetry ##########
+  [ok] POSITIVE CONTROL - a 30-day-old lease is not active
+        expected: False
+        observed: lease_is_active=False
+  [ok]   and a task on that stale lease is not counted active
+        expected: 'active': 0
+        observed: {'verified': 0, 'active': 0, 'blocked': 1}
+  [ok] a 30-day-old transport report is still counted active
+        expected: 'active': 1
+        observed: {'verified': 0, 'active': 1, 'blocked': 0}
+  [ok]   and still renders at the same progress
+        expected: 85
+        observed: progress_percent=85, updated_at=2026-07-02T17:38:48Z
+
+########## D. what clears the projection ##########
+  [ok] a claimed task keeps the stale external_status on disk
+        expected: ready
+        observed: external_status.phase=ready
+  [ok]   but the monitor ignores it once the task leaves pending
+        expected: 25
+        observed: progress_percent=25 status_source=canonical
+  [ok] requeue drops external_status
+        expected: None
+        observed: external_status=None
+  [ok]   and the task falls back to canonical progress
+        expected: 10
+        observed: progress_percent=10
+
+########## 0 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.
