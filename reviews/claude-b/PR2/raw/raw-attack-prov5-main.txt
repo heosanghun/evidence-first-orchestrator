@@ -1,0 +1,44 @@
+########## G-BASE  positive control ##########
+  honest, both files bound           ACCEPTED  byte_exact=True
+
+########## G1  wrong Git remote declared ##########
+  remote_url = someone else's        REJECTED  EvidenceError: Git remote mismatch: expected 'https://example.invalid/other.git', observed '/tmp/prov5/origin.git'
+
+########## G2  commit that was never pushed ##########
+  local commit 1b32266a is on refs/heads/main but not on origin
+  local-only commit, tracking ref present REJECTED  EvidenceError: Git provenance command failed (merge-base --is-ancestor 1b32266a7fc8e60d07127092eca162ae2e183810 refs/remotes/origin/main): 
+  -- and with the remote-tracking ref deleted, so the fallback is exercised:
+  same, refs/remotes/origin/main gone ACCEPTED  byte_exact=True
+
+########## G3  partial submission - bind only one of two ##########
+  declares report.txt, hides raw.txt REJECTED  EvidenceError: Git provenance does not bind every claim-bearing evidence file: /tmp/prov5/reports/claude/raw.txt
+
+########## G4  duplicate binding ##########
+  same submitted_path twice          REJECTED  EvidenceError: Duplicate submitted_path in Git provenance: /tmp/prov5/reports/claude/report.txt
+
+########## G5  CRLF mutation with the manifest sha re-stamped ##########
+  submitted sha re-stamped to 1ee757316bad4161…
+  CRLF bytes, manifest consistent    REJECTED  EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'report.txt': blob=045aa3ee928e731bf645ad947726ac0f22f0f93aeff39af0d6ee48cc39e5d549, submitted=1ee757316bad4161953701e5fddd23bea1764cbfe7092c5f4356121617e4b2ed
+
+########## G6  repo-local core.autocrlf on an honest delivery ##########
+  honest bytes, local autocrlf=true  ACCEPTED  byte_exact=True
+
+########## G7  url.insteadOf rewriting the declared remote ##########
+  git remote get-url now reports: https://evil.invalid/
+  declare the pre-rewrite URL        REJECTED  EvidenceError: Git remote mismatch: expected '/tmp/prov5/origin.git', observed 'https://evil.invalid/'
+  declare the rewritten URL          ACCEPTED  byte_exact=True
+
+########## summary ##########
+  G-BASE                 as designed
+  G1                     as designed
+  G2                     as designed
+  G2b                    !! UNEXPECTED !!
+  G3                     as designed
+  G4                     as designed
+  G5                     as designed
+  G6                     as designed
+  G7-declare-real        as designed
+  G7-declare-rewritten   as designed
+
+Any '!! UNEXPECTED !!' above is a finding; everything else behaved as the
+design promises.  SUBMITTED, not VERIFIED.
