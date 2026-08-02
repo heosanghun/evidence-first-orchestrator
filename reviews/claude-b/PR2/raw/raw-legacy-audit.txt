@@ -1,0 +1,142 @@
+########## A. POSITIVE CONTROL - a real legacy tree, driven by the CLI ##########
+  [ok] MIGRATION.md documents the read-only audit (Phase 0, :16-20)
+        expected: efo legacy audit "E:\\path\\to\\legacy-workspace"
+        observed: efo legacy audit "E:\\path\\to\\legacy-workspace"
+  [ok] the CLI accepts it
+        expected: exit 0
+        observed: exit 0
+  [ok]   and calls the tree compatible
+        expected: compatible: True
+        observed: compatible: True
+  [ok]   having found all seven required files
+        expected: missing: []
+        observed: missing: []
+  [ok]   and no malformed events
+        expected: malformed: 0
+        observed: malformed: 0
+  The positive control is LIVE: an incompatible tree must be refused,
+  or 'compatible' proves nothing. Deleting one required file:
+  [ok]   one missing file flips the verdict
+        expected: compatible: False
+        observed: compatible: False
+
+########## B. Phase 0's claim: the audit is READ-ONLY ##########
+  [ok] no path created, removed, or modified by two audits
+        expected: delta: {'added': [], 'removed': [], 'changed': []}
+        observed: delta: {'added': [], 'removed': [], 'changed': []}
+  Phase 0's read-only claim HOLDS for the default mode.
+
+########## C. Phase 2's claim: writes 'only in reports/<agent>/' ##########
+  MIGRATION.md:51-52 -> 'The check writes and removes one temporary file only in'
+             ... continuing: '`reports/<agent>/`.'
+  `audit_legacy_workspace` builds that directory as
+      report_dir = root_path / 'reports' / agent_id
+  and gates it on `report_dir.is_dir()`. That is an EXISTENCE check,
+  not a CONTAINMENT check, and agent_id is never validated - the CLI
+  takes --agent as a free string and `validate_agent_id` is not called.
+    --agent 'codex'                        OWN
+        writes to reports/codex
+        observed: wrote to /tmp/efo-legacy-0wm452go/legacy-workspace/reports/codex
+    --agent 'claude'                       OWN
+        writes to reports/claude
+        observed: wrote to /tmp/efo-legacy-0wm452go/legacy-workspace/reports/claude
+    --agent ''                             REFUSED
+        refused - agent_id is required for a legacy write test
+        observed: refused (agent_id is required for a legacy write test)
+    --agent 'nope'                         REFUSED
+        refused - report directory does not exist
+        observed: refused (Legacy report directory does not exist for nope: /tmp/efo-legacy-0wm452go/legacy-workspace/reports/no
+    --agent 'reports'                      REFUSED
+        refused - reports/reports does not exist
+        observed: refused (Legacy report directory does not exist for reports: /tmp/efo-legacy-0wm452go/legacy-workspace/reports
+    --agent '..'                           ESCAPES
+        leaves the reports subtree - the legacy root itself
+        observed: wrote to /tmp/efo-legacy-0wm452go/legacy-workspace
+    --agent '../..'                        ESCAPES
+        leaves the workspace - two levels up
+        observed: wrote to /tmp/efo-legacy-0wm452go
+    --agent '.'                            ESCAPES
+        reports/ itself, above any agent
+        observed: wrote to /tmp/efo-legacy-0wm452go/legacy-workspace/reports
+    --agent '/tmp/efo-legacy-0wm452go/outside' ESCAPES
+        an unrelated absolute path
+        observed: wrote to /tmp/efo-legacy-0wm452go/outside
+    --agent 'codex/../claude'              OTHER-AGENT
+        inside the subtree, but ANOTHER agent's directory
+        observed: wrote to /tmp/efo-legacy-0wm452go/legacy-workspace/reports/claude
+  [ok] every --agent shape is adjudicated
+        expected: uncovered: []
+        observed: uncovered: []
+  [ok] shapes that leave the reports subtree entirely
+        expected: ['.', '..', '../..', '<abs>']
+        observed: ['.', '..', '../..', '<abs>']
+  [ok]   and shapes that land in a DIFFERENT agent's directory
+        expected: ['codex/../claude']
+        observed: ['codex/../claude']
+  The documented sentence says 'only in `reports/<agent>/`'. Four
+  shapes leave that subtree altogether - three of them leave the
+  workspace - and a fifth stays inside it while writing into a
+  different agent's directory than the one named on the command line.
+  Phase 2 says to run this 'from inside each agent's own execution
+  context', so who owns the target directory is the point of the check.
+  The temporary file IS removed in every case: the 'writes and removes'
+  half of the claim holds. This is about WHERE, not about residue.
+
+  The reported path hides it. `write_test.path` is stored unresolved:
+  [ok]   the JSON an operator reads still contains 'reports'
+        expected: reports
+        observed: /tmp/efo-legacy-0wm452go/legacy-workspace/reports/../..
+  [ok]   while the directory actually written to is the legacy root's parent
+        expected: /tmp/efo-legacy-0wm452go
+        observed: /tmp/efo-legacy-0wm452go
+  So a --write-test run that escaped two levels reports a path string
+  containing `/reports/`, and `writable: true`, and exit 0.
+
+########## D. does the legacy verdict reach `doctor`'s healthy flag? ##########
+  [ok] the broker alone is healthy
+        expected: healthy: True
+        observed: healthy: True
+  [ok] the legacy tree is now broken
+        expected: compatible: False
+        observed: compatible: False
+  [ok]   and carries a plaintext secret
+        expected: secret findings: 1
+        observed: secret findings: 1
+  [ok]   yet the top-level verdict is unchanged
+        expected: healthy: True
+        observed: healthy: True
+  [ok]   and the CLI exits 0
+        expected: exit 0
+        observed: exit 0
+  `healthy` is computed before `legacy` is attached and never consults
+  it (doctor.py:203-211 vs :213-219). NOT FILED: nothing claims it does
+  - README.md describes `doctor` as a broker check and `--legacy-root`
+  as an add-on. Recorded because one payload with one `healthy: true`
+  and a `legacy.compatible: false` beside it invites the wrong read.
+
+########## E. what the legacy secret scan does not see ##########
+  [ok] only the bare-word key is caught
+        expected: [('api_key', 'ENV.md')]
+        observed: [('api_key', 'ENV.md')]
+  Two misses, and they are DIFFERENT KINDS:
+   1. AWS_SECRET_ACCESS_KEY / GITHUB_TOKEN sit in a scanned file and are
+      missed by the regex - SECRET_RE's \b treats '_' as a word
+      character. This is the SAME `_scan_secrets` and the SAME defect
+      already filed as issue #12; recorded here, not filed again,
+      because it is one fix surface reached by a second caller.
+   2. shared/CREDENTIALS.md and reports/codex/run.md are never opened at
+      all - the scan iterates LEGACY_REQUIRED, seven fixed paths.
+  [ok]   the scan covers exactly the seven required files
+        expected: 7
+        observed: 7
+  MIGRATION.md Phase 0 (:8-14) asks the operator to remove plaintext
+  credentials and then says 'Run the read-only audit'. It does not
+  claim the audit proves step 1 was done, so #2 is a MAP, not a finding.
+  Worth an operator knowing anyway: a clean `secret_findings: []` means
+  'nothing matched in seven files', not 'this tree carries no secrets'.
+
+########## 0 unexpected result(s) ##########
+Pre-registered permissions unchanged: gpu/network/performance_metrics
+all false. No network call was made and no measured performance claim
+appears above.
+SUBMITTED, not VERIFIED.

@@ -29,6 +29,7 @@ never treated my own re-run as independent confirmation.
 | `functions/api/chat.js` | **1 issue (two findings)** | #13 the refusal is Korean-gated; snapshot text lands in `instructions` |
 | `functions/api/snapshot.js` | **1 issue** | #14 `FORBIDDEN_KEYS` matches whole key names |
 | `model.py` | **1 issue** | #15 `permissions`/`gates` are never type-checked |
+| `doctor.py` (legacy path) | **1 issue** | #17 `--write-test` writes outside `reports/<agent>/` and reports a path that hides it |
 | `proxy_submit` + grant | clean | `NOTE-proxy-grant-holds.md` |
 | `monitor/collector.py` (redaction) | clean | `NOTE-collector-redaction-holds.md` |
 | `functions/api/local-health.js` | clean — **the strongest shape measured** | `ADDENDUM-chat-refusal-and-grounding.md` |
@@ -162,7 +163,10 @@ four exception families rather than only `EFOError`.
 concurrent load; the served dashboard HTML; any behaviour of the OpenAI model
 behind `chat.js` (`network: false` — the request was constructed, never issued);
 the real `nvidia-smi` and `docker` binaries (recorded fixtures only); and
-`docs/MIGRATION.md`'s legacy path against a real Markdown workspace.
+Windows path semantics anywhere, since `E:\...` cannot be exercised here.
+
+`docs/MIGRATION.md`'s legacy path **has since been examined** — see
+`ADDENDUM-legacy-write-test-escapes-reports.md` and issue #17.
 
 Pre-registered permissions were never relaxed at any point in this pass:
 `gpu: false`, `network: false`, `performance_metrics: false`; gates
