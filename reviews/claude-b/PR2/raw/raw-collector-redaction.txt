@@ -1,0 +1,80 @@
+########## A. POSITIVE CONTROL - the markers that SHOULD appear ##########
+  [ok] the GPU name reaches the snapshot
+        expected: NVIDIA MARKERGPU A100 present: True
+        observed: NVIDIA MARKERGPU A100 present: True
+  [ok] the task title reaches the snapshot
+        expected: MARKERTITLE present: True
+        observed: MARKERTITLE present: True
+  [ok] the container name, as a project label reaches the snapshot
+        expected: MARKERNAME present: True
+        observed: MARKERNAME present: True
+  [ok] the ledger event stream, as activity reaches the snapshot
+        expected: task.created present: True
+        observed: task.created present: True
+        gpus=1 tasks=1 activity=8 alerts=0
+
+########## B. the documented omission list ##########
+  README.md:359-361 - each marker planted in exactly one input.
+  [ok] GPU UUIDs absent
+        expected: GPU-MARKERUUID0000-1111-2222-333344445555 present: False
+        observed: GPU-MARKERUUID0000-1111-2222-333344445555 present: False
+  [ok] PIDs absent
+        expected: 918273645 present: False
+        observed: 918273645 present: False
+  [ok] command lines (docker ps Command / inspect Cmd / logs) absent
+        expected: MARKERCMDLINE present: False
+        observed: MARKERCMDLINE present: False
+  [ok] a credential in a task description absent
+        expected: MARKERDESC present: False
+        observed: MARKERDESC present: False
+  [ok] a credential value in a task description absent
+        expected: AKIA1234567890EXAMPLE present: False
+        observed: AKIA1234567890EXAMPLE present: False
+  [ok] an absolute path in a blocked_reason absent
+        expected: MARKERBLOCKED present: False
+        observed: MARKERBLOCKED present: False
+  ledger signatures, hashes and event payloads:
+  [ok]   the first event's signature is absent
+        expected: signature present: False
+        observed: signature present: False
+  [ok]   the first event's event_hash is absent
+        expected: event_hash present: False
+        observed: event_hash present: False
+
+########## C. activity history: exactly the documented fields? ##########
+  documented: event time, sequence, actor alias, transition label,
+              task ID, task title
+  emitted:    ['action', 'actor', 'actor_name', 'at', 'category', 'label', 'sequence', 'task_id', 'title']
+  [ok] no field carrying free text beyond the title
+        expected: payload present: False
+        observed: payload present: False
+  one entry:  {"sequence": 1, "at": "2026-08-02T06:14:43Z", "actor": "antigravity", "actor_name": "antigravity", "action": "workspace.initialized", "label": "워크스페이스 생성", "category": "system", "task_id": null, "title": null}
+
+########## D. the one channel that publishes external text ##########
+  query_gpus (collector.py:200-209) and collect_efo (1038-1048) put
+  subprocess stderr into a public alert via sanitize_label.
+  [ok] nvidia-smi stderr reaches the published snapshot
+        expected: MARKERSTDERR present: True
+        observed: MARKERSTDERR present: True
+        {"severity": "critical", "title": "GPU 상태 수집 실패", "message": "MARKERSTDERR /home/operator/.config/efo/ingest-secret", "at": "2026-08-02T06:14:44.135908Z"}
+  [ok]   and the file path inside it survives sanitize_label
+        expected: /home/operator/.config/efo/ingest-secret present: True
+        observed: /home/operator/.config/efo/ingest-secret present: True
+  what sanitize_label actually removes, checked directly:
+        '/home/operator/.ssh/id_ed25519'             -> '/home/operator/.ssh/id_ed25519'
+        'python train.py --api-key=sk-ant-0123'      -> 'python train.py --api-keysk-ant-0123'
+        'token=abc; rm -rf /'                        -> 'tokenabc rm -rf /'
+        'user@host:/srv/data'                        -> 'user@host:/srv/data'
+        '$(whoami)`id`'                              -> 'whoamiid'
+
+########## E. hostname - measured, against no claim ##########
+  README.md:369 'Local collection sends no hostname' sits in the
+  Windows-PC-panel paragraph; the collector's own list at 359-361 does
+  not name hostname. Recorded, not scored.
+        system.hostname = 'vm'
+        source.host     = 'vm'
+        source.host falls back to system.hostname when display_host
+        is unset (collector.py:1277-1280).
+
+########## 0 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.
