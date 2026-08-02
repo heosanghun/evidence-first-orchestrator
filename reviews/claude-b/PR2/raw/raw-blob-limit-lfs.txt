@@ -1,0 +1,84 @@
+########## A. POSITIVE CONTROL - the configured limit is the documented one ##########
+  [ok] the workspace ships the 50 MB default README.md:391 names
+        expected: max_evidence_bytes: 52428800
+        observed: max_evidence_bytes: 52428800
+  [ok]   and a small artifact submits by proxy
+        expected: ACCEPTED, state: submitted
+        observed: ACCEPTED, state: submitted
+
+########## B. the ceiling, at the real 50 MB boundary ##########
+  No reduced stand-in limit: these are genuine 50 MB blobs, because the
+  question is whether the DOCUMENTED number behaves as documented.
+  [ok]   exactly at the limit (52428800 bytes)
+        expected: ACCEPTED, state: submitted
+        observed: ACCEPTED, state: submitted
+  [ok]   one byte over (52428801 bytes)
+        expected: exceeds the proxy verification limit
+        observed: EvidenceError: Git source blob exceeds the proxy verification limit: deliverables/C1.artifact.bin (52428801 > 52428800)
+  The comparison is `blob_size > max_blob_bytes` (provenance.py:263),
+  so exactly-at-the-limit is accepted and limit+1 is refused. The
+  boundary is inclusive and off-by-one clean.
+
+########## C. the same limit, opposite behaviour on the two paths ##########
+  README.md:391-394 promises what happens to an over-limit artifact:
+    'Larger artifacts such as checkpoints STAY EXTERNAL; their absolute
+     path, byte size, and SHA-256 remain in the signed record.'
+  Both paths read ONE config key, `max_evidence_bytes`:
+    workspace.py:1159  -> validate_git_provenance(max_blob_bytes=...)
+    workspace.py:1227  -> archive(max_artifact_bytes=...)
+  [ok] the DIRECT path honours the documented behaviour
+        expected: ACCEPTED, state: submitted
+        observed: ACCEPTED, state: submitted, left external: 1 (artifact=52428801B), still bound by sha256: True
+  [ok] the PROXY path refuses the same artifact outright
+        expected: exceeds the proxy verification limit
+        observed: EvidenceError: Git source blob exceeds the proxy verification limit: deliverables/C1.artifact.bin (52428801 > 52428800)
+  -> `archive.py:128` treats the limit as a COPY threshold
+     (`should_copy = force or size <= max_artifact_bytes`), which is
+     what README.md:391-394 describes. `provenance.py:263-266` treats
+     the identical number as a HARD CEILING and raises.
+  The documented sentence is true on the direct path and false on the
+  proxy path, and nothing in README.md or docs/*.md says the proxy
+  path differs. An offline author delivering a >50 MB checkpoint by
+  proxy - the exact scenario PROXY_SUBMISSION.md exists for - cannot
+  submit at all, and the refusal names a limit the docs describe as a
+  copy threshold.
+
+########## D. the Git LFS guard, and its near misses ##########
+  provenance.py:288-291 rejects a blob that startswith:
+    b'version https://git-lfs.github.com/spec/v1\n'
+  Nothing in README.md or docs/*.md mentions Git LFS at all - this is
+  UNDOCUMENTED DEFENCE, so the bar is 'does it do something sensible',
+  not 'does it match a promise'.
+  [ok]   a real LFS pointer
+        expected: Git LFS pointer is not accepted as evidence content
+        observed: EvidenceError: Git LFS pointer is not accepted as evidence content: deliverables/C1.artifact.bin
+  [ok]   the header with CRLF instead of LF
+        expected: ACCEPTED
+        observed: ACCEPTED, state: submitted
+  [ok]   the header uppercased
+        expected: ACCEPTED
+        observed: ACCEPTED, state: submitted
+  [ok]   the header on line 2, not line 1
+        expected: ACCEPTED
+        observed: ACCEPTED, state: submitted
+  [ok]   a leading space before the header
+        expected: ACCEPTED
+        observed: ACCEPTED, state: submitted
+  [ok]   prose that DOCUMENTS the pointer format
+        expected: Git LFS pointer is not accepted as evidence content
+        observed: EvidenceError: Git LFS pointer is not accepted as evidence content: deliverables/C1.artifact.bin
+  The guard is an exact-prefix match on the canonical first line. The
+  four near misses are ACCEPTED - correctly, since none of them is a
+  pointer Git would smudge; a CRLF or uppercased header is just a file.
+  The last row is the honest cost: a legitimate artifact whose first
+  line quotes the pointer format is refused. Recorded, NOT FILED -
+  nothing claims otherwise, the false-positive class is narrow (the
+  quote must be byte-exact AND at offset 0), and refusing evidence is
+  the safe direction for a guard whose job is to stop a 130-byte stub
+  standing in for a checkpoint.
+
+########## 0 unexpected result(s) ##########
+No network call was made: proxy submission never fetches, the remote is
+example.invalid, and no LFS object was resolved. Pre-registered
+permissions unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

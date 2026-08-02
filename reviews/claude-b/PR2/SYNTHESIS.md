@@ -30,6 +30,7 @@ never treated my own re-run as independent confirmation.
 | `functions/api/snapshot.js` | **1 issue** | #14 `FORBIDDEN_KEYS` matches whole key names |
 | `model.py` | **1 issue** | #15 `permissions`/`gates` are never type-checked |
 | `doctor.py` (legacy path) | **1 issue** | #17 `--write-test` writes outside `reports/<agent>/` and reports a path that hides it |
+| `archive.py` / `provenance.py` limit | **1 issue** | #18 one config key is a copy threshold on one path and a hard ceiling on the other |
 | `proxy_submit` + grant | clean | `NOTE-proxy-grant-holds.md` |
 | `provenance.py` byte-exactness | clean — 9 mutations, all refused | `NOTE-byte-exactness-holds.md` |
 | `monitor/collector.py` (redaction) | clean | `NOTE-collector-redaction-holds.md` |
@@ -90,6 +91,15 @@ Every divergence currently lands safe, which is why no issue was filed. What is
 worth knowing is that the stricter implementation lives in the component with
 the *lower* security stake, and **nothing in the test suite runs both over one
 corpus**, so a future edit to either will not be checked against the other.
+
+### 3b. One knob, two policies
+
+`max_evidence_bytes` is read by `archive.py:128` as a *copy threshold* — over
+the limit, keep the artifact external and still bind it, which is what
+`README.md:391-394` documents — and by `provenance.py:263` as a *hard ceiling*
+that refuses the submission (#18). Same number, opposite meanings, one lever,
+and only one of the two written down. It rhymes with class 3: two
+implementations of one idea that nothing runs over a shared corpus.
 
 ### 4. Type confusion that only ever opens gates
 
