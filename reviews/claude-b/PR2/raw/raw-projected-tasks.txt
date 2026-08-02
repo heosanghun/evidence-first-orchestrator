@@ -1,0 +1,83 @@
+########## A. POSITIVE CONTROL - a real workspace ##########
+  [ok] the fold reconstructs every task
+        expected: ['T1', 'T2']
+        observed: ['T1', 'T2']
+  [ok]   and matches the on-disk projection byte for byte
+        expected: match: True
+        observed: match: True
+  [ok]   the latest snapshot wins, not the first
+        expected: state=claimed
+        observed: state=claimed
+
+########## B. every caller, enumerated from the source ##########
+  projected_tasks() never verifies the chain itself - it calls read(),
+  which only refuses malformed JSON. So the question is whether every
+  caller verifies first.
+  [ok] projected_tasks itself calls verify
+        expected: verify present: False
+        observed: verify present: False
+  call sites found: [468, 489, 1498]
+        workspace.py:468  verify() within 5 lines above: True
+                     -> get_task - self.ledger.verify() at workspace.py:467
+        workspace.py:489  verify() within 5 lines above: True
+                     -> list_tasks - self.ledger.verify() at workspace.py:488
+        workspace.py:1498  verify() within 5 lines above: True
+                     -> _audit_projections - ledger_status = self.ledger.verify() at 1497
+  [ok] every call site is adjudicated
+        expected: uncovered: 0
+        observed: uncovered: 0
+  [ok]   and every one of them verifies first
+        expected: all verify: True
+        observed: all verify: True
+  [ok]   no other module reaches it
+        expected: other modules: []
+        observed: other modules: []
+
+########## C. what the fold does with input the API cannot make ##########
+  These are properties of the function, NOT reachable states: every
+  shipped caller verifies the chain first (section B), and forging a
+  chain needs the signing key. The events below are written directly.
+  [ok] a well-formed event folds
+        expected: {'T1': {'id': 'T1', 'state': 'pending'}}
+        observed: {'T1': {'id': 'T1', 'state': 'pending'}}
+  [ok] an UNKNOWN action carrying a task payload still folds
+        expected: 'T1'
+        observed: ['T1']
+        -> the fold filters on payload shape, not on the action name.
+  [ok] task_id and payload.task.id disagreeing
+        expected: keyed under 'T1'
+        observed: keyed under 'T1' with id='T2'
+        -> keyed on the ENVELOPE's task_id, not the snapshot's own id.
+  [ok] a null task_id is ignored
+        expected: {}
+        observed: {}
+  [ok] a non-dict task payload is ignored
+        expected: {}
+        observed: {}
+  [ok] an event with no task payload is ignored
+        expected: {}
+        observed: {}
+  [ok] a task with no task.created still projects
+        expected: 'state': 'verified'
+        observed: {'T1': {'id': 'T1', 'state': 'verified'}}
+        -> the fold has no notion of a lifecycle; last write wins.
+
+########## D. does the mismatch survive a real read? ##########
+  Section C's id mismatch is the one shape worth chasing, because it
+  would put a T2-shaped snapshot under the key T1. Rebuilt here with a
+  VALID chain, so get_task actually reaches the comparison.
+  [ok] the chain still verifies with the mismatched event
+        expected: 'valid': True
+        observed: accepted ({'valid': True, 'events': 3, 'head': '71aa667bbf004a082f2b6ae7b8749b1c4a2f9f6807e3ed3c14cf88780cc5231b', 'signed': True})
+  [ok]   and the fold keys it under T1
+        expected: id='T2'
+        observed: id='T2'
+  [ok]   but get_task refuses it
+        expected: Unknown task
+        observed: rejected (ConfigurationError: Unknown task: T1)
+        -> no tasks/T1.json exists, so the projection check never
+           compares. The mismatch is inert unless a matching file is
+           also planted - which is the same filesystem access #9 needs.
+
+########## 0 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.
