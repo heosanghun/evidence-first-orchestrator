@@ -1,0 +1,79 @@
+########## A. POSITIVE CONTROL - an honestly independent verification ##########
+  [ok] a genuinely different verifier is accepted
+        expected: accepted (verified)
+        observed: accepted (verified)
+  [ok]   and the audit reports it independent
+        expected: checked=1 independent=1 non_independent=0
+        observed: checked=1 independent=1 non_independent=0
+  [ok]   sourcing both sides from the recorded snapshots
+        expected: worker=submission_snapshot verifier=verification_snapshot
+        observed: worker=submission_snapshot verifier=verification_snapshot
+
+########## B. issue #3, re-run verbatim at 5694ab45 ##########
+  [ok] a verifier declared identical to the worker
+        expected: Independent verification could not be established: same_control_principal, same_model_family
+        observed: rejected (AuthorizationError: Independent verification could not be established: same_control_principal, same_model_family)
+  the verifier is re-attested to openai / openai-codex
+  [ok]   the byte-identical verification, replayed
+        expected: accepted (verified)
+        observed: accepted (verified)
+  [ok]   what does audit-independence say now?
+        expected: checked=1 independent=1 non_independent=0
+        observed: checked=1 independent=1 non_independent=0
+  [ok]     and where did it source the verifier?
+        expected: verification_snapshot
+        observed: verification_snapshot
+  the mutating event sits inside the task's own lifetime:
+          5  agent.identity_attested    antigravity
+         10  task.submitted             claude
+         11  agent.identity_attested    antigravity
+         12  task.verified              claude-verifier
+  [ok]   submitted < attested < verified
+        expected: in-lifetime: True
+        observed: in-lifetime: True
+  does the audit consider agent.identity_attested at all?
+  [ok]   the string appears in independence.py
+        expected: identity_attested present: False
+        observed: identity_attested present: False
+  every event action independence.py mentions:
+        if event.get("action") != "task.verified":
+        if event.get("action") in {"task.submitted", "task.proxy_submitted"}:
+
+########## C. issue #3's secondary claim: is a policy a mitigation? ##########
+  #3 says resolve_identity_registry consults the policy only as a
+  fallback for agents with NO identity, so it cannot pin one that has.
+  [ok] a policy naming an agent that already has an identity
+        expected: control_principal=openai
+        observed: control_principal=openai
+  [ok]   and the audit with that policy applied
+        expected: checked=1 independent=1 non_independent=0
+        observed: checked=1 independent=1 non_independent=0
+  [ok]   a policy DOES fill an agent that has none
+        expected: control_principal=mistral
+        observed: control_principal=mistral
+
+########## D. the alias machinery #3 left unexamined ##########
+  [ok] a verifier aliased to the worker
+        expected: Independent verification could not be established
+        observed: rejected (AuthorizationError: Independent verification could not be established: same_control_principal, same_model_family, shared_alias_lineage)
+  [ok] a three-deep alias chain resolves to the root's principal
+        expected: control_principal=openai chain=['mid', 'root']
+        observed: control_principal=openai chain=['mid', 'root']
+  [ok] an alias cycle
+        expected: Identity policy alias cycle
+        observed: rejected (ConfigurationError: Identity policy alias cycle: a -> b -> a)
+  [ok] an alias to an agent that has no identity
+        expected: accepted
+        observed: accepted (None)
+
+########## E. a verification with no matching submission ##########
+  [ok] the audit falls back to the task owner's CURRENT identity
+        expected: worker=signed_agent_identity
+        observed: worker=signed_agent_identity
+  [ok]   and says so in the finding
+        expected: checked=1
+        observed: checked=1 independent=1 non_independent=0
+  -> the fallback is disclosed, not silent. That is the right shape.
+
+########## 0 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.
