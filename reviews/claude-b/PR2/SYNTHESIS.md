@@ -31,6 +31,7 @@ never treated my own re-run as independent confirmation.
 | `model.py` | **1 issue** | #15 `permissions`/`gates` are never type-checked |
 | `doctor.py` (legacy path) | **1 issue** | #17 `--write-test` writes outside `reports/<agent>/` and reports a path that hides it |
 | `proxy_submit` + grant | clean | `NOTE-proxy-grant-holds.md` |
+| `provenance.py` byte-exactness | clean — 9 mutations, all refused | `NOTE-byte-exactness-holds.md` |
 | `monitor/collector.py` (redaction) | clean | `NOTE-collector-redaction-holds.md` |
 | `functions/api/local-health.js` | clean — **the strongest shape measured** | `ADDENDUM-chat-refusal-and-grounding.md` |
 | `public/assets/app.js` | clean | `NOTE-dashboard-escaping-holds.md` |
@@ -41,7 +42,7 @@ never treated my own re-run as independent confirmation.
 | `dashboard.py`, `errors.py` | clean | `NOTE-dashboard-and-errors-hold.md` |
 | alias / `alias_chain` machinery | clean | `NOTE-alias-lineage-holds.md` |
 
-Ten components were probed and found sound. That is half the value of this
+Eleven components were probed and found sound. That is half the value of this
 pass: it says where *not* to look next.
 
 ---
@@ -126,6 +127,10 @@ task stricter than intended.
   spot does not extend to the ownership gate.
 - **The dashboard bind guard.** A strict allow-list: `127.1`, `127.0.0.2`,
   `0177.0.0.1`, `[::1]` and `LOCALHOST` all reach loopback and are all refused.
+- **Proxy byte-exactness.** Nine mutations refused, including the three that
+  render identically — a trailing newline added, removed, and trailing
+  whitespace. The comparison is over `git cat-file blob` bytes, never a
+  checkout, so no smudge filter can launder anything.
 
 ---
 

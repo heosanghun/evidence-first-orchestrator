@@ -1,0 +1,116 @@
+########## A. POSITIVE CONTROL - a byte-exact submission is accepted ##########
+  [ok] the untouched envelope submits
+        expected: state: submitted
+        observed: state: submitted
+  [ok]   and every declared file was blob-verified
+        expected: verified: 2
+        observed: verified: 2
+  [ok]   with byte_exact recorded
+        expected: byte_exact: True
+        observed: byte_exact: True
+  [ok]   bound to the commit, not to a checkout
+        expected: 215c83e209b4f6b3e79e04dbbe192d9cfe9be6ca
+        observed: 215c83e209b4f6b3e79e04dbbe192d9cfe9be6ca
+  The control is LIVE: one flipped byte in the artifact must be refused.
+  [ok]   a single flipped byte
+        expected: Git blob bytes differ from submitted evidence
+        observed: EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'deliverables/C1.artifact.txt': blob=7594f159e7eec0553c1622e5bd7d7227b554402edb2fc66a82f05ac84034436a, submitted=189cc9a65402a1062fb68f3bd92bfb0e09f2296c0dbc7fb054af688b598a297b
+
+########## B. every mutation PROXY_SUBMISSION.md:78-82 names ##########
+  Each is applied to the SUBMITTED file and the manifest hash is
+  re-synced, so the guard under test is the BLOB comparison and not
+  the earlier manifest-hash check. Section C shows there are THREE
+  layers here and proves which one these results exercise.
+  [ok]   LF -> CRLF (the documented text-mode copy)
+        expected: Git blob bytes differ from submitted evidence
+        observed: EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'deliverables/C1.artifact.txt': blob=7594f159e7eec0553c1622e5bd7d7227b554402edb2fc66a82f05ac84034436a, submitted=142cc704a64f1e778714180c053dc48ac5045e027f2b85e14b04e287edfe6d37
+  [ok]   UTF-8 BOM inserted
+        expected: Git blob bytes differ from submitted evidence
+        observed: EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'deliverables/C1.artifact.txt': blob=7594f159e7eec0553c1622e5bd7d7227b554402edb2fc66a82f05ac84034436a, submitted=92a14c897cc9923d6b1352b1c0229fa991431934768334f092213dafc98659ea
+  [ok]   encoding conversion to UTF-16LE
+        expected: Git blob bytes differ from submitted evidence
+        observed: EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'deliverables/C1.artifact.txt': blob=7594f159e7eec0553c1622e5bd7d7227b554402edb2fc66a82f05ac84034436a, submitted=e50c820519c302c90ddaca9aef191b4851677a4bf906205d2f4b17b92f8fc1d5
+  [ok]   one trailing newline ADDED
+        expected: Git blob bytes differ from submitted evidence
+        observed: EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'deliverables/C1.artifact.txt': blob=7594f159e7eec0553c1622e5bd7d7227b554402edb2fc66a82f05ac84034436a, submitted=25300fd563a3b2dcee122a904eea4cf5f760759940239c15992ed2295bd85244
+  [ok]   the trailing newline REMOVED
+        expected: Git blob bytes differ from submitted evidence
+        observed: EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'deliverables/C1.artifact.txt': blob=7594f159e7eec0553c1622e5bd7d7227b554402edb2fc66a82f05ac84034436a, submitted=b3ae49f3982cc734a0b31e1e2b85356c236b5b69cc4cd1a7aec1a7fd1856e57b
+  [ok]   trailing whitespace on a line
+        expected: Git blob bytes differ from submitted evidence
+        observed: EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'deliverables/C1.artifact.txt': blob=7594f159e7eec0553c1622e5bd7d7227b554402edb2fc66a82f05ac84034436a, submitted=066f91e9c4bcf1857904a1ffc4da0d0fd5eac19438afdd046a04ba0a47e007e8
+  [ok]   NUL byte appended
+        expected: Git blob bytes differ from submitted evidence
+        observed: EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'deliverables/C1.artifact.txt': blob=7594f159e7eec0553c1622e5bd7d7227b554402edb2fc66a82f05ac84034436a, submitted=38c6ef906b33b14d35447eeb775dda30f8fa21a8ee928680b51e82000e2a5b43
+  [ok]   empty file
+        expected: Git blob bytes differ from submitted evidence
+        observed: EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'deliverables/C1.artifact.txt': blob=7594f159e7eec0553c1622e5bd7d7227b554402edb2fc66a82f05ac84034436a, submitted=e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+  Every documented mutation is a HARD FAILURE, and the message names
+  the cause: 'possible newline or transport mutation'. Rendered text
+  being identical does not help - the comparison is over raw bytes
+  from `git cat-file blob`, never a checkout.
+
+  The raw validation output is held to the same rule, not just artifacts:
+  [ok]   CRLF in the raw output file
+        expected: Git blob bytes differ from submitted evidence
+        observed: EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'deliverables/C1.raw.txt': blob=877905694edf8b7063733cd5b687d3fc4f3b25c505aa0a95fd833c7cff530590, submitted=60bfe3c3eaada0521744876922a2f867224dd0cf4d55fd53d750fe1865f472ae
+
+########## C. three guards, not one, and they fire in order ##########
+  [ok] mutate WITHOUT re-syncing the manifest -> the FIRST guard fires
+        expected: Evidence artifact SHA mismatch
+        observed: EvidenceError: Evidence artifact SHA mismatch for /tmp/efo-bytes-c8g76ghf/fx-p1xhkqjw/ws/reports/antigravity/C1.artifact.txt: expected 7594f159e7eec0553c1622e5bd7d7227b554402edb2fc66a82f05ac84034436a, observed 92e78d0b032962f47792a9fa95fd981ef63e1e3ef074d536d6304c75eddbe29f
+  -> that message is `evidence.py:119`, raised while the manifest is
+     validated - BEFORE provenance.py is entered at all. So the layers
+     are:
+       1. evidence.py:119        manifest hash vs file, at validation
+       2. provenance.py:294-297  manifest hash vs file, AGAIN, inside
+                                 the provenance loop
+       3. provenance.py:298-303  Git blob bytes vs file
+     Layer 2 is unreachable from outside: it can only fire if the file
+     changes BETWEEN layers 1 and 3, i.e. a concurrent writer during a
+     single proxy_submit. It is a TOCTOU backstop, and this probe did
+     NOT reach it - that is stated as unmeasured, not as covered.
+  The point for a prober: a run that forgot to re-sync the manifest
+  measures layer 1 and never exercises layer 3, and would report the
+  blob check as working when it had never executed.
+
+########## D. is the six-section REPORT byte-bound? ##########
+  It is NOT, and the narrow document says so plainly.
+  [ok] a report with no Git blob behind it submits
+        expected: ACCEPTED
+        observed: ACCEPTED, state: submitted
+  [ok]   the manifest never references the report
+        expected: report in manifest: False
+        observed: report in manifest: False
+  NOT FILED, and the reason is which paragraph the claim sits in:
+    PROXY_SUBMISSION.md:61-63 says the transport actor CREATES the
+    six-section report, and requires exactness of 'claim-bearing
+    ARTIFACTS AND RAW VALIDATION OUTPUTS' - a set that excludes it.
+    MIGRATION.md:141-143 is looser ('its claim-bearing files'), but the
+    narrow document governs and is self-consistent: a file the
+    transport actor authors cannot also be a blob from the author's
+    commit.
+  Worth an operator knowing anyway: `byte_exact: true` in the recorded
+  provenance covers the artifacts and raw outputs. The prose of the
+  report around them is transport-authored and commit-bound to nothing.
+
+########## E. the completeness rule (PROXY_SUBMISSION.md:73) ##########
+  'every claim-bearing artifact and raw output is listed once'
+  [ok] dropping the raw output from the provenance list
+        expected: Git provenance does not bind every claim-bearing evidence file
+        observed: EvidenceError: Git provenance does not bind every claim-bearing evidence file: /tmp/efo-bytes-c8g76ghf/fx-v87rfrc6/ws/reports/antigravity/C1.raw.txt
+  [ok]   listing the same file twice
+        expected: Duplicate submitted_path in Git provenance
+        observed: EvidenceError: Duplicate submitted_path in Git provenance: /tmp/efo-bytes-c8g76ghf/fx-y4m13ptj/ws/reports/antigravity/C1.artifact.txt
+  [ok]   two source paths for one submitted file
+        expected: Duplicate submitted_path in Git provenance
+        observed: EvidenceError: Duplicate submitted_path in Git provenance: /tmp/efo-bytes-c8g76ghf/fx-_m2vres0/ws/reports/antigravity/C1.artifact.txt
+  Both directions are closed: nothing may be omitted, and nothing may
+  be listed twice. The set equality at provenance.py:320 is what makes
+  'listed once' mechanical rather than advisory.
+
+########## 0 unexpected result(s) ##########
+No network call was made: proxy submission never fetches, and the
+remote is example.invalid. Pre-registered permissions unchanged -
+gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.
