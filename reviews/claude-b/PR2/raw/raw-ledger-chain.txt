@@ -1,0 +1,51 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] an untouched ledger verifies
+        expected: 'valid': True
+        observed: {'valid': True, 'events': 8, 'head': '57b0376f4b5e5ad52cbfd7c5bf24d15a508585c6cd6ed8df2babacbfcdf8abb9', 'signed': True}
+  [ok]   and doctor reports healthy
+        expected: healthy=True
+        observed: healthy=True
+
+########## B. the documented claims ##########
+  [ok] an edited line (docs: hash or HMAC verification fails)
+        expected: event hash mismatch at event 3
+        observed: rejected (IntegrityError: Ledger event hash mismatch at event 3)
+  [ok] a forged signature with an intact hash
+        expected: signature mismatch at event 3
+        observed: rejected (IntegrityError: Ledger signature mismatch at event 3)
+  [ok] two events reordered
+        expected: sequence mismatch
+        observed: rejected (IntegrityError: Ledger sequence mismatch at event 3)
+  [ok] an event duplicated in place
+        expected: sequence mismatch
+        observed: rejected (IntegrityError: Ledger sequence mismatch at event 4)
+  [ok] a deleted task projection (docs: ledger retains the snapshot)
+        expected: projection missing
+        observed: rejected (IntegrityError: T1: projection missing)
+
+########## C. tail truncation - not mentioned in the docs ##########
+  ledger has 8 events; dropping the last one (the claim)
+  [!! UNEXPECTED !!] does the chain itself notice a dropped tail?
+        expected: rejected
+        observed: accepted ({'valid': True, 'events': 7, 'head': '01e0185408265d4b5011c330d7041166b71152c0374288c2c03b5b6605a25394', 'signed': True})
+  [ok]   does reading the task notice?
+        expected: projection differs from the signed ledger
+        observed: rejected (IntegrityError: Task T1 projection differs from the signed ledger)
+  [ok]   and doctor?
+        expected: healthy=False
+        observed: healthy=False
+
+########## D. truncation with the projection rolled back to match ##########
+  [ok] the chain verifies
+        expected: accepted
+        observed: accepted ({'valid': True, 'events': 7, 'head': '820968a8680abeefcdc49993e25e6fb1ecc1d1293e4f9aa31900bbe92e72fa21', 'signed': True})
+  [ok]   and the task reads back as pending
+        expected: accepted
+        observed: accepted (pending)
+  [ok]   and doctor?
+        expected: healthy=
+        observed: healthy=True
+  -> the claim event is gone from history and nothing reports it.
+
+########## 1 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.
