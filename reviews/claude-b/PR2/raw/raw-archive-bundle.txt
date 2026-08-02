@@ -1,0 +1,146 @@
+########## A. POSITIVE CONTROL - an honest submit archives ##########
+  [ok] the submission archives report, manifest, artifact and raw output
+        expected: 'retained': 4
+        observed: retained=4 external=0 files=4 -> 'retained': 4
+        bundle_id  = worker-3fcf3d96483693ce
+        path       = .../submissions/T1/attempt-001/worker-3fcf3d96483693ce
+        report     retained=True size=230    f51bbdf181bfee705ec257dc991b4ccd76b5a4c69a2d2074e60d95810bf35699_report.md
+        manifest   retained=True size=958    3fcf3d96483693cecff8721c269677097f84b557a27f23c9711d2cbad90cdf49_manifest.json
+        artifact   retained=True size=18     1ef9875005db492e46b0eb9cf9aac9e12b1aa0cad45987c97c526467fa13810e_artifact.txt
+        raw_output retained=True size=18     877905694edf8b7063733cd5b687d3fc4f3b25c505aa0a95fd833c7cff530590_raw.txt
+  [ok]   every file is stored under its own content hash
+        expected: 1ef9875005db492e
+        observed: 1ef9875005db492e46b0eb9cf9aac9e12b1aa0cad45987c97c526467fa13810e_artifact.txt 3fcf3d96483693cecff8721c269677097f84b557a27f23c9711d2cbad90cdf49_manifest.json 877905694edf8b7063733cd5b687d3fc4f3b25c505aa0a95fd833c7cff530590_raw.txt f51bbdf181bfee705ec257dc991b4ccd76b5a4c69a2d2074e60d95810bf35699_report.md
+  [ok]   and doctor is healthy afterwards
+        expected: healthy=True
+        observed: healthy=True
+
+########## B. the copy guards, called directly ##########
+  [ok] POSITIVE CONTROL - an honest direct call
+        expected: accepted
+        observed: accepted ({'bundle_id': 'worker-c8c59264a1f7a080', 'path': '/tmp/efo-archive-_miuirf2/direct/out/T9/attempt-001/worker-c8c59264a1f7a080', 'manifest_path': '/tmp/efo-archive-_miuirf2/direct/out/T9/attempt-001/worker-c8c59264a1f7a080/bundle.json', 'manifest_sha256': '93f9028aea6f7bb68847ebd263a5d67e81ae1736ff2c43aa46e59efbac48578a', 'files': [{'kind': 'manifest', 'source': '/tmp/efo-archive-_miuirf2/direct/src/m.json', 'sha256': 'c8c59264a1f7a080c696a7ce3a7ccfcbc0e47b4fe3cf7dbbc3d66d9ac96f1cb8', 'size_bytes': 17, 'retained': True, 'archive_path': '/tmp/efo-archive-_miuirf2/direct/out/T9/attempt-001/worker-c8c59264a1f7a080/files/c8c59264a1f7a080c696a7ce3a7ccfcbc0e47b4fe3cf7dbbc3d66d9ac96f1cb8_m.json'}, {'kind': 'artifact', 'source': '/tmp/efo-archive-_miuirf2/direct/src/evidence.txt', 'sha256': 'caba551b8dddb218c9ac43b9beaadc360d66d11b0fdd8b0c98eb826a94dc4c98', 'size_bytes': 13, 'retained': True, 'archive_path': '/tmp/efo-archive-_miuirf2/direct/out/T9/attempt-001/worker-c8c59264a1f7a080/files/caba551b8dddb218c9ac43b9beaadc360d66d11b0fdd8b0c98eb826a94dc4c98_evidence.txt'}], 'retained': 2, 'external': 0})
+  [ok] evidence swapped between hashing and archival
+        expected: Evidence changed while being archived
+        observed: rejected (EvidenceError: Evidence changed while being archived: /tmp/efo-archive-_miuirf2/direct/src/evidence.txt (expected 0000000000000000000000000000000000000000000000000000000000000000, observed caba551b8dddb218c9ac43b9beaadc360d66d11b0fdd8b0c98eb826a94dc4c98))
+  [ok] a source that no longer exists
+        expected: Evidence disappeared before archival
+        observed: rejected (EvidenceError: Evidence disappeared before archival: /tmp/efo-archive-_miuirf2/direct/gone.txt)
+  [ok] a negative byte bound
+        expected: max_artifact_bytes cannot be negative
+        observed: rejected (EvidenceError: max_artifact_bytes cannot be negative)
+  [ok] a destination already holding different content
+        expected: Archived evidence path already has different content
+        observed: rejected (EvidenceError: Archived evidence path already has different content: /tmp/efo-archive-_miuirf2/direct/out/T9/attempt-001/worker-c8c59264a1f7a080/files/caba551b8dddb218c9ac43b9beaadc360d66d11b0fdd8b0c98eb826a94dc4c98_evidence.txt)
+  filename sanitisation (the archived name is derived from path.name):
+        _safe_name('...') -> 'artifact'
+        _safe_name('a/b') -> 'b'
+        _safe_name('..') -> 'artifact'
+        _safe_name('x;rm -rf /.txt') -> 'txt'
+        _safe_name('') -> 'q'
+  [ok] a task id that would escape the submissions root
+        expected: Task id must start with an alphanumeric character
+        observed: rejected (ConfigurationError: Task id must start with an alphanumeric character and contain only letters, numbers, dot, underscore, or hyphen (maximum 80 characters))
+
+########## C. is retained evidence ever looked at again? ##########
+  the ledger DOES hold the per-file hashes - the data to check exists:
+        ledger: report     f51bbdf181bfee70... retained=True
+        ledger: manifest   6ca3b7ca12554fd4... retained=True
+        ledger: artifact   1ef9875005db492e... retained=True
+        ledger: raw_output 877905694edf8b70... retained=True
+  archived artifact rewritten in place
+        recorded sha = 1ef9875005db492e...
+        on-disk sha  = 2489b7e1ba304ad1...
+  [ok] does the ledger notice?
+        expected: accepted
+        observed: accepted ({'valid': True, 'events': 13, 'head': '335cece7f578a84b14d36eded379e41906d92f51d8c691bb2b0cbc1e6f62c311', 'signed': True})
+  [ok]   does reading the task notice?
+        expected: accepted
+        observed: accepted (submitted)
+  [ok]   does doctor notice?
+        expected: healthy=
+        observed: healthy=True
+  [ok]   does audit_projections notice?
+        expected: accepted
+        observed: accepted ([])
+  [ok] bundle.json replaced - doctor?
+        expected: healthy=
+        observed: healthy=True
+  the whole bundle directory deleted
+  [ok] does the ledger notice?
+        expected: accepted
+        observed: accepted ({'valid': True, 'events': 13, 'head': '335cece7f578a84b14d36eded379e41906d92f51d8c691bb2b0cbc1e6f62c311', 'signed': True})
+  [ok]   does reading the task notice?
+        expected: accepted
+        observed: accepted (submitted)
+  [ok]   does doctor notice?
+        expected: healthy=
+        observed: healthy=True
+  every public Workspace method that could re-check it: ['archive', 'audit_independence', 'audit_projections', 'authorize_proxy_submission', 'verify']
+
+########## D. an artifact over the byte bound is not retained ##########
+  configured max_evidence_bytes = 52428800 (50 MiB)
+  [ok] POSITIVE CONTROL - can the bound be lowered by editing the config?
+        expected: Workspace configuration differs from the signed ledger
+        observed: rejected (IntegrityError: Workspace configuration differs from the signed ledger)
+  public Workspace methods that could change it: []
+  so the artifact itself has to exceed 50 MiB (sparse, costs no disk).
+  [ok] the submission is still accepted
+        expected: 'external': 1
+        observed: retained=3 external=1 -> 'external': 1
+        report     retained=True size=230    archive_path=/tmp/efo-archive-_miuirf2/ws-oau4899u/ws/submissions/T1/attempt-001/worker-06118c0339809aad/files/f51bbdf181bfee705ec257dc991b4ccd76b5a4c69a2d2074e60d95810bf35699_report.md
+        manifest   retained=True size=958    archive_path=/tmp/efo-archive-_miuirf2/ws-oau4899u/ws/submissions/T1/attempt-001/worker-06118c0339809aad/files/06118c0339809aad6e5ffa3108cb40a787fda80e1da2ebe35cef34e4946389aa_manifest.json
+        artifact   retained=False size=52428801 archive_path=None
+        raw_output retained=True size=18     archive_path=/tmp/efo-archive-_miuirf2/ws-oau4899u/ws/submissions/T1/attempt-001/worker-06118c0339809aad/files/877905694edf8b7063733cd5b687d3fc4f3b25c505aa0a95fd833c7cff530590_raw.txt
+  the un-retained artifact deleted from the worker's own report dir
+  [ok] does reading the task notice?
+        expected: accepted
+        observed: accepted (submitted)
+  [ok]   does doctor notice?
+        expected: healthy=
+        observed: healthy=True
+  [ok]   can a verifier still accept it?
+        expected: accepted
+        observed: accepted (verified)
+
+########## E. Workspace.archive() - the state machine and the chain ##########
+  [ok] archive a pending task
+        expected: cannot transition pending -> archived
+        observed: rejected (TransitionError: Task T1 cannot transition pending -> archived)
+  [ok] archive a submitted task
+        expected: cannot transition submitted -> archived
+        observed: rejected (TransitionError: Task T1 cannot transition submitted -> archived)
+  [ok] archive a worker
+        expected: Only orchestrator 'antigravity' may perform this action
+        observed: rejected (AuthorizationError: Only orchestrator 'antigravity' may perform this action)
+  [ok] archive a verified task
+        expected: accepted
+        observed: accepted (archived)
+  [ok]   the archival is committed to the chain
+        expected: events 14 -> 15
+        observed: events 14 -> 15
+  [ok]   the live projection is retained
+        expected: exists=True
+        observed: exists=True
+  [ok]   a second copy is written to archive/
+        expected: exists=True
+        observed: exists=True
+  [ok] archive twice
+        expected: cannot transition archived -> archived
+        observed: rejected (TransitionError: Task T1 cannot transition archived -> archived)
+  [ok]   the chain still verifies
+        expected: accepted
+        observed: accepted ({'valid': True, 'events': 15, 'head': '41d4ea320709b7bc3ec6c8f331f1d24f883c247bbfac101a69e684610d195147', 'signed': True})
+  [ok]   and doctor is healthy
+        expected: healthy=True
+        observed: healthy=True
+  archive/T1.json rewritten (state -> verified, owner -> someone-else)
+  [ok] does reading the task notice?
+        expected: accepted
+        observed: accepted (archived)
+  [ok]   does doctor notice?
+        expected: healthy=
+        observed: healthy=True
+  public Workspace methods touching archive/: ['archive']
+
+########## 0 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.
