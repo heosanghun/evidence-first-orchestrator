@@ -1,0 +1,110 @@
+########## A. POSITIVE CONTROL - an honest proxy submission ##########
+  [ok] the submission is accepted
+        expected: 'state': 'submitted'
+        observed: 'state': 'submitted' attempt=1
+  [ok]   authorship is the offline author, not the transport
+        expected: actor='claude' method='proxy'
+        observed: actor='claude' method='proxy'
+  [ok]   transport is recorded separately
+        expected: actor='antigravity'
+        observed: actor='antigravity'
+  [ok]   the grant is marked consumed
+        expected: consumed_by='antigravity'
+        observed: consumed_at=True consumed_by='antigravity'
+  [ok]   and doctor is healthy
+        expected: healthy=True
+        observed: healthy=True
+
+########## B. the grant gates ##########
+  [ok] submit with no grant at all
+        expected: has no proxy authorization
+        observed: rejected (AuthorizationError: Task C1 has no proxy authorization)
+  [ok] a wrong token
+        expected: Proxy authorization token is invalid
+        observed: rejected (AuthorizationError: Proxy authorization token is invalid)
+  [ok] an author who is not the task owner
+        expected: is not task owner
+        observed: rejected (AuthorizationError: Proxy author 'other' is not task owner 'claude')
+  [ok] the transport submitting as itself
+        expected: An author must use the normal claim/start/submit path
+        observed: rejected (AuthorizationError: An author must use the normal claim/start/submit path)
+  [ok] a second authorization while one is active
+        expected: already has an active proxy authorization
+        observed: rejected (TransitionError: Task already has an active proxy authorization)
+  [ok] a transport that is not the orchestrator
+        expected: Proxy transport must be the workspace orchestrator
+        observed: rejected (AuthorizationError: Proxy transport must be the workspace orchestrator)
+  [ok] can the orchestrator own a task at all?
+        expected: is not a worker
+        observed: rejected (ConfigurationError: Task owner 'antigravity' is not a worker)
+  [ok] a report outside the transport's report directory
+        expected: Proxy report must be under the transport actor's report directory
+        observed: rejected (AuthorizationError: Proxy report must be under the transport actor's report directory: /tmp/efo-proxy-dg6sghcg/fx-6o_w2t2y/ws/reports/antigravity)
+  [ok] a provenance commit that does not exist
+        expected: Needed a single revision
+        observed: rejected (EvidenceError: Git provenance command failed (rev-parse --verify 0000000000000000000000000000000000000000^{commit}): fatal: Needed a single revision)
+  [ok] a real commit that the grant does not name
+        expected: differs from the proxy authorization
+        observed: rejected (AuthorizationError: Git provenance commit differs from the proxy authorization)
+  replay: consume a grant, then present it again
+  [ok]   the same token a second time
+        expected: does not match this submission: next_attempt
+        observed: rejected (AuthorizationError: Proxy authorization does not match this submission: next_attempt)
+  cross-workspace: both workspaces hold a live grant for C1;
+  present workspace A's token to workspace B
+  [ok]   a token minted in another workspace
+        expected: Proxy authorization token is invalid
+        observed: rejected (AuthorizationError: Proxy authorization token is invalid)
+
+########## C. the archival path at workspace.py:1220 ##########
+  [ok] the bundle is labelled as proxy work
+        expected: proxy-worker
+        observed: proxy-worker-8e68aa1ce0ce93f1
+  [ok]   and filed under the grant's next_attempt
+        expected: attempt-001
+        observed: /tmp/efo-proxy-dg6sghcg/fx-3fo9t40p/ws/submissions/C1/attempt-001/proxy-worker-8e68aa1ce0ce93f1
+        report               retained=True size=233
+        manifest             retained=True size=991
+        artifact             retained=True size=18
+        raw_output           retained=True size=18
+        provenance_manifest  retained=True size=454
+  [ok]   the provenance manifest is archived alongside the evidence
+        expected: provenance_manifest
+        observed: ['artifact', 'manifest', 'provenance_manifest', 'raw_output', 'report']
+  the normal path lets an over-limit artifact stay external (issue #10).
+  does the proxy path?
+  [ok]   an artifact larger than max_evidence_bytes
+        expected: Git source blob exceeds the proxy verification limit
+        observed: rejected (EvidenceError: Git source blob exceeds the proxy verification limit: deliverables/C1.artifact.txt (52428801 > 52428800))
+  -> it never reaches archival, so a proxy bundle is always complete:
+  [ok]   external count on the honest proxy bundle
+        expected: 'external': 0
+        observed: 'external': 0
+  archived provenance manifest rewritten
+        recorded sha = 4e31f7a72f3cad14...
+        on-disk sha  = 9321954e9bf6900c...
+  [ok] does the ledger notice?
+        expected: accepted
+        observed: accepted ({'valid': True, 'events': 10, 'head': '853e8aede5bd582605500e18bd6efa1288b9fb294d3b71b6ba72c85c3ffd3cd1', 'signed': True})
+  [ok]   does doctor notice?
+        expected: healthy=
+        observed: healthy=True
+
+########## D. is transport independence enforced or only recorded? ##########
+  [ok] an independent transport is recorded as independent
+        expected: True
+        observed: True
+  [ok] an author sharing the orchestrator's principal and family
+        expected: 'state': 'submitted'
+        observed: 'state': 'submitted'
+  [ok]   what does the record say?
+        expected: same_control_principal
+        observed: independent=False reasons=['same_control_principal', 'same_model_family']
+  every mention of transport_independence in the source tree:
+        evidence_orchestrator/workspace.py:1184:        evidence["transport_independence"] = evaluate_independence(
+        evidence_orchestrator/workspace.py:1301:                transport_independence = evaluate_independence(
+        evidence_orchestrator/workspace.py:1305:                verification["transport_overlap"] = not transport_independence[
+        evidence_orchestrator/workspace.py:1308:                verification["transport_independence"] = transport_independence
+
+########## 0 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.
