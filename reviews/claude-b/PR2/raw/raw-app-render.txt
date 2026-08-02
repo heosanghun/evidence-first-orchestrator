@@ -1,0 +1,167 @@
+########## A. POSITIVE CONTROL - the extractor finds real sites ##########
+  lifted from /tmp/efo-prov/public/assets/app.js:144-151
+  [ok] escapeHtml lifted and callable
+        expected: &lt;b&gt;
+        observed: &lt;b&gt;
+  [ok] the extractor finds innerHTML template interpolations
+        expected: true
+        observed: true (found 89)
+  [ok]   including a known-escaped one
+        expected: true
+        observed: true
+  [ok]   and stripping escapeHtml removes it
+        expected: true
+        observed: true
+  [ok]   while a known-numeric one survives the strip
+        expected: true
+        observed: true
+
+########## B. escapeHtml, executed against hostile payloads ##########
+  [ok] a script tag
+        expected: &lt;script&gt;alert(1)&lt;/script&gt;
+        observed: &lt;script&gt;alert(1)&lt;/script&gt;
+  [ok] an img onerror
+        expected: &lt;img src=x onerror=&quot;alert(1)&quot;&gt;
+        observed: &lt;img src=x onerror=&quot;alert(1)&quot;&gt;
+  [ok] an attribute break, double quote
+        expected: &quot; onmouseover=&quot;alert(1)
+        observed: &quot; onmouseover=&quot;alert(1)
+  [ok] an attribute break, single quote
+        expected: &#039; onmouseover=&#039;alert(1)
+        observed: &#039; onmouseover=&#039;alert(1)
+  [ok] an ampersand, escaped first so entities cannot be smuggled
+        expected: &amp;lt;script&amp;gt;
+        observed: &amp;lt;script&amp;gt;
+  [ok] a null-ish value
+        expected: 
+        observed: 
+  All five HTML-significant characters are covered, and `&` is
+  replaced FIRST, which is the ordering that matters.
+
+########## C. every innerHTML interpolation, classified ##########
+  interpolations in total:            89
+    escapeHtml(...) or only literals: 37
+    numeric-only:                     27
+    everything else:                  25
+  the remainder, deduplicated, each adjudicated by reading its site:
+        app.js: 687  gpuIndexes.join(", ")
+                       -> gpu.index values, coerced by number() at app.js:690
+        app.js: 687  verified
+                       -> project.verified_count via number()
+        app.js: 687  taskCount
+                       -> project.task_count via number()
+        app.js: 687  active
+                       -> project.active_task_count via number()
+        app.js: 687  blocked
+                       -> project.blocked_task_count via number()
+        app.js: 806  state
+                       -> String(agent.state).toLowerCase(), then matched against a fixed class set
+        app.js: 806  transportBadge
+                       -> a fragment built above; its own text is escaped
+        app.js: 935  category
+                       -> a key of ACTIVITY_CATEGORY_LABELS, a fixed map
+        app.js: 935  count > 0 ? count : ""
+                       -> a bucket count or empty
+        app.js: 935  count === 0 ? " empty" : ""
+                       -> two literals
+        app.js: 935  count > 0 ? `<svg class="activity-bar-svg" viewBox="0 0 12 100" preserveAspectRatio="none" ar...
+                       -> a nested template whose own interpolations are counted separately
+        app.js: 935  new Date(bucket.at).toISOString()
+                       -> Date.toISOString() output
+        app.js: 935  showLabel ? ESCAPED : ""
+                       -> a boolean guard around an escaped call
+        app.js: 991  event.category
+                       -> same fixed map, used as a CSS class
+        app.js: 991  group.length
+                       -> an array length
+        app.js: 991  rows
+                       -> a fragment built above; its own text is escaped
+        app.js:1037  project.eta
+                       -> assigned to `eta`, which is only ever used inside escapeHtml(...) at app.js:1065-1067
+        app.js:1037  reserved ? " reserved" : ""
+                       -> two literals
+        app.js:1037  thermalClass
+                       -> one of "", "warm", "hot"
+        app.js:1037  projects
+                       -> a fragment built above; its own text is escaped
+        app.js:1239  seriesIndex % GPU_COLORS.length
+                       -> a number
+        app.js:1330  statusBadge
+                       -> a fragment built above; its own text is escaped
+        app.js:1435  severity
+                       -> whitelisted to critical|info|warning at app.js:1437-1439
+        app.js:1435  label
+                       -> one of 긴급|안내|주의, three literals
+        app.js:1435  alert.message ? `<span> · ${ ESCAPED }</span>` : ""
+                       -> a presence guard around an escaped call
+  [ok] every remaining interpolation is adjudicated
+        expected: uncovered: 0
+        observed: uncovered: 0
+  None of them carries free text from the snapshot. Every string
+  that does - titles, names, roles, objectives, alert messages,
+  ETAs, activity titles - reaches markup through escapeHtml.
+
+########## D. cross-check: every snapshot text field ##########
+  For each field the snapshot carries as free text, confirm every
+  innerHTML site that mentions it wraps it in escapeHtml.
+        task.title                   escaped at every one of 1 site(s)
+        task.id                      escaped at every one of 3 site(s)
+        task.owner                   escaped at every one of 1 site(s)
+        task.next                    escaped at every one of 1 site(s)
+        task.status_badge            escaped at every one of 1 site(s)
+        agent.name                   escaped at every one of 2 site(s)
+        agent.id                     escaped at every one of 2 site(s)
+        agent.role                   escaped at every one of 1 site(s)
+        agent.current                escaped at every one of 1 site(s)
+        agent.next                   escaped at every one of 1 site(s)
+        project.name                 escaped at every one of 2 site(s)
+        project.id                   escaped at every one of 2 site(s)
+        project.objective            escaped at every one of 1 site(s)
+        project.phase                escaped at every one of 1 site(s)
+        project.next_milestone       escaped at every one of 1 site(s)
+        project.eta                  1 bare site(s), adjudicated: true
+        alert.title                  escaped at every one of 1 site(s)
+        alert.message                1 bare site(s), adjudicated: true
+        event.title                  not rendered by an innerHTML template
+        event.actor_name             escaped at every one of 1 site(s)
+        event.label                  escaped at every one of 1 site(s)
+        event.task_id                not rendered by an innerHTML template
+        snapshot.workspace.name      not rendered by an innerHTML template
+        snapshot.workspace.objective not rendered by an innerHTML template
+  [ok] snapshot text fields reaching an UNADJUDICATED bare slot
+        expected: count: 0
+        observed: count: 0
+
+########## E. the other DOM sinks ##########
+  [ok]   document.write
+        expected: count: 0
+        observed: count: 0
+  [ok]   insertAdjacentHTML
+        expected: count: 0
+        observed: count: 0
+  [ok]   outerHTML assignment
+        expected: count: 0
+        observed: count: 0
+  [ok]   createContextualFragment
+        expected: count: 0
+        observed: count: 0
+  [ok]   eval
+        expected: count: 0
+        observed: count: 0
+  [ok]   new Function
+        expected: count: 0
+        observed: count: 0
+  [ok]   href assignment
+        expected: count: 0
+        observed: count: 0
+  [ok]   srcdoc
+        expected: count: 0
+        observed: count: 0
+  textContent assignments: 80
+  innerHTML assignments:   18
+  Everything scalar goes through textContent; innerHTML is used
+  only for list rendering, where the templates escape.
+
+########## 0 unexpected result(s) ##########
+No DOM was instantiated and nothing was rendered.
+SUBMITTED, not VERIFIED.
