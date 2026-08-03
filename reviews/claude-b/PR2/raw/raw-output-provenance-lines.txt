@@ -9,8 +9,8 @@
         expected: 7a9553b
         observed: 7a9553b
   [ok]   raw outputs in the corpus, the marker-printing ones excluded
-        expected: outputs: 79
-        observed: outputs: 79
+        expected: outputs: 80
+        observed: outputs: 80
   [ok]     exactly three outputs are excluded
         expected: excluded: 3
         observed: excluded: 3
@@ -42,8 +42,8 @@
     divergent-only tokens  raw-full-final.txt  ['test_meta_orchestration']
     divergent-only tokens  raw-w4-replay.txt  ['transfer_orchestrator', 'transfer-orchestrator', 'orchestrator_transferred']
   [ok] outputs positively placed on the ANCHOR's line
-        expected: anchor: 27
-        observed: anchor: 27
+        expected: anchor: 28
+        observed: anchor: 28
   [ok]   outputs carrying a divergent-only token
         expected: other: 5
         observed: other: 5
@@ -60,8 +60,8 @@
         expected: undecidable: 47
         observed: undecidable: 47
   [ok]     and the four classes account for every output
-        expected: total: 79
-        observed: total: 79
+        expected: total: 80
+        observed: total: 80
 
 ########## D. the KNOWN ANSWER that shows the test is ONE-WAY ##########
   [ok] raw-attack4.txt is in the UNDECIDABLE set

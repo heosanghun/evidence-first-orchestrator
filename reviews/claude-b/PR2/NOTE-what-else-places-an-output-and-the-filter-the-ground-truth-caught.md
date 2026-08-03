@@ -4,7 +4,7 @@ Reproduce with `raw/probe_what_else_places_an_output.py`; raw output in
 `raw/raw-what-else-places-an-output.txt`. **26 checks, 0 unexpected.** A
 **map with a mostly-negative result** — no issue filed, nothing retracted.
 
-**Scope, stated first:** 79 outputs, 47 undecidable, 3 candidate classes
+**Scope, stated first:** 79 outputs at publication (**80** at `HEAD`, item 65's output having landed), 47 undecidable, 3 candidate classes
 measured for coverage, 2 literal sets derived over full ancestry, 1 filter bug
 caught by ground truth, 12 newly placed, **35 left open**.
 
@@ -70,7 +70,7 @@ source **text**:
 | anchor-only | 159 | **159** |
 | divergent-only | 309 | **302** |
 | **contradictions** | **5** | **0** |
-| agreements with known placements | — | **19 of 19** |
+| agreements with known placements | — | **19 of 19** (20 of 20 at `HEAD`) |
 
 *Checking a filter against ground truth in both directions* is item 50's rule.
 Here the ground truth was item 61's own placements, and the raw filter
@@ -89,7 +89,7 @@ simply a result.
 And the union of both tests over all 79:
 
 ```
-    anchor 35   divergent 5   mixed 4   undecidable 35
+    anchor 35   divergent 5   mixed 4   undecidable 35      (36/5/4/35 at HEAD)
 ```
 
 > **The union is not the sum of the parts**, and I predicted it wrongly. An
@@ -100,7 +100,7 @@ And the union of both tests over all 79:
 
 ## The headline is the negative
 
-**35 of 79 outputs carry no marker of any class measured here.** The corpus is
+**35 of 79 outputs carry no marker of any class measured here** — 35 of 80 at `HEAD`, item 65's output being placed. The corpus is
 mostly unplaceable — and that *is* the answer to item 64, not a shortfall in
 it. What has changed is that the statement now rests on a test whose
 false-positive rate against known answers is **measured at zero** rather than
@@ -144,5 +144,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_what_else_places_an_output.py` | `ab6edd0511ae68dd9e9a839b0f43c385033fb19d18621e21e82204fb236c0aff` |
-| `raw/raw-what-else-places-an-output.txt` | `78e6f2734f44b063b2140d83fe9077e289c6521d369b45aafcb68b3eddf3faf2` |
+| `raw/probe_what_else_places_an_output.py` | `d4648b029712c0be90bd10f615f95b26be46875e725ad913c4ccba49338eb5d7` |
+| `raw/raw-what-else-places-an-output.txt` | `3984ba4aa5a4ed2d9bc0b1a36e091ba72132c03a3fc181a673fd9b3124c2e39a` |

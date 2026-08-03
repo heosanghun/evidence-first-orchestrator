@@ -13,7 +13,7 @@ six cited outputs.
 
     published   35 anchor / 1 other / 41 undecidable
     corrected   27 anchor / 5 other / 45 undecidable
-    at HEAD     27 anchor / 5 other / 47 undecidable (items 62-64 landed;
+    at HEAD     28 anchor / 5 other / 47 undecidable (items 62-65 landed;
                 item 64's own output is EXCLUDED, being marker-printing)
 
 The known answer that would have caught it was inside the document being
@@ -50,7 +50,7 @@ trees:
 A TWO-WAY discriminator, which is better than the one-way test the item
 proposed. Scanned across every `raw-*.txt`:
 
-    27  carry an ANCHOR-only token  -> positively placed on the anchor's line
+    28  carry an ANCHOR-only token  -> positively placed on the anchor's line
      5  carry divergent-only tokens -> `raw-w4-replay.txt`, my own item-55
         probe, which names both refs by design, plus the four this probe
         first placed backwards
@@ -153,7 +153,7 @@ outputs = [p for p in every if p.name not in SKIP]
 # output pushed 75 -> 76 and 39 -> 40, and the pin is what said so. Item 61's
 # output is excluded rather than counted, so the population stays 77.
 check("  raw outputs in the corpus, the marker-printing ones excluded",
-      "outputs: 79", f"outputs: {len(outputs)}")
+      "outputs: 80", f"outputs: {len(outputs)}")
 check("    exactly three outputs are excluded", "excluded: 3",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
 print("  This probe's OWN classification is therefore the one number here")
@@ -244,7 +244,7 @@ for path in outputs:
         placed_anchor.append(path.name)
     else:
         undecidable.append(path.name)
-check("outputs positively placed on the ANCHOR's line", "anchor: 27",
+check("outputs positively placed on the ANCHOR's line", "anchor: 28",
       f"anchor: {len(placed_anchor)}")
 check("  outputs carrying a divergent-only token", "other: 5",
       f"other: {len(placed_other)}")

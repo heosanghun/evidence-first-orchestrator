@@ -83,8 +83,8 @@ for row in rows:
         if found and (RAW / found.group(1)).is_file():
             probes[found.group(1)] = component
 check("clean rows in SYNTHESIS", "clean rows: 21", f"clean rows: {len(rows)}")
-check("  distinct notes they cite", "notes: 25", f"notes: {len(notes)}")
-check("    whose probe can be located", "probes: 23", f"probes: {len(probes)}")
+check("  distinct notes they cite", "notes: 26", f"notes: {len(notes)}")
+check("    whose probe can be located", "probes: 24", f"probes: {len(probes)}")
 print("  Twenty-two is more than one round of hand adjudication, which is what")
 print("  the item anticipated. Section B tries the cheap way; section C shows")
 print("  the cheap way does not work.")
@@ -161,8 +161,8 @@ for probe, (component, count) in sorted(driving.items()):
     print(f"    drives   {probe:<42}{component[:22]:<24}{count} non-string args")
 check("probes that never execute the component - a static census",
       "static: 4", f"static: {len(static)}")
-check("  probes that drive it", "driving: 19", f"driving: {len(driving)}")
-check("    of which the proxy says feed a non-string", "flagged: 19",
+check("  probes that drive it", "driving: 20", f"driving: {len(driving)}")
+check("    of which the proxy says feed a non-string", "flagged: 20",
       f"flagged: {sum(1 for _, n in driving.values() if n)}")
 print("  For a static census the question does not arise: it reads the AST and")
 print("  never calls anything, so it has no input class to feed.")
@@ -202,7 +202,7 @@ ISSUES = {
     "`cli.py`": "#19 (done - item 56)",
     "`dashboard.py`, `errors.py`": "#19",
     "`workspace.py` implicit exceptions": "#19",
-    "`proxy_submit` + grant": "#7",
+    "`proxy_submit` + grant": "#7 (done - item 65)",
     "`util.py`, `lock.py`": "(done - item 47)",
 }
 named = [(p, c, ISSUES[c]) for p, (c, _) in sorted(driving.items())
@@ -213,14 +213,14 @@ for probe, component, issues in named:
 # it appears twice in this listing. Corrected to the measurement; the remainder
 # is still seven because both of its entries are already adjudicated.
 check("driving probes whose component carries an open issue",
-      "with an issue: 13", f"with an issue: {len(named)}")
+      "with an issue: 14", f"with an issue: {len(named)}")
 check("  of which already adjudicated by hand - items 47, 53, 56, 59, 62",
-      "already done: 10",
+      "already done: 12",
       f"already done: {sum(1 for _, _, i in named if 'done' in i)}")
 check("    leaving the population for the next round",
-      "remaining: 3",
+      "remaining: 2",
       f"remaining: {len(named) - sum(1 for _, _, i in named if 'done' in i)}")
-print("  THREE remain. That is the population the next round should take, one")
+print("  TWO remain. That is the population the next round should take, one")
 print("  at a time and BY HAND, which is the only method shown to work here.")
 print("  Updated 2026-08-03: items 53, 56, 59 and 62 adjudicated `provenance.py`")
 print("  byte-exactness, `cli.py`, the collector and `projected_tasks`, moving")

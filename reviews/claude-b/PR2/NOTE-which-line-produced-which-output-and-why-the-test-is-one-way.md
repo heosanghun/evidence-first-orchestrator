@@ -33,6 +33,10 @@ sets, 3 candidate discriminators, 1 known answer.
 > **35 remain unplaceable by any class measured.** This probe's own numbers
 > are unchanged — item 64 is an additional test, reported beside it.
 >
+> **Item 65's output** moves the population to **80** and the anchor placement
+> to **28**; the undecidable count is unchanged at **47**. The pin said so
+> again.
+>
 > **Every table below is superseded by
 > `NOTE-the-suite-size-decided-it-and-a-substring-reversed-four.md`**, which
 > carries the measurement. Two things here survive unchanged: the test still
@@ -79,7 +83,7 @@ belonging to the other one.
 
 | | outputs (**as published — see the correction above**) |
 |---|---|
-| carry an **anchor-only** token → placed on the anchor's line | ~~**35**~~ → **27** |
+| carry an **anchor-only** token → placed on the anchor's line | ~~**35**~~ → **27** → **28** at `HEAD` |
 | carry a **`7a9553b`-only** token | ~~**1**~~ → **5**; `raw-w4-replay.txt` names both refs by design, and the other four were placed backwards here |
 | carry **neither** → **undecidable** | ~~**41**~~ → **45** → **47** at `HEAD` |
 
@@ -147,7 +151,7 @@ same treatment `probe_inventory_selfcheck.py`'s tally got.
   before the results print. The anchor's working tree is untouched, and it does
   **not** touch `main` or another agent's branch.
 - **MEASURED:** both marker sets over the whole of each line, the four-way
-  scan of all 79 outputs,
+  scan of all 80 outputs,
   `REPORT.md`'s six, both `status` shapes, the usage-line census, item 55's two
   quoted sentences, the self-exclusion. **REASONED:** nothing.
 
@@ -161,5 +165,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_output_provenance_lines.py` | `43848eb7e34adaa2fbc379d00a3dee456981464788b427441356239f15c3a29e` |
-| `raw/raw-output-provenance-lines.txt` | `b84310bf78fa381d93d6d54260eb0a2b981eefcc0c13b64f628e1a3685dfcd2b` |
+| `raw/probe_output_provenance_lines.py` | `511cadbef74fd414701748eaf954b152efc5e1a632413fc91962552f06185d9f` |
+| `raw/raw-output-provenance-lines.txt` | `afd98f4d8a9ad589f125bc34f80d806bb6d153eb8b21687e0b829ac93c93c918` |

@@ -20,7 +20,8 @@ FROM THE CODE. Corrected by subtracting any literal that appears anywhere in
 the other line's source TEXT - after which:
 
     contradictions   5 -> 0
-    agreements       19 of 19 decidable-by-both
+    agreements       19 of 19 decidable-by-both (20 of 20 at HEAD,
+                     item 65's output having joined the corpus)
 
 Applied to the 47, the corrected class places 12 and leaves 35. That is the
 publishable result: the corpus is mostly unplaceable, and now by a test whose
@@ -29,7 +30,7 @@ assumed.
 
     python3 probe_what_else_places_an_output.py
 
-SCOPE, stated first: 79 outputs, 47 undecidable, 3 candidate classes measured
+SCOPE, stated first: 80 outputs, 47 undecidable, 3 candidate classes measured
 for coverage, 2 literal sets derived over full ancestry, 1 filter bug caught
 by ground truth, 12 newly placed, 35 left open. A MAP. No issue filed,
 nothing retracted.
@@ -88,7 +89,7 @@ every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
 check("  raw outputs scanned, the marker-printing ones excluded",
-      "outputs: 79", f"outputs: {len(outputs)}")
+      "outputs: 80", f"outputs: {len(outputs)}")
 check("    exactly three are excluded, and the third is this probe's own",
       "excluded: 3",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
@@ -263,7 +264,7 @@ agree = sum(1 for p in outputs
             if token[p.name] in ("anchor", "divergent")
             and classify(p.read_text(errors="replace"), DA, DD)
             == token[p.name])
-check("  and it AGREES with this many known placements", "agreements: 19",
+check("  and it AGREES with this many known placements", "agreements: 20",
       f"agreements: {agree}")
 check("    the two offenders are gone from the divergent set",
       "removed: True",
@@ -298,7 +299,7 @@ print(f"    UNION of both tests: {dict(Counter(union.values()))}")
 # already placed by one test can pick up the OTHER line's marker from the
 # second, becoming MIXED rather than staying put. Corrected to the measured
 # union, and the mixed class is asserted rather than absorbed.
-check("the union places this many on the anchor's line", "anchor: 35",
+check("the union places this many on the anchor's line", "anchor: 36",
       f"anchor: {sum(1 for v in union.values() if v == 'anchor')}")
 check("  on the divergent line", "divergent: 5",
       f"divergent: {sum(1 for v in union.values() if v == 'divergent')}")

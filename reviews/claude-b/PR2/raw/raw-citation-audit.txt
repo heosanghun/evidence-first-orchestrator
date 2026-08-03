@@ -6,11 +6,11 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   and the write-ups are present
-        expected: documents: 71
-        observed: documents: 71
+        expected: documents: 72
+        observed: documents: 72
 
 ########## B. every FILE:LINE citation in the write-ups ##########
-  252 live citations across 71 documents
+  255 live citations across 72 documents
   15 more appear inside correction banners and are
   excluded as retractions rather than claims - see the comment in the
   source for why that exclusion is principled and not self-serving.
@@ -60,7 +60,7 @@
     tests/test_workspace.py                        1 citations, 234 lines
     tests/test_concurrency.py                      2 citations, 59 lines
     tests/test_ledger.py                           1 citations, 41 lines
-    src/evidence_orchestrator/workspace.py        53 citations, 1562 lines
+    src/evidence_orchestrator/workspace.py        56 citations, 1562 lines
 
 ########## C. the two that did NOT resolve, and what they should be ##########
   [ok] README.md is shorter than one citation claimed
@@ -153,11 +153,11 @@
   while the committed raw output beside it said 152 across 35. Nobody
   was checking. Now the run fails when prose and output disagree.
   [ok]   NOTE-citation-audit-of-this-review.md states this run's counts
-        expected: 252 citations / 71 documents
-        observed: 252 citations / 71 documents
+        expected: 255 citations / 72 documents
+        observed: 255 citations / 72 documents
   [ok]   SYNTHESIS.md states this run's counts
-        expected: 252 citations / 71 documents
-        observed: 252 citations / 71 documents
+        expected: 255 citations / 72 documents
+        observed: 255 citations / 72 documents
   [ok]   and the retraction count it excludes
         expected: retractions: 15
         observed: retractions: 15

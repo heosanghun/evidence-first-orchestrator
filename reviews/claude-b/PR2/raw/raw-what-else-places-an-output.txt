@@ -6,14 +6,14 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   raw outputs scanned, the marker-printing ones excluded
-        expected: outputs: 79
-        observed: outputs: 79
+        expected: outputs: 80
+        observed: outputs: 80
   [ok]     exactly three are excluded, and the third is this probe's own
         expected: excluded: 3
         observed: excluded: 3
 
 ########## B. the classification item 61 left ##########
-    Counter({'undecidable': 47, 'anchor': 27, 'divergent': 5})
+    Counter({'undecidable': 47, 'anchor': 28, 'divergent': 5})
   [ok] the module/test-id test leaves this many undecidable
         expected: undecidable: 47
         observed: undecidable: 47
@@ -75,8 +75,8 @@
         expected: contradictions: 0
         observed: contradictions: 0
   [ok]   and it AGREES with this many known placements
-        expected: agreements: 19
-        observed: agreements: 19
+        expected: agreements: 20
+        observed: agreements: 20
   [ok]     the two offenders are gone from the divergent set
         expected: removed: True
         observed: removed: True
@@ -99,10 +99,10 @@
   [ok]   and STILL undecidable
         expected: undecidable: 35
         observed: undecidable: 35
-    UNION of both tests: {'undecidable': 35, 'anchor': 35, 'mixed': 4, 'divergent': 5}
+    UNION of both tests: {'undecidable': 35, 'anchor': 36, 'mixed': 4, 'divergent': 5}
   [ok] the union places this many on the anchor's line
-        expected: anchor: 35
-        observed: anchor: 35
+        expected: anchor: 36
+        observed: anchor: 36
   [ok]   on the divergent line
         expected: divergent: 5
         observed: divergent: 5
@@ -113,8 +113,8 @@
         expected: undecidable: 35
         observed: undecidable: 35
   [ok]     the classes account for every output
-        expected: total: 79
-        observed: total: 79
+        expected: total: 80
+        observed: total: 80
 
 ########## H. what this does NOT establish ##########
   * The headline is a NEGATIVE: 35 of 79 outputs carry no marker of
