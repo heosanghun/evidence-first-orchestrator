@@ -6,11 +6,11 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   and the write-ups are present
-        expected: documents: 50
-        observed: documents: 50
+        expected: documents: 51
+        observed: documents: 51
 
 ########## B. every FILE:LINE citation in the write-ups ##########
-  206 live citations across 50 documents
+  207 live citations across 51 documents
   13 more appear inside correction banners and are
   excluded as retractions rather than claims - see the comment in the
   source for why that exclusion is principled and not self-serving.
@@ -24,7 +24,7 @@
   [ok]   and every cited line is within its file
         expected: out of range: []
         observed: out of range: []
-  distinct files cited: 35
+  distinct files cited: 36
     CONTRIBUTING.md                                2 citations, 31 lines
     docs/MIGRATION.md                              4 citations, 167 lines
     docs/PROXY_SUBMISSION.md                       2 citations, 192 lines
@@ -59,6 +59,7 @@
     tests/test_proxy_status.py                     4 citations, 287 lines
     tests/test_workspace.py                        1 citations, 234 lines
     tests/test_concurrency.py                      2 citations, 59 lines
+    tests/test_ledger.py                           1 citations, 41 lines
     src/evidence_orchestrator/workspace.py        44 citations, 1562 lines
 
 ########## C. the two that did NOT resolve, and what they should be ##########
@@ -152,11 +153,11 @@
   while the committed raw output beside it said 152 across 35. Nobody
   was checking. Now the run fails when prose and output disagree.
   [ok]   NOTE-citation-audit-of-this-review.md states this run's counts
-        expected: 206 citations / 50 documents
-        observed: 206 citations / 50 documents
+        expected: 207 citations / 51 documents
+        observed: 207 citations / 51 documents
   [ok]   SYNTHESIS.md states this run's counts
-        expected: 206 citations / 50 documents
-        observed: 206 citations / 50 documents
+        expected: 207 citations / 51 documents
+        observed: 207 citations / 51 documents
   [ok]   and the retraction count it excludes
         expected: retractions: 13
         observed: retractions: 13

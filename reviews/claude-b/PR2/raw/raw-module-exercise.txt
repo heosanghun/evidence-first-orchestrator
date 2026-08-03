@@ -1,0 +1,108 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok] top-level modules in the package
+        expected: modules: 15
+        observed: modules: 15
+  [ok]   test files
+        expected: test files: 12
+        observed: test files: 12
+  [ok]   top-level names to adjudicate
+        expected: names: 95
+        observed: names: 95
+  Small enough to adjudicate every name, and every one below is.
+
+########## B. how a Workspace attribute hides a module from a name census ##########
+    self.config     = read_json  tests reach `.config`: 0
+    self.ledger     = Ledger     tests reach `.ledger`: 8
+  [ok] Workspace attributes built from a constructor
+        expected: attributes: 2
+        observed: attributes: 2
+  [ok]   and the one the tests actually drive
+        expected: ledger reached: 8
+        observed: ledger reached: 8
+  THE NEAR MISS: a pure name census scored ledger.py as never-exercised
+  on ONE hit, and that hit is `title="Ledger test"` - a STRING in a
+  fixture, not the class. The real exercise is workspace.ledger.verify()
+  and .append(). A census over NAMES cannot see a value reached through
+  an ATTRIBUTE - the same shape as #6. Recorded rather than shipped.
+
+########## C. the census, three ways per module ##########
+    module           defs  called  raised  named  verdict
+    __main__.py         0       0       0      0  NEVER NAMED
+    adapter.py          6       1       0      1  exercised by name
+    archive.py          3       0       0      1  PATCH TARGET ONLY
+    cli.py             36       2       0      2  exercised by name
+    dashboard.py        2       0       0      0  NEVER NAMED
+    doctor.py           3       1       0      1  exercised by name
+    errors.py           8       0       6      6  exercised by name
+    evidence.py         6       1       0      1  exercised by name
+    independence.py     7       5       0      5  exercised by name
+    ledger.py           1       0       0      1  exercised via attribute
+    lock.py             1       0       0      0  NEVER NAMED
+    model.py            5       0       0      0  NEVER NAMED
+    provenance.py       7       0       0      1  PATCH TARGET ONLY
+    util.py             9       0       0      0  NEVER NAMED
+    workspace.py        1       1       0      1  exercised by name
+  [ok] modules never named by the suite at all
+        expected: never: 5
+        observed: never: 5   ['__main__.py', 'dashboard.py', 'lock.py', 'model.py', 'util.py']
+  [ok]   modules whose only mention is a patch target
+        expected: patch-only: 2
+        observed: patch-only: 2   ['archive.py', 'provenance.py']
+  [ok]     together, the never-exercised set
+        expected: unexercised: 7
+        observed: unexercised: 7
+  [ok]       out of fifteen
+        expected: fraction: 7/15
+        observed: fraction: 7/15
+
+########## D. and five issues live in that set ##########
+    __main__.py      ['(no issue filed)']
+    archive.py       ['#10', '#18']
+    dashboard.py     ['(no issue filed)']
+    lock.py          ['(no issue filed)']
+    model.py         ['#15']
+    provenance.py    ['#4', '#5', '#18']
+    util.py          ['(no issue filed)']
+  [ok] issues whose component is never exercised by name
+        expected: issues: ['#10', '#15', '#18', '#4', '#5']
+        observed: issues: ['#10', '#15', '#18', '#4', '#5']
+  [ok]   item 42 predicted four; the fifth is model.py
+        expected: model.py in set: True
+        observed: model.py in set: True
+  [ok]     and #15's own function is not in the suite
+        expected: validate_task named: 0
+        observed: validate_task named: 0
+    model.py's five names, none of them in tests: ['new_task', 'validate_task', 'transition', 'lease_expired', 'lease_expiry']
+  So it is a structural fact about the suite, not a coincidence about
+  two components. `errors.py` is the counter-example that shows the
+  census is not just counting silence: it has zero CALLS but six of its
+  eight classes appear in assertRaises, so it lands in `exercised`.
+
+########## E. what this does NOT claim ##########
+  * NOT that the code is unexecuted. Item 42 measured the opposite:
+    submit / verify / proxy_submit are driven by 40 test call sites and
+    reach archive.py and provenance.py UNCONDITIONALLY on every run.
+    The claim is that no test NAMES them, so none can fail ABOUT their
+    own contract.
+  * NOT that a name census is sufficient. ledger.py proves it is not,
+    and that near miss is in section B rather than hidden.
+  * NOT a finding. This is a MAP, no issue is filed, and #4, #5, #10,
+    #15 and #18 are neither re-confirmed nor retracted here.
+  * It does not run the Python suite - pytest is not installed in this
+    container. Every result is a static read at main 5694ab45.
+  * MEASURED: every count, every verdict, the attribute table, the
+    per-name listings. REASONED: that a module no test names cannot
+    have a failing test about its contract - which follows from the
+    absence, not from running anything.
+
+########## 0 unexpected result(s) ##########
+Static AST and text reads of the package and tests at main 5694ab45.
+Nothing executed against a workspace, no issue filed. Pre-registered
+permissions unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

@@ -10,17 +10,24 @@
         observed: exists: True
 
 ########## B. no attack4 script has EVER existed ##########
+    1642414 review: raw-attack4.txt is unreproducible, and REPORT.md's provenance sentence was false
+    reviews/claude-b/PR2/NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md
+    reviews/claude-b/PR2/raw/probe_attack4_provenance.py
+    reviews/claude-b/PR2/raw/raw-attack4-provenance.txt
     a820891 review(claude-b): independent verification of PR #2
     reviews/claude-b/PR2/raw/raw-attack4.txt
   [ok] commits that DELETED anything named attack4
         expected: deleted: []
         observed: deleted: []
-  [ok]   the only path ever matching the name
-        expected: paths: 1
-        observed: paths: 1   ['reviews/claude-b/PR2/raw/raw-attack4.txt']
-  [ok]     and it is the OUTPUT, not a script
-        expected: raw-attack4.txt
-        observed: reviews/claude-b/PR2/raw/raw-attack4.txt
+  [ok]   attack4 SCRIPTS ever committed anywhere in history
+        expected: scripts: []
+        observed: scripts: []
+  [ok]     the output itself is present and classified as output
+        expected: output: True
+        observed: output: True
+  [ok]     and this round's own artifacts are excluded, and named
+        expected: self-references: 4
+        observed: self-references: 4   ['NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md', 'probe_attack4_provenance.py', 'raw-attack4-provenance.txt', 'raw-attack4.txt']
   [ok]   added in the branch's first review commit
         expected: a820891 2026-07-30
         observed: a820891 2026-07-30

@@ -80,11 +80,26 @@ for line in touching:
     print(f"    {line}")
 check("commits that DELETED anything named attack4", "deleted: []",
       f"deleted: {deleted}")
-paths = [line for line in touching if "/" in line]
-check("  the only path ever matching the name", "paths: 1",
-      f"paths: {len(set(paths))}   {sorted(set(paths))}")
-check("    and it is the OUTPUT, not a script",
-      "raw-attack4.txt", sorted(set(paths))[0] if paths else "(none)")
+# CLASSIFY, do not just count. The glob `*attack4*` now also matches THIS
+# investigation's own artifacts - the probe, its output and its note - which
+# did not exist when the question was asked. Excluding them by name would be a
+# guess; the three-way classification the inventory already uses is a rule:
+# under raw/, a file is a SCRIPT unless it is `raw-*.txt` or `probe_*.py`, and
+# anything outside raw/ is a write-up. Same self-reference the attack-script
+# census hit one round earlier, one directory up.
+paths = sorted({line for line in touching if "/" in line})
+in_raw = [p for p in paths if "/raw/" in p]
+scripts = [p for p in in_raw
+           if not Path(p).name.startswith(("raw-", "probe_"))]
+own = [p for p in paths if p not in scripts]
+check("  attack4 SCRIPTS ever committed anywhere in history",
+      "scripts: []", f"scripts: {scripts}")
+check("    the output itself is present and classified as output",
+      "output: True",
+      f"output: {any(Path(p).name == 'raw-attack4.txt' for p in in_raw)}")
+check("    and this round's own artifacts are excluded, and named",
+      f"self-references: {len(paths) - len(scripts)}",
+      f"self-references: {len(own)}   {[Path(p).name for p in own]}")
 added = git(BRANCH, "log", "--diff-filter=A", "--format=%h %ad", "--date=short",
             "-1", "--", "reviews/claude-b/PR2/raw/raw-attack4.txt").strip()
 check("  added in the branch's first review commit", "a820891 2026-07-30", added)

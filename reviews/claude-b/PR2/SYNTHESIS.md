@@ -3,15 +3,15 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**800 passing checks across 44 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 115 files: **46 probe scripts, 61 raw outputs, 8
+**815 passing checks across 45 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 117 files: **47 probe scripts, 62 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
 paragraph disagrees with it. The counts exclude that probe's **own** output,
 which is the report of the run doing the counting — a self-reference with no
 fixpoint, stated rather than hidden — the same guard the citation and quote counts got.
-It also checks the headline `N checks, M unexpected` of all **39** write-ups
+It also checks the headline `N checks, M unexpected` of all **40** write-ups
 against the raw output each one names; nothing verified those until 2026-08-03.
 
 Twelve `UNEXPECTED` lines survive, in five files —
@@ -92,7 +92,7 @@ never treated my own re-run as independent confirmation.
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
-| this review's own counts | machine-checked — inventory, 39 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
+| this review's own counts | machine-checked — inventory, 40 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
 | attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
 | `monitor/collector.py` coverage | map — 27 tests, **no test ages an input**; #6 has no vocabulary to be tested by | `NOTE-the-collector-suite-never-ages-an-input.md` |
 | the 8 provenance-attack scripts | map — all self-document; **2 ran against an unpinned tree that was the stale base**, superseded by the `_main` re-runs | `NOTE-two-attack-scripts-ran-against-the-stale-base.md` |
@@ -100,6 +100,7 @@ never treated my own re-run as independent confirmation.
 | #4 / #5 / #8 / #18 vs the Python suite | map — the components are driven unpatched; **3 of the 4 properties have no vocabulary at all**, the 4th's guard is fed only integers | `NOTE-four-issues-whose-property-the-suite-has-no-words-for.md` |
 | attribute bases arriving via a PARAMETER | clean — 487 too many to adjudicate, one hop leaves **2**, both guarded by a short-circuiting `isinstance` | `NOTE-487-is-too-many-and-the-two-that-survive-are-guarded.md` |
 | `raw-attack4.txt`, the orphan output | **unreproducible** — no `attack4` script ever existed, and the wheel fixture it tests is absent at the anchor; `REPORT.md`'s provenance sentence was false and is corrected in place | `NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md` |
+| the package vs the Python suite | map — **7 of 15 modules are never named by any test**, and #4/#5/#10/#15/#18 all live there; `errors.py` is the counter-example, `ledger.py` the near miss | `NOTE-seven-of-fifteen-modules-the-suite-never-names.md` |
 | the class-2b pattern | **census: 7 of 7 tests cannot fail on their issue** | `NOTE-class-2b-is-a-census-now-seven-of-seven.md` |
 | this review's own censuses | bounded — **24 of 30 measured, 6 reasoned from reading** | `NOTE-which-of-my-censuses-measured-and-which-read.md` |
 | `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
@@ -261,8 +262,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **206 live citations across
-50 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **207 live citations across
+51 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -280,7 +281,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 267 inline spans remain undecidable by position and are named as a
+lenient. 268 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03

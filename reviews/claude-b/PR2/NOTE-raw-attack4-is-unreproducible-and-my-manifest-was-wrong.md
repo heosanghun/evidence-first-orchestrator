@@ -1,7 +1,7 @@
 # `raw-attack4.txt` is unreproducible — and my own manifest says something untrue about it
 
 Reproduce with `raw/probe_attack4_provenance.py`; raw output in
-`raw/raw-attack4-provenance.txt`. **14 checks, 0 unexpected.** No issue filed —
+`raw/raw-attack4-provenance.txt`. **15 checks, 0 unexpected.** No issue filed —
 the defect here is in **my own bookkeeping**, not in EFO.
 
 **Scope, stated first:** one output file (191 lines), one `REPORT.md` section,
@@ -18,9 +18,17 @@ answers, in increasing order of how much they matter.
     reviews/claude-b/PR2/raw/raw-attack4.txt
 ```
 
-`git log --all --diff-filter=D -- '*attack4*'` returns **nothing**. The only
-path that has ever matched the name is the **output**, added in `a820891`
-(2026-07-30), the branch's first review commit.
+`git log --all --diff-filter=D -- '*attack4*'` returns **nothing**, and **zero
+attack4 *scripts* have ever been committed** — the output was added in
+`a820891` (2026-07-30), the branch's first review commit.
+
+> **Correction, 2026-08-03.** This first read *"the only path that has ever
+> matched the name is the output"*, which stopped being true the moment this
+> note, its probe and its raw output were committed — all three match
+> `*attack4*`. The census now **classifies** instead of counting: under `raw/`
+> a file is a script unless it is `raw-*.txt` or `probe_*.py`. The four
+> self-references are named in the output. Same self-reference the attack-script
+> census hit one round earlier, one directory up.
 
 So "recover it from history" is not one of the options. There is nothing to
 recover.
@@ -107,5 +115,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_attack4_provenance.py` | `fcdd18beaa27d3c2e4c5a7bda1a62112765c848b18759a3147197e1e3a3e258d` |
-| `raw/raw-attack4-provenance.txt` | `94b57dbc8804124a0a4bce804243f3fddc86876ce1e0e51b4d17f6725c900879` |
+| `raw/probe_attack4_provenance.py` | `8e8b2b3aa9a7bfc1ca1cfd7f3703df0e42f81acb375eaa3e73543b64e7f28a60` |
+| `raw/raw-attack4-provenance.txt` | `a2ce4ef6ad49b7aa4620f4191bd3559f3a6178c799383818f74a15ed5274b1c4` |
