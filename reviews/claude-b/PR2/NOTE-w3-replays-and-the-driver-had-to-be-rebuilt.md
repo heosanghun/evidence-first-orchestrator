@@ -84,8 +84,17 @@ past.
 
 ## What this does not do
 
-- It does **not** run W4–W8. Their blocker is gone and their scope is stated
-  above; they remain **un-run** and are not claimed otherwise.
+- It does **not** run W4–W8. ~~Their blocker is gone~~ and their scope is
+  stated above; they remain **un-run** and are not claimed otherwise.
+
+> **Correction, 2026-08-03.** *"Their blocker is gone"* is **wrong for W4, W5,
+> W6 and W6b.** The v0.1 blocker is gone, but those four drive
+> `transfer_orchestrator`, which exists at **`7a9553b`** and **nowhere at the
+> anchor** — and `git merge-base --is-ancestor 7a9553b 5694ab45` says `7a9553b`
+> is **not an ancestor**. They need a second, divergent ref, which
+> `raw/probe_w4_replay.py` checks out and names. Found by item 55 on the round
+> after this note was written; W3's replay above is unaffected, because its
+> property is common to both lines.
 - It does **not** claim P2-1 or P2-2 are re-verified.
 - It does **not** recover the original driver — that script never existed. The
   sequence here is a reconstruction matching the recorded event count and error

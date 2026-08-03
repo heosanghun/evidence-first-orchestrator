@@ -1,0 +1,160 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  This probe reads a SECOND ref on purpose and names both, the way
+  ADDENDUM-main-is-red does. The anchor is still not re-pointed.
+  [ok]   the second checkout is at 7a9553b
+        expected: 7a9553b
+        observed: 7a9553b
+  [ok]     and it is a different commit from the anchor
+        expected: same: False
+        observed: same: False
+
+########## B. the feature W4 needs is ABSENT at the anchor ##########
+    7a9553b  7a9553b:src/evidence_orchestrator/cli.py
+    7a9553b  7a9553b:src/evidence_orchestrator/workspace.py
+    7a9553b  7a9553b:tests/test_meta_orchestration.py
+  [ok] transfer_orchestrator lives in three files at 7a9553b
+        expected: at 7a9553b: 3
+        observed: at 7a9553b: 3
+  [ok]   over seven occurrences - cli, workspace and one test file
+        expected: occurrences: 7
+        observed: occurrences: 7
+  [ok]   and in NONE at the anchor - not src, not tests, not docs
+        expected: at anchor: []
+        observed: at anchor: []
+  [ok]     and 7a9553b is NOT an ancestor of the anchor - divergent history
+        expected: is ancestor: False
+        observed: is ancestor: False
+    the anchor's workspace.py line: f827f29 Build evidence-first multi-agent orchestrator
+    the anchor's ledger actions: ['agent.added', 'agent.identity_attested', 'task.archived', 'task.blocked', 'task.claimed', 'task.created', 'task.heartbeat', 'task.lease_expired', 'task.proxy_authorized', 'task.proxy_status_reported', 'task.proxy_submitted', 'task.rejected', 'task.requeued', 'task.started', 'task.submitted', 'task.verified', 'workspace.initialized', 'workspace.json']
+  [ok]       none of them is an orchestrator transfer
+        expected: transfer actions: []
+        observed: transfer actions: []
+  So W4, W5, W6 and W6b drive an API the anchor does not have. Item
+  52 said their blocker was gone; for these four a DIFFERENT blocker
+  exists, and that note is corrected in place.
+
+########## C. the expectations, PARSED from the committed W4 ##########
+    handoff payload keys : ['event_hash', 'from', 'reason', 'to']
+    from -> to           : antigravity -> codex
+    traceback            : FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-user-S
+    traceback            : KeyError: 'orchestrator'
+  [ok]   the committed handoff records four keys
+        expected: keys: ['event_hash', 'from', 'to', 'reason']
+        observed: keys: ['event_hash', 'from', 'to', 'reason']
+  [ok]     and W4 records exactly two tracebacks
+        expected: tracebacks: 2
+        observed: tracebacks: 2
+
+########## D. W4 REPLAYED - against 7a9553b, not the anchor ##########
+    init                                     exit=0
+    workspace transfer-orchestrator          exit=0
+    from -> to                               antigravity -> codex
+  [ok] the handoff succeeds, as the committed run recorded
+        expected: transfer exit: 0
+        observed: transfer exit: 0
+  [ok]   and returns the same four keys
+        expected: keys: ['event_hash', 'from', 'reason', 'to']
+        observed: keys: ['event_hash', 'from', 'reason', 'to']
+  [ok]     with the same from and to
+        expected: antigravity -> codex
+        observed: antigravity -> codex
+  [ok]       but NOT the same event_hash - it is signed and timestamped
+        expected: hashes equal: False
+        observed: hashes equal: False
+
+########## E. both tracebacks are the DRIVER's, adjudicated ##########
+    driver's path  ws/workspace.json        FileNotFoundError: [Errno 2] No such file or directory: '/tmp/efo-w4-ms31pz8l/ws/workspace.json'
+    correct path   ws/.efo/workspace.json   antigravity
+    driver's key   status()['orchestrator'] KeyError: 'orchestrator'
+    correct key    ['status']['orchestrator'] codex
+  [ok] the driver's path reproduces the committed FileNotFoundError
+        expected: FileNotFoundError
+        observed: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/efo-w4-ms31pz8l/ws/workspace.json'
+  [ok]   and the CORRECT path reads the config fine
+        expected: antigravity
+        observed: antigravity
+  [ok]     the driver's key reproduces the committed KeyError
+        expected: KeyError: 'orchestrator'
+        observed: KeyError: 'orchestrator'
+  [ok]       and the CORRECT key - W6b's - returns the new orchestrator
+        expected: codex
+        observed: codex
+  Both are the ORIGINAL DRIVER's defects, not EFO's: one wrong path,
+  one index on the CLI's `{status, tasks}` wrapper. W6b is the same
+  question asked correctly, and it answers.
+
+########## F. the config/ledger divergence is REAL, and by design ##########
+      -> str:
+      orchestrator = str(self.config["orchestrator"])
+      if not self.ledger.path.exists():
+      return orchestrator
+      for event in self.ledger.read():
+      if event.get("action") != "workspace.orchestrator_transferred":
+      continue
+      target = event.get("payload", {}).get("to")
+      if isinstance(target, str):
+      orchestrator = target
+      return orchestrator
+  [ok] 7a9553b's `orchestrator` seeds from the CONFIG
+        expected: orchestrator = str(self.config["orchestrator"])
+        observed:  -> str:
+        orchestrator = str(self.config["orchestrator"])
+        if not self.ledger.path.exists():
+            return orchestrator
+        for event in self.ledger.read():
+            if event.get("action") != "workspace.orchestrator_transferred":
+                continue
+            target = event.get("payload", {}).get("to")
+            if isinstance(target, str):
+                orchestrator = target
+        return orchestrator
+
+    
+  [ok]   then REPLAYS the transfer events from the ledger
+        expected: workspace.orchestrator_transferred
+        observed:  -> str:
+        orchestrator = str(self.config["orchestrator"])
+        if not self.ledger.path.exists():
+            return orchestrator
+        for event in self.ledger.read():
+            if event.get("action") != "workspace.orchestrator_transferred":
+                continue
+            target = event.get("payload", {}).get("to")
+            if isinstance(target, str):
+                orchestrator = target
+        return orchestrator
+
+    
+  So `config file orchestrator: antigravity` and `effective
+  orchestrator: codex` are BOTH correct at once - the config is a seed
+  and the ledger is the authority. W6/W6b measured a real divergence,
+  and it is the intended one, not a defect.
+  This says NOTHING about the anchor, where no such event exists and
+  `orchestrator` is the config value alone.
+
+########## G. what this does NOT do ##########
+  * It does not run W5, W6, W6b, W7 or W8. Four of the six remaining
+    sections need 7a9553b, which is now checked out and named.
+  * It does not review 7a9553b. That commit is NOT this review's
+    subject; nothing here is a verdict about its code.
+  * It does not file an issue and retracts no finding. It DOES correct
+    item 52's `their blocker is gone`, in place and dated.
+  * It does not claim to know which v2 produced raw-attack4.txt - only
+    that the API W4 uses exists on 7a9553b's line and not the anchor's.
+  * No network, no server. Both checkouts are local; the workspace is a
+    tempfile directory, removed before this section printed.
+  * MEASURED: both file censuses, the ancestry, the anchor's action
+    list, the committed payload, all five driven commands, both
+    tracebacks and both corrections, the property body. REASONED:
+    nothing.
+
+########## 0 unexpected result(s) ##########
+Two refs read and named. The anchor's working tree is untouched, no
+`main` write, no issue filed. Pre-registered permissions unchanged -
+gpu/network/performance_metrics all false. SUBMITTED, not VERIFIED.
