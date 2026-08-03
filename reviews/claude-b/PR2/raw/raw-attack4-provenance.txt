@@ -10,6 +10,9 @@
         observed: exists: True
 
 ########## B. no attack4 script has EVER existed ##########
+    571461b review: two of REPORT.md's outputs are not unreproducible - they were re-run here
+    reviews/claude-b/PR2/NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md
+    reviews/claude-b/PR2/raw/raw-attack4-provenance.txt
     c33ba96 review: 91 -> 22 -> 16 -> one driven raise, blocked by the ledger guard
     reviews/claude-b/PR2/NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md
     reviews/claude-b/PR2/raw/raw-attack4-provenance.txt

@@ -153,6 +153,12 @@ ADJUDICATED = {
         "PROBE OUTPUT - `helpers.py:87 expected=4 observed=4 if "
         "known_answer_passed else 5` is the census line, which renders the "
         "dict's two values on one line; the source spells them across four",
+    ("NOTE-what-util-is-clean-rested-on-and-the-input-it-never-fed.md",
+     "provenance.py"):
+        "PROBE OUTPUT - the block is this census's own caller listing, each "
+        "line prefixed `str()` or `  -  ` to mark whether the site coerces. It "
+        "renders provenance.py:156 alongside four other call sites and is not "
+        "a quote of any single line",
     ("NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md",
      "REPORT.md"):
         "PROBE OUTPUT - the block is the probe's own citation listing "

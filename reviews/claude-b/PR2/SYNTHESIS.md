@@ -3,15 +3,15 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**854 passing checks across 47 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 121 files: **49 probe scripts, 64 raw outputs, 8
+**871 passing checks across 48 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 123 files: **50 probe scripts, 65 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
 paragraph disagrees with it. The counts exclude that probe's **own** output,
 which is the report of the run doing the counting — a self-reference with no
 fixpoint, stated rather than hidden — the same guard the citation and quote counts got.
-It also checks the headline `N checks, M unexpected` of all **42** write-ups
+It also checks the headline `N checks, M unexpected` of all **43** write-ups
 against the raw output each one names; nothing verified those until 2026-08-03.
 
 Twelve `UNEXPECTED` lines survive, in five files —
@@ -81,7 +81,7 @@ never treated my own re-run as independent confirmation.
 | `public/assets/app.js` | clean | `NOTE-dashboard-escaping-holds.md` |
 | `ledger.projected_tasks` | clean | `NOTE-projected-tasks-holds.md` |
 | collector identity registry | clean, but diverges | `NOTE-two-identity-implementations.md` |
-| `util.py`, `lock.py` | clean | `NOTE-util-and-lock-hold.md` |
+| `util.py`, `lock.py` | clean — **scope narrowed**: all 46 checks rested on my probe, and none fed a non-string; 17 driven inputs raise raw Python exceptions, 0 `EFOError` | `NOTE-util-and-lock-hold.md`, `NOTE-what-util-is-clean-rested-on-and-the-input-it-never-fed.md` |
 | `cli.py` | clean | `NOTE-cli-surface-holds.md` |
 | `dashboard.py`, `errors.py` | clean, **one claim corrected** | `NOTE-dashboard-and-errors-hold.md` — its `escapes: []` is disproved by #19 |
 | alias / `alias_chain` machinery | clean | `NOTE-alias-lineage-holds.md` |
@@ -92,7 +92,7 @@ never treated my own re-run as independent confirmation.
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
-| this review's own counts | machine-checked — inventory, 42 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
+| this review's own counts | machine-checked — inventory, 43 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
 | attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
 | `monitor/collector.py` coverage | map — 27 tests, **no test ages an input**; #6 has no vocabulary to be tested by | `NOTE-the-collector-suite-never-ages-an-input.md` |
 | the 8 provenance-attack scripts | map — all self-document; **2 ran against an unpinned tree that was the stale base**, superseded by the `_main` re-runs | `NOTE-two-attack-scripts-ran-against-the-stale-base.md` |
@@ -264,8 +264,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **208 live citations across
-53 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **213 live citations across
+54 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.

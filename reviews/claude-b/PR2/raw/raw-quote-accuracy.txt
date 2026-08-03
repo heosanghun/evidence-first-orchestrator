@@ -8,9 +8,9 @@
 
 ########## B. citation + fenced block, the decidable subset ##########
   [ok] every decidable pair was examined
-        expected: pairs: 27
-        observed: pairs: 27
-  verbatim-verified: 17   not matched: 10
+        expected: pairs: 28
+        observed: pairs: 28
+  verbatim-verified: 17   not matched: 11
     ADDENDUM-git-replace-regression.md  ->  provenance.py:47
         deliberate before/after - the block quotes the argument list that was REMOVED, which is the whole point of the regression
     NOTE-487-is-too-many-and-the-two-that-survive-are-guarded.md  ->  provenance.py:78
@@ -31,6 +31,8 @@
         PROBE OUTPUT - the block is the probe's own citation listing (`REPORT.md:305  *measured.* ...`), not a quote of REPORT.md:194-232. This is also the first REVIEW-LOCAL pair the checker has ever resolved: before REVIEW_LOCAL existed the pair hit `continue` and vanished, and the `every decidable pair was examined` count is what caught it
     NOTE-remaining-docs-adjudicated.md  ->  src/evidence_orchestrator/adapter.py:180
         PROBE OUTPUT again - the block is this review's own census line `adapter.py:180  shell=False`, not a quote of the source at :180. Caught by this check on the very round the note was written, which is the self-check working as intended
+    NOTE-what-util-is-clean-rested-on-and-the-input-it-never-fed.md  ->  provenance.py:156
+        PROBE OUTPUT - the block is this census's own caller listing, each line prefixed `str()` or `  -  ` to mark whether the site coerces. It renders provenance.py:156 alongside four other call sites and is not a quote of any single line
   [ok] every unmatched block is adjudicated
         expected: uncovered: []
         observed: uncovered: []
@@ -312,14 +314,14 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
   silently is indistinguishable from one that was never measured, so
   the run now fails when prose and output disagree.
   [ok]   the note states this run's pairs
-        expected: pairs: 27
-        observed: pairs: 27
+        expected: pairs: 28
+        observed: pairs: 28
   [ok]   the note states this run's verbatim-verified
         expected: verbatim-verified: 17
         observed: verbatim-verified: 17
   [ok]   the note states this run's adjudicated non-quotes
-        expected: adjudicated non-quotes: 10
-        observed: adjudicated non-quotes: 10
+        expected: adjudicated non-quotes: 11
+        observed: adjudicated non-quotes: 11
   [ok]   the note states this run's inline spans
         expected: inline spans: 270
         observed: inline spans: 270
