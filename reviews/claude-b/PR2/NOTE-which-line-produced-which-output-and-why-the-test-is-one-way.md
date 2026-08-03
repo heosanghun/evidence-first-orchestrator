@@ -42,7 +42,7 @@ sets, 3 candidate discriminators, 1 known answer.
 >
 > **Item 71's output lands and IS counted** — it prints no markers — so the
 > population moves **83 → 84** and this test's undecidable **50 → 51**. The pin
-> is what said so.
+> is what said so. **Item 72's** takes it to **85 / 52**.
 >
 > **Every table below is superseded by
 > `NOTE-the-suite-size-decided-it-and-a-substring-reversed-four.md`**, which
@@ -172,5 +172,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_output_provenance_lines.py` | `aadf6c1aea5d0d5c9a15a1e26860947a42f36862f0b844c2fd521c42fc649d50` |
-| `raw/raw-output-provenance-lines.txt` | `1eca9456936a36cff32982501f14c0d51a4009a43ecdca8d0a884895b5420ccf` |
+| `raw/probe_output_provenance_lines.py` | `e7f20ab3e2504c763551242f047c9f6cb8d0e38bef7f23f2d95297c2eb9e06b8` |
+| `raw/raw-output-provenance-lines.txt` | `4ac382eba02c5e812ed480a430493540fbfc71b4c8dbe6ada25f17eae0a686a6` |

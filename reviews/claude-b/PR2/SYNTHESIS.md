@@ -3,15 +3,15 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**1430 passing checks across 72 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 171 files: **74 probe scripts, 89 raw outputs, 8
+**1461 passing checks across 73 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 173 files: **75 probe scripts, 90 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
 paragraph disagrees with it. The counts exclude that probe's **own** output,
 which is the report of the run doing the counting — a self-reference with no
 fixpoint, stated rather than hidden — the same guard the citation and quote counts got.
-It also checks the headline `N checks, M unexpected` of all **66** write-ups
+It also checks the headline `N checks, M unexpected` of all **67** write-ups
 against the raw output each one names; nothing verified those until 2026-08-03.
 
 Twelve `UNEXPECTED` lines survive, in five files —
@@ -92,7 +92,7 @@ never treated my own re-run as independent confirmation.
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
-| this review's own counts | machine-checked — inventory, 66 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
+| this review's own counts | machine-checked — inventory, 67 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
 | attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed, **under the threat model `SECURITY.md:38` declares** | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
 | `monitor/collector.py` coverage | map — 27 tests, **no test ages an input**; #6 has no vocabulary to be tested by | `NOTE-the-collector-suite-never-ages-an-input.md` |
 | the 8 provenance-attack scripts | map — all self-document; **2 ran against an unpinned tree that was the stale base**, superseded by the `_main` re-runs | `NOTE-two-attack-scripts-ran-against-the-stale-base.md` |
@@ -122,6 +122,7 @@ never treated my own re-run as independent confirmation.
 | deleting each file kind | map — **#10 widened from edits to deletes**: all 17 kinds driven **both** ways in one run. The caught **set** is identical (**5 caught / 12 unnoticed** either way, edit reproducing item 66) but **all 5 messages differ** — a deleted `.efo/workspace.json` reports *not a workspace at all* where an edit reports a *configuration mismatch*. A whole archived bundle, every report and every submission copy can be **removed** with `doctor` healthy | `NOTE-deleting-every-file-kind-the-set-holds-the-message-moves.md` |
 | the swallowing rule, corpus-wide | map — **corrects two rules of mine**: item 67's rule applied to all **83** outputs moves **2** verdicts, and the new one is **not** a mis-placement — `raw-class2b-census.txt`'s only anchor marks are swallowed inside `test_independence.py:161`, an **anchor-only test module named as a path**, which the parsed unittest-id rule cannot see. The **marker set was short by one class**; adding test-module filenames moves the union **36/5/4/38 → 37/6/3/37**. Separately the marker tuples count **slots, not markers** (162/160, 309/306) — 4 of my 6 hand-added tokens were already derived | `NOTE-the-swallowing-rule-corpus-wide-and-the-marker-set-was-short.md` |
 | the class #19's probe never fed | **finding, reported on #19** — that probe fed 2 of 5 projection classes and **never wrote a projection file**, measured. Two un-fed classes are covered (a non-object hits `read_json`; any other key altered hits the ledger comparison). The third is not: `last_event_hash` is excluded by name from **all four** comparisons (`workspace.py:470`, `:495`, `:517`, `:1511`) and read at one (`:1182`). Forged to `"f"*64` it is written into the **signed** `task.proxy_submitted` event, bound to **no event in the ledger**, with `doctor healthy: True` | `NOTE-the-class-19s-probe-never-fed-and-the-hash-that-can-be-forged.md` |
+| deleting EVERY instance of a kind | map — **#10 widened a second time**: 17 kinds split into **9 multi-instance / 8 singleton**, the singletons serving as a positive control that reproduces item 69's four caught kinds. Of the nine, **0 change verdict or message** between one instance and all — `agents/*.json` reports `One or more signed agent projections are missing` either way, compared **un-truncated** because item 69's 40-character cut would have hidden it. The whole `submissions/T1/attempt-001/` tree (9 files) removes in one operation with `doctor` healthy and the task still `archived` | `NOTE-deleting-every-instance-of-a-kind-and-the-whole-attempt-tree.md` |
 | `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
 
 Twenty components were probed and found sound (one with a claim since corrected — see #19).
@@ -282,7 +283,7 @@ task stricter than intended.
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
 `NOTE-citation-audit-of-this-review.md` audits all **263 live citations across
-78 documents**; every one now resolves at `main`. Three did not:
+79 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.

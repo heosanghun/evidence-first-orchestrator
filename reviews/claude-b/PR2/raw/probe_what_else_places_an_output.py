@@ -91,7 +91,7 @@ every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
 check("  raw outputs scanned, the marker-printing ones excluded",
-      "outputs: 84", f"outputs: {len(outputs)}")
+      "outputs: 85", f"outputs: {len(outputs)}")
 check("    exactly five are excluded, this probe's own among them",
       "excluded: 5",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
@@ -140,7 +140,7 @@ token = {p.name: verdict(*by_token(p.read_text(errors="replace")))
          for p in outputs}
 print(f"    {Counter(token.values())}")
 check("the module/test-id test leaves this many undecidable",
-      "undecidable: 51",
+      "undecidable: 52",
       f"undecidable: {sum(1 for v in token.values() if v == 'undecidable')}")
 
 # ---------------------------------------------------------------- C
@@ -286,7 +286,7 @@ check("outputs newly placed on the anchor's line", "anchor: 10",
 check("  newly placed on the divergent line", "divergent: 2",
       f"divergent: {placed['divergent']}")
 check("  carrying literals from BOTH", "mixed: 1", f"mixed: {placed['mixed']}")
-check("  and STILL undecidable", "undecidable: 38",
+check("  and STILL undecidable", "undecidable: 39",
       f"undecidable: {placed['undecidable']}")
 
 union = {}
@@ -307,7 +307,7 @@ check("  on the divergent line", "divergent: 5",
       f"divergent: {sum(1 for v in union.values() if v == 'divergent')}")
 check("  and this many carry markers from BOTH - none by the token test alone",
       "mixed: 4", f"mixed: {sum(1 for v in union.values() if v == 'mixed')}")
-check("  and leaves this many OPEN", "undecidable: 38",
+check("  and leaves this many OPEN", "undecidable: 39",
       f"undecidable: {sum(1 for v in union.values() if v == 'undecidable')}")
 check("    the classes account for every output", f"total: {len(outputs)}",
       f"total: {sum(Counter(union.values()).values())}")

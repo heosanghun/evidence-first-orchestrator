@@ -1,0 +1,177 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok] the lifecycle reaches `archived` - the CONTROL
+        expected: state: archived
+        observed: state: archived
+  [ok]   and the untouched workspace audits healthy
+        expected: HEALTHY
+        observed: HEALTHY - unnoticed
+
+########## B. the kinds, and how many INSTANCES each has ##########
+  [ok] a full lifecycle ships this many files
+        expected: files: 27
+        observed: files: 27
+  [ok]   collapsing to this many kinds
+        expected: kinds: 17
+        observed: kinds: 17
+    3x  agents/*.json
+    2x  reports/<agent>/*.artifact.txt
+    2x  reports/<agent>/*.evidence.json
+    2x  reports/<agent>/*.md
+    2x  reports/<agent>/*.raw.txt
+    2x  submissions/.../bundle.json
+    2x  submissions/.../files/*.artifact.txt
+    2x  submissions/.../files/*.evidence.json
+    2x  submissions/.../files/*.raw.txt
+  [ok] kinds with MORE THAN ONE instance - the only ones this round can move
+        expected: multi: 9
+        observed: multi: 9
+  [ok]   and singletons, where delete-one IS delete-all
+        expected: single: 8
+        observed: single: 8
+  [ok]     the split is exhaustive in both directions
+        expected: total: 17
+        observed: total: 17
+  [ok]       and accounts for every file
+        expected: files: 27
+        observed: files: 27
+  [ok]   the biggest is agents/*.json, the one item 69 named
+        expected: agents: 3
+        observed: agents: 3
+
+########## C. the eight singletons - the POSITIVE CONTROL ##########
+  For a singleton the two operations delete the same file, so these
+  must reproduce item 69's delete column. If they do not, the driver
+  is wrong and nothing in section D can be trusted.
+  [ok]     .efo/.gitignore
+        expected: deleted: 1
+        observed: deleted: 1
+  [ok]     .efo/ledger.key
+        expected: deleted: 1
+        observed: deleted: 1
+  [ok]     .efo/workspace.json
+        expected: deleted: 1
+        observed: deleted: 1
+  [ok]     archive/*.json
+        expected: deleted: 1
+        observed: deleted: 1
+  [ok]     ledger/events.jsonl
+        expected: deleted: 1
+        observed: deleted: 1
+  [ok]     runs/.gitignore
+        expected: deleted: 1
+        observed: deleted: 1
+  [ok]     submissions/.../files/*.md
+        expected: deleted: 1
+        observed: deleted: 1
+  [ok]     tasks/*.json
+        expected: deleted: 1
+        observed: deleted: 1
+  [ok]   singleton kinds whose deletion is CAUGHT
+        expected: caught: 4
+        observed: caught: 4
+  [ok]     and they are item 69's four singletons
+        expected: ['.efo/ledger.key', '.efo/workspace.json', 'ledger/events.jsonl', 'tasks/*.json']
+        observed: ['.efo/ledger.key', '.efo/workspace.json', 'ledger/events.jsonl', 'tasks/*.json']
+      .efo/ledger.key              CAUGHT: Ledger signing key is missing: /tmp/efo-item72-70pzaji4/03/.efo/ledger.key
+      .efo/workspace.json          CAUGHT: Not an Evidence First Orchestrator workspace: /tmp/efo-item72-70pzaji4/04
+      ledger/events.jsonl          CAUGHT: T1: no ledger event
+      tasks/*.json                 CAUGHT: T1: projection missing
+
+########## D. the nine multi-instance kinds, ONE vs ALL ##########
+    agents/*.json                                (3 instances)
+        one: CAUGHT: One or more signed agent projections are missing
+        all: CAUGHT: One or more signed agent projections are missing
+    reports/<agent>/*.artifact.txt               (2 instances)
+        one: HEALTHY - unnoticed
+        all: HEALTHY - unnoticed
+    reports/<agent>/*.evidence.json              (2 instances)
+        one: HEALTHY - unnoticed
+        all: HEALTHY - unnoticed
+    reports/<agent>/*.md                         (2 instances)
+        one: HEALTHY - unnoticed
+        all: HEALTHY - unnoticed
+    reports/<agent>/*.raw.txt                    (2 instances)
+        one: HEALTHY - unnoticed
+        all: HEALTHY - unnoticed
+    submissions/.../bundle.json                  (2 instances)
+        one: HEALTHY - unnoticed
+        all: HEALTHY - unnoticed
+    submissions/.../files/*.artifact.txt         (2 instances)
+        one: HEALTHY - unnoticed
+        all: HEALTHY - unnoticed
+    submissions/.../files/*.evidence.json        (2 instances)
+        one: HEALTHY - unnoticed
+        all: HEALTHY - unnoticed
+    submissions/.../files/*.raw.txt              (2 instances)
+        one: HEALTHY - unnoticed
+        all: HEALTHY - unnoticed
+  [ok] every multi-instance kind driven BOTH ways
+        expected: driven: 9
+        observed: driven: 9
+  [ok]   and `all` really deleted more than `one` each time
+        expected: more: 9
+        observed: more: 9
+  [ok] kinds whose VERDICT or MESSAGE changes when every instance goes
+        expected: moved: 0
+        observed: moved: 0 []
+  [ok]   caught when ONE instance is deleted
+        expected: one caught: 1
+        observed: one caught: 1
+  [ok]     and when EVERY instance is
+        expected: all caught: 1
+        observed: all caught: 1
+  [ok]       the same kind, agents/*.json
+        expected: ['agents/*.json']
+        observed: ['agents/*.json']
+      one agent record deleted : CAUGHT: One or more signed agent projections are missing
+      all three deleted         : CAUGHT: One or more signed agent projections are missing
+  [ok]         and the two messages are identical in FULL, not truncated
+        expected: CAUGHT: One or more signed agent projections are missing
+        observed: CAUGHT: One or more signed agent projections are missing
+  So EIGHT multi-instance kinds can be removed ENTIRELY - every
+  report, every submitted copy, both bundles - with doctor healthy.
+
+########## E. the whole attempt tree, in one operation ##########
+  [ok] the archived submission tree holds this many files
+        expected: removed: 9
+        observed: removed: 9
+  [ok]   and removing the whole of it is
+        expected: HEALTHY - unnoticed
+        observed: HEALTHY - unnoticed
+  [ok]     with the task still reporting archived
+        expected: state: archived
+        observed: state: archived
+  Item 63 deleted TOP-LEVEL directories. This is a sub-tree, the one
+  that holds the archived evidence itself, and it is the shape an
+  operator would actually reach for - `rm -rf` on one attempt.
+
+########## F. what this does NOT establish ##########
+  * It does NOT file an issue. This widens the measured width of #10
+    a second time - item 69 went from edits to deletes, this goes
+    from one instance to every instance. Quantifying an open issue is
+    not opening another.
+  * It does NOT retract item 69. Its one-instance column is
+    re-derived here for the eight singletons and agrees.
+  * The audit surface is `doctor.audit_workspace`, the same one items
+    63, 66 and 69 used. A human listing the directory sees the files
+    are gone; the product's own health check does not.
+  * It does NOT delete across TASKS - one task, one attempt. Whether a
+    workspace with several archived tasks behaves differently is
+    UNCHECKED, not shown safe.
+  * No network, no GPU. Twenty-eight tempfile workspaces, removed
+    before the results print. The anchor's working tree is untouched,
+    and it does not touch `main` or another agent's branch.
+  * MEASURED: the file enumeration, the kind collapse, the instance
+    counts, all eight singleton deletes, all nine kinds both ways, the
+    whole-subtree delete, the lifecycle control. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED: re-running my own evidence is a
+re-run, not independent confirmation.

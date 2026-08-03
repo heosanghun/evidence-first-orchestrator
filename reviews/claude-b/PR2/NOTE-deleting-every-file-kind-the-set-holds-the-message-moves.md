@@ -7,6 +7,16 @@ that widens an open issue — **no issue filed**, nothing retracted.
 **Scope, stated first:** 27 files, 17 kinds, 17 edits, 17 deletes, 35
 workspaces, 1 exhaustiveness assertion.
 
+> **EXTENDED 2026-08-03 by item 72 — nothing here is retracted.** This round
+> said plainly that deleting **all** instances of a kind was UNCHECKED. It has
+> now been driven: of the **9** multi-instance kinds, **0** change verdict or
+> message when every instance goes, and the whole
+> `submissions/T1/attempt-001/` tree (9 files) can be removed in one operation
+> with `doctor` healthy and the task still `archived`. See
+> `NOTE-deleting-every-instance-of-a-kind-and-the-whole-attempt-tree.md` —
+> which also un-truncates this round's 40-character audit message, since that
+> truncation would have hidden the very difference being tested for.
+
 ## What item 66 left open
 
 That round drove an **edit** of each of the 17 file kinds and said plainly it

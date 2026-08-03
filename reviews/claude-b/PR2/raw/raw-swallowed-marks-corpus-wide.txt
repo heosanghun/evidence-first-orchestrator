@@ -6,8 +6,8 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   raw outputs scanned, the marker-printing ones excluded
-        expected: outputs: 84
-        observed: outputs: 84
+        expected: outputs: 85
+        observed: outputs: 85
   [ok]     five are excluded now, this probe's own among them
         expected: excluded: 5
         observed: excluded: 5
@@ -87,8 +87,8 @@
   [ok]   and NONE of the six was already in the set - all six are new markers
         expected: added: 6
         observed: added: 6
-    union before : {'undecidable': 38, 'anchor': 37, 'mixed': 4, 'divergent': 5}
-    union after  : {'undecidable': 37, 'anchor': 38, 'mixed': 3, 'divergent': 6}
+    union before : {'undecidable': 39, 'anchor': 37, 'mixed': 4, 'divergent': 5}
+    union after  : {'undecidable': 38, 'anchor': 38, 'mixed': 3, 'divergent': 6}
   [ok] raw-class2b-census.txt recovers, now on a LIVE marker
         expected: anchor
         observed: anchor
@@ -116,11 +116,11 @@
         expected: mixed: 3
         observed: mixed: 3
   [ok]   and still OPEN
-        expected: undecidable: 37
-        observed: undecidable: 37
+        expected: undecidable: 38
+        observed: undecidable: 38
   [ok]     the four classes account for every output
-        expected: total: 84
-        observed: total: 84
+        expected: total: 85
+        observed: total: 85
   `raw-class2b-census.txt` keeps its VERDICT and changes its EVIDENCE.
   A sweep that only reported changed verdicts would have shown
   nothing there - and that is the case this round exists to catch.

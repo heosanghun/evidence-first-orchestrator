@@ -158,7 +158,7 @@ outputs = [p for p in every if p.name not in SKIP]
 # output pushed 75 -> 76 and 39 -> 40, and the pin is what said so. Item 61's
 # output is excluded rather than counted, so the population stays 77.
 check("  raw outputs in the corpus, the marker-printing ones excluded",
-      "outputs: 84", f"outputs: {len(outputs)}")
+      "outputs: 85", f"outputs: {len(outputs)}")
 check("    exactly five outputs are excluded", "excluded: 5",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
 print("  This probe's OWN classification is therefore the one number here")
@@ -261,7 +261,7 @@ check("    and the four this probe first placed BACKWARDS",
       f"other: {sorted(placed_other)}")
 check("  outputs carrying tokens from BOTH lines", "mixed: 0",
       f"mixed: {len(mixed)}")
-check("  outputs the test cannot place", "undecidable: 51",
+check("  outputs the test cannot place", "undecidable: 52",
       f"undecidable: {len(undecidable)}")
 check("    and the four classes account for every output",
       f"total: {len(outputs)}",
