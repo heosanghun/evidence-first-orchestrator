@@ -36,7 +36,7 @@ than filed as a new issue - it is the same key and the same missing guard.
 
     python3 probe_implicit_exceptions_input_class.py
 
-SCOPE, stated first: 1 probe re-classified, 10 of its checks, 4 feeders, 5
+SCOPE, stated first: 1 probe re-classified, 10 of its checks, 5 feeders, 5
 projection classes, 3 un-fed, 2 of them covered, 1 driven to a signed forgery,
 1 known answer (#19's own traceback). Roughly 90s - it builds six workspaces
 and six git delivery repos.

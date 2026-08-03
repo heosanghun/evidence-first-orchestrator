@@ -50,10 +50,10 @@
 ########## C. two of the three are COVERED - measured, not assumed ##########
   [ok] a projection that is not an object is refused before any index
         expected: CAUGHT ConfigurationError
-        observed: CAUGHT ConfigurationError: Expected a JSON object in /tmp/efo-inclass71-0cf8odbi/fx-__141mkc/ws/tasks/C1.json
+        observed: CAUGHT ConfigurationError: Expected a JSON object in /tmp/efo-inclass71-vm0vgyul/fx-oeqhpzh0/ws/tasks/C1.json
   [ok]   and read_json is what refuses it
         expected: Expected a JSON object
-        observed: CAUGHT ConfigurationError: Expected a JSON object in /tmp/efo-inclass71-0cf8odbi/fx-__141mkc/ws/tasks/C1.json
+        observed: CAUGHT ConfigurationError: Expected a JSON object in /tmp/efo-inclass71-vm0vgyul/fx-oeqhpzh0/ws/tasks/C1.json
   [ok] any OTHER key altered is caught by the ledger comparison
         expected: CAUGHT IntegrityError
         observed: CAUGHT IntegrityError: Task C1 projection differs from the signed ledger
@@ -100,8 +100,8 @@
         expected: /payload/task/result/transport/grant_event_hash
         observed: /payload/task/result/transport/grant_event_hash
   [ok]         and it equals the hash of the AUTHORIZATION event, its purpose
-        expected: 9aa76fb829f63fafa509261d15e4e3987e65df0400e44954f4dd2d1fb39c5308
-        observed: 9aa76fb829f63fafa509261d15e4e3987e65df0400e44954f4dd2d1fb39c5308
+        expected: 322e039a1304e7c8fdbdcaf4294ef3f6449a565aed883763db8bca3a600e3998
+        observed: 322e039a1304e7c8fdbdcaf4294ef3f6449a565aed883763db8bca3a600e3998
   [ok]           which is action
         expected: task.proxy_authorized
         observed: task.proxy_authorized
