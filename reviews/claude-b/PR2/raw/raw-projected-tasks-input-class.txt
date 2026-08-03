@@ -186,7 +186,7 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 ########## F. is the absence REACHABLE? signed with the real key ##########
   [ok] verify() ACCEPTS an event whose payload is a string
         expected: 'valid': True
-        observed: returned {'valid': True, 'events': 5, 'head': 'd7d73adb64560be151041c6f2c24f958a0f17206c728abf4c0003c7fd969aaa0', 'signed': True}
+        observed: returned {'valid': True, 'events': 5, 'head': 'a00da4faf6962b6825168df0b23be2a37c7bddca023ca3d63cf0f0d087a48311', 'signed': True}
   [ok]   so the fold is reached, and it raises
         expected: AttributeError
         observed: AttributeError: 'str' object has no attribute 'get'

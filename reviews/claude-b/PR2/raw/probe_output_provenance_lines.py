@@ -13,7 +13,7 @@ six cited outputs.
 
     published   35 anchor / 1 other / 41 undecidable
     corrected   27 anchor / 5 other / 45 undecidable
-    at HEAD     27 anchor / 5 other / 46 undecidable (item 62's output landed)
+    at HEAD     27 anchor / 5 other / 47 undecidable (items 62-63 landed)
 
 The known answer that would have caught it was inside the document being
 classified: `REPORT.md:437-438` names `4aa47ca6` as its subject, a commit on
@@ -53,7 +53,7 @@ proposed. Scanned across every `raw-*.txt`:
      5  carry divergent-only tokens -> `raw-w4-replay.txt`, my own item-55
         probe, which names both refs by design, plus the four this probe
         first placed backwards
-    46  carry NEITHER              -> UNDECIDABLE by this test
+    47  carry NEITHER              -> UNDECIDABLE by this test
 
 AND THE TEST HAS A PROVEN FALSE NEGATIVE. `raw-attack4.txt` is in the
 undecidable set - yet item 55 established, by the ABSENT API rather than by any
@@ -148,7 +148,7 @@ outputs = [p for p in every if p.name not in SKIP]
 # output pushed 75 -> 76 and 39 -> 40, and the pin is what said so. Item 61's
 # output is excluded rather than counted, so the population stays 77.
 check("  raw outputs in the corpus, the two marker-printing ones excluded",
-      "outputs: 78", f"outputs: {len(outputs)}")
+      "outputs: 79", f"outputs: {len(outputs)}")
 check("    exactly two outputs are excluded, and they are those two",
       f"excluded: ['{SELF}', '{ITEM61}']",
       f"excluded: {sorted(p.name for p in every if p.name in SKIP)}")
@@ -252,7 +252,7 @@ check("    and the four this probe first placed BACKWARDS",
       f"other: {sorted(placed_other)}")
 check("  outputs carrying tokens from BOTH lines", "mixed: 0",
       f"mixed: {len(mixed)}")
-check("  outputs the test cannot place", "undecidable: 46",
+check("  outputs the test cannot place", "undecidable: 47",
       f"undecidable: {len(undecidable)}")
 check("    and the four classes account for every output",
       f"total: {len(outputs)}",

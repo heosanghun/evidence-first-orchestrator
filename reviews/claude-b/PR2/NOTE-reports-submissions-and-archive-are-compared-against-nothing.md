@@ -77,6 +77,15 @@ Nothing recomputes them.
 
 - It does **not** enumerate `shared/`. That directory exists after `init` and
   was **not driven** — stated, not implied.
+  > **Closed 2026-08-03 by item 63.** All nine top-level directories are now
+  > enumerated from the filesystem and the classification asserted exhaustive.
+  > `shared/` takes three tampers (plant, subtree, **delete the whole
+  > directory**) and `ledger/`, `.efo/` and `.efo/locks/` five more — **eight
+  > for eight unnoticed**. That round also adds the positive control this one
+  > lacked: replacing `.efo/ledger.key` is **caught** with `Ledger signature
+  > mismatch at event 1`, and deleting it with a different message, so the
+  > `unnoticed` results are a statement about coverage rather than about the
+  > driver. `NOTE-every-directory-tampered-and-the-one-that-is-caught.md`.
 - It does **not** test the CLI `ledger audit-projections` path separately;
   `doctor.audit_workspace` calls `audit_projections` and is the surface an
   operator is told to run.

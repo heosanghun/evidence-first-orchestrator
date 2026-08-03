@@ -168,4 +168,4 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 | Artifact | SHA-256 |
 |---|---|
 | `raw/probe_inventory_selfcheck.py` | `9abb9ad8b22bed303339d5bdc4a2edea57581e116b9e6c6214992e2b3a9ce9f5` |
-| `raw/raw-inventory-selfcheck.txt` | `bc15e5cd914b84bc7193f60f927314340cffff9c5a408e1ebbccfa99deb671cb` |
+| `raw/raw-inventory-selfcheck.txt` | `7d66b652a402d407c5220012a0c5d46fe12207a7434089f78c9eb0e0036bf330` |

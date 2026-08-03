@@ -158,4 +158,4 @@ independent confirmation.
 | Artifact | SHA-256 |
 |---|---|
 | `raw/probe_projected_tasks_input_class.py` | `a77db591f26bb9f9c004a187ee80d00ea7766003f03d53f774aabc86e87a3cc8` |
-| `raw/raw-projected-tasks-input-class.txt` | `e90bc0e876e18b5b06de81290ced322f938f346b87dec918b74ea70248778264` |
+| `raw/raw-projected-tasks-input-class.txt` | `79c5fcbdc9176a196aa6e04f5bc001736ea595913ed9abaab7e9c5dcf14d6e2e` |

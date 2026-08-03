@@ -9,8 +9,8 @@
         expected: 7a9553b
         observed: 7a9553b
   [ok]   raw outputs in the corpus, the two marker-printing ones excluded
-        expected: outputs: 78
-        observed: outputs: 78
+        expected: outputs: 79
+        observed: outputs: 79
   [ok]     exactly two outputs are excluded, and they are those two
         expected: excluded: ['raw-output-provenance-lines.txt', 'raw-recheck-line-and-the-substring-that-reversed-four.txt']
         observed: excluded: ['raw-output-provenance-lines.txt', 'raw-recheck-line-and-the-substring-that-reversed-four.txt']
@@ -57,11 +57,11 @@
         expected: mixed: 0
         observed: mixed: 0
   [ok]   outputs the test cannot place
-        expected: undecidable: 46
-        observed: undecidable: 46
+        expected: undecidable: 47
+        observed: undecidable: 47
   [ok]     and the four classes account for every output
-        expected: total: 78
-        observed: total: 78
+        expected: total: 79
+        observed: total: 79
 
 ########## D. the KNOWN ANSWER that shows the test is ONE-WAY ##########
   [ok] raw-attack4.txt is in the UNDECIDABLE set
