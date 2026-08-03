@@ -15,72 +15,47 @@
     "name": "System 1.5",
     "objective": "검증 가능한 근거를 남기며 System 1.5 연구를 완성합니다.",
     "next_milestone": "실시간 SSH 수집기 연결",
-    "workflow_progress_percent": 58
+    "workflow_progress_percent": 22.5
   },
-  "projects": [
-    {
-      "id": "cts",
-      "name": "CTS",
-      "objective": "전용 latent 상태공간에서 반복 깊이의 유효성을 증거 게이트로 검증합니다.",
-      "phase": "연산자·통계 사전등록",
-      "next_milestone": "연산자 학습성 및 디코드 품질 게이트",
-      "progress_percent": 62.5,
-      "task_count": 8,
-      "verified_count": 4,
-      "active_task_count": 1,
-      "blocked_task_count": 1,
-      "active_gpu_indexes": []
-    },
-    {
-      "id": "system-1-5",
-      "name": "System 1.5",
-      "objective": "Thought-Slot DEQ를 단계별 Go/No-Go 게이트로 재구축합니다.",
-      "phase": "Thought-Slot 구현 감사",
-      "next_milestone": "T>1 유효성 소규모 파일럿",
-      "progress_percent": 28.57,
-      "task_count": 7,
-      "verified_count": 1,
-      "active_task_count": 1,
-      "blocked_task_count": 0,
-      "active_gpu_indexes": [0, 3]
-    }
-  ],
   "agents": [
     {
       "id": "codex",
       "name": "Codex",
       "role": "메타 오케스트레이터",
-      "state": "working",
-      "current": "작업 분배, 증거 검증, 운영 화면 구축",
-      "next": "제출 증거 독립 검증",
-      "progress_percent": 72
+      "state": "waiting",
+      "current": "배정 대기",
+      "next": "오케스트레이터 지시 대기",
+      "progress_percent": 0
     },
     {
       "id": "claude-a",
       "name": "Claude A",
       "role": "연구·분석 작업자",
       "state": "working",
-      "current": "DEQ 설계 근거와 실패 원인 정리",
-      "next": "검증 가능한 실험 명세 제출",
-      "progress_percent": 64
+      "current": "System 1.5 :: Stage 1 DEQ Broyden Solver on physical GPU 0~7",
+      "next": "Stage 2 Fast Weight Program ΔW 메모리 결합 파이프라인 수행",
+      "progress_percent": 55,
+      "current_task_id": "SYS15-R1",
+      "status_source": "canonical"
     },
     {
       "id": "claude-b",
       "name": "Claude B",
       "role": "구현·검증 작업자",
-      "state": "waiting",
-      "current": "백본 검증 도구 결과 대기",
-      "next": "독립 단위 테스트",
-      "progress_percent": 41
+      "state": "working",
+      "current": "CTS :: Publish verified P1b statistics tools",
+      "next": "P1b 통계 독립 검증 및 원장 서명 제출",
+      "progress_percent": 55,
+      "current_task_id": "P1b-4"
     },
     {
       "id": "antigravity",
       "name": "Antigravity",
       "role": "연구 운영·기록",
       "state": "waiting",
-      "current": "EFO 원장과 다음 과제 확인",
-      "next": "검증 결과를 FACTS에 반영",
-      "progress_percent": 53
+      "current": "EFO 모니터링 관제",
+      "next": "독립 검증 서명 준비",
+      "progress_percent": 100
     }
   ],
   "tasks": [
@@ -130,7 +105,11 @@
       "memory_total_mib": 49140,
       "temperature_c": 72,
       "power_w": 278,
-      "projects": [{ "name": "System1.5 / seed13" }]
+      "projects": [
+        {
+          "name": "System1.5 / seed13"
+        }
+      ]
     },
     {
       "index": 1,
@@ -140,7 +119,11 @@
       "memory_total_mib": 49140,
       "temperature_c": 74,
       "power_w": 284,
-      "projects": [{ "name": "System2.5 / train" }]
+      "projects": [
+        {
+          "name": "System2.5 / train"
+        }
+      ]
     },
     {
       "index": 2,
@@ -160,7 +143,11 @@
       "memory_total_mib": 49140,
       "temperature_c": 70,
       "power_w": 265,
-      "projects": [{ "name": "System1.5 / G1 gate" }]
+      "projects": [
+        {
+          "name": "System1.5 / G1 gate"
+        }
+      ]
     },
     {
       "index": 4,
@@ -357,66 +344,226 @@
     {
       "at": "2026-07-30T03:30:00Z",
       "gpus": [
-        { "index": 0, "utilization_percent": 88, "temperature_c": 68 },
-        { "index": 1, "utilization_percent": 94, "temperature_c": 71 },
-        { "index": 2, "utilization_percent": 0, "temperature_c": 40 },
-        { "index": 3, "utilization_percent": 79, "temperature_c": 66 },
-        { "index": 4, "utilization_percent": 0, "temperature_c": 35 },
-        { "index": 5, "utilization_percent": 0, "temperature_c": 36 },
-        { "index": 6, "utilization_percent": 0, "temperature_c": 34 },
-        { "index": 7, "utilization_percent": 0, "temperature_c": 35 }
+        {
+          "index": 0,
+          "utilization_percent": 88,
+          "temperature_c": 68
+        },
+        {
+          "index": 1,
+          "utilization_percent": 94,
+          "temperature_c": 71
+        },
+        {
+          "index": 2,
+          "utilization_percent": 0,
+          "temperature_c": 40
+        },
+        {
+          "index": 3,
+          "utilization_percent": 79,
+          "temperature_c": 66
+        },
+        {
+          "index": 4,
+          "utilization_percent": 0,
+          "temperature_c": 35
+        },
+        {
+          "index": 5,
+          "utilization_percent": 0,
+          "temperature_c": 36
+        },
+        {
+          "index": 6,
+          "utilization_percent": 0,
+          "temperature_c": 34
+        },
+        {
+          "index": 7,
+          "utilization_percent": 0,
+          "temperature_c": 35
+        }
       ]
     },
     {
       "at": "2026-07-30T04:00:00Z",
       "gpus": [
-        { "index": 0, "utilization_percent": 93, "temperature_c": 70 },
-        { "index": 1, "utilization_percent": 97, "temperature_c": 73 },
-        { "index": 2, "utilization_percent": 2, "temperature_c": 42 },
-        { "index": 3, "utilization_percent": 84, "temperature_c": 68 },
-        { "index": 4, "utilization_percent": 0, "temperature_c": 35 },
-        { "index": 5, "utilization_percent": 0, "temperature_c": 36 },
-        { "index": 6, "utilization_percent": 0, "temperature_c": 34 },
-        { "index": 7, "utilization_percent": 0, "temperature_c": 35 }
+        {
+          "index": 0,
+          "utilization_percent": 93,
+          "temperature_c": 70
+        },
+        {
+          "index": 1,
+          "utilization_percent": 97,
+          "temperature_c": 73
+        },
+        {
+          "index": 2,
+          "utilization_percent": 2,
+          "temperature_c": 42
+        },
+        {
+          "index": 3,
+          "utilization_percent": 84,
+          "temperature_c": 68
+        },
+        {
+          "index": 4,
+          "utilization_percent": 0,
+          "temperature_c": 35
+        },
+        {
+          "index": 5,
+          "utilization_percent": 0,
+          "temperature_c": 36
+        },
+        {
+          "index": 6,
+          "utilization_percent": 0,
+          "temperature_c": 34
+        },
+        {
+          "index": 7,
+          "utilization_percent": 0,
+          "temperature_c": 35
+        }
       ]
     },
     {
       "at": "2026-07-30T04:30:00Z",
       "gpus": [
-        { "index": 0, "utilization_percent": 96, "temperature_c": 72 },
-        { "index": 1, "utilization_percent": 91, "temperature_c": 72 },
-        { "index": 2, "utilization_percent": 0, "temperature_c": 41 },
-        { "index": 3, "utilization_percent": 90, "temperature_c": 70 },
-        { "index": 4, "utilization_percent": 0, "temperature_c": 35 },
-        { "index": 5, "utilization_percent": 0, "temperature_c": 36 },
-        { "index": 6, "utilization_percent": 0, "temperature_c": 34 },
-        { "index": 7, "utilization_percent": 0, "temperature_c": 35 }
+        {
+          "index": 0,
+          "utilization_percent": 96,
+          "temperature_c": 72
+        },
+        {
+          "index": 1,
+          "utilization_percent": 91,
+          "temperature_c": 72
+        },
+        {
+          "index": 2,
+          "utilization_percent": 0,
+          "temperature_c": 41
+        },
+        {
+          "index": 3,
+          "utilization_percent": 90,
+          "temperature_c": 70
+        },
+        {
+          "index": 4,
+          "utilization_percent": 0,
+          "temperature_c": 35
+        },
+        {
+          "index": 5,
+          "utilization_percent": 0,
+          "temperature_c": 36
+        },
+        {
+          "index": 6,
+          "utilization_percent": 0,
+          "temperature_c": 34
+        },
+        {
+          "index": 7,
+          "utilization_percent": 0,
+          "temperature_c": 35
+        }
       ]
     },
     {
       "at": "2026-07-30T05:00:00Z",
       "gpus": [
-        { "index": 0, "utilization_percent": 92, "temperature_c": 71 },
-        { "index": 1, "utilization_percent": 96, "temperature_c": 74 },
-        { "index": 2, "utilization_percent": 3, "temperature_c": 42 },
-        { "index": 3, "utilization_percent": 87, "temperature_c": 69 },
-        { "index": 4, "utilization_percent": 0, "temperature_c": 35 },
-        { "index": 5, "utilization_percent": 0, "temperature_c": 36 },
-        { "index": 6, "utilization_percent": 0, "temperature_c": 34 },
-        { "index": 7, "utilization_percent": 0, "temperature_c": 35 }
+        {
+          "index": 0,
+          "utilization_percent": 92,
+          "temperature_c": 71
+        },
+        {
+          "index": 1,
+          "utilization_percent": 96,
+          "temperature_c": 74
+        },
+        {
+          "index": 2,
+          "utilization_percent": 3,
+          "temperature_c": 42
+        },
+        {
+          "index": 3,
+          "utilization_percent": 87,
+          "temperature_c": 69
+        },
+        {
+          "index": 4,
+          "utilization_percent": 0,
+          "temperature_c": 35
+        },
+        {
+          "index": 5,
+          "utilization_percent": 0,
+          "temperature_c": 36
+        },
+        {
+          "index": 6,
+          "utilization_percent": 0,
+          "temperature_c": 34
+        },
+        {
+          "index": 7,
+          "utilization_percent": 0,
+          "temperature_c": 35
+        }
       ]
     },
     {
       "at": "2026-07-30T05:30:00Z",
       "gpus": [
-        { "index": 0, "utilization_percent": 94, "temperature_c": 72 },
-        { "index": 1, "utilization_percent": 96, "temperature_c": 74 },
-        { "index": 2, "utilization_percent": 4, "temperature_c": 43 },
-        { "index": 3, "utilization_percent": 88, "temperature_c": 70 },
-        { "index": 4, "utilization_percent": 0, "temperature_c": 35 },
-        { "index": 5, "utilization_percent": 0, "temperature_c": 36 },
-        { "index": 6, "utilization_percent": 0, "temperature_c": 34 },
-        { "index": 7, "utilization_percent": 0, "temperature_c": 35 }
+        {
+          "index": 0,
+          "utilization_percent": 94,
+          "temperature_c": 72
+        },
+        {
+          "index": 1,
+          "utilization_percent": 96,
+          "temperature_c": 74
+        },
+        {
+          "index": 2,
+          "utilization_percent": 4,
+          "temperature_c": 43
+        },
+        {
+          "index": 3,
+          "utilization_percent": 88,
+          "temperature_c": 70
+        },
+        {
+          "index": 4,
+          "utilization_percent": 0,
+          "temperature_c": 35
+        },
+        {
+          "index": 5,
+          "utilization_percent": 0,
+          "temperature_c": 36
+        },
+        {
+          "index": 6,
+          "utilization_percent": 0,
+          "temperature_c": 34
+        },
+        {
+          "index": 7,
+          "utilization_percent": 0,
+          "temperature_c": 35
+        }
       ]
     }
   ],
