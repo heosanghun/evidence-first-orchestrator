@@ -1,0 +1,129 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   the restored v0.1 client is present and importable
+        expected: v0.1 CLI: 0
+        observed: v0.1 CLI: 0
+  [ok]     and it is NOT the anchor's source
+        expected: same tree: False
+        observed: same tree: False
+  sections in the committed output: ['W1', 'W2', 'W2b', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W6b']
+  [ok]   the committed output carries TEN sections, not eight
+        expected: sections: ['W1', 'W2', 'W2b', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W6b']
+        observed: sections: ['W1', 'W2', 'W2b', 'W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W6b']
+  [ok]     of which item 49 already re-ran three
+        expected: remaining: 7
+        observed: remaining: 7
+  [ok]       leaving exactly this population
+        expected: left: ['W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W6b']
+        observed: left: ['W3', 'W4', 'W5', 'W6', 'W7', 'W8', 'W6b']
+  [ok]         this round attempts ONE of the seven
+        expected: attempting: W3
+        observed: attempting: W3
+  Every command in all seven sections is a local filesystem call -
+  no network, no server. Twenty-four of them is more than one round.
+
+########## B. the expectations, PARSED from the committed output ##########
+    rejection string : "Agent 'antigravity' registration differs from the signed ledger"
+    ledger           : {'events': 7, 'head': 'f888c7f202517d4f00b5d182d5df175532e304a7dd5dae19536d3f687e772104', 'signed': True, 'valid': True}
+    exit codes, in order: ['2', '0', '0', '0']
+    v2 setup lines, written inline: [('v2 init', '0'), ('v2 task add', '0')]
+  [ok]   the committed W3 records four standalone exit lines
+        expected: exits: 4
+        observed: exits: 4
+  [ok]     plus two v2 setup exits written INLINE - six steps in all
+        expected: inline: 2, total: 6
+        observed: inline: 2, total: 6
+  [ok]       and both v2 setup steps succeeded in the committed run
+        expected: v2 setup exits: ['0', '0']
+        observed: v2 setup exits: ['0', '0']
+  [ok]     and a signed, valid ledger of 7 events
+        expected: events 7 signed True valid True
+        observed: events 7 signed True valid True
+  None of these is typed into this probe - they are read out of the
+  artifact, so the artifact supplies the expectation and the fresh run
+  supplies the observation.
+
+########## C. the RECONSTRUCTED driver, and why the first one was wrong ##########
+  No `attack4` script ever existed (item 43), so the sequence below is
+  rebuilt from the output. A first attempt ran only:
+      v2 init --preset antigravity-codex-claude ; v2 task add
+  and produced ledger events=5 with v0.1 status exit=0 - no rejection
+  at all. THE EVENT COUNT IS WHAT SAID IT WAS WRONG. The missing step
+  is `agent attest`, which writes the identity block v0.1 cannot read.
+    v2 init                         exit=0
+    v2 task add                     exit=0
+    v2 agent attest antigravity     exit=0
+    v2 agent attest codex           exit=0
+  [ok]   every v2 setup command succeeded
+        expected: non-zero: []
+        observed: non-zero: []
+
+########## D. W3 REPLAYED - six steps, committed vs fresh ##########
+    v0.1 status        exit=2
+    v0.1 ledger verify exit=0  {'events': 7, 'head': '5945e31159b5cdf456eccbb6a251700950e623b57a50d4d85542aae104bf2923', 'signed': True, 'valid': True}
+    v0.1 doctor        exit=0  healthy=False
+    v0.1 task show C1  exit=0
+  [ok] the v0.1 client REJECTS the v2 workspace, with the recorded string
+        expected: Agent 'antigravity' registration differs from the signed ledger
+        observed: error: Agent 'antigravity' registration differs from the signed ledger
+
+  [ok]   and exits 2, as the committed run did
+        expected: status exit: 2
+        observed: status exit: 2
+  [ok]   the ledger still verifies - signed, valid, 7 events
+        expected: events 7 signed True valid True
+        observed: events 7 signed True valid True
+  [ok]     and ledger verify exits 0 even though status exits 2
+        expected: ledger exit: 0
+        observed: ledger exit: 0
+  [ok]   doctor reports the SAME error and healthy=false
+        expected: Agent 'antigravity' registration differs from the signed ledger
+        observed: {"checks": {"integrity": {"ledger": {"events": 7, "head": "5945e31159b5cdf456eccbb6a251700950e623b57a50d4d85542aae104bf2923", "signed": true, "valid": true}, "mismatches": [], "repaired": [], "task_snapshots": 1}}, "error": "Agent 'antigravity' registration differs from the signed ledger", "healthy": false, "root": "/tmp/efo-w3-ajznpcoz/ws4"}
+  [ok]     while itself exiting 0
+        expected: doctor exit: 0
+        observed: doctor exit: 0
+  [ok]   and the task IS readable by v0.1 despite the agent rejection
+        expected: show exit: 0
+        observed: show exit: 0
+  Six for six. The shape W3 recorded is real and reproduces: the v0.1
+  client refuses the AGENT record while accepting the LEDGER and the
+  TASK written by v2 - it fails closed on identity, not on the chain.
+
+########## E. what does NOT reproduce, and why ##########
+  [ok] the committed ledger head is NOT reproduced - and must not be
+        expected: heads equal: False
+        observed: heads equal: False
+    committed head : f888c7f202517d4f00b5d182d5df1755...
+    fresh head     : 5945e31159b5cdf456eccbb6a2517009...
+  The chain is HMAC-signed with a per-workspace key and every event
+  carries a timestamp, so a byte-equal head would mean the run had NOT
+  been redone. What must match is the PROPERTIES - count, signed,
+  valid, exit codes, the error string - and those do.
+  Also NOT reproduced, and not attempted: W8's thirteen-key agent
+  record. That listing was taken AFTER the W4 handoff, so it carries
+  `governance_epoch` and `active`; the record at W3 time has ten keys.
+  Reading it as a W3 expectation would be reading the wrong section.
+
+########## F. what this does NOT do ##########
+  * It does not run W4-W8. Their blocker is gone and their scope is
+    stated above; they remain UN-RUN and are not claimed otherwise.
+  * It does not claim P2-1 or P2-2 are re-verified.
+  * It does not file an issue and retracts nothing.
+  * It does not recover the original driver - that script never
+    existed. The sequence here is a reconstruction that matches the
+    recorded event count and error string; a different sequence
+    reaching the same state is not excluded.
+  * No network, no server, no pip, no build. The workspace is a
+    tempfile directory, removed before this section printed.
+  * MEASURED: all four parsed expectations, all four v2 setup exits,
+    all six W3 outcomes, the head mismatch. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Two clients driven against one temporary workspace. Anchor untouched,
+no `main` write, no issue filed. Pre-registered permissions unchanged -
+gpu/network/performance_metrics all false. SUBMITTED, not VERIFIED.

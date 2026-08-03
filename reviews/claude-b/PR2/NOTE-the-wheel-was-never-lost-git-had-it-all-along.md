@@ -4,9 +4,18 @@ Reproduce with `raw/probe_wheel_restored.py`; raw output in
 `raw/raw-wheel-restored.txt`. **18 checks, 0 unexpected.** No issue filed —
 this **corrects my own earlier verdict**.
 
-**Scope, stated first:** one wheel, 14 modules, **2 of the 8 sections** of
-`raw-attack4.txt` (W1 and W2). W3–W8 drive a live v0.1-against-v2 workspace and
-are **not** attempted here.
+**Scope, stated first:** one wheel, 14 modules, **3 of the 10 sections** of
+`raw-attack4.txt` (W1, W2 and W2b). W3–W8 drive a live v0.1-against-v2
+workspace and are **not** attempted here.
+
+> **Correction, 2026-08-03.** This read *"2 of the 8 sections … (W1 and W2)"*.
+> `raw-attack4.txt` carries **ten** `##########` section headers, not eight, and
+> this note covered **three** of them: the one-byte-difference characterisation
+> and the six byte-identical security modules in the table below **are W2b**,
+> which I had not counted as a section at all. Both numbers were hand-typed off
+> a reading. `raw/probe_w3_replay.py` §A now parses the header list and
+> **derives** the remaining population instead of naming it — found by item 52
+> on the round after this note was written.
 
 ## The correction, first
 

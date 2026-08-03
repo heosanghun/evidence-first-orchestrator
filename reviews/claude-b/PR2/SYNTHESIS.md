@@ -3,15 +3,15 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**949 passing checks across 52 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 131 files: **54 probe scripts, 69 raw outputs, 8
+**970 passing checks across 53 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 133 files: **55 probe scripts, 70 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
 paragraph disagrees with it. The counts exclude that probe's **own** output,
 which is the report of the run doing the counting — a self-reference with no
 fixpoint, stated rather than hidden — the same guard the citation and quote counts got.
-It also checks the headline `N checks, M unexpected` of all **47** write-ups
+It also checks the headline `N checks, M unexpected` of all **48** write-ups
 against the raw output each one names; nothing verified those until 2026-08-03.
 
 Twelve `UNEXPECTED` lines survive, in five files —
@@ -92,7 +92,7 @@ never treated my own re-run as independent confirmation.
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
-| this review's own counts | machine-checked — inventory, 47 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
+| this review's own counts | machine-checked — inventory, 48 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
 | attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
 | `monitor/collector.py` coverage | map — 27 tests, **no test ages an input**; #6 has no vocabulary to be tested by | `NOTE-the-collector-suite-never-ages-an-input.md` |
 | the 8 provenance-attack scripts | map — all self-document; **2 ran against an unpinned tree that was the stale base**, superseded by the `_main` re-runs | `NOTE-two-attack-scripts-ran-against-the-stale-base.md` |
@@ -108,6 +108,7 @@ never treated my own re-run as independent confirmation.
 | this review's own censuses | bounded — **24 of 30 measured, 6 reasoned from reading** | `NOTE-which-of-my-censuses-measured-and-which-read.md` |
 | my own 21 sound-verdict rows, censused cheaply | **lead, not a verdict — the cheap proxy is refuted** by item 47's hand measurement; 4 of 19 locatable probes are static censuses, 15 drive a component, and the 7 whose component carries an open issue are named for hand adjudication | `NOTE-the-cheap-way-to-census-my-clean-verdicts-is-refuted.md` |
 | the `isinstance` guard, package-wide | map — **a positive pattern, measured**: 24 of 147 functions type-check at 66 sites, and only **11** guard an ARGUMENT; the other 43 guard data the function itself read. 35 of the 37 raising sites raise an `EFOError` | `NOTE-66-guards-and-only-eleven-of-them-guard-an-argument.md` |
+| `raw-attack4.txt` W3, replayed | **replays — 6 of 6 steps**, exit codes and the rejection string identical; the driver never existed and was reconstructed, and a first reconstruction was caught wrong by the ledger event count (5, not 7). 7 of the 10 sections remain un-run; all are offline | `NOTE-w3-replays-and-the-driver-had-to-be-rebuilt.md` |
 | `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
 
 Twenty components were probed and found sound (one with a claim since corrected — see #19).
@@ -268,7 +269,7 @@ task stricter than intended.
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
 `NOTE-citation-audit-of-this-review.md` audits all **227 live citations across
-58 documents**; every one now resolves at `main`. Three did not:
+59 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
