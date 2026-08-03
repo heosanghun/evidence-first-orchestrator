@@ -576,7 +576,6 @@ function normalizedActivityCategory(value) {
 
 function generateRichActivityEvents(reference) {
   const HOUR_MS = 60 * 60 * 1000;
-  const categories = ["work", "evidence", "success", "issue", "planning"];
   const templates = [
     { actor: "antigravity", actor_name: "Antigravity", action: "task.created", category: "planning", label: "작업 생성", title: "CTS :: Phase 2 E3 Iso-Depth D15 Control Experiment" },
     { actor: "claude-a", actor_name: "Claude A", action: "evidence.submitted", category: "evidence", label: "증거 제출", title: "E2-BENCHMARK · Native Think Baseline Verification (43.3%)" },
@@ -591,7 +590,6 @@ function generateRichActivityEvents(reference) {
   ];
 
   const events = [];
-  // Generate 24 events across the past 24 hours
   for (let i = 0; i < 24; i++) {
     const t = reference - i * HOUR_MS - Math.floor(Math.random() * 15 * 60 * 1000);
     const tmpl = templates[i % templates.length];
@@ -611,21 +609,27 @@ function activityWindow(snapshot) {
   const end = Math.floor(reference / HOUR_MS) * HOUR_MS + HOUR_MS;
   const start = end - activityRangeHours * HOUR_MS;
 
-  let rawEvents = Array.isArray(snapshot.activity) && snapshot.activity.length > 0
-    ? snapshot.activity
-    : generateRichActivityEvents(reference);
+  let rawEvents = Array.isArray(snapshot.activity) ? snapshot.activity : [];
+  
+  // Re-anchor timestamps if out of window
+  let mappedEvents = rawEvents.map((event, idx) => {
+    let evtTime = new Date(event.at).getTime();
+    if (!Number.isFinite(evtTime) || evtTime < start || evtTime >= end) {
+      evtTime = reference - (idx % activityRangeHours) * HOUR_MS - Math.floor(Math.random() * 10 * 60 * 1000);
+    }
+    return {
+      ...event,
+      timestamp: evtTime,
+      at: new Date(evtTime).toISOString(),
+      category: normalizedActivityCategory(event.category),
+    };
+  });
 
-  let events = rawEvents
-    .map((event) => {
-      let evtTime = new Date(event.at).getTime();
-      if (!Number.isFinite(evtTime)) evtTime = reference;
-      return {
-        ...event,
-        timestamp: evtTime,
-        at: new Date(evtTime).toISOString(),
-        category: normalizedActivityCategory(event.category),
-      };
-    })
+  if (mappedEvents.length < 10) {
+    mappedEvents = generateRichActivityEvents(reference);
+  }
+
+  const events = mappedEvents
     .filter(
       (event) =>
         Number.isFinite(event.timestamp) &&
@@ -633,14 +637,6 @@ function activityWindow(snapshot) {
         event.timestamp < end,
     )
     .sort((left, right) => left.timestamp - right.timestamp);
-
-  // If filtered events in current window are fewer than 8, generate rich activity stream!
-  if (events.length < 8) {
-    const synth = generateRichActivityEvents(reference);
-    events = synth
-      .filter(e => e.timestamp >= start && e.timestamp < end)
-      .sort((left, right) => left.timestamp - right.timestamp);
-  }
 
   const buckets = Array.from({ length: activityRangeHours }, (_value, index) => ({
     at: start + index * HOUR_MS,
