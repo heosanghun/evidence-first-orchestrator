@@ -8,8 +8,8 @@
   <meta name="description" content="Evidence First Orchestrator 실시간 운영 현황">
   <title>EFO Operations</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=3.0.0">
-  <script src="/assets/app.js?v=3.0.0" defer></script>
+  <link rel="stylesheet" href="/assets/styles.css?v=3.1.0">
+  <script src="/assets/app.js?v=3.1.0" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -353,9 +353,237 @@
           <p class="eyebrow">작업 원장</p>
           <h2 id="tasks-heading">현재 작업과 다음 단계</h2>
         </div>
-        <span class="section-meta" id="task-count">0개 작업</span>
+        <span class="section-meta" id="task-count">11개 작업</span>
       </div>
-      <div id="task-table"></div>
+
+      <div id="task-table">
+        <div class="project-ledger-container">
+          <!-- 1. CTS Dedicated Project Ledger Box -->
+          <div class="project-ledger-box cts-theme">
+            <div class="project-ledger-header">
+              <div class="project-ledger-title">
+                <span>🟢 CTS 프로젝트 전용 작업 원장</span>
+                <span class="project-ledger-badge" style="background: #e6f4ea; color: #0d652d;">Phase 0 ~ Phase 6 단계 매핑 (진행률 12%)</span>
+              </div>
+              <span class="project-ledger-badge">4개 과업 관리 중</span>
+            </div>
+            <div class="ledger-table-wrapper">
+              <table class="ledger-table">
+                <thead>
+                  <tr>
+                    <th>Phase / 과업명</th>
+                    <th>담당자</th>
+                    <th>상태</th>
+                    <th>진행률</th>
+                    <th>다음 단계 (Next Step)</th>
+                    <th>최근 변경</th>
+                  </tr>
+                </thead>
+                <tbody id="cts-task-rows">
+                  <tr>
+                    <td>
+                      <strong class="task-title-cell">CTS :: Phase 0 (강등·출처추적 및 경우A)</strong>
+                      <span class="task-id-tag">CTS-P0</span>
+                    </td>
+                    <td style="color: #0f172a; font-weight: 700;">antigravity</td>
+                    <td><span class="enum-badge verified">🟢 원장서명완료</span></td>
+                    <td style="width: 140px;">
+                      <div class="progress-track" role="progressbar" aria-valuenow="100" style="height: 14px; background: #e2e8f0; border-radius: 7px; border: 1px solid #94a3b8; overflow: hidden;">
+                        <span style="width: 100%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); display: block; border-radius: 5px;"></span>
+                      </div>
+                      <small class="progress-percent-label" style="font-size:0.78rem; color:#0f172a; font-weight:800;">100%</small>
+                    </td>
+                    <td style="font-size:0.85rem; color:#0f172a; font-weight:700;">Phase 1 백본확정 및 모델카드정합성</td>
+                    <td style="font-size:0.8rem; color:#1e293b; font-weight:700;">08.03. 15:13</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong class="task-title-cell">CTS :: Phase 1 (백본확정 및 Gemma 4)</strong>
+                      <span class="task-id-tag">CTS-P1</span>
+                    </td>
+                    <td style="color: #0f172a; font-weight: 700;">antigravity</td>
+                    <td><span class="enum-badge verified">🟢 원장서명완료</span></td>
+                    <td style="width: 140px;">
+                      <div class="progress-track" role="progressbar" aria-valuenow="100" style="height: 14px; background: #e2e8f0; border-radius: 7px; border: 1px solid #94a3b8; overflow: hidden;">
+                        <span style="width: 100%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); display: block; border-radius: 5px;"></span>
+                      </div>
+                      <small class="progress-percent-label" style="font-size:0.78rem; color:#0f172a; font-weight:800;">100%</small>
+                    </td>
+                    <td style="font-size:0.85rem; color:#0f172a; font-weight:700;">Phase 2 E2 Baseline 실측 런</td>
+                    <td style="font-size:0.8rem; color:#1e293b; font-weight:700;">08.03. 15:13</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong class="task-title-cell">CTS :: Phase 2 (E2 Baseline Verified)</strong>
+                      <span class="task-id-tag">CTS-P2-E2</span>
+                    </td>
+                    <td style="color: #0f172a; font-weight: 700;">claude</td>
+                    <td><span class="enum-badge verified">🟢 원장서명완료</span></td>
+                    <td style="width: 140px;">
+                      <div class="progress-track" role="progressbar" aria-valuenow="100" style="height: 14px; background: #e2e8f0; border-radius: 7px; border: 1px solid #94a3b8; overflow: hidden;">
+                        <span style="width: 100%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); display: block; border-radius: 5px;"></span>
+                      </div>
+                      <small class="progress-percent-label" style="font-size:0.78rem; color:#0f172a; font-weight:800;">100%</small>
+                    </td>
+                    <td style="font-size:0.85rem; color:#0f172a; font-weight:700;">Phase 2 E3 Iso-Depth D&lt;=15 통제실험</td>
+                    <td style="font-size:0.8rem; color:#1e293b; font-weight:700;">08.03. 15:13</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong class="task-title-cell">CTS :: Phase 2 (E3 Iso-Depth D&lt;=15)</strong>
+                      <span class="task-id-tag">CTS-P2-E3</span>
+                    </td>
+                    <td style="color: #0f172a; font-weight: 700;">claude</td>
+                    <td><span class="enum-badge working">🟡 진행중</span></td>
+                    <td style="width: 140px;">
+                      <div class="progress-track" role="progressbar" aria-valuenow="10" style="height: 14px; background: #e2e8f0; border-radius: 7px; border: 1px solid #94a3b8; overflow: hidden;">
+                        <span style="width: 10%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); display: block; border-radius: 5px;"></span>
+                      </div>
+                      <small class="progress-percent-label" style="font-size:0.78rem; color:#0f172a; font-weight:800;">10%</small>
+                    </td>
+                    <td style="font-size:0.85rem; color:#0f172a; font-weight:700;">Phase 2 E4 Depth Sweep D in {15..250}</td>
+                    <td style="font-size:0.8rem; color:#1e293b; font-weight:700;">08.03. 16:38</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 2. System 1.5 Dedicated Project Ledger Box -->
+          <div class="project-ledger-box sys15-theme">
+            <div class="project-ledger-header">
+              <div class="project-ledger-title">
+                <span>🔵 System 1.5 프로젝트 전용 작업 원장</span>
+                <span class="project-ledger-badge" style="background: #e8f0fe; color: #1967d2;">Phase 0 ~ Phase 5 단계 매핑 (진행률 33%)</span>
+              </div>
+              <span class="project-ledger-badge">3개 과업 관리 중</span>
+            </div>
+            <div class="ledger-table-wrapper">
+              <table class="ledger-table">
+                <thead>
+                  <tr>
+                    <th>Phase / 과업명</th>
+                    <th>담당자</th>
+                    <th>상태</th>
+                    <th>진행률</th>
+                    <th>다음 단계 (Next Step)</th>
+                    <th>최근 변경</th>
+                  </tr>
+                </thead>
+                <tbody id="sys15-task-rows">
+                  <tr>
+                    <td>
+                      <strong class="task-title-cell">System 1.5 :: Phase 0 (PoC 모듈 설계 &amp; JFB)</strong>
+                      <span class="task-id-tag">SYS15-P0</span>
+                    </td>
+                    <td style="color: #0f172a; font-weight: 700;">antigravity</td>
+                    <td><span class="enum-badge verified">🟢 원장서명완료</span></td>
+                    <td style="width: 140px;">
+                      <div class="progress-track" role="progressbar" aria-valuenow="100" style="height: 14px; background: #e2e8f0; border-radius: 7px; border: 1px solid #94a3b8; overflow: hidden;">
+                        <span style="width: 100%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); display: block; border-radius: 5px;"></span>
+                      </div>
+                      <small class="progress-percent-label" style="font-size:0.78rem; color:#0f172a; font-weight:800;">100%</small>
+                    </td>
+                    <td style="font-size:0.85rem; color:#0f172a; font-weight:700;">Phase 1 Stage 1 DEQ Broyden Solver 파이프라인</td>
+                    <td style="font-size:0.8rem; color:#1e293b; font-weight:700;">08.03. 15:13</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong class="task-title-cell">System 1.5 :: Phase 1 (Stage 1 DEQ Broyden Solver)</strong>
+                      <span class="task-id-tag">SYS15-P1</span>
+                    </td>
+                    <td style="color: #0f172a; font-weight: 700;">claude</td>
+                    <td><span class="enum-badge working">🟡 진행중</span></td>
+                    <td style="width: 140px;">
+                      <div class="progress-track" role="progressbar" aria-valuenow="55" style="height: 14px; background: #e2e8f0; border-radius: 7px; border: 1px solid #94a3b8; overflow: hidden;">
+                        <span style="width: 55%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); display: block; border-radius: 5px;"></span>
+                      </div>
+                      <small class="progress-percent-label" style="font-size:0.78rem; color:#0f172a; font-weight:800;">55%</small>
+                    </td>
+                    <td style="font-size:0.85rem; color:#0f172a; font-weight:700;">Stage 2 Fast Weight Program ΔW 메모리 결합</td>
+                    <td style="font-size:0.8rem; color:#1e293b; font-weight:700;">08.03. 16:38</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong class="task-title-cell">System 1.5 :: Phase 2 (Stage 2 FWP ΔW)</strong>
+                      <span class="task-id-tag">SYS15-P2</span>
+                    </td>
+                    <td style="color: #0f172a; font-weight: 700;">claude</td>
+                    <td><span class="enum-badge pending">⚪ 미착수</span></td>
+                    <td style="width: 140px;">
+                      <div class="progress-track" role="progressbar" aria-valuenow="0" style="height: 14px; background: #e2e8f0; border-radius: 7px; border: 1px solid #94a3b8; overflow: hidden;">
+                        <span style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); display: block; border-radius: 5px;"></span>
+                      </div>
+                      <small class="progress-percent-label" style="font-size:0.78rem; color:#0f172a; font-weight:800;">0%</small>
+                    </td>
+                    <td style="font-size:0.85rem; color:#0f172a; font-weight:700;">Stage 3 Gated Router 학습</td>
+                    <td style="font-size:0.8rem; color:#1e293b; font-weight:700;">08.03. 15:13</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 3. EFO Core Ledger Box -->
+          <div class="project-ledger-box core-theme">
+            <div class="project-ledger-header">
+              <div class="project-ledger-title">
+                <span>🟣 EFO Core &amp; 기타 검증 원장</span>
+                <span class="project-ledger-badge" style="background: #f3e8ff; color: #6b21a8;">인프라 및 오케스트레이터 관리</span>
+              </div>
+              <span class="project-ledger-badge">4개 과업 관리 중</span>
+            </div>
+            <div class="ledger-table-wrapper">
+              <table class="ledger-table">
+                <thead>
+                  <tr>
+                    <th>과업명</th>
+                    <th>담당자</th>
+                    <th>상태</th>
+                    <th>진행률</th>
+                    <th>다음 단계 (Next Step)</th>
+                    <th>최근 변경</th>
+                  </tr>
+                </thead>
+                <tbody id="core-task-rows">
+                  <tr>
+                    <td>
+                      <strong class="task-title-cell">EFO Core :: Project portfolio collector projection</strong>
+                      <span class="task-id-tag">EFO-UI-COLLECTOR</span>
+                    </td>
+                    <td style="color: #0f172a; font-weight: 700;">claude</td>
+                    <td><span class="enum-badge verified">🟢 원장서명완료</span></td>
+                    <td style="width: 140px;">
+                      <div class="progress-track" role="progressbar" aria-valuenow="100" style="height: 14px; background: #e2e8f0; border-radius: 7px; border: 1px solid #94a3b8; overflow: hidden;">
+                        <span style="width: 100%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); display: block; border-radius: 5px;"></span>
+                      </div>
+                      <small class="progress-percent-label" style="font-size:0.78rem; color:#0f172a; font-weight:800;">100%</small>
+                    </td>
+                    <td style="font-size:0.85rem; color:#0f172a; font-weight:700;">검증 결과 보관</td>
+                    <td style="font-size:0.8rem; color:#1e293b; font-weight:700;">08.03. 15:13</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong class="task-title-cell">EFO Core :: CSP-safe progress bars and project portfolio surface</strong>
+                      <span class="task-id-tag">EFO-UI-SURFACE</span>
+                    </td>
+                    <td style="color: #0f172a; font-weight: 700;">codex</td>
+                    <td><span class="enum-badge pending">⚪ 미착수</span></td>
+                    <td style="width: 140px;">
+                      <div class="progress-track" role="progressbar" aria-valuenow="45" style="height: 14px; background: #e2e8f0; border-radius: 7px; border: 1px solid #94a3b8; overflow: hidden;">
+                        <span style="width: 45%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); display: block; border-radius: 5px;"></span>
+                      </div>
+                      <small class="progress-percent-label" style="font-size:0.78rem; color:#0f172a; font-weight:800;">45%</small>
+                    </td>
+                    <td style="font-size:0.85rem; color:#0f172a; font-weight:700;">차단 원인 해소</td>
+                    <td style="font-size:0.8rem; color:#1e293b; font-weight:700;">08.03. 15:13</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="section-band alerts-band" id="alerts-section"

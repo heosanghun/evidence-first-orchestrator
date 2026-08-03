@@ -2508,3 +2508,107 @@ dialog input:focus {
   font-size: 0.85rem;
   font-weight: 800;
 }
+
+
+/* ==========================================================================
+   PROJECT LEDGER DEDICATED COLOR-CODED BOXES (v3.1.0)
+   ========================================================================== */
+
+.project-ledger-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 16px;
+  width: 100%;
+}
+
+.project-ledger-box {
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.project-ledger-box.cts-theme {
+  border-left: 6px solid #10b981;
+}
+
+.project-ledger-box.sys15-theme {
+  border-left: 6px solid #2563eb;
+}
+
+.project-ledger-box.core-theme {
+  border-left: 6px solid #8b5cf6;
+}
+
+.project-ledger-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.project-ledger-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.project-ledger-badge {
+  background: #f1f5f9;
+  color: #334155;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.ledger-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ledger-table th {
+  padding: 10px 12px;
+  text-align: left;
+  color: #0f172a;
+  font-weight: 800;
+  font-size: 0.88rem;
+  background: #f1f5f9;
+  border-bottom: 2px solid #cbd5e1;
+}
+
+.ledger-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+
+.task-title-cell {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a !important;
+}
+
+.task-id-tag {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-top: 3px;
+}
