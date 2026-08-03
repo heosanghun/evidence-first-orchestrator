@@ -44,7 +44,19 @@ def check(name: str, expected: str, observed: str) -> None:
     print(f"        observed: {observed}")
 
 
+# Same category as probe_citation_audit.py's REVIEW_LOCAL: `REPORT.md` is cited
+# by line but lives in the REVIEW directory and has never existed at main.
+# Before this, such a pair hit `continue` below and vanished - and the
+# `every decidable pair was examined` check is exactly what caught it, because
+# it compares the pair COUNT against verified+unmatched rather than trusting
+# the loop to have handled every pair.
+REVIEW_LOCAL = {"REPORT.md", "SYNTHESIS.md"}
+
+
 def resolve(path: str) -> Path | None:
+    if path in REVIEW_LOCAL:
+        candidate = REVIEWS / path
+        return candidate if candidate.is_file() else None
     for prefix in ROOTS:
         candidate = SOURCE / prefix / path if prefix else SOURCE / path
         if candidate.is_file():
@@ -141,6 +153,14 @@ ADJUDICATED = {
         "PROBE OUTPUT - `helpers.py:87 expected=4 observed=4 if "
         "known_answer_passed else 5` is the census line, which renders the "
         "dict's two values on one line; the source spells them across four",
+    ("NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md",
+     "REPORT.md"):
+        "PROBE OUTPUT - the block is the probe's own citation listing "
+        "(`REPORT.md:305  *measured.* ...`), not a quote of REPORT.md:194-232. "
+        "This is also the first REVIEW-LOCAL pair the checker has ever "
+        "resolved: before REVIEW_LOCAL existed the pair hit `continue` and "
+        "vanished, and the `every decidable pair was examined` count is what "
+        "caught it",
     ("NOTE-487-is-too-many-and-the-two-that-survive-are-guarded.md",
      "provenance.py"):
         "PROBE OUTPUT - the block is the probe's own two-line site listing "

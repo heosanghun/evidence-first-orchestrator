@@ -60,9 +60,12 @@
   [ok] raw-attack outputs present, excluding this probe's own
         expected: outputs: 9
         observed: outputs: 9
-  [ok]   and the self-exclusion is exactly one file
-        expected: self: True
-        observed: self: True
+  [ok]   and the probe-output exclusions are named, not silent
+        expected: excluded: ['raw-attack-provenance.txt', 'raw-attack4-provenance.txt']
+        observed: excluded: ['raw-attack-provenance.txt', 'raw-attack4-provenance.txt']
+  [ok]     this probe's own output among them
+        expected: self excluded: True
+        observed: self excluded: True
     ['raw-attack-main.txt', 'raw-attack-main2.txt', 'raw-attack-prov-main.txt', 'raw-attack-prov5-main.txt', 'raw-attack-proxy.txt', 'raw-attack2-cef5623.txt', 'raw-attack2.txt', 'raw-attack3.txt', 'raw-attack4.txt']
     raw-attack4.txt has NO attack4 script in raw/. Nine outputs, eight
     scripts: one result on this branch cannot be reproduced from what

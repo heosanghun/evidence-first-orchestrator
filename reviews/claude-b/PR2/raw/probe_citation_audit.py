@@ -59,7 +59,7 @@ check("probe source is main 5694ab45",
       "5694ab455139f1e72d946bc2fe7e42c7c0c8a43a", head)
 check("  with no working-tree modification", "dirty: ''", f"dirty: {dirty!r}")
 documents = sorted(REVIEWS.glob("*.md"))
-check("  and the write-ups are present", "documents: 49",
+check("  and the write-ups are present", "documents: 50",
       f"documents: {len(documents)}")
 
 # ---------------------------------------------------------------- B
@@ -75,6 +75,14 @@ KNOWN_MISSING = {
     "qwen_adapter.py", "cts/backbone/qwen_adapter.py",
 }
 
+# REVIEW-LOCAL documents: cited by line like any source, but they live in
+# reviews/claude-b/PR2/ and are NOT EFO source, so resolving them against main
+# is a category error - `REPORT.md` exists here and has never existed at main.
+# Resolved against the REVIEW directory instead, and section B asserts that
+# each one is really there, so the exclusion cannot hide a typo the way a bare
+# skip-list would.
+REVIEW_LOCAL = {"REPORT.md", "SYNTHESIS.md"}
+
 # The write-ups cite modules by bare name, the way a reader refers to them.
 SEARCH_ROOTS = ("", "src/evidence_orchestrator", "docs", "functions/api",
                 "public/assets", "monitor", "tests", "web_tests")
@@ -82,6 +90,9 @@ SEARCH_ROOTS = ("", "src/evidence_orchestrator", "docs", "functions/api",
 
 def resolve(path: str) -> Path | None:
     """A bare `doctor.py:109` means the module, not a file at the repo root."""
+    if path in REVIEW_LOCAL:
+        candidate = REVIEWS / path
+        return candidate if candidate.is_file() else None
     for prefix in SEARCH_ROOTS:
         candidate = SOURCE / prefix / path if prefix else SOURCE / path
         if candidate.is_file():
@@ -133,7 +144,13 @@ for document_name, path, start, end in citations:
     if path not in line_counts:
         line_counts[path] = len(
             target.read_text(encoding="utf-8", errors="replace").splitlines())
-        resolved_as[path] = str(target.relative_to(SOURCE))
+        # A review-local document does not live under SOURCE, so
+        # relative_to would raise. It did, on the first run of this
+        # change - caught because the traceback was READ, not because
+        # a count looked wrong.
+        resolved_as[path] = (
+            f"(review) {path}" if path in REVIEW_LOCAL
+            else str(target.relative_to(SOURCE)))
     total = line_counts[path]
     highest = end or start
     if highest > total or start < 1:
@@ -143,6 +160,14 @@ for document_name, path, start, end in citations:
 
 check("every cited file exists at main", "missing: []",
       f"missing: {sorted(set(missing_file))}")
+# The review-local exclusion is ASSERTED, not assumed: each named document must
+# actually be present in the review directory, so a typo in REVIEW_LOCAL fails
+# the run instead of silently exempting a citation.
+absent_local = sorted(n for n in REVIEW_LOCAL if not (REVIEWS / n).is_file())
+check("  and every review-local document really is here",
+      "absent: []", f"absent: {absent_local}")
+print(f"  review-local paths, resolved against the review dir not main: "
+      f"{sorted(REVIEW_LOCAL)}")
 check("  and every cited line is within its file", "out of range: []",
       f"out of range: {sorted(set(unresolved))}")
 print(f"  distinct files cited: {len(line_counts)}")

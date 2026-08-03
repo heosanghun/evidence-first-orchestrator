@@ -1,7 +1,7 @@
 # The eight attack scripts are not opaque — but two ran against an unpinned tree that was the stale base
 
 Reproduce with `raw/probe_attack_provenance.py`; raw output in
-`raw/raw-attack-provenance.txt`. **11 checks, 0 unexpected.** No issue filed —
+`raw/raw-attack-provenance.txt`. **12 checks, 0 unexpected.** No issue filed —
 this audits **my own evidence**, not EFO.
 
 Queue item 40 asked whether `raw/`'s third category — the attack scripts that
@@ -120,5 +120,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_attack_provenance.py` | `df39a0d0b232788afa1ef3936d8e8b729ef34057fe33b25de7cd32787608e863` |
-| `raw/raw-attack-provenance.txt` | `c740eb5f7037dd3b5aec56222f527e533dfac1c907bcfba89d27a83a92eabdf4` |
+| `raw/probe_attack_provenance.py` | `e8f6215c4f4fa9d3e74da0ccf49aee2d013e0ab0e336679fd5b191282bf1e580` |
+| `raw/raw-attack-provenance.txt` | `4cf1011194e116c60e3631a7a64557da19f6555b600767d564c956db9413162b` |

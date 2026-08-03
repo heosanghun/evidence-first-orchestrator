@@ -1,0 +1,98 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   and the orphan output is present to be measured
+        expected: exists: True
+        observed: exists: True
+
+########## B. no attack4 script has EVER existed ##########
+    a820891 review(claude-b): independent verification of PR #2
+    reviews/claude-b/PR2/raw/raw-attack4.txt
+  [ok] commits that DELETED anything named attack4
+        expected: deleted: []
+        observed: deleted: []
+  [ok]   the only path ever matching the name
+        expected: paths: 1
+        observed: paths: 1   ['reviews/claude-b/PR2/raw/raw-attack4.txt']
+  [ok]     and it is the OUTPUT, not a script
+        expected: raw-attack4.txt
+        observed: reviews/claude-b/PR2/raw/raw-attack4.txt
+  [ok]   added in the branch's first review commit
+        expected: a820891 2026-07-30
+        observed: a820891 2026-07-30
+  Not recoverable from history, because there is nothing to recover.
+  The item asked whether to recover or to mark unreproducible; the
+  first option does not exist.
+
+########## C. and REPORT.md says something untrue about it ##########
+    REPORT.md:442  repository. `raw-attack4.txt` was produced by the inline command blocks quoted
+  [ok] REPORT.md states where the output came from
+        expected: claim lines: 1
+        observed: claim lines: 1
+    (the sentence continues on REPORT.md:443 - `in §3 ④.`)
+    §3 ④ spans REPORT.md:194-232, 39 lines
+  [ok]   fenced blocks in that section
+        expected: fenced blocks: 2
+        observed: fenced blocks: 2
+  [ok]     command-shaped lines in that section
+        expected: commands: 0
+        observed: commands: 0
+      block at §3④+4: sha256(tests/fixtures/evidence_first_orchestrator-0.1.0-py3-none-any.w
+      block at §3④+34: config file orchestrator : antigravity
+  Both blocks are RESULTS - a sha256 line and its README comparison.
+  The manifest's sentence does not hold. That is a defect in MY OWN
+  evidence bookkeeping, and it is stated first rather than folded into
+  the verdict.
+
+########## D. the INPUT is gone too, which settles it ##########
+    7a9553b Add evidence-gated meta-orchestration v2
+    tests/fixtures/evidence_first_orchestrator-0.1.0-py3-none-any.whl
+  [ok] the wheel fixture exists at the anchor
+        expected: present at main: False
+        observed: present at main: False
+  [ok]   in fact the fixture directory is gone
+        expected: fixtures dir: False
+        observed: fixtures dir: False
+  [ok]   and README no longer claims the wheel hash
+        expected: readme hash: False
+        observed: readme hash: False
+  W1 hashes that wheel and W2 diffs its 14 modules against f827f29.
+  Neither can run at the anchor no matter what drives them, so the
+  output is unreproducible for a reason stronger than the missing
+  script: the artifact under test is not in the tree.
+
+########## E. what still rests on it ##########
+    documents citing it: ['NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md', 'NOTE-two-attack-scripts-ran-against-the-stale-base.md', 'REPORT.md', 'SYNTHESIS.md']
+      REPORT.md:305  *measured.* `raw/raw-attack4.txt`, W6 / W6b.
+      REPORT.md:322  *measured.* `raw/raw-attack4.txt`, W3.
+      REPORT.md:342  *measured.* `raw/raw-attack4.txt`, W2 / W2b.
+  [ok] REPORT.md claims that cite it as measured
+        expected: measured citations: 3
+        observed: measured citations: 3
+    the P2 findings in REPORT.md: ['P2-1', 'P2-2', 'P2-3', 'P2-4']
+  P2-1, P2-2 and P2-3 each cite raw-attack4.txt. They are not
+  retracted here - they were measured when they were made, against a
+  ref REPORT.md names as 4aa47ca6, not this review's anchor. What is
+  now recorded is that they cannot be re-derived on this branch.
+
+########## F. what this does NOT do ##########
+  * It does not retract P2-1, P2-2 or P2-3, and does not re-run them.
+    Unreproducible-at-the-anchor is not the same as wrong.
+  * It does not reconstruct the commands. Writing a plausible attack4
+    now and calling it the original would be inventing provenance -
+    the exact thing this review exists to catch.
+  * It does not touch main or any other agent's branch. REPORT.md is
+    this review's own document and is corrected in place, dated.
+  * MEASURED: every git query, the section bounds, the fenced-block and
+    command counts, the fixture's absence, the citation census.
+    REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Read-only git and file queries. Nothing executed against a workspace,
+no issue filed - this is a defect in my own bookkeeping, not in EFO.
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED.

@@ -8,9 +8,9 @@
 
 ########## B. citation + fenced block, the decidable subset ##########
   [ok] every decidable pair was examined
-        expected: pairs: 25
-        observed: pairs: 25
-  verbatim-verified: 16   not matched: 9
+        expected: pairs: 26
+        observed: pairs: 26
+  verbatim-verified: 16   not matched: 10
     ADDENDUM-git-replace-regression.md  ->  provenance.py:47
         deliberate before/after - the block quotes the argument list that was REMOVED, which is the whole point of the regression
     NOTE-487-is-too-many-and-the-two-that-survive-are-guarded.md  ->  provenance.py:78
@@ -27,6 +27,8 @@
         extractor artifact - the citation is INSIDE a fenced listing, so the following PROSE paragraph was captured as the block
     NOTE-proxy-grant-holds.md  ->  workspace.py:1308
         extractor artifact - same shape, citation inside a fenced listing
+    NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md  ->  REPORT.md:342
+        PROBE OUTPUT - the block is the probe's own citation listing (`REPORT.md:305  *measured.* ...`), not a quote of REPORT.md:194-232. This is also the first REVIEW-LOCAL pair the checker has ever resolved: before REVIEW_LOCAL existed the pair hit `continue` and vanished, and the `every decidable pair was examined` count is what caught it
     NOTE-remaining-docs-adjudicated.md  ->  src/evidence_orchestrator/adapter.py:180
         PROBE OUTPUT again - the block is this review's own census line `adapter.py:180  shell=False`, not a quote of the source at :180. Caught by this check on the very round the note was written, which is the self-check working as intended
   [ok] every unmatched block is adjudicated
@@ -293,7 +295,7 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 
 ########## D. what stays UNDECIDABLE, with a count ##########
-  inline backticked spans sharing a line with a citation: 263
+  inline backticked spans sharing a line with a citation: 267
   These are NOT checked. A sentence like "`doctor.py:109` interpolates
   `agent_id` into a path" contains a citation and a span that is a
   quote, and a sentence like "`workspace.py:1182` reads it by direct
@@ -310,23 +312,23 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
   silently is indistinguishable from one that was never measured, so
   the run now fails when prose and output disagree.
   [ok]   the note states this run's pairs
-        expected: pairs: 25
-        observed: pairs: 25
+        expected: pairs: 26
+        observed: pairs: 26
   [ok]   the note states this run's verbatim-verified
         expected: verbatim-verified: 16
         observed: verbatim-verified: 16
   [ok]   the note states this run's adjudicated non-quotes
-        expected: adjudicated non-quotes: 9
-        observed: adjudicated non-quotes: 9
+        expected: adjudicated non-quotes: 10
+        observed: adjudicated non-quotes: 10
   [ok]   the note states this run's inline spans
-        expected: inline spans: 263
-        observed: inline spans: 263
+        expected: inline spans: 267
+        observed: inline spans: 267
   [ok]   NOTE-citation-audit-of-this-review.md cross-reference agrees
-        expected: inline: 263
-        observed: inline: 263
+        expected: inline: 267
+        observed: inline: 267
   [ok]   SYNTHESIS.md cross-reference agrees
-        expected: inline: 263
-        observed: inline: 263
+        expected: inline: 267
+        observed: inline: 267
 
 ########## 0 unexpected result(s) ##########
 This audits MY OWN write-ups, not EFO. Static analysis only; nothing

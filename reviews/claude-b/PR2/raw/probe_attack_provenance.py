@@ -54,9 +54,20 @@ scripts = sorted(p.name for p in RAW.iterdir()
 # make the census grow by one the moment the probe is committed - the same
 # self-reference probe_inventory_selfcheck.py hit, one level down. Excluded by
 # name, and the exclusion is asserted below so a second cannot hide.
+# The exclusion is DERIVED, not a name list. Any `raw-X.txt` that has a
+# `probe_X.py` beside it is a PROBE output, not an attack output - including
+# this probe's own, and including `raw-attack4-provenance.txt`, which was added
+# later and collided with this glob purely because of its name. Hardcoding
+# SELF caught the first collision and would have missed the second.
+def is_probe_output(name: str) -> bool:
+    return (RAW / f"probe_{name[len('raw-'):-len('.txt')].replace('-', '_')}.py").is_file()
+
+
 SELF = "raw-attack-provenance.txt"
+excluded = sorted(p.name for p in RAW.glob("raw-attack*.txt")
+                  if is_probe_output(p.name))
 outputs = sorted(p.name for p in RAW.glob("raw-attack*.txt")
-                 if p.name != SELF)
+                 if not is_probe_output(p.name))
 
 # ---------------------------------------------------------------- A
 print("########## A. POSITIVE CONTROL ##########")
@@ -137,8 +148,11 @@ print("  about main. Same defect as REPORT.md reviewing an unnamed ref.")
 print("\n########## E. two smaller gaps in the same category ##########")
 check("raw-attack outputs present, excluding this probe's own",
       "outputs: 9", f"outputs: {len(outputs)}")
-check("  and the self-exclusion is exactly one file", "self: True",
-      f"self: {(RAW / SELF).is_file()}")
+check("  and the probe-output exclusions are named, not silent",
+      "excluded: ['raw-attack-provenance.txt', 'raw-attack4-provenance.txt']",
+      f"excluded: {excluded}")
+check("    this probe's own output among them", "self excluded: True",
+      f"self excluded: {SELF in excluded}")
 print(f"    {outputs}")
 orphan = [o for o in outputs
           if not any(o[len('raw-'):].replace('-', '_').startswith(

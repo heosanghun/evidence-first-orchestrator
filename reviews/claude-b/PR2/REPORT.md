@@ -441,3 +441,20 @@ Subject under review: `heosanghun/evidence-first-orchestrator` @
 create and destroy their own workspaces under `/tmp` and touch nothing in either
 repository. `raw-attack4.txt` was produced by the inline command blocks quoted
 in §3 ④.
+
+> **Correction, 2026-08-03.** The sentence above is **false**, and it is a
+> statement about provenance in the section whose job is provenance. §3 ④
+> (`REPORT.md:194-232`) contains **two fenced blocks and zero command-shaped
+> lines** — both blocks are *results*, not commands. No `attack4` script has
+> ever existed in this repository: `git log --all --diff-filter=D --
+> '*attack4*'` returns nothing, and the only path ever matching the name is the
+> output itself, added in `a820891`.
+>
+> `raw-attack4.txt` is therefore **unreproducible**, and for a reason stronger
+> than the missing driver: the wheel fixture W1 hashes and W2 diffs was added in
+> `7a9553b` and **`tests/fixtures/` does not exist at `main` `5694ab45`**, nor
+> does the README hash claim W1 checked. P2-1, P2-2 and P2-3 cite this output
+> and are **not retracted** — they were measured against the ref this report
+> names, `4aa47ca6` — but they cannot be re-derived on this branch.
+> `NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md` measures all
+> of it.
