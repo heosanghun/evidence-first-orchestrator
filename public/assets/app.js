@@ -412,13 +412,14 @@ function renderMission(snapshot) {
   elements.objective.textContent = snapshot.workspace.objective;
   
   // Overall workflow progress calculated as average of project portfolios
-  let progress = 23;
+  let progress = 0;
   if (snapshot.projects && snapshot.projects.length > 0) {
     const total = snapshot.projects.reduce((acc, p) => {
-      const pVal = (p.id === "cts" || (p.name && p.name.includes("CTS"))) ? 12 : (p.progress_percent || 0);
-      return acc + pVal;
+      return acc + (p.progress_percent || 0);
     }, 0);
     progress = Math.round(total / snapshot.projects.length);
+  } else if (snapshot.workspace && snapshot.workspace.workflow_progress_percent !== undefined) {
+    progress = snapshot.workspace.workflow_progress_percent;
   }
   
   elements.overallProgressLabel.textContent = formatPercent(progress);
@@ -501,33 +502,9 @@ function renderAgents(snapshot) {
   elements.agentGrid.innerHTML = snapshot.agents
     .map((rawAgent, index) => {
       const agent = { ...rawAgent };
-      
-      // Explicit exact user-requested Korean labels & 55% active state
-      if (agent.id === "claude-a" || agent.name === "Claude A") {
-        agent.state = "working";
-        agent.current = "System 1.5 :: Stage 1 DEQ Broyden Solver on physical GPU 0~7";
-        agent.next = "Stage 2 Fast Weight Program ΔW 메모리 결합 파이프라인 수행";
-        agent.progress_percent = 55;
-      } else if (agent.id === "claude-b" || agent.name === "Claude B") {
-        agent.state = "working";
-        agent.current = "CTS :: Publish verified P1b statistics tools";
-        agent.next = "P1b 통계 독립 검증 및 원장 서명 제출";
-        agent.progress_percent = 55;
-      } else if (agent.id === "codex" || agent.name === "Codex") {
-        agent.state = "idle";
-        agent.current = "배정 대기";
-        agent.next = "오케스트레이터 지시 대기";
-        agent.progress_percent = 0;
-      } else if (agent.id === "antigravity" || agent.name === "Antigravity") {
-        agent.state = "idle";
-        agent.current = "배정 대기";
-        agent.next = "오케스트레이터 지시 대기";
-        agent.progress_percent = 0;
-      }
-
       const state = normalizeAgentState(agent.state);
       const isWorking = state === "working";
-      const progress = isWorking ? 55 : clamp(agent.progress_percent || 0);
+      const progress = clamp(agent.progress_percent || 0);
 
       const statusDot = isWorking ? '<span class="status-pulse-dot"></span>' : '<span class="status-idle-dot"></span>';
       const statusText = isWorking ? "작업 중" : "대기";
