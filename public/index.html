@@ -8,8 +8,8 @@
   <meta name="description" content="Evidence First Orchestrator 실시간 운영 현황">
   <title>EFO Operations</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=2.9.0">
-  <script src="/assets/app.js?v=2.9.0" defer></script>
+  <link rel="stylesheet" href="/assets/styles.css?v=3.0.0">
+  <script src="/assets/app.js?v=3.0.0" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -355,21 +355,7 @@
         </div>
         <span class="section-meta" id="task-count">0개 작업</span>
       </div>
-      <div class="table-scroll">
-        <table>
-          <thead>
-            <tr>
-              <th>작업</th>
-              <th>담당</th>
-              <th>상태</th>
-              <th>진행률</th>
-              <th>다음 단계</th>
-              <th>최근 변경</th>
-            </tr>
-          </thead>
-          <tbody id="task-table"></tbody>
-        </table>
-      </div>
+      <div id="task-table"></div>
     </section>
 
     <section class="section-band alerts-band" id="alerts-section"
