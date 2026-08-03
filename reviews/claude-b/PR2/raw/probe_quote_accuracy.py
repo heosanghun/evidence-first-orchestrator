@@ -141,6 +141,15 @@ ADJUDICATED = {
         "PROBE OUTPUT - `helpers.py:87 expected=4 observed=4 if "
         "known_answer_passed else 5` is the census line, which renders the "
         "dict's two values on one line; the source spells them across four",
+    ("NOTE-487-is-too-many-and-the-two-that-survive-are-guarded.md",
+     "provenance.py"):
+        "PROBE OUTPUT - the block is the probe's own two-line site listing "
+        "(`provenance.py:76  branch.strip  in validate_git_source_claim()`), "
+        "not a quote of the source at :76. The note DOES quote that line "
+        "verbatim, in a separate fenced block a few paragraphs down, which "
+        "carries no citation on its own line and so is not paired. Flagged on "
+        "the round the note was written - the fifth time this check has caught "
+        "its own author",
     ("NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md", "workspace.py"):
         "PROBE OUTPUT - the block is this census's listing of the 14 chained "
         "`get(default).get()` sites across five modules, one line each; it is "

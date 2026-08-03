@@ -59,7 +59,7 @@ check("probe source is main 5694ab45",
       "5694ab455139f1e72d946bc2fe7e42c7c0c8a43a", head)
 check("  with no working-tree modification", "dirty: ''", f"dirty: {dirty!r}")
 documents = sorted(REVIEWS.glob("*.md"))
-check("  and the write-ups are present", "documents: 48",
+check("  and the write-ups are present", "documents: 49",
       f"documents: {len(documents)}")
 
 # ---------------------------------------------------------------- B
