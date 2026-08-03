@@ -1,0 +1,122 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   the second checkout is still 7a9553b
+        expected: 7a9553b
+        observed: 7a9553b
+  [ok]   raw outputs in the corpus, this probe's own excluded
+        expected: outputs: 75
+        observed: outputs: 75
+  [ok]     exactly one output is excluded, and it is this one
+        expected: excluded: ['raw-output-provenance-lines.txt']
+        observed: excluded: ['raw-output-provenance-lines.txt']
+  This probe's OWN classification is therefore the one number here
+  that is not machine-checked; it is read off the section below.
+
+########## B. the markers, DERIVED from the two trees ##########
+    only at 7a9553b : ['identity.py', 'job_runner.py']
+    only at anchor  : ['independence.py']
+  [ok] modules present only on 7a9553b's line
+        expected: only other: ['identity.py', 'job_runner.py']
+        observed: only other: ['identity.py', 'job_runner.py']
+  [ok]   and present only on the anchor's
+        expected: only anchor: ['independence.py']
+        observed: only anchor: ['independence.py']
+  A TWO-WAY discriminator, which is stronger than the one-way test the
+  item proposed: an output can be placed on EITHER line, not just
+  flagged as belonging to the other one.
+
+########## C. the scan ##########
+    7a9553b-only tokens  raw-w4-replay.txt  ['transfer_orchestrator', 'transfer-orchestrator', 'orchestrator_transferred']
+  [ok] outputs positively placed on the ANCHOR's line
+        expected: anchor: 35
+        observed: anchor: 35
+  [ok]   outputs carrying a 7a9553b-only token
+        expected: other: 1
+        observed: other: 1
+  [ok]     and it is my OWN item-55 probe, which names both refs
+        expected: other: ['raw-w4-replay.txt']
+        observed: other: ['raw-w4-replay.txt']
+  [ok]   outputs the test cannot place
+        expected: undecidable: 39
+        observed: undecidable: 39
+  [ok]     and the three classes account for every output
+        expected: total: 75
+        observed: total: 75
+
+########## D. the KNOWN ANSWER that shows the test is ONE-WAY ##########
+  [ok] raw-attack4.txt is in the UNDECIDABLE set
+        expected: attack4 undecidable: True
+        observed: attack4 undecidable: True
+  [ok]   yet item 55 placed its W4-W6b on 7a9553b's line
+        expected: W4, W5, W6 and W6b drive a v2 that only exists on the other line
+        observed: # W4 needs a ref the anchor never took — and both its tracebacks are the driver's  Reproduce with `raw/probe_w4_replay.py`; raw output in `raw/raw-w4-replay.txt`. **21 checks, 0 unexpected.** A **map about a ref this review is not anchored to** — no issue filed, nothing retracted.  **Scope, stated first:** 2 refs, **1 of the 7** remaining sections, 5 driven commands.  ## The correction, first  Item 52 replayed W3 six-for-six at the anchor and wrote that W4–W8's *"blocker is gone"*. **For W4, W5, W6 and W6b that is wrong**, and the reason is not a missing client:  ```     transfer_orchestrator     7 occurrences across 3 files at 7a9553b                               (cli.py, workspace.py, test_meta_orchestration.py)                               0 files at 5694ab45 — not src, not tests, not docs      git merge-base --is-ancestor 7a9553b 5694ab45   →  NO ```  **`7a9553b` is not an ancestor of the anchor.** The anchor's `workspace.py` line begins at `f827f29`; `7a9553b` is a separate branch. Corrected in that note with a dated banner.  So `raw-attack4.txt` **mixes two lines of history**: W1/W2/W2b compare the v0.1 wheel against `git archive f827f29` — the anchor's ancestor — while W4, W5, W6 and W6b drive a v2 that only exists on the other line. W3 reproduced at the anchor because its property (the v0.1 client refusing an attested agent record) is common to both.  The anchor's ledger action list is **derived from its own source**, not typed here, and holds no orchestrator transfer:  ```     agent.added  agent.identity_attested  task.archived  task.blocked     task.claimed  task.created  task.heartbeat  task.lease_expired     task.proxy_authorized  task.proxy_status_reported  task.proxy_submitted     task.rejected  task.requeued  task.started  task.submitted  task.verified     workspace.initialized ```  ## W4 replayed — against `7a9553b`, named rather than assumed  | | committed | fresh run at `7a9553b` | |---|---|---| | `workspace transfer-orchestrator` | `exit=0` | **0** | | payload keys | `event_hash`, `from`, `to`, `reason` | **same four** | | from → to | `antigravity → codex` | **antigravity → codex** | | `event_hash` | `58f129a9…` | **differs — and must** |  The hash is signed and timestamped; a byte-equal one would mean the run had not been redone.  ## Both tracebacks are the original driver's  | | result | |---|---| | driver's path `ws4/workspace.json` | **`FileNotFoundError`** — reproduces exactly | | correct path `.efo/workspace.json` | **`antigravity`** | | driver's key `status_json['orchestrator']` | **`KeyError: 'orchestrator'`** — reproduces exactly | | correct key `['status']['orchestrator']` | **`codex`** |  The CLI's `status` output has keys `['status', 'tasks']`, so indexing `orchestrator` on the **wrapper** raises. **W6b is the same question asked correctly**, and it answers. Neither traceback is EFO's.  > **An expectation of mine, corrected to the measurement.** I first predicted > that `Workspace(...).status()['orchestrator']` would raise the `KeyError`. It > does not — the Python API returns a flat dict and gives `codex` directly. The > `KeyError` comes from the **CLI's JSON**, which is a different shape. Measured > before it was written down.  ## The config/ledger divergence is real, and by design  ```python     def orchestrator(self) -> str:         orchestrator = str(self.config["orchestrator"])         if not self.ledger.path.exists():             return orchestrator         for event in self.ledger.read():             if event.get("action") != "workspace.orchestrator_transferred":                 continue             target = event.get("payload", {}).get("to")             if isinstance(target, str):                 orchestrator = target         return orchestrator ```  At `7a9553b` the property **seeds from the config and then replays the transfer events**. So *"config file orchestrator: antigravity"* and *"effective orchestrator: codex"* are both correct at once — the config is a seed, the ledger is the authority. W6/W6b measured a real divergence, and it is the intended one.  **This says nothing about the anchor**, where no such event exists and `orchestrator` is the config value alone.  ## What this does not do  - It does **not** run W5, W6, W6b, W7 or W8. Four of the six remaining sections   need `7a9553b`, which is now checked out at `/tmp/efo-7a9553b` and named. - It does **not** review `7a9553b`. That commit is **not** this review's   subject; nothing here is a verdict about its code. - It does **not** claim to know which v2 produced `raw-attack4.txt` — only that   the API W4 uses exists on `7a9553b`'s line and not the anchor's. - It does **not** file an issue and retracts no finding. It **does** correct   item 52's *"their blocker is gone"*, in place and dated. - No network, no server. Both checkouts are local (`git clone --shared`), and   the workspace is a `tempfile` directory removed before the results print. It   does **not** touch `main`, the anchor's working tree, or another agent's   branch. - **MEASURED:** both file censuses, the ancestry, the anchor's action list, the   committed payload, all five driven commands, both tracebacks and both   corrections, the property body. **REASONED:** nothing.  Pre-registered permissions unchanged: `gpu: false`, `network: false`, `performance_metrics: false`; gates `allow_skips: false`, `require_validation: true`, `require_known_answer_check: true`, `require_independent_verification: true`.  **SUBMITTED, not VERIFIED.** Re-running my own evidence is a re-run, not independent confirmation.  | Artifact | SHA-256 | |---|---| | `raw/probe_w4_replay.py` | `8bb143dce90ef45040dceb4b9f658c92a77523cab856eefe2f6cff7b827e0c71` | | `raw/raw-w4-replay.txt` | `53d2097ee23bf76a9114bf8c1d4f0ae2a41db60a2385eaba4435217581f77e54` | 
+  [ok]     by the ABSENT API and the ancestry, not by any token in the output
+        expected: git merge-base --is-ancestor 7a9553b 5694ab45
+        observed: # W4 needs a ref the anchor never took — and both its tracebacks are the driver's  Reproduce with `raw/probe_w4_replay.py`; raw output in `raw/raw-w4-replay.txt`. **21 checks, 0 unexpected.** A **map about a ref this review is not anchored to** — no issue filed, nothing retracted.  **Scope, stated first:** 2 refs, **1 of the 7** remaining sections, 5 driven commands.  ## The correction, first  Item 52 replayed W3 six-for-six at the anchor and wrote that W4–W8's *"blocker is gone"*. **For W4, W5, W6 and W6b that is wrong**, and the reason is not a missing client:  ```     transfer_orchestrator     7 occurrences across 3 files at 7a9553b                               (cli.py, workspace.py, test_meta_orchestration.py)                               0 files at 5694ab45 — not src, not tests, not docs      git merge-base --is-ancestor 7a9553b 5694ab45   →  NO ```  **`7a9553b` is not an ancestor of the anchor.** The anchor's `workspace.py` line begins at `f827f29`; `7a9553b` is a separate branch. Corrected in that note with a dated banner.  So `raw-attack4.txt` **mixes two lines of history**: W1/W2/W2b compare the v0.1 wheel against `git archive f827f29` — the anchor's ancestor — while W4, W5, W6 and W6b drive a v2 that only exists on the other line. W3 reproduced at the anchor because its property (the v0.1 client refusing an attested agent record) is common to both.  The anchor's ledger action list is **derived from its own source**, not typed here, and holds no orchestrator transfer:  ```     agent.added  agent.identity_attested  task.archived  task.blocked     task.claimed  task.created  task.heartbeat  task.lease_expired     task.proxy_authorized  task.proxy_status_reported  task.proxy_submitted     task.rejected  task.requeued  task.started  task.submitted  task.verified     workspace.initialized ```  ## W4 replayed — against `7a9553b`, named rather than assumed  | | committed | fresh run at `7a9553b` | |---|---|---| | `workspace transfer-orchestrator` | `exit=0` | **0** | | payload keys | `event_hash`, `from`, `to`, `reason` | **same four** | | from → to | `antigravity → codex` | **antigravity → codex** | | `event_hash` | `58f129a9…` | **differs — and must** |  The hash is signed and timestamped; a byte-equal one would mean the run had not been redone.  ## Both tracebacks are the original driver's  | | result | |---|---| | driver's path `ws4/workspace.json` | **`FileNotFoundError`** — reproduces exactly | | correct path `.efo/workspace.json` | **`antigravity`** | | driver's key `status_json['orchestrator']` | **`KeyError: 'orchestrator'`** — reproduces exactly | | correct key `['status']['orchestrator']` | **`codex`** |  The CLI's `status` output has keys `['status', 'tasks']`, so indexing `orchestrator` on the **wrapper** raises. **W6b is the same question asked correctly**, and it answers. Neither traceback is EFO's.  > **An expectation of mine, corrected to the measurement.** I first predicted > that `Workspace(...).status()['orchestrator']` would raise the `KeyError`. It > does not — the Python API returns a flat dict and gives `codex` directly. The > `KeyError` comes from the **CLI's JSON**, which is a different shape. Measured > before it was written down.  ## The config/ledger divergence is real, and by design  ```python     def orchestrator(self) -> str:         orchestrator = str(self.config["orchestrator"])         if not self.ledger.path.exists():             return orchestrator         for event in self.ledger.read():             if event.get("action") != "workspace.orchestrator_transferred":                 continue             target = event.get("payload", {}).get("to")             if isinstance(target, str):                 orchestrator = target         return orchestrator ```  At `7a9553b` the property **seeds from the config and then replays the transfer events**. So *"config file orchestrator: antigravity"* and *"effective orchestrator: codex"* are both correct at once — the config is a seed, the ledger is the authority. W6/W6b measured a real divergence, and it is the intended one.  **This says nothing about the anchor**, where no such event exists and `orchestrator` is the config value alone.  ## What this does not do  - It does **not** run W5, W6, W6b, W7 or W8. Four of the six remaining sections   need `7a9553b`, which is now checked out at `/tmp/efo-7a9553b` and named. - It does **not** review `7a9553b`. That commit is **not** this review's   subject; nothing here is a verdict about its code. - It does **not** claim to know which v2 produced `raw-attack4.txt` — only that   the API W4 uses exists on `7a9553b`'s line and not the anchor's. - It does **not** file an issue and retracts no finding. It **does** correct   item 52's *"their blocker is gone"*, in place and dated. - No network, no server. Both checkouts are local (`git clone --shared`), and   the workspace is a `tempfile` directory removed before the results print. It   does **not** touch `main`, the anchor's working tree, or another agent's   branch. - **MEASURED:** both file censuses, the ancestry, the anchor's action list, the   committed payload, all five driven commands, both tracebacks and both   corrections, the property body. **REASONED:** nothing.  Pre-registered permissions unchanged: `gpu: false`, `network: false`, `performance_metrics: false`; gates `allow_skips: false`, `require_validation: true`, `require_known_answer_check: true`, `require_independent_verification: true`.  **SUBMITTED, not VERIFIED.** Re-running my own evidence is a re-run, not independent confirmation.  | Artifact | SHA-256 | |---|---| | `raw/probe_w4_replay.py` | `8bb143dce90ef45040dceb4b9f658c92a77523cab856eefe2f6cff7b827e0c71` | | `raw/raw-w4-replay.txt` | `53d2097ee23bf76a9114bf8c1d4f0ae2a41db60a2385eaba4435217581f77e54` | 
+  So "no marker" does NOT mean "the anchor's line". The test NARROWS
+  the population and cannot decide it. Saying so is the result; a
+  filter checked in only one direction is what item 50 refuted.
+
+########## E. REPORT.md's six cited outputs ##########
+    raw-attack2-cef5623.txt       ANCHOR
+    raw-attack2.txt               ANCHOR
+    raw-attack3.txt               ANCHOR
+    raw-attack4.txt               undecidable
+    raw-full-final.txt            ANCHOR
+    raw-recheck-cef5623.txt       undecidable
+  [ok] REPORT.md cites six outputs with no probe of mine beside them
+        expected: cited: 6
+        observed: cited: 6
+  [ok]   four are positively placed on the anchor's line
+        expected: on anchor: 4
+        observed: on anchor: 4
+  [ok]     and two are undecidable
+        expected: undecidable: ['raw-attack4.txt', 'raw-recheck-cef5623.txt']
+        observed: undecidable: ['raw-attack4.txt', 'raw-recheck-cef5623.txt']
+  One of those two is the file item 55 already showed to be MIXED.
+  The other, raw-recheck-cef5623.txt, is left open - item 46 re-ran its
+  suite section (77/77, OK) without asking which v2 produced it, and
+  this round does not answer that either.
+
+########## F. two more discriminators, MEASURED not assumed ##########
+    CLI status keys, anchor  : ['status', 'tasks']
+    CLI status keys, 7a9553b : ['status', 'tasks']
+  [ok] the status shape is IDENTICAL on both lines - NOT a discriminator
+        expected: identical: True
+        observed: identical: True
+    outputs containing a CLI usage line: ['raw-dashboard-errors.txt', 'raw-wheel-restored.txt']
+  [ok]   the subcommand list IS a discriminator, but appears in only two
+        expected: with usage: 2
+        observed: with usage: 2
+  [ok]     and neither of them is raw-attack4.txt
+        expected: attack4 among them: False
+        observed: attack4 among them: False
+  `workspace` and `audit` are subcommands only 7a9553b has, so a usage
+  line would settle it - but the corpus almost never records one.
+
+########## G. what this does NOT do ##########
+  * It does not decide the 39. It says which 35 are placed, which one
+    is mine, and that the remaining 39 are OPEN - including one already
+    known to be mixed.
+  * It does not re-run any catalogued output, and does not retract
+    item 46's catalogue or its two re-runs.
+  * It does not claim the token sets are the only possible markers.
+    Two more were considered; one was ruled out by measurement and one
+    is real but almost never present.
+  * It does not file an issue: nothing here is a defect in EFO. It is
+    a fact about the PROVENANCE of evidence this review inherited.
+  * No network. Two local checkouts and one tempfile workspace pair,
+    removed above. The anchor's working tree is untouched.
+  * MEASURED: both module sets, the three-way scan of all 75 outputs,
+    REPORT.md's six, both status shapes, the usage-line census, item
+    55's two quoted sentences. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Two refs read and named. No `main` write, no issue filed, nothing
+retracted. Pre-registered permissions unchanged -
+gpu/network/performance_metrics all false. SUBMITTED, not VERIFIED.

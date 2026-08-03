@@ -6,11 +6,11 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   and the write-ups are present
-        expected: documents: 64
-        observed: documents: 64
+        expected: documents: 65
+        observed: documents: 65
 
 ########## B. every FILE:LINE citation in the write-ups ##########
-  238 live citations across 64 documents
+  238 live citations across 65 documents
   13 more appear inside correction banners and are
   excluded as retractions rather than claims - see the comment in the
   source for why that exclusion is principled and not self-serving.
@@ -153,11 +153,11 @@
   while the committed raw output beside it said 152 across 35. Nobody
   was checking. Now the run fails when prose and output disagree.
   [ok]   NOTE-citation-audit-of-this-review.md states this run's counts
-        expected: 238 citations / 64 documents
-        observed: 238 citations / 64 documents
+        expected: 238 citations / 65 documents
+        observed: 238 citations / 65 documents
   [ok]   SYNTHESIS.md states this run's counts
-        expected: 238 citations / 64 documents
-        observed: 238 citations / 64 documents
+        expected: 238 citations / 65 documents
+        observed: 238 citations / 65 documents
   [ok]   and the retraction count it excludes
         expected: retractions: 13
         observed: retractions: 13

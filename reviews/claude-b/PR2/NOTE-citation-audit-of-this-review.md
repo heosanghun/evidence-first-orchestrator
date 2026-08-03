@@ -18,7 +18,7 @@ reading one document, I audited every citation on the branch.
 
 ## The audit
 
-**238 live citations across 64 documents, over 25 distinct files.**
+**238 live citations across 65 documents, over 25 distinct files.**
 (126 across 30 when first written; re-run after every write-up change, and
 section F now **fails the run** if this sentence and the output disagree.) Every cited
 file exists at `main`; every cited line is within its file. The run fails on
@@ -122,5 +122,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_citation_audit.py` | `ef8e3054566a583483d818586d152217640a619e3ac63397505fcafc0bbf78bc` |
-| `raw/raw-citation-audit.txt` | `f2e1cceb04d50b751ede6f74cef9587cbe7453b4e1ff54123d812c18ef29fe59` |
+| `raw/probe_citation_audit.py` | `e1e7544d52bcbc52b80ac032de6f88921d02f95df33df0b2cd9da741e9285cc1` |
+| `raw/raw-citation-audit.txt` | `28c587ced13970dcf4538ff6df14640367f180edfad47a5469eb8994d87375cc` |
