@@ -8,11 +8,13 @@
 
 ########## B. citation + fenced block, the decidable subset ##########
   [ok] every decidable pair was examined
-        expected: pairs: 21
-        observed: pairs: 21
-  verbatim-verified: 14   not matched: 7
+        expected: pairs: 22
+        observed: pairs: 22
+  verbatim-verified: 14   not matched: 8
     ADDENDUM-git-replace-regression.md  ->  provenance.py:47
         deliberate before/after - the block quotes the argument list that was REMOVED, which is the whole point of the regression
+    NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md  ->  workspace.py:1346
+        PROBE OUTPUT - the block is this census's listing of the 14 chained `get(default).get()` sites across five modules, one line each; it is not a quote of workspace.py at any single cited line
     NOTE-class-2b-is-a-census-now-seven-of-seven.md  ->  test_independence.py:243
         PROBE OUTPUT - the block is this census's own listing of the three attest_agent_identity call sites with the role of each agent, not a quote of any one line of the test file
     NOTE-class-2b-is-a-census-now-seven-of-seven.md  ->  helpers.py:87
@@ -289,7 +291,7 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 
 ########## D. what stays UNDECIDABLE, with a count ##########
-  inline backticked spans sharing a line with a citation: 251
+  inline backticked spans sharing a line with a citation: 255
   These are NOT checked. A sentence like "`doctor.py:109` interpolates
   `agent_id` into a path" contains a citation and a span that is a
   quote, and a sentence like "`workspace.py:1182` reads it by direct
@@ -306,23 +308,23 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
   silently is indistinguishable from one that was never measured, so
   the run now fails when prose and output disagree.
   [ok]   the note states this run's pairs
-        expected: pairs: 21
-        observed: pairs: 21
+        expected: pairs: 22
+        observed: pairs: 22
   [ok]   the note states this run's verbatim-verified
         expected: verbatim-verified: 14
         observed: verbatim-verified: 14
   [ok]   the note states this run's adjudicated non-quotes
-        expected: adjudicated non-quotes: 7
-        observed: adjudicated non-quotes: 7
+        expected: adjudicated non-quotes: 8
+        observed: adjudicated non-quotes: 8
   [ok]   the note states this run's inline spans
-        expected: inline spans: 251
-        observed: inline spans: 251
+        expected: inline spans: 255
+        observed: inline spans: 255
   [ok]   NOTE-citation-audit-of-this-review.md cross-reference agrees
-        expected: inline: 251
-        observed: inline: 251
+        expected: inline: 255
+        observed: inline: 255
   [ok]   SYNTHESIS.md cross-reference agrees
-        expected: inline: 251
-        observed: inline: 251
+        expected: inline: 255
+        observed: inline: 255
 
 ########## 0 unexpected result(s) ##########
 This audits MY OWN write-ups, not EFO. Static analysis only; nothing

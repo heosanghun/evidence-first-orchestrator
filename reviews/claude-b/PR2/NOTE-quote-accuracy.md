@@ -21,12 +21,12 @@ opposite of the point.
 
 The decidable subset is: **exactly one citation on a line, immediately followed
 by a fenced block.** There the block is unambiguously a quote of that location.
-**21** such pairs exist.
+**22** such pairs exist.
 
 | Disposition | Count |
 |---|---|
 | verbatim-verified against the cited range | 14 |
-| adjudicated non-quotes | 7 |
+| adjudicated non-quotes | 8 |
 
 > **Correction, 2026-08-03.** This section previously read *"Eleven such pairs
 > exist"* with a table of 7 and 5 — which do not sum. The committed raw output
@@ -37,9 +37,9 @@ by a fenced block.** There the block is unambiguously a quote of that location.
 > probe now **fails the run** when prose and output disagree, so the numbers
 > above are this run's, not a memory of an earlier one.
 
-The seven non-quotes are: two extractor artifacts (the citation sits *inside* a
+The eight non-quotes are: two extractor artifacts (the citation sits *inside* a
 fenced listing, so the following prose paragraph was captured as the "block");
-**four** blocks that are **probe output**, presented as output and not claiming
+**five** blocks that are **probe output**, presented as output and not claiming
 to be source; and one **deliberate before/after** —
 `ADDENDUM-git-replace-regression.md` quotes the argument list that was
 *removed*, which is the whole point of the regression.
@@ -82,7 +82,7 @@ was a **checker** defect. The window now spans `start-8` to `end+10`.
 
 ## What stays undecidable, with a count
 
-**251 inline backticked spans share a line with a citation.** They are not
+**255 inline backticked spans share a line with a citation.** They are not
 checked, and cannot be by position:
 
 - *"`doctor.py:109` interpolates `agent_id` into a path"* — the span **is** a
@@ -103,7 +103,7 @@ unambiguous, compared whitespace-insensitively against the full cited range at
 --porcelain` empty). Static analysis only; nothing was executed against a
 workspace.
 
-Not examined: inline spans (251, above); whether a *paraphrase* in prose
+Not examined: inline spans (255, above); whether a *paraphrase* in prose
 accurately characterises the cited code, which is a judgement no string
 comparison can make.
 
@@ -116,5 +116,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_quote_accuracy.py` | `ef8857911946283700e460e92953e476cd52847f6f89df0ea73ca8e28d29ea87` |
-| `raw/raw-quote-accuracy.txt` | `b182d3b81e8037dedcdf5a899bf4fe834e858e9a20e98f8cdfd40e29c6fa87fc` |
+| `raw/probe_quote_accuracy.py` | `1b97a2af893760d270437119e5e5514eb132fdef7f02d73b628e857da06c857c` |
+| `raw/raw-quote-accuracy.txt` | `6f27caf55ad547030cdfdb80cad4c5a6ff9cdc152c6ed0d92d9a72cd9da80dd3` |

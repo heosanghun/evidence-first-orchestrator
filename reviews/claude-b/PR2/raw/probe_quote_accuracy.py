@@ -141,6 +141,10 @@ ADJUDICATED = {
         "PROBE OUTPUT - `helpers.py:87 expected=4 observed=4 if "
         "known_answer_passed else 5` is the census line, which renders the "
         "dict's two values on one line; the source spells them across four",
+    ("NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md", "workspace.py"):
+        "PROBE OUTPUT - the block is this census's listing of the 14 chained "
+        "`get(default).get()` sites across five modules, one line each; it is "
+        "not a quote of workspace.py at any single cited line",
     ("ADDENDUM-git-replace-regression.md", "provenance.py"):
         "deliberate before/after - the block quotes the argument list that "
         "was REMOVED, which is the whole point of the regression",

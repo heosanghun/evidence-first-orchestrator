@@ -99,7 +99,11 @@ as complete when it is not:
 `AttributeError` and `TypeError` are **not statically enumerable here**. `x.foo`
 is unsafe only if `x` can be `None` or another type, and deciding that needs
 type inference this probe does not have. For scale: **963 attribute accesses**
-across these modules. Enumerating them without adjudication would be the
+across these modules. **Scoped 2026-08-03**: of those 963, **24**
+are read on a name bound from a dict field — the subset a parsed document can
+control — and all 24 are adjudicated in
+`NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md`. The remaining 939
+stay unmeasured for the reason given here. Enumerating them without adjudication would be the
 appearance of coverage, not coverage — so they are named as a gap instead.
 
 So the honest claim after this round is: *every constant-key subscript read in

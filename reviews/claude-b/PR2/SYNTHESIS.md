@@ -3,8 +3,8 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**711 passing checks across 37 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 101 files: **39 probe scripts, 54 raw outputs, 8
+**719 passing checks across 38 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 103 files: **40 probe scripts, 55 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
@@ -85,11 +85,12 @@ never treated my own re-run as independent confirmation.
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
 | this review's own counts | machine-checked — inventory, 30 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
+| attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
 | the class-2b pattern | **census: 7 of 7 tests cannot fail on their issue** | `NOTE-class-2b-is-a-census-now-seven-of-seven.md` |
 | this review's own censuses | bounded — **24 of 30 measured, 6 reasoned from reading** | `NOTE-which-of-my-censuses-measured-and-which-read.md` |
 | `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
 
-Sixteen components were probed and found sound (one with a claim since corrected — see #19).
+Seventeen components were probed and found sound (one with a claim since corrected — see #19).
 
 > **Made self-checking, 2026-08-03.** This number, the class-2b count below and
 > the section heading beneath it were each stale when measured — the first by
@@ -237,8 +238,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **184 live citations across
-43 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **194 live citations across
+44 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -256,7 +257,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 251 inline spans remain undecidable by position and are named as a
+lenient. 255 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03
