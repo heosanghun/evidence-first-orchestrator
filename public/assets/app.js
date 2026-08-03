@@ -1015,51 +1015,152 @@ function renderResources(snapshot) {
 
 function renderTasks(snapshot) {
   elements.taskCount.textContent = `${snapshot.tasks.length}개 작업`;
+
   if (snapshot.tasks.length === 0) {
     elements.taskTable.innerHTML =
-      '<tr><td colspan="6"><div class="empty-state">현재 원장 작업이 없습니다.</div></td></tr>';
+      '<div class="empty-state">등록된 EFO 작업이 없습니다.</div>';
     return;
   }
 
-  elements.taskTable.innerHTML = snapshot.tasks
-    .map((task) => {
-      const progress = clamp(task.progress_percent);
+  // Filter tasks into Dedicated Project Groups
+  const ctsTasks = snapshot.tasks.filter(t => {
+    const id = String(t.id || "").toUpperCase();
+    const title = String(t.title || "").toUpperCase();
+    return id.startsWith("CTS") || id.startsWith("E1") || id.startsWith("E2") || id.startsWith("E3") || id.startsWith("E4") || id.startsWith("E5") || id.startsWith("E6") || id.startsWith("E7") || title.includes("CTS");
+  });
+
+  const sys15Tasks = snapshot.tasks.filter(t => {
+    const id = String(t.id || "").toUpperCase();
+    const title = String(t.title || "").toUpperCase();
+    return id.startsWith("SYS15") || title.includes("SYSTEM 1.5") || title.includes("SYSTEM1.5") || title.includes("STAGE");
+  });
+
+  const coreTasks = snapshot.tasks.filter(t => !ctsTasks.includes(t) && !sys15Tasks.includes(t));
+
+  function renderTaskRows(taskList) {
+    if (taskList.length === 0) return '<tr><td colspan="6" class="empty-cell" style="text-align:center; padding:12px; color:#64748b;">해당 프로젝트 과업이 없습니다.</td></tr>';
+    return taskList.map(task => {
       const state = String(task.state || "pending").toLowerCase();
-      const statusBadge =
-        task.status_source === "transport_assertion" && task.status_badge
-          ? `<span class="transport-badge" title="정식 claim이나 heartbeat가 아닌 오케스트레이터 관찰 보고">${escapeHtml(
-              task.status_badge,
-            )}</span>`
-          : "";
+      const progress = clamp(task.progress_percent || 0);
+      const updated = task.updated_at ? formatClock(task.updated_at) : "-";
+      
+      let stateBadge = '<span class="enum-badge pending">⚪ 미착수</span>';
+      if (["verified", "completed", "accepted", "signed"].includes(state)) {
+        stateBadge = '<span class="enum-badge verified">🟢 원장서명완료</span>';
+      } else if (["running", "claimed", "submitted", "working"].includes(state)) {
+        stateBadge = '<span class="enum-badge working">🟡 진행중</span>';
+      }
+
       return `
         <tr>
           <td>
-            <span class="task-title">${escapeHtml(task.title || task.id)}</span>
-            <span class="task-id">${escapeHtml(task.id || "-")}</span>
+            <strong class="task-title-cell">${escapeHtml(task.title || task.id)}</strong>
+            <span class="task-id-tag">${escapeHtml(task.id)}</span>
           </td>
-          <td>${escapeHtml(task.owner || "미지정")}</td>
-          <td>
-            <span class="state-label ${escapeHtml(state)}">${escapeHtml(
-              stateLabel(state),
-            )}</span>
-            ${statusBadge}
-          </td>
-          <td>
-            <div class="table-progress">
-              <div class="progress-track" role="progressbar" aria-valuemin="0"
-                   aria-valuemax="100" aria-valuenow="${Math.round(progress)}">
-                <span style="width:${progress}%"></span>
-              </div>
-              <small>${Math.round(progress)}%</small>
+          <td>${escapeHtml(task.owner || "미배정")}</td>
+          <td>${stateBadge}</td>
+          <td style="width: 140px;">
+            <div class="progress-track" role="progressbar" aria-valuenow="${Math.round(progress)}">
+              <span style="width:${progress}%"></span>
             </div>
+            <small class="progress-percent-label" style="font-size:0.7rem; color:#94a3b8;">${Math.round(progress)}%</small>
           </td>
-          <td>${escapeHtml(task.next || "-")}</td>
-          <td>${escapeHtml(formatClock(task.updated_at))}</td>
+          <td style="font-size:0.8rem; color:#cbd5e1;">${escapeHtml(task.next || task.description || "검증 이력 보관")}</td>
+          <td style="font-size:0.75rem; color:#94a3b8;">${escapeHtml(updated)}</td>
         </tr>
       `;
-    })
-    .join("");
+    }).join("");
+  }
+
+  elements.taskTable.innerHTML = `
+    <div class="project-ledger-container">
+      <!-- 1. CTS Dedicated Project Ledger Box -->
+      <div class="project-ledger-box cts-theme">
+        <div class="project-ledger-header">
+          <div class="project-ledger-title">
+            <span>🟢 CTS 프로젝트 전용 작업 원장</span>
+            <span class="project-ledger-badge">Phase 0 ~ Phase 6 단계 매핑 (진행률 12%)</span>
+          </div>
+          <span class="project-ledger-badge">${ctsTasks.length}개 과업 관리 중</span>
+        </div>
+        <div class="ledger-table-wrapper">
+          <table class="ledger-table">
+            <thead>
+              <tr>
+                <th>Phase / 과업명</th>
+                <th>담당자</th>
+                <th>상태</th>
+                <th>진행률</th>
+                <th>다음 단계 (Next Step)</th>
+                <th>최근 변경</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${renderTaskRows(ctsTasks)}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 2. System 1.5 Dedicated Project Ledger Box -->
+      <div class="project-ledger-box sys15-theme">
+        <div class="project-ledger-header">
+          <div class="project-ledger-title">
+            <span>🔵 System 1.5 프로젝트 전용 작업 원장</span>
+            <span class="project-ledger-badge">Phase 0 ~ Phase 5 단계 매핑 (진행률 33%)</span>
+          </div>
+          <span class="project-ledger-badge">${sys15Tasks.length}개 과업 관리 중</span>
+        </div>
+        <div class="ledger-table-wrapper">
+          <table class="ledger-table">
+            <thead>
+              <tr>
+                <th>Phase / 과업명</th>
+                <th>담당자</th>
+                <th>상태</th>
+                <th>진행률</th>
+                <th>다음 단계 (Next Step)</th>
+                <th>최근 변경</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${renderTaskRows(sys15Tasks)}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 3. EFO Core & Other Tasks Ledger Box -->
+      <div class="project-ledger-box core-theme">
+        <div class="project-ledger-header">
+          <div class="project-ledger-title">
+            <span>🟣 EFO Core & 기타 검증 원장</span>
+            <span class="project-ledger-badge">인프라 및 오케스트레이터 관리</span>
+          </div>
+          <span class="project-ledger-badge">${coreTasks.length}개 과업</span>
+        </div>
+        <div class="ledger-table-wrapper">
+          <table class="ledger-table">
+            <thead>
+              <tr>
+                <th>과업명</th>
+                <th>담당자</th>
+                <th>상태</th>
+                <th>진행률</th>
+                <th>다음 단계 (Next Step)</th>
+                <th>최근 변경</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${renderTaskRows(coreTasks)}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
 }
+
 
 function buildAlerts(snapshot) {
   const alerts = snapshot.alerts.map((alert) => ({
