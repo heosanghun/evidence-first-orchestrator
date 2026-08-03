@@ -2323,3 +2323,188 @@ dialog input:focus {
   font-size: 0.8rem !important;
   font-weight: 700 !important;
 }
+
+
+/* ==========================================================================
+   TARGETED IMPROVEMENTS: 4-CARD LOCAL HEALTH GRID & PROJECT LEDGER BOXES (v2.8.0)
+   ========================================================================== */
+
+.local-health-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+@media (max-width: 1024px) {
+  .local-health-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .local-health-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.local-card {
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.local-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.local-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.local-card-title {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.local-card-badge {
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+
+.local-card-badge.normal {
+  background: #e6f4ea;
+  color: #0d652d;
+}
+
+.local-card-badge.warning {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.local-card-badge.info {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.local-card-value {
+  margin-bottom: 12px;
+}
+
+.local-card-value strong {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #0f172a;
+  line-height: 1.2;
+}
+
+.local-card-value small {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  margin-top: 4px;
+}
+
+.local-card-gauge {
+  width: 100%;
+}
+
+.local-gauge-track {
+  width: 100%;
+  height: 14px;
+  background: #e2e8f0;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  overflow: hidden;
+  position: relative;
+}
+
+.local-gauge-fill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s ease;
+}
+
+.local-gauge-fill.cpu {
+  background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+.local-gauge-fill.memory {
+  background: linear-gradient(90deg, #8b5cf6 0%, #6d28d9 100%);
+}
+
+.local-gauge-fill.disk {
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+}
+
+.local-gauge-fill.stress {
+  background: linear-gradient(90deg, #10b981 0%, #047857 100%);
+}
+
+/* Dedicated Project Ledger Boxes */
+.project-ledger-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  margin-top: 16px;
+}
+
+.project-ledger-box {
+  background: #ffffff;
+  border: 2px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+}
+
+.project-ledger-box.cts-theme {
+  border-left: 6px solid #10b981;
+}
+
+.project-ledger-box.sys15-theme {
+  border-left: 6px solid #2563eb;
+}
+
+.project-ledger-box.core-theme {
+  border-left: 6px solid #8b5cf6;
+}
+
+.project-ledger-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.project-ledger-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.project-ledger-badge {
+  background: #f1f5f9;
+  color: #334155;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
