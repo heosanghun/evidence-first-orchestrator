@@ -4,7 +4,7 @@ Reproduce with `raw/probe_the_four_mixed_outputs.py`; raw output in
 `raw/raw-the-four-mixed-outputs.txt`. **43 checks, 0 unexpected.** A **map
 that corrects a count of mine** — no issue filed, nothing about EFO claimed.
 
-**Scope, stated first:** 81 outputs, 4 mixed, 3 categories, 2 genuine, 1
+**Scope, stated first:** 81 outputs at publication (**82** at `HEAD`), 4 mixed, 3 categories, 2 genuine, 1
 swallowed literal measured occurrence-by-occurrence, 1 subject test.
 
 ## What item 64 left open
@@ -126,5 +126,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_the_four_mixed_outputs.py` | `dc402036f70f2186828dc8493df0ce210cffd0fb76b7d9fe9bee3689cd98e17a` |
-| `raw/raw-the-four-mixed-outputs.txt` | `16017176a436fbc392ca0f6fa10822845873a1e69ea171aa2eef41881cbeb38c` |
+| `raw/probe_the_four_mixed_outputs.py` | `f1a700bc912cfa114e7c2a0e3ecba968e827ccf9f2b14e3d9ce68cae83b61991` |
+| `raw/raw-the-four-mixed-outputs.txt` | `5f03f3b04f4bffc53c91ed56d5c9fd20bdce21ac2cd5b76270b7d8c135139d85` |

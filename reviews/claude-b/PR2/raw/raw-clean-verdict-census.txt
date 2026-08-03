@@ -9,11 +9,11 @@
         expected: clean rows: 21
         observed: clean rows: 21
   [ok]   distinct notes they cite
-        expected: notes: 26
-        observed: notes: 26
+        expected: notes: 27
+        observed: notes: 27
   [ok]     whose probe can be located
-        expected: probes: 24
-        observed: probes: 24
+        expected: probes: 25
+        observed: probes: 25
   Twenty-two is more than one round of hand adjudication, which is what
   the item anticipated. Section B tries the cheap way; section C shows
   the cheap way does not work.
@@ -38,6 +38,7 @@
     drives   probe_collector_malformed_output.py       `monitor/collector.py`  17 non-string args
     drives   probe_collector_redaction.py              `monitor/collector.py`  9 non-string args
     drives   probe_cross_module_hop.py                 cross-module dict-fiel  4 non-string args
+    drives   probe_dashboard_allow_remote_class.py     `dashboard.py`, `error  7 non-string args
     drives   probe_dashboard_and_errors.py             `dashboard.py`, `error  6 non-string args
     drives   probe_hop_three_closure.py                hop-three closure       7 non-string args
     drives   probe_identity_two_impls.py               collector identity reg  3 non-string args
@@ -53,11 +54,11 @@
         expected: static: 4
         observed: static: 4
   [ok]   probes that drive it
-        expected: driving: 20
-        observed: driving: 20
+        expected: driving: 21
+        observed: driving: 21
   [ok]     of which the proxy says feed a non-string
-        expected: flagged: 20
-        observed: flagged: 20
+        expected: flagged: 21
+        observed: flagged: 21
   For a static census the question does not arise: it reads the AST and
   never calls anything, so it has no input class to feed.
 
@@ -87,7 +88,8 @@
     `cli.py`                            #19 (done - item 56)probe_cli_typed_options.py
     `monitor/collector.py` (redaction)  #6 (done - item 59)probe_collector_malformed_output.py
     `monitor/collector.py` (redaction)  #6 (done - item 59)probe_collector_redaction.py
-    `dashboard.py`, `errors.py`         #19               probe_dashboard_and_errors.py
+    `dashboard.py`, `errors.py`         #19 (done - item 68)probe_dashboard_allow_remote_class.py
+    `dashboard.py`, `errors.py`         #19 (done - item 68)probe_dashboard_and_errors.py
     `workspace.py` implicit exceptions  #19               probe_implicit_exceptions.py
     `ledger.projected_tasks`            #9 (done - item 62)probe_projected_tasks.py
     `ledger.projected_tasks`            #9 (done - item 62)probe_projected_tasks_input_class.py
@@ -96,15 +98,15 @@
     `util.py`, `lock.py`                (done - item 47)  probe_util_and_lock.py
     `util.py`, `lock.py`                (done - item 47)  probe_util_uncovered_input.py
   [ok] driving probes whose component carries an open issue
-        expected: with an issue: 14
-        observed: with an issue: 14
+        expected: with an issue: 15
+        observed: with an issue: 15
   [ok]   of which already adjudicated by hand - items 47, 53, 56, 59, 62
-        expected: already done: 12
-        observed: already done: 12
+        expected: already done: 14
+        observed: already done: 14
   [ok]     leaving the population for the next round
-        expected: remaining: 2
-        observed: remaining: 2
-  TWO remain. That is the population the next round should take, one
+        expected: remaining: 1
+        observed: remaining: 1
+  ONE remains. That is the population the next round should take, one
   at a time and BY HAND, which is the only method shown to work here.
   Updated 2026-08-03: items 53, 56, 59 and 62 adjudicated `provenance.py`
   byte-exactness, `cli.py`, the collector and `projected_tasks`, moving

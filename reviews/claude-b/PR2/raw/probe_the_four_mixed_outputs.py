@@ -36,7 +36,7 @@ adding one.
 
     python3 probe_the_four_mixed_outputs.py
 
-SCOPE, stated first: 81 outputs, 4 mixed, 3 categories, 2 genuine, 1 swallowed
+SCOPE, stated first: 82 outputs, 4 mixed, 3 categories, 2 genuine, 1 swallowed
 marker measured occurrence-by-occurrence, 1 subject test. A MAP that CORRECTS
 a count of mine. No issue filed, nothing about EFO claimed.
 """
@@ -93,7 +93,7 @@ every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
 check("  raw outputs scanned, the marker-printing ones excluded",
-      "outputs: 81", f"outputs: {len(outputs)}")
+      "outputs: 82", f"outputs: {len(outputs)}")
 check("    four are excluded now, this probe's own among them", "excluded: 4",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
 

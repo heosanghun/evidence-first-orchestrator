@@ -9,10 +9,10 @@ a verdict — **no issue filed, and not one `clean` verdict retracted.**
 in EFO is executed here; this reads my own probe sources and my own SYNTHESIS.
 
 > **Updated 2026-08-03.** Every number in this note moves as the seven are
-> adjudicated. **Items 53, 56, 59, 62 and 65** have now taken five of them, and each
-> amended its clean row to cite a second note, so the set cites **27** notes
-> over **24** locatable probes, **20** of which drive; fourteen sit on a component
-> with an open issue, **twelve** are adjudicated and **two** remain. The probe
+> adjudicated. **Items 53, 56, 59, 62, 65 and 68** have now taken six of them, and each
+> amended its clean row to cite a second note, so the set cites **28** notes
+> over **25** locatable probes, **21** of which drive; fifteen sit on a component
+> with an open issue, **fourteen** are adjudicated and **one** remains. The probe
 > re-derives all of them — none is left at the value this note first published.
 
 ## The question, and why one round is not enough for it
@@ -72,7 +72,7 @@ here ground truth existed, and the filter failed it.
 
 | component | issue | probe |
 |---|---|---|
-| `dashboard.py`, `errors.py` | #19 | `probe_dashboard_and_errors.py` |
+| ~~`dashboard.py`, `errors.py`~~ | *(done — item 68)* | `probe_dashboard_and_errors.py`, `probe_dashboard_allow_remote_class.py` |
 | `workspace.py` implicit exceptions | #19 | `probe_implicit_exceptions.py` |
 | ~~`ledger.projected_tasks`~~ | *(done — item 62)* | `probe_projected_tasks.py`, `probe_projected_tasks_input_class.py` |
 | ~~`proxy_submit` + grant~~ | *(done — item 65)* | `probe_proxy_grant.py`, `probe_proxy_grant_duration_class.py` |
@@ -81,10 +81,10 @@ here ground truth existed, and the filter failed it.
 | ~~`cli.py`~~ | *(done — item 56)* | `probe_cli_surface.py`, `probe_cli_typed_options.py` |
 | ~~`monitor/collector.py` (redaction)~~ | *(done — item 59)* | `probe_collector_redaction.py`, `probe_collector_malformed_output.py` |
 
-**Fourteen** driving probes sit on a component with an open issue — more than
+**Fifteen** driving probes sit on a component with an open issue — more than
 the eight components, because `util.py`/`lock.py`, `provenance.py`
 byte-exactness, `cli.py` and the collector are each **one** component with
-**two** probes. Twelve are already adjudicated. **Two remain**, and that is the population for the next rounds: one at a time, by
+**two** probes. Fourteen are already adjudicated. **One remains**, and that is the population for the next rounds: one at a time, by
 hand, which is the only method shown here to work.
 
 ## The self-reference, excluded and asserted
@@ -120,5 +120,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_clean_verdict_census.py` | `32eeb31b5c9ed2ce3a16589857e753f644927f5705ae8cc89b9a78e36f025722` |
-| `raw/raw-clean-verdict-census.txt` | `5de2bf31c41cc00ea0b095169db40d25551bb2ff346acc8c31003e55aa4c3a25` |
+| `raw/probe_clean_verdict_census.py` | `b893d9f1ac910b3bed55da9007218f5bcb1a320a10b3dd74b66d485ac88b1e6a` |
+| `raw/raw-clean-verdict-census.txt` | `0f288c779c7a91fb48869c916ba4b1c43db51f96ece5050040f34da1fe1b6cce` |

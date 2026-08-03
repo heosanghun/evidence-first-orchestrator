@@ -3,15 +3,15 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**1331 passing checks across 68 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 163 files: **70 probe scripts, 85 raw outputs, 8
+**1350 passing checks across 69 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 165 files: **71 probe scripts, 86 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
 paragraph disagrees with it. The counts exclude that probe's **own** output,
 which is the report of the run doing the counting — a self-reference with no
 fixpoint, stated rather than hidden — the same guard the citation and quote counts got.
-It also checks the headline `N checks, M unexpected` of all **62** write-ups
+It also checks the headline `N checks, M unexpected` of all **63** write-ups
 against the raw output each one names; nothing verified those until 2026-08-03.
 
 Twelve `UNEXPECTED` lines survive, in five files —
@@ -83,7 +83,7 @@ never treated my own re-run as independent confirmation.
 | collector identity registry | clean, but diverges | `NOTE-two-identity-implementations.md` |
 | `util.py`, `lock.py` | clean — **scope narrowed**: all 46 checks rested on my probe, and none fed a non-string; 17 driven inputs raise raw Python exceptions, 0 `EFOError` | `NOTE-util-and-lock-hold.md`, `NOTE-what-util-is-clean-rested-on-and-the-input-it-never-fed.md` |
 | `cli.py` | clean — **scope narrowed**: all 25 checks fed strings (argparse hands strings) and **none of the 8 typed options**; driving those gives argparse rejection at parse time, the floor on `-5`, and `--lease-seconds 0` silently becoming the 1800s default | `NOTE-cli-surface-holds.md`, `NOTE-what-cli-surface-fed-and-the-eight-typed-options-it-never-did.md` |
-| `dashboard.py`, `errors.py` | clean, **one claim corrected** | `NOTE-dashboard-and-errors-hold.md` — its `escapes: []` is disproved by #19 |
+| `dashboard.py`, `errors.py` | clean, **one claim corrected**; **scope narrowed**: the 28 checks drove `host` with 14 spellings but fed `allow_remote` only real bools and `port` only `0`. The guard is `host not in {...} and not allow_remote` — **strict on the host, truthiness on the flag**: 5 of 10 non-bool values bypass it, including the strings `"no"`, `"false"`, `"0"`. **Not reachable from the CLI** (`--allow-remote` is `store_true`, measured); the exposure is the library API, #15's class | `NOTE-dashboard-and-errors-hold.md` — its `escapes: []` is disproved by #19 —, `NOTE-what-the-dashboard-fed-and-the-allow-remote-it-never-did.md` |
 | alias / `alias_chain` machinery | clean | `NOTE-alias-lineage-holds.md` |
 | `workspace.py` implicit exceptions | clean — #19 is the only instance | `NOTE-issue19-is-the-only-one.md` |
 | the rest of the package, implicit exceptions | clean — 78 reads, 3 guarded indexes | `NOTE-implicit-exceptions-package-wide.md` |
@@ -92,7 +92,7 @@ never treated my own re-run as independent confirmation.
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
-| this review's own counts | machine-checked — inventory, 62 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
+| this review's own counts | machine-checked — inventory, 63 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
 | attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed, **under the threat model `SECURITY.md:38` declares** | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
 | `monitor/collector.py` coverage | map — 27 tests, **no test ages an input**; #6 has no vocabulary to be tested by | `NOTE-the-collector-suite-never-ages-an-input.md` |
 | the 8 provenance-attack scripts | map — all self-document; **2 ran against an unpinned tree that was the stale base**, superseded by the `_main` re-runs | `NOTE-two-attack-scripts-ran-against-the-stale-base.md` |
@@ -278,8 +278,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **256 live citations across
-74 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **257 live citations across
+75 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -297,7 +297,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 326 inline spans remain undecidable by position and are named as a
+lenient. 327 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03
