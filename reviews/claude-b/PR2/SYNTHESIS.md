@@ -147,6 +147,35 @@ task stricter than intended.
 
 ---
 
+## A defect in this branch, found and fixed on 2026-08-03
+
+Until `c16df6d`, this branch was based on `dad3f4c4`, an ancestor of `main`,
+and was **behind main by 9,457 lines** — `workspace.py` −680, `provenance.py`
+−341, and four whole test modules plus `web_tests/*`. Merging PR #16 would have
+reverted `main`. The PR body called it "documentation only", which was true of
+the commits and false of the branch.
+
+It was caught by a line-number mismatch: a CI traceback cited
+`tests/test_concurrency.py:49`, and `main` has that statement at `:54`.
+
+`c16df6d` merges `origin/main` in. The branch is now `main` plus
+`reviews/claude-b/` alone — 17,011 insertions, **zero deletions**, nothing
+outside `reviews/`.
+
+**The findings are unaffected**: every probe runs against a separate checkout
+verified at `git rev-parse HEAD == 5694ab45` with an empty `git status`, and
+that verification is now a standing precondition of the review rather than an
+assumption. What *was* affected is PR #16's CI — every green run before
+`c16df6d` exercised stale source, so none of them is evidence about `main`. The
+first honest run is `30776534613`, all 11 checks green.
+
+Related, measured while checking for further contamination of my own making:
+`reviews/claude-b/PR2/test_p1_1.py` is named `test_*`, but neither test runner
+collects it. CI runs `python -m unittest discover -s tests -t .` (start
+directory `tests`) and `node --test` over three explicitly named files in
+`web_tests/`. The green run on `c16df6d`, which contains both that file and
+`main`'s full suite, is the measurement.
+
 ## Two caveats about this document's own numbers
 
 **The counting convention changed mid-pass.** The early probes
