@@ -10,6 +10,10 @@
         observed: exists: True
 
 ########## B. no attack4 script has EVER existed ##########
+    2e6187d review: seven of fifteen modules the suite never names, and five issues live there
+    reviews/claude-b/PR2/NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md
+    reviews/claude-b/PR2/raw/probe_attack4_provenance.py
+    reviews/claude-b/PR2/raw/raw-attack4-provenance.txt
     1642414 review: raw-attack4.txt is unreproducible, and REPORT.md's provenance sentence was false
     reviews/claude-b/PR2/NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md
     reviews/claude-b/PR2/raw/probe_attack4_provenance.py
