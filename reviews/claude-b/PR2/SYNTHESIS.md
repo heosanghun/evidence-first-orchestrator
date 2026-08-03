@@ -3,8 +3,8 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**652 passing checks across 32 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 89 files: **33 probe scripts, 48 raw outputs, 8
+**666 passing checks across 33 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 91 files: **34 probe scripts, 49 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. These four numbers are **not yet
 machine-checked** — unlike the citation and quote counts below, nothing fails
@@ -67,6 +67,7 @@ never treated my own re-run as independent confirmation.
 | dynamic-key subscripts, whole package | clean — 7 runtime reads, 1 keyed by parsed input; a **published count of mine corrected** | `NOTE-the-144-was-my-own-misleading-number.md` |
 | `SECURITY.md` / `CONTRIBUTING.md` claims | clean — ignore rules, no `shell=True`, report containment | `NOTE-remaining-docs-adjudicated.md` |
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
+| dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
 
 Fifteen components were probed and found sound (one with a claim since corrected — see #19).
 
@@ -177,8 +178,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **170 live citations across
-37 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **173 live citations across
+38 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -196,7 +197,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 235 inline spans remain undecidable by position and are named as a
+lenient. 240 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03
@@ -220,6 +221,17 @@ the `raise` census blind to a dict index (#19), the variable-name filter that
 missed `task_for_validation`, the module list that missed `errors.py`, and the
 quote-accuracy window built from a range's start only — and the **second** time
 the bug was in a figure already on the record.
+
+**A limit of the technique, not of a list — found 2026-08-03.** Tracing those
+stores forward, the census reported that `provenance.py::files` is never read
+back, contradicting a claim I was mid-way through writing. The census was
+right: the dict is **renamed across a return** (`expected_files =
+_evidence_file_map(evidence)`), and a census keyed on a variable *name* measures
+a **scope**, not a **value**. Every name-scoped census in this review carries
+that bound; where a value crosses a function boundary the chain has to be read,
+and the result is reasoned from reading rather than measured.
+`NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` says which of
+its own results fall on each side.
 
 ## Counts that drifted, caught and made self-checking on 2026-08-03
 

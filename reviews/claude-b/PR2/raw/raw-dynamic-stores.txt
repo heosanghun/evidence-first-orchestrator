@@ -1,0 +1,158 @@
+########## A. POSITIVE CONTROL and the store census ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   and the module list is the whole package
+        expected: unlisted: []
+        observed: unlisted: []
+    adapter.py:74  snapshot[relative]
+    independence.py:143  declarations[agent_id]
+    independence.py:155  resolved[agent_id]
+    independence.py:162  resolved[agent_id]
+    independence.py:176  resolved[agent_id]
+    independence.py:220  submissions[key]
+    ledger.py:164  tasks[task_id]
+    provenance.py:119  files[Path(artifact['path']).resolve()]
+    provenance.py:123  files[Path(raw_output['path']).resolve()]
+    workspace.py:264  signed[record['id']]
+  [ok] dynamic-key stores in the whole package
+        expected: stores: 10
+        observed: stores: 10
+  [ok]   of which item 29 counted, excluding workspace.py
+        expected: excluded: 9
+        observed: excluded: 9
+  9 + 1 = the 10 below. Item 29 reported 9 because it excluded
+  workspace.py from that population and counted it separately.
+
+########## B. every access to each stored-into dict, adjudicated ##########
+    adapter.py  `snapshot`
+        {'rebound': 1, 'passed / returned / set()': 1, 'subscript-store': 1}
+        built by _workspace_snapshot and RETURNED. Never subscripted in this module.
+    independence.py  `declarations`
+        {'rebound': 1, 'iterated': 1, 'subscript-store': 1, '.get()': 2}
+        read only via .get() at :142 and :153, and iterated at :179.
+    independence.py  `resolved`
+        {'rebound': 1, 'passed / returned / set()': 1, 'membership / comparison': 1, 'subscript-store': 3, 'subscript-read': 2}
+        read by subscript at :148 and :177, both adjudicated by item 29 as own-keyspace. See section C.
+    independence.py  `submissions`
+        {'rebound': 1, 'subscript-store': 1, '.get()': 1}
+        read only via .get() at :240.
+    ledger.py  `tasks`
+        {'rebound': 1, 'passed / returned / set()': 1, 'subscript-store': 1}
+        built by projected_tasks and RETURNED. Its three consumers are all in workspace.py, which item 29 measured as having ZERO runtime dynamic-key reads - so none of them can subscript it with a variable.
+    provenance.py  `files`
+        {'rebound': 1, 'passed / returned / set()': 1, 'subscript-store': 2}
+        built by _evidence_file_map and RETURNED. Under THIS name it is never read back - the caller rebinds it as `expected_files`, which is where :241 and :295 read it. A name-scoped census cannot see that; section C does it by reading.
+    workspace.py  `signed`
+        {'rebound': 2, 'passed / returned / set()': 2, 'subscript-store': 1, '.get()': 1}
+        read via .get() at :288 and set() at :293. Never subscripted.
+  [ok] every stored-into dict is adjudicated
+        expected: uncovered: []
+        observed: uncovered: []
+  [ok]   and the map has no stale entries
+        expected: stale: []
+        observed: stale: []
+  [ok]   dicts read back by dynamic subscript UNDER THE SAME NAME
+        expected: feeding: ['independence.py::resolved']
+        observed: feeding: ['independence.py::resolved']
+  [ok]   stores belonging to it
+        expected: fed: 3
+        observed: fed: 3
+  A CORRECTION TO MY OWN FIRST DRAFT. I wrote this section expecting
+  two such dicts and five such stores, counting provenance.py's
+  `files` because I knew it becomes `expected_files` and is read at
+  :295. The census says one and three, and the census is right: under
+  the name `files` that dict is stored into and RETURNED, nothing
+  more. The caller rebinds the return value, and a census keyed on a
+  variable NAME cannot follow a rename across a return.
+  That bounds this probe and, more usefully, bounds every name-scoped
+  census in this review: they measure a SCOPE, not a VALUE. Where a
+  value crosses a function boundary the chain has to be read, which
+  is what section C does - and the result is then REASONED FROM
+  READING, not measured by the census.
+  So the plain answer the queue asked for is NOT 'none'. Two chains
+  exist; one is visible to the census and one is not.
+
+########## C. the two chains, and why one of them matters ##########
+  CHAIN 1 - independence.py `resolved`
+    stores  :155 :162 :176   ->   reads  [148, 177]
+    Item 29 classified both reads as OWN KEYSPACE. This traces WHY:
+    every key written is `agent_id`, the same parameter the reads use,
+    and :148 is guarded by `if agent_id in resolved` while :177 reads
+    the key assigned one line above. Nothing new; the chain confirms
+    the earlier classification rather than changing it.
+
+  CHAIN 2 - provenance.py `files`, which the caller renames to
+  `expected_files`. NOT visible to section B, established by reading.
+    stores  :119 :123   ->   read  []
+    provenance.py:119  files[Path(artifact["path"]).resolve()] = artifact["sha256"]
+    provenance.py:123  files[Path(raw_output["path"]).resolve()] = raw_output["sha256"]
+    provenance.py:241  if submitted not in expected_files:
+    provenance.py:295  if submitted_sha != expected_files[submitted]:
+  [ok]   the store keys are built from the evidence manifest
+        expected: files[Path(artifact["path"]).resolve()]
+        observed: files[Path(artifact["path"]).resolve()] = artifact["sha256"]
+  [ok]   and the rename that hides the chain is a plain return + rebind
+        expected: expected_files = _evidence_file_map(evidence)
+        observed: expected_files = _evidence_file_map(evidence)
+  [ok]   and the read key is built from the provenance document
+        expected: expected_files[submitted]
+        observed: if submitted_sha != expected_files[submitted]:
+  THIS is the result worth publishing. Item 29 already established
+  that `submitted` - the KEY - comes from parsed input. What the store
+  side adds is that the KEYSPACE comes from parsed input too:
+  `_evidence_file_map` keys the dict by the artifact and raw_output
+  paths declared in the EVIDENCE MANIFEST, and :295 indexes it with a
+  path declared in the PROVENANCE DOCUMENT. Two worker-supplied
+  documents on either side of one dict lookup.
+  It is still safe: :241 rejects any `submitted` not in the map, in the
+  same loop iteration, and item 29 proved the map is never mutated
+  after :218. But 'both sides are attacker-controlled and the only
+  thing between them is a membership test 54 lines up' is a sharper
+  statement of the same structure than item 29 could make alone.
+
+########## D. a near miss: where .get() is load-bearing ##########
+    adapter.py:86  changed = {
+    adapter.py:87  path
+    adapter.py:88  for path in set(before) | set(after)
+    adapter.py:89  if before.get(path) != after.get(path)
+  [ok]   the iteration is over the UNION of both keyspaces
+        expected: set(before) | set(after)
+        observed: for path in set(before) | set(after)
+  [ok]   and both dicts are read with .get, not a subscript
+        expected: before.get(path) != after.get(path)
+        observed: if before.get(path) != after.get(path)
+  `changed` iterates keys present in EITHER dict, so a subscript here
+  WOULD raise KeyError on any file added or deleted during the run -
+  which is the normal case this function exists to detect. The `.get`
+  is doing real work. Worth naming because it is the shape that would
+  have been a finding had it been written the other way, and because a
+  census of stores that reported only 'no reads' would have walked
+  straight past it.
+
+########## E. what this does NOT cover ##########
+  * Cross-module flow is traced by READING the consumers, not by
+    static dataflow. `ledger.projected_tasks()` is resolved through
+    item 29's measurement that workspace.py has zero runtime
+    dynamic-key reads; that is a cross-reference, not a new proof.
+  * Nothing was executed. Whether a crafted evidence manifest plus a
+    crafted provenance document can reach :295 with a key the map
+    lacks is a BEHAVIOURAL question this probe does not answer - it
+    would need `verify_git_provenance` driven end to end against a
+    real repository, and `network: false` forbids the fetch that
+    would make that realistic.
+  * Constant-key stores are out of scope, as are stores through an
+    attribute (`self.x[k] = v`) - the census keys on a bare Name, and
+    there are none of the latter among these ten.
+  * MEASURED: the census, every access tally, both chains, the near
+    miss. REASONED: that .get()/membership/iteration cannot raise
+    KeyError, which is language semantics rather than a measurement.
+
+########## 0 unexpected result(s) ##########
+Static analysis only; nothing was executed against a live workspace.
+No issue filed - every chain here is guarded. Pre-registered
+permissions unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

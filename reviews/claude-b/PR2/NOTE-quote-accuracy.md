@@ -21,11 +21,11 @@ opposite of the point.
 
 The decidable subset is: **exactly one citation on a line, immediately followed
 by a fenced block.** There the block is unambiguously a quote of that location.
-**16** such pairs exist.
+**17** such pairs exist.
 
 | Disposition | Count |
 |---|---|
-| verbatim-verified against the cited range | 11 |
+| verbatim-verified against the cited range | 12 |
 | adjudicated non-quotes | 5 |
 
 > **Correction, 2026-08-03.** This section previously read *"Eleven such pairs
@@ -81,7 +81,7 @@ was a **checker** defect. The window now spans `start-8` to `end+10`.
 
 ## What stays undecidable, with a count
 
-**235 inline backticked spans share a line with a citation.** They are not
+**240 inline backticked spans share a line with a citation.** They are not
 checked, and cannot be by position:
 
 - *"`doctor.py:109` interpolates `agent_id` into a path"* — the span **is** a
@@ -102,7 +102,7 @@ unambiguous, compared whitespace-insensitively against the full cited range at
 --porcelain` empty). Static analysis only; nothing was executed against a
 workspace.
 
-Not examined: inline spans (235, above); whether a *paraphrase* in prose
+Not examined: inline spans (240, above); whether a *paraphrase* in prose
 accurately characterises the cited code, which is a judgement no string
 comparison can make.
 
@@ -116,4 +116,4 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 | Artifact | SHA-256 |
 |---|---|
 | `raw/probe_quote_accuracy.py` | `ceef7b82e593cf4a7130115881bae4e4af56b51d907e42a2162a4c5963adab6f` |
-| `raw/raw-quote-accuracy.txt` | `376afa3b6aca34c7e631a7617af3ccd52a1378bb5d90e7a57b6ae7b62767cae0` |
+| `raw/raw-quote-accuracy.txt` | `2db28179647fd95c5e6737f69b67bae7e586e78a3ee319c1a03e84a4d97a4bcf` |
