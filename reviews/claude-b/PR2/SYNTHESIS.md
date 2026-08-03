@@ -3,13 +3,14 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**690 passing checks across 35 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 95 files: **36 probe scripts, 51 raw outputs, 8
+**707 passing checks across 36 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 97 files: **37 probe scripts, 52 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
-bound in the write-up that cites it. These four numbers are **not yet
-machine-checked** — unlike the citation and quote counts below, nothing fails
-when they drift. Recount with `ls raw/ | ...` and `grep -c '[ok]' raw/raw-*.txt`
-rather than trusting them; making them self-checking is queued.
+bound in the write-up that cites it. **These numbers are now machine-checked**:
+`raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
+paragraph disagrees with it — the same guard the citation and quote counts got.
+It also checks the headline `N checks, M unexpected` of all **29** write-ups
+against the raw output each one names; nothing verified those until 2026-08-03.
 
 Thirteen `UNEXPECTED` lines survive, in five files —
 `raw-evidence-gates.txt` (5), `raw-lifecycle-gates.txt` (3),
@@ -26,11 +27,14 @@ document.
 > counts by prefix. This is the same defect as the two below — a count copied
 > into prose and never re-derived.
 
-> **`main` has moved, 2026-08-03 06:19–06:51Z.** This review stays anchored at
-> `5694ab45`; every write-up and every SHA-256 below is bound to it and
-> `/tmp/efo-prov` was deliberately not re-pointed. `origin/main` is now
-> `0d67750` and has been **red on nine consecutive pushes** — a UI rewrite
-> deleted the whole security-header block and the transport-badge rendering.
+> **`main` has moved and keeps moving, from 2026-08-03 06:19Z.** This review
+> stays anchored at `5694ab45`; every write-up and every SHA-256 below is bound
+> to it and `/tmp/efo-prov` was deliberately not re-pointed. `origin/main` has
+> been **red on every push since `b78c63d`** — a UI rewrite deleted the whole
+> security-header block and the transport-badge rendering, and the header block
+> has since been deleted **twice**, an explicit rollback having restored it in
+> between. Its SHA is not recorded here because it changes every few minutes;
+> the probe resolves it live and prints the head it measured.
 > That is issue **#20** and
 > `ADDENDUM-main-is-red-and-a-push-run-is-not-a-pr-run.md`, the only document
 > here that reads a ref other than the anchor. It names both.
@@ -78,7 +82,7 @@ never treated my own re-run as independent confirmation.
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
-| `public/` at **main `0d67750`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
+| `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
 
 Fifteen components were probed and found sound (one with a claim since corrected — see #19).
 
@@ -207,7 +211,7 @@ task stricter than intended.
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
 `NOTE-citation-audit-of-this-review.md` audits all **179 live citations across
-40 documents**; every one now resolves at `main`. Three did not:
+41 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.

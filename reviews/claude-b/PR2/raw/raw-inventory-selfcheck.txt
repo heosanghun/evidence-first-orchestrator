@@ -1,0 +1,88 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] the review's anchor is unmoved at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  This probe audits the REVIEW, not EFO. The anchor is checked anyway
+  because every count below is a count of work done against it.
+
+########## B. raw/ recounted, and the classification checked ##########
+  [ok] every file in raw/ is classified
+        expected: total: 97
+        observed: total: 97
+    37 probe scripts, 52 raw outputs, 8 provenance-attack scripts
+    the attack scripts, named rather than lumped in: ['attack2.sh', 'attack2_cef.sh', 'attack3.sh', 'attack_main.sh', 'attack_main2.sh', 'attack_prov5_main.py', 'attack_prov_main.sh', 'attack_proxy.sh']
+    707 passing checks across 36 instrumented outputs; 13 UNEXPECTED lines
+    the UNEXPECTED lines, by file: {'raw-alias-lineage.txt': 2, 'raw-attack-prov5-main.txt': 2, 'raw-evidence-gates.txt': 5, 'raw-ledger-chain.txt': 1, 'raw-lifecycle-gates.txt': 3}
+
+########## C. SYNTHESIS.md's own inventory, against the files ##########
+  [ok] SYNTHESIS states a machine-readable inventory
+        expected: found: True
+        observed: found: True
+  [ok]   passing checks
+        expected: passing checks: 707
+        observed: passing checks: 707
+  [ok]   instrumented outputs
+        expected: instrumented outputs: 36
+        observed: instrumented outputs: 36
+  [ok]   files in raw/
+        expected: files in raw/: 97
+        observed: files in raw/: 97
+  [ok]   probe scripts
+        expected: probe scripts: 37
+        observed: probe scripts: 37
+  [ok]   raw outputs
+        expected: raw outputs: 52
+        observed: raw outputs: 52
+  [ok]   attack scripts
+        expected: attack scripts: 8
+        observed: attack scripts: 8
+  [ok]   and the UNEXPECTED tally it reports
+        expected: files: 5
+        observed: files: 5
+  [ok]     with the total it names
+        expected: unexpected: 13
+        observed: unexpected: 13
+
+########## D. every write-up's OWN headline count ##########
+  Write-ups open with `N checks, M unexpected`. Nothing has ever
+  checked one. Each is now compared against the raw output it names.
+  [ok] every stated check-count is paired with a raw output
+        expected: strict: 30
+        observed: strict: 30
+    30 checkable headline claims across the write-ups
+    (An earlier draft pinned this at 30, from `grep -l` counting FILES
+     rather than occurrences. The census said 29 and was right. The
+     number is now derived on both sides, so neither can go stale.)
+  [ok]   every named raw output exists
+        expected: missing: []
+        observed: missing: []
+  [ok]   and every headline count matches its raw output
+        expected: mismatched: []
+        observed: mismatched: []
+  A document whose headline disagrees with its own evidence is the
+  exact failure this project exists to prevent, and until this probe
+  existed nothing would have caught one.
+
+########## E. what this does NOT cover ##########
+  * It checks that a stated number matches the file it names. It does
+    NOT check that the raw output was produced by the probe beside it -
+    that is what the SHA-256 bindings in each write-up are for, and
+    they are verified by hand at commit time, not here.
+  * Documents that state a count WITHOUT naming a raw output in the
+    same sentence are not matched by the pattern. That is why section D
+    asserts the claim COUNT: if a document changes shape and drops out
+    of the census, the count falls and the run fails.
+  * Counts in prose that are not headline check-counts - issue numbers,
+    'Fifteen components', per-note tallies inside tables - are still
+    hand-maintained. Named as a gap rather than papered over; the
+    citation and quote counts are covered by the other two probes.
+  * MEASURED: everything above. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+This audits MY OWN write-ups, not EFO. Static file reads only; nothing
+was executed against a workspace. Pre-registered permissions unchanged
+- gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.
