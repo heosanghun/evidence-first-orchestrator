@@ -180,6 +180,13 @@ ADJUDICATED = {
         "PROBE OUTPUT - the block is this census's listing of the 14 chained "
         "`get(default).get()` sites across five modules, one line each; it is "
         "not a quote of workspace.py at any single cited line",
+    ("NOTE-66-guards-and-only-eleven-of-them-guard-an-argument.md",
+     "workspace.py"):
+        "PROBE OUTPUT - the block is this census's listing of the ELEVEN "
+        "parameter-guarding sites across four modules, one line each "
+        "(`workspace.py:326  add_agent(command)`); it is not a quote of "
+        "workspace.py at any single cited line. Sixth time this check has "
+        "caught its own author on the round the note was written",
     ("ADDENDUM-git-replace-regression.md", "provenance.py"):
         "deliberate before/after - the block quotes the argument list that "
         "was REMOVED, which is the whole point of the regression",

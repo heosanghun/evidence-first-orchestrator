@@ -8,13 +8,15 @@
 
 ########## B. citation + fenced block, the decidable subset ##########
   [ok] every decidable pair was examined
-        expected: pairs: 28
-        observed: pairs: 28
-  verbatim-verified: 17   not matched: 11
+        expected: pairs: 29
+        observed: pairs: 29
+  verbatim-verified: 17   not matched: 12
     ADDENDUM-git-replace-regression.md  ->  provenance.py:47
         deliberate before/after - the block quotes the argument list that was REMOVED, which is the whole point of the regression
     NOTE-487-is-too-many-and-the-two-that-survive-are-guarded.md  ->  provenance.py:78
         PROBE OUTPUT - the block is the probe's own two-line site listing (`provenance.py:76  branch.strip  in validate_git_source_claim()`), not a quote of the source at :76. The note DOES quote that line verbatim, in a separate fenced block a few paragraphs down, which carries no citation on its own line and so is not paired. Flagged on the round the note was written - the fifth time this check has caught its own author
+    NOTE-66-guards-and-only-eleven-of-them-guard-an-argument.md  ->  workspace.py:618
+        PROBE OUTPUT - the block is this census's listing of the ELEVEN parameter-guarding sites across four modules, one line each (`workspace.py:326  add_agent(command)`); it is not a quote of workspace.py at any single cited line. Sixth time this check has caught its own author on the round the note was written
     NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md  ->  workspace.py:1346
         PROBE OUTPUT - the block is this census's listing of the 14 chained `get(default).get()` sites across five modules, one line each; it is not a quote of workspace.py at any single cited line
     NOTE-class-2b-is-a-census-now-seven-of-seven.md  ->  test_independence.py:243
@@ -314,14 +316,14 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
   silently is indistinguishable from one that was never measured, so
   the run now fails when prose and output disagree.
   [ok]   the note states this run's pairs
-        expected: pairs: 28
-        observed: pairs: 28
+        expected: pairs: 29
+        observed: pairs: 29
   [ok]   the note states this run's verbatim-verified
         expected: verbatim-verified: 17
         observed: verbatim-verified: 17
   [ok]   the note states this run's adjudicated non-quotes
-        expected: adjudicated non-quotes: 11
-        observed: adjudicated non-quotes: 11
+        expected: adjudicated non-quotes: 12
+        observed: adjudicated non-quotes: 12
   [ok]   the note states this run's inline spans
         expected: inline spans: 284
         observed: inline spans: 284
