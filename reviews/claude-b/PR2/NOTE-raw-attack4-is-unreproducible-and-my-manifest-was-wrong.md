@@ -69,6 +69,20 @@ under test is not in the tree.*
 
 **Verdict: mark it unreproducible.**
 
+> **Correction, 2026-08-03 — this verdict was too strong, and the error is
+> mine.** *"The artifact under test is not in the tree"* is true **at the
+> anchor** and wrong as *"permanently lost"*. A git repository keeps a file
+> after the tree stops carrying it, and I wrote the verdict without trying
+> `git show`. It restores the wheel **byte-exact** — 40269 bytes, sha256
+> `18ed72c3…b103b2354`, matching what `tests/fixtures/README.md` claimed at
+> `7a9553b` — with **no network and no build**, and **W1 and W2 have now been
+> re-run** and match this output. The v0.1 CLI extracted from it executes.
+> `NOTE-the-wheel-was-never-lost-git-had-it-all-along.md` measures all of it.
+>
+> What stands unchanged: **no `attack4` script ever existed**, and
+> `REPORT.md`'s sentence about where the output came from **is still false**.
+> Sections W3–W8 remain un-re-run — but their stated blocker does not hold.
+
 ## What still rests on it
 
 Three `REPORT.md` claims cite it as *measured*:

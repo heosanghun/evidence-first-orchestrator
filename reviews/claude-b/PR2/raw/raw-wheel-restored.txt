@@ -1,0 +1,374 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   and the wheel really is absent from the anchor's TREE
+        expected: in tree: False
+        observed: in tree: False
+  That absence is what items 43 and 46 measured. This asks the next
+  question: absent from the tree is not absent from the REPOSITORY.
+
+########## B. git restores it - no network, no build ##########
+    restored 40269 bytes to /tmp/efo-v01/wheel.whl
+  [ok] the restored wheel's sha256
+        expected: 18ed72c3f2ddf38a9a18d435032095cfbc074b2e21b9397d96e4a76b103b2354
+        observed: 18ed72c3f2ddf38a9a18d435032095cfbc074b2e21b9397d96e4a76b103b2354
+  [ok]   which is what the FIXTURE README claimed at that commit
+        expected: claimed: 18ed72c3f2ddf38a9a18d435032095cfbc074b2e21b9397d96e4a76b103b2354
+        observed: claimed: 18ed72c3f2ddf38a9a18d435032095cfbc074b2e21b9397d96e4a76b103b2354
+  [ok]     and the ROOT README never carried it - the assumption I made first
+        expected: root readme hash: False
+        observed: root readme hash: False
+  [ok]   it is a valid zip
+        expected: corrupt member: None
+        observed: corrupt member: None
+  [ok]     with the expected member count
+        expected: members: 20
+        observed: members: 20
+  [ok]     and it is pure-python - no build step exists to run
+        expected: py3-none-any
+        observed: tests/fixtures/evidence_first_orchestrator-0.1.0-py3-none-any.whl
+
+########## C. W1 and W2 RE-RUN, against the committed output ##########
+  [ok] W1: the committed output's README claim matches this run's hash
+        expected: w1: 18ed72c3f2ddf38a9a18d435032095cfbc074b2e21b9397d96e4a76b103b2354
+        observed: w1: 18ed72c3f2ddf38a9a18d435032095cfbc074b2e21b9397d96e4a76b103b2354
+    DIFFERS __init__.py      127 -> 128 bytes
+    DIFFERS __main__.py      160 -> 161 bytes
+    DIFFERS archive.py       4938 -> 4939 bytes
+    DIFFERS dashboard.py     8115 -> 8116 bytes
+    DIFFERS errors.py        816 -> 817 bytes
+    DIFFERS lock.py          2339 -> 2340 bytes
+    DIFFERS model.py         4416 -> 4417 bytes
+    DIFFERS util.py          3434 -> 3435 bytes
+  [ok] W2: modules byte-identical to git f827f29
+        expected: identical: 6
+        observed: identical: 6
+  [ok]   and modules that differ
+        expected: differing: 8
+        observed: differing: 8
+  [ok]     every difference is exactly ONE byte
+        expected: all +1: True
+        observed: all +1: True
+    a trailing newline the wheel build added - the committed output
+    recorded `stripped_equal=True` for all eight.
+  [ok]   the committed output's byte-identical list, as the expectation
+        expected: committed: ['adapter.py', 'cli.py', 'doctor.py', 'evidence.py', 'ledger.py', 'workspace.py']
+        observed: committed: ['adapter.py', 'cli.py', 'doctor.py', 'evidence.py', 'ledger.py', 'workspace.py']
+
+########## D. the v0.1 client RUNS - so W3-W8 are not lost either ##########
+  [ok] the restored v0.1 CLI executes
+        expected: exit: 0
+        observed: exit: 0
+  [ok]   and reports its own subcommands
+        expected: init,status,agent,task
+        observed: usage: efo [-h]      {init,status,agent,task,recover,ledger,doctor,legacy,evidence,worker,serve}      ... Evidence-gated orchestration for multiple coding agents. positional arguments:  {init,status,agent,task,recover,ledger,doctor,legacy,evidence,worker,serve}   init        Initialize a broker workspace   status       Show workspace and task status   agent        Manage registered agents   task        Manage the task state machine   recover       Block expired task leases   ledger       Inspect the signed event ledger   doctor       Audit a broker workspace   legacy       Audit a Markdown-only workspace   evidence      Validate a submission bundle   worker       Run configured agent adapters   serve        Serve the read-only dashboard options:  -h, --help      show this help message and exit 
+  W3-W8 drive a LIVE v0.1-against-v2 workspace - init, task add, a
+  signed orchestrator handoff, and both clients reading each other's
+  state. That is a multi-step scenario, not a diff, and it is NOT
+  attempted here. What is measured is that the blocker items 43 and 46
+  named - `the client is gone` - does not hold.
+
+########## E. this CORRECTS my own earlier verdict ##########
+  [ok] the earlier note now carries a dated correction
+        expected: Correction, 2026-08-03
+        observed: # `raw-attack4.txt` is unreproducible — and my own manifest says something untrue about it
+
+Reproduce with `raw/probe_attack4_provenance.py`; raw output in
+`raw/raw-attack4-provenance.txt`. **15 checks, 0 unexpected.** No issue filed —
+the defect here is in **my own bookkeeping**, not in EFO.
+
+**Scope, stated first:** one output file (191 lines), one `REPORT.md` section,
+four git-history queries. Small enough to read end to end, and it was read.
+
+Queue item 43 asked whether the missing `attack4` script is recoverable from
+git history, or whether the output should be marked unreproducible. Three
+answers, in increasing order of how much they matter.
+
+## 1. No script ever existed
+
+```
+    a820891 review(claude-b): independent verification of PR #2
+    reviews/claude-b/PR2/raw/raw-attack4.txt
+```
+
+`git log --all --diff-filter=D -- '*attack4*'` returns **nothing**, and **zero
+attack4 *scripts* have ever been committed** — the output was added in
+`a820891` (2026-07-30), the branch's first review commit.
+
+> **Correction, 2026-08-03.** This first read *"the only path that has ever
+> matched the name is the output"*, which stopped being true the moment this
+> note, its probe and its raw output were committed — all three match
+> `*attack4*`. The census now **classifies** instead of counting: under `raw/`
+> a file is a script unless it is `raw-*.txt` or `probe_*.py`. The four
+> self-references are named in the output. Same self-reference the attack-script
+> census hit one round earlier, one directory up.
+
+So "recover it from history" is not one of the options. There is nothing to
+recover.
+
+## 2. `REPORT.md` says where it came from, and that is false
+
+The evidence manifest states the output *"was produced by the inline command
+blocks quoted in §3 ④"*.
+
+§3 ④ spans `REPORT.md:194-232` and contains **2 fenced blocks and 0
+command-shaped lines**. Both blocks are *results* — a `sha256(...)` line with
+its README comparison, and a two-line `config file orchestrator` /
+`effective orchestrator` pair.
+
+**There are no command blocks there.** A statement about the provenance of my
+own artifact that does not hold, in the section of the report whose entire job
+is provenance. Said first rather than folded into the verdict.
+
+`REPORT.md` now carries a dated correction at that line.
+
+## 3. The input is gone too, which settles it
+
+```
+    7a9553b Add evidence-gated meta-orchestration v2
+    tests/fixtures/evidence_first_orchestrator-0.1.0-py3-none-any.whl
+```
+
+| At `main` `5694ab45` | |
+|---|---|
+| the wheel fixture | **absent** |
+| `tests/fixtures/` | **does not exist** |
+| the README hash claim W1 checked | **gone** |
+
+W1 hashes that wheel; W2 diffs its 14 modules against `git archive f827f29`.
+Neither can run at the anchor **no matter what drives them**. The output is
+unreproducible for a reason stronger than the missing script: *the artifact
+under test is not in the tree.*
+
+**Verdict: mark it unreproducible.**
+
+> **Correction, 2026-08-03 — this verdict was too strong, and the error is
+> mine.** *"The artifact under test is not in the tree"* is true **at the
+> anchor** and wrong as *"permanently lost"*. A git repository keeps a file
+> after the tree stops carrying it, and I wrote the verdict without trying
+> `git show`. It restores the wheel **byte-exact** — 40269 bytes, sha256
+> `18ed72c3…b103b2354`, matching what `tests/fixtures/README.md` claimed at
+> `7a9553b` — with **no network and no build**, and **W1 and W2 have now been
+> re-run** and match this output. The v0.1 CLI extracted from it executes.
+> `NOTE-the-wheel-was-never-lost-git-had-it-all-along.md` measures all of it.
+>
+> What stands unchanged: **no `attack4` script ever existed**, and
+> `REPORT.md`'s sentence about where the output came from **is still false**.
+> Sections W3–W8 remain un-re-run — but their stated blocker does not hold.
+
+## What still rests on it
+
+Three `REPORT.md` claims cite it as *measured*:
+
+```
+      REPORT.md:305  *measured.* `raw/raw-attack4.txt`, W6 / W6b.
+      REPORT.md:322  *measured.* `raw/raw-attack4.txt`, W3.
+      REPORT.md:342  *measured.* `raw/raw-attack4.txt`, W2 / W2b.
+```
+
+These are findings **P2-1**, **P2-2** and **P2-3** — the fourth P2 finding does
+not cite it. They are **not retracted**. They were measured when they were made,
+against a ref `REPORT.md` itself names as `4aa47ca6` — not this review's anchor.
+What is recorded now is that they **cannot be re-derived on this branch**.
+
+`SYNTHESIS.md` and `NOTE-two-attack-scripts-ran-against-the-stale-base.md` also
+mention the file; both already describe it as the orphan.
+
+## An expectation of mine, corrected
+
+I expected the manifest sentence to span **2** lines, because both of my match
+patterns fired. They fired on the **same wrapped line** — it is **1**. Corrected
+to the measurement, not the other way round.
+
+## What this does not do
+
+- It does **not** retract P2-1, P2-2 or P2-3, and does not re-run them.
+  *Unreproducible at the anchor* is not the same as *wrong*.
+- It does **not** reconstruct the commands. Writing a plausible `attack4` now
+  and calling it the original would be **inventing provenance** — the exact
+  thing this review exists to catch.
+- It does **not** touch `main` or any other agent's branch. `REPORT.md` is this
+  review's own document and is corrected in place, dated.
+- **MEASURED:** every git query, the section bounds, the fenced-block and
+  command counts, the fixture's absence, the citation census. **REASONED:**
+  nothing.
+
+Pre-registered permissions unchanged: `gpu: false`, `network: false`,
+`performance_metrics: false`; gates `allow_skips: false`,
+`require_validation: true`, `require_known_answer_check: true`,
+`require_independent_verification: true`.
+
+**SUBMITTED, not VERIFIED.**
+
+| Artifact | SHA-256 |
+|---|---|
+| `raw/probe_attack4_provenance.py` | `8e8b2b3aa9a7bfc1ca1cfd7f3703df0e42f81acb375eaa3e73543b64e7f28a60` |
+| `raw/raw-attack4-provenance.txt` | `3f99bf54f6970d3e971e49cc8434955bfa36950fc683b9e1729793cd8a398024` |
+
+  [ok]   and it still stands on the two things that ARE true
+        expected: zero
+attack4 *scripts* have ever been committed
+        observed: # `raw-attack4.txt` is unreproducible — and my own manifest says something untrue about it
+
+Reproduce with `raw/probe_attack4_provenance.py`; raw output in
+`raw/raw-attack4-provenance.txt`. **15 checks, 0 unexpected.** No issue filed —
+the defect here is in **my own bookkeeping**, not in EFO.
+
+**Scope, stated first:** one output file (191 lines), one `REPORT.md` section,
+four git-history queries. Small enough to read end to end, and it was read.
+
+Queue item 43 asked whether the missing `attack4` script is recoverable from
+git history, or whether the output should be marked unreproducible. Three
+answers, in increasing order of how much they matter.
+
+## 1. No script ever existed
+
+```
+    a820891 review(claude-b): independent verification of PR #2
+    reviews/claude-b/PR2/raw/raw-attack4.txt
+```
+
+`git log --all --diff-filter=D -- '*attack4*'` returns **nothing**, and **zero
+attack4 *scripts* have ever been committed** — the output was added in
+`a820891` (2026-07-30), the branch's first review commit.
+
+> **Correction, 2026-08-03.** This first read *"the only path that has ever
+> matched the name is the output"*, which stopped being true the moment this
+> note, its probe and its raw output were committed — all three match
+> `*attack4*`. The census now **classifies** instead of counting: under `raw/`
+> a file is a script unless it is `raw-*.txt` or `probe_*.py`. The four
+> self-references are named in the output. Same self-reference the attack-script
+> census hit one round earlier, one directory up.
+
+So "recover it from history" is not one of the options. There is nothing to
+recover.
+
+## 2. `REPORT.md` says where it came from, and that is false
+
+The evidence manifest states the output *"was produced by the inline command
+blocks quoted in §3 ④"*.
+
+§3 ④ spans `REPORT.md:194-232` and contains **2 fenced blocks and 0
+command-shaped lines**. Both blocks are *results* — a `sha256(...)` line with
+its README comparison, and a two-line `config file orchestrator` /
+`effective orchestrator` pair.
+
+**There are no command blocks there.** A statement about the provenance of my
+own artifact that does not hold, in the section of the report whose entire job
+is provenance. Said first rather than folded into the verdict.
+
+`REPORT.md` now carries a dated correction at that line.
+
+## 3. The input is gone too, which settles it
+
+```
+    7a9553b Add evidence-gated meta-orchestration v2
+    tests/fixtures/evidence_first_orchestrator-0.1.0-py3-none-any.whl
+```
+
+| At `main` `5694ab45` | |
+|---|---|
+| the wheel fixture | **absent** |
+| `tests/fixtures/` | **does not exist** |
+| the README hash claim W1 checked | **gone** |
+
+W1 hashes that wheel; W2 diffs its 14 modules against `git archive f827f29`.
+Neither can run at the anchor **no matter what drives them**. The output is
+unreproducible for a reason stronger than the missing script: *the artifact
+under test is not in the tree.*
+
+**Verdict: mark it unreproducible.**
+
+> **Correction, 2026-08-03 — this verdict was too strong, and the error is
+> mine.** *"The artifact under test is not in the tree"* is true **at the
+> anchor** and wrong as *"permanently lost"*. A git repository keeps a file
+> after the tree stops carrying it, and I wrote the verdict without trying
+> `git show`. It restores the wheel **byte-exact** — 40269 bytes, sha256
+> `18ed72c3…b103b2354`, matching what `tests/fixtures/README.md` claimed at
+> `7a9553b` — with **no network and no build**, and **W1 and W2 have now been
+> re-run** and match this output. The v0.1 CLI extracted from it executes.
+> `NOTE-the-wheel-was-never-lost-git-had-it-all-along.md` measures all of it.
+>
+> What stands unchanged: **no `attack4` script ever existed**, and
+> `REPORT.md`'s sentence about where the output came from **is still false**.
+> Sections W3–W8 remain un-re-run — but their stated blocker does not hold.
+
+## What still rests on it
+
+Three `REPORT.md` claims cite it as *measured*:
+
+```
+      REPORT.md:305  *measured.* `raw/raw-attack4.txt`, W6 / W6b.
+      REPORT.md:322  *measured.* `raw/raw-attack4.txt`, W3.
+      REPORT.md:342  *measured.* `raw/raw-attack4.txt`, W2 / W2b.
+```
+
+These are findings **P2-1**, **P2-2** and **P2-3** — the fourth P2 finding does
+not cite it. They are **not retracted**. They were measured when they were made,
+against a ref `REPORT.md` itself names as `4aa47ca6` — not this review's anchor.
+What is recorded now is that they **cannot be re-derived on this branch**.
+
+`SYNTHESIS.md` and `NOTE-two-attack-scripts-ran-against-the-stale-base.md` also
+mention the file; both already describe it as the orphan.
+
+## An expectation of mine, corrected
+
+I expected the manifest sentence to span **2** lines, because both of my match
+patterns fired. They fired on the **same wrapped line** — it is **1**. Corrected
+to the measurement, not the other way round.
+
+## What this does not do
+
+- It does **not** retract P2-1, P2-2 or P2-3, and does not re-run them.
+  *Unreproducible at the anchor* is not the same as *wrong*.
+- It does **not** reconstruct the commands. Writing a plausible `attack4` now
+  and calling it the original would be **inventing provenance** — the exact
+  thing this review exists to catch.
+- It does **not** touch `main` or any other agent's branch. `REPORT.md` is this
+  review's own document and is corrected in place, dated.
+- **MEASURED:** every git query, the section bounds, the fenced-block and
+  command counts, the fixture's absence, the citation census. **REASONED:**
+  nothing.
+
+Pre-registered permissions unchanged: `gpu: false`, `network: false`,
+`performance_metrics: false`; gates `allow_skips: false`,
+`require_validation: true`, `require_known_answer_check: true`,
+`require_independent_verification: true`.
+
+**SUBMITTED, not VERIFIED.**
+
+| Artifact | SHA-256 |
+|---|---|
+| `raw/probe_attack4_provenance.py` | `8e8b2b3aa9a7bfc1ca1cfd7f3703df0e42f81acb375eaa3e73543b64e7f28a60` |
+| `raw/raw-attack4-provenance.txt` | `3f99bf54f6970d3e971e49cc8434955bfa36950fc683b9e1729793cd8a398024` |
+
+  Unchanged and still correct: no attack4 SCRIPT ever existed, and
+  REPORT.md's sentence about where the output came from is false.
+  WRONG, and corrected: `the artifact under test is not in the tree`
+  was read as `permanently lost`. A git repository keeps a file after
+  the tree stops carrying it, and I did not try `git show` before
+  writing the verdict. That is the method's own rule - do not declare
+  something unreproducible until you have tried it - applied to me.
+
+########## F. what this does NOT do ##########
+  * It does not re-run W3-W8, and does not claim P2-1 or P2-2 are
+    re-verified. It removes their stated blocker; driving them is a
+    separate job.
+  * It does not retract P2-1, P2-2 or P2-3.
+  * It does not install anything. The wheel is unzipped to /tmp and
+    put on PYTHONPATH; no pip, no network, no build.
+  * It does not touch main, the anchor's working tree, or any other
+    agent's branch. `git show` writes nothing back.
+  * MEASURED: the restored bytes and their hash, the README claim at
+    7a9553b, the zip integrity, both W1 and W2 comparisons, the CLI
+    exit code. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Read-only git object reads plus one unzip and one --help. No workspace
+mutation, no network, no issue filed. Pre-registered permissions
+unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

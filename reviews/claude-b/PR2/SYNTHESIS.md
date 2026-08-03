@@ -3,15 +3,15 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**889 passing checks across 49 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 125 files: **51 probe scripts, 66 raw outputs, 8
+**907 passing checks across 50 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 127 files: **52 probe scripts, 67 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
 paragraph disagrees with it. The counts exclude that probe's **own** output,
 which is the report of the run doing the counting — a self-reference with no
 fixpoint, stated rather than hidden — the same guard the citation and quote counts got.
-It also checks the headline `N checks, M unexpected` of all **44** write-ups
+It also checks the headline `N checks, M unexpected` of all **45** write-ups
 against the raw output each one names; nothing verified those until 2026-08-03.
 
 Twelve `UNEXPECTED` lines survive, in five files —
@@ -92,14 +92,14 @@ never treated my own re-run as independent confirmation.
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
-| this review's own counts | machine-checked — inventory, 44 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
+| this review's own counts | machine-checked — inventory, 45 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
 | attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
 | `monitor/collector.py` coverage | map — 27 tests, **no test ages an input**; #6 has no vocabulary to be tested by | `NOTE-the-collector-suite-never-ages-an-input.md` |
 | the 8 provenance-attack scripts | map — all self-document; **2 ran against an unpinned tree that was the stale base**, superseded by the `_main` re-runs | `NOTE-two-attack-scripts-ran-against-the-stale-base.md` |
 | `public/_headers` at live `main` | map — the file is **maintained**; two commits that name it left the security block out, and a second rollback preserved the regression | `NOTE-the-headers-file-is-maintained-without-the-block.md` |
 | #4 / #5 / #8 / #18 vs the Python suite | map — the components are driven unpatched; **3 of the 4 properties have no vocabulary at all**, the 4th's guard is fed only integers | `NOTE-four-issues-whose-property-the-suite-has-no-words-for.md` |
 | attribute bases arriving via a PARAMETER | clean — 487 too many to adjudicate, one hop leaves **2**, both guarded by a short-circuiting `isinstance` | `NOTE-487-is-too-many-and-the-two-that-survive-are-guarded.md` |
-| `raw-attack4.txt`, the orphan output | **unreproducible** — no `attack4` script ever existed, and the wheel fixture it tests is absent at the anchor; `REPORT.md`'s provenance sentence was false and is corrected in place | `NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md` |
+| `raw-attack4.txt`, the orphan output | **partly reproducible — my earlier `unreproducible` was too strong.** No `attack4` script ever existed and `REPORT.md`'s provenance sentence is false, both unchanged; but `git show 7a9553b:…whl` restores the wheel **byte-exact** and **W1/W2 have been re-run** | `NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md`, `NOTE-the-wheel-was-never-lost-git-had-it-all-along.md` |
 | the package vs the Python suite | map — **7 of 15 modules are never named by any test**, and #4/#5/#10/#15/#18 all live there; `errors.py` is the counter-example, `ledger.py` the near miss | `NOTE-seven-of-fifteen-modules-the-suite-never-names.md` |
 | cross-module dict-field propagation | clean — 91 scoped to **22**, 16 accesses, one **driven** raise in `model.lease_expired`; the ledger projection guard blocks the API path, so a near miss **not** filed | `NOTE-91-to-22-to-one-raise-that-the-ledger-guard-blocks.md` |
 | hop-three closure | clean — closure **terminates** at 25 triples; `_validate_remote_url` is the only function found that raises a `ConfigurationError` on a non-string, and the one unguarded validator is a string **by construction** | `NOTE-hop-three-closes-and-the-one-unguarded-validator-is-unreachable.md` |
@@ -266,7 +266,7 @@ task stricter than intended.
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
 `NOTE-citation-audit-of-this-review.md` audits all **219 live citations across
-55 documents**; every one now resolves at `main`. Three did not:
+56 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
