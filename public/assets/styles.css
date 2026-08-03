@@ -2323,3 +2323,145 @@ dialog input:focus {
   font-size: 0.8rem !important;
   font-weight: 700 !important;
 }
+
+
+/* === LOCAL WORKSTATION 4-CARD CLEAN WHITE GRID DESIGN (v2.4.0) === */
+.local-health-cards-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 16px !important;
+  margin-top: 16px !important;
+  margin-bottom: 24px !important;
+}
+
+@media (max-width: 1024px) {
+  .local-health-cards-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .local-health-cards-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.local-card {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  border-radius: 12px !important;
+  padding: 18px 20px !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  min-height: 140px !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.local-card:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08) !important;
+  border-color: #94a3b8 !important;
+}
+
+.local-card-head {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 10px !important;
+}
+
+.local-card-title {
+  color: #475569 !important;
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+}
+
+.local-card-badge {
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  padding: 3px 10px !important;
+  border-radius: 12px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 4px !important;
+}
+
+.local-card-badge.normal {
+  background: #e6f4ea !important;
+  color: #0d652d !important;
+  border: 1px solid #b7e1cd !important;
+}
+
+.local-card-badge.warning {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border: 1px solid #fde68a !important;
+}
+
+.local-card-badge.info {
+  background: #e0f2fe !important;
+  color: #075985 !important;
+  border: 1px solid #bae6fd !important;
+}
+
+.local-card-value {
+  margin: 6px 0 10px 0 !important;
+}
+
+.local-card-value strong {
+  display: block !important;
+  color: #0f172a !important;
+  font-size: 1.65rem !important;
+  font-weight: 900 !important;
+  line-height: 1.1 !important;
+}
+
+.local-card-value small {
+  display: block !important;
+  color: #64748b !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  margin-top: 4px !important;
+}
+
+.local-card-gauge {
+  margin-top: auto !important;
+}
+
+.local-gauge-track {
+  width: 100% !important;
+  height: 12px !important;
+  background: #e2e8f0 !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  border: 1.5px solid #cbd5e1 !important;
+  position: relative !important;
+}
+
+.local-gauge-fill {
+  height: 100% !important;
+  border-radius: 5px !important;
+  transition: width 400ms ease !important;
+}
+
+.local-gauge-fill.cpu {
+  background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%) !important;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.4) !important;
+}
+
+.local-gauge-fill.memory {
+  background: linear-gradient(90deg, #8b5cf6 0%, #6d28d9 100%) !important;
+  box-shadow: 0 0 8px rgba(139, 92, 246, 0.4) !important;
+}
+
+.local-gauge-fill.disk {
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%) !important;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.4) !important;
+}
+
+.local-gauge-fill.stress {
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%) !important;
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4) !important;
+}
