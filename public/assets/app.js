@@ -542,7 +542,7 @@ function renderAgents(snapshot) {
           <div class="agent-progress-row">
             <div class="progress-track" role="progressbar" aria-valuemin="0"
                  aria-valuemax="100" aria-valuenow="${Math.round(progress)}">
-              <span class="${shimmerClass}" style="width:${progress}%"></span>
+              <span class="${shimmerClass}" style="width:${progress}%; background: linear-gradient(90deg, #10b981 0%, #059669 100%) !important; height: 100%; display: block; border-radius: 6px;"></span>
             </div>
             <small class="${percentClass}">${Math.round(progress)}%</small>
           </div>
