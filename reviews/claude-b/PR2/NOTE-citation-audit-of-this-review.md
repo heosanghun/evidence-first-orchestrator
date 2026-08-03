@@ -18,7 +18,7 @@ reading one document, I audited every citation on the branch.
 
 ## The audit
 
-**236 live citations across 63 documents, over 25 distinct files.**
+**238 live citations across 64 documents, over 25 distinct files.**
 (126 across 30 when first written; re-run after every write-up change, and
 section F now **fails the run** if this sentence and the output disagree.) Every cited
 file exists at `main`; every cited line is within its file. The run fails on
@@ -111,7 +111,7 @@ reader would read them.
 Fragment accuracy was **not** examined here — only the nine finding-bearing
 anchors in section D. That gap is now closed for the decidable subset by
 `NOTE-quote-accuracy.md`, which found two condensed quotes and made them
-verbatim; 286 inline spans remain undecidable by position.
+verbatim; 293 inline spans remain undecidable by position.
 
 Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 `performance_metrics: false`; gates `allow_skips: false`,
@@ -122,5 +122,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_citation_audit.py` | `fbe038f01549725682bff3416f3dfc3c6bae8fd22239d9722b4ca785141f5805` |
-| `raw/raw-citation-audit.txt` | `a124320bd260bcbd62e1ccf5868498df04735d90c5e79c484eeb3f0e62e52d95` |
+| `raw/probe_citation_audit.py` | `ef8e3054566a583483d818586d152217640a619e3ac63397505fcafc0bbf78bc` |
+| `raw/raw-citation-audit.txt` | `f2e1cceb04d50b751ede6f74cef9587cbe7453b4e1ff54123d812c18ef29fe59` |

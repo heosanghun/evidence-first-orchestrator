@@ -3,15 +3,15 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**1044 passing checks across 57 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 141 files: **59 probe scripts, 74 raw outputs, 8
+**1064 passing checks across 58 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 143 files: **60 probe scripts, 75 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
 paragraph disagrees with it. The counts exclude that probe's **own** output,
 which is the report of the run doing the counting — a self-reference with no
 fixpoint, stated rather than hidden — the same guard the citation and quote counts got.
-It also checks the headline `N checks, M unexpected` of all **52** write-ups
+It also checks the headline `N checks, M unexpected` of all **53** write-ups
 against the raw output each one names; nothing verified those until 2026-08-03.
 
 Twelve `UNEXPECTED` lines survive, in five files —
@@ -75,7 +75,7 @@ never treated my own re-run as independent confirmation.
 | `archive.py` / `provenance.py` limit | **1 issue** | #18 one config key is a copy threshold on one path and a hard ceiling on the other |
 | `repair_projections` / `cli.py` | **1 issue** | #19 repair drops `last_event_hash`; a later proxy submit escapes the CLI as a `KeyError` traceback |
 | `proxy_submit` + grant | clean | `NOTE-proxy-grant-holds.md` |
-| `provenance.py` byte-exactness | clean — 9 mutations, all refused; **scope narrowed**: the 20 checks fed 11 byte mutations and 3 membership errors and **never a malformed record**, and driving that gap gives 7 refusals, 7 `EFOError`s, 0 accepted | `NOTE-byte-exactness-holds.md`, `NOTE-what-byte-exactness-fed-and-the-malformed-record-it-never-did.md` |
+| `provenance.py` byte-exactness | clean — 9 mutations, all refused; **scope narrowed**: the 20 checks fed 11 byte mutations and 3 membership errors and **never a malformed record**, and driving that gap gives 7 refusals, 7 `EFOError`s, 0 accepted; unreachability holds **under the declared threat model** (item 57) | `NOTE-byte-exactness-holds.md`, `NOTE-what-byte-exactness-fed-and-the-malformed-record-it-never-did.md` |
 | `monitor/collector.py` (redaction) | clean | `NOTE-collector-redaction-holds.md` |
 | `functions/api/local-health.js` | clean — **the strongest shape measured** | `ADDENDUM-chat-refusal-and-grounding.md` |
 | `public/assets/app.js` | clean | `NOTE-dashboard-escaping-holds.md` |
@@ -92,8 +92,8 @@ never treated my own re-run as independent confirmation.
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
-| this review's own counts | machine-checked — inventory, 52 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
-| attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
+| this review's own counts | machine-checked — inventory, 53 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
+| attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed, **under the threat model `SECURITY.md:38` declares** | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
 | `monitor/collector.py` coverage | map — 27 tests, **no test ages an input**; #6 has no vocabulary to be tested by | `NOTE-the-collector-suite-never-ages-an-input.md` |
 | the 8 provenance-attack scripts | map — all self-document; **2 ran against an unpinned tree that was the stale base**, superseded by the `_main` re-runs | `NOTE-two-attack-scripts-ran-against-the-stale-base.md` |
 | `public/_headers` at live `main` | map — the file is **maintained**; two commits that name it left the security block out, and a second rollback preserved the regression | `NOTE-the-headers-file-is-maintained-without-the-block.md` |
@@ -101,7 +101,7 @@ never treated my own re-run as independent confirmation.
 | attribute bases arriving via a PARAMETER | clean — 487 too many to adjudicate, one hop leaves **2**, both guarded by a short-circuiting `isinstance` | `NOTE-487-is-too-many-and-the-two-that-survive-are-guarded.md` |
 | `raw-attack4.txt`, the orphan output | **partly reproducible — my earlier `unreproducible` was too strong.** No `attack4` script ever existed and `REPORT.md`'s provenance sentence is false, both unchanged; but `git show 7a9553b:…whl` restores the wheel **byte-exact** and **W1/W2 have been re-run** | `NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md`, `NOTE-the-wheel-was-never-lost-git-had-it-all-along.md` |
 | the package vs the Python suite | map — **7 of 15 modules are never named by any test**, and #4/#5/#10/#15/#18 all live there; `errors.py` is the counter-example, `ledger.py` the near miss | `NOTE-seven-of-fifteen-modules-the-suite-never-names.md` |
-| cross-module dict-field propagation | clean — 91 scoped to **22**, 16 accesses, one **driven** raise in `model.lease_expired`; the ledger projection guard blocks the API path, so a near miss **not** filed | `NOTE-91-to-22-to-one-raise-that-the-ledger-guard-blocks.md` |
+| cross-module dict-field propagation | clean — 91 scoped to **22**, 16 accesses, one **driven** raise in `model.lease_expired`; the ledger projection guard blocks the API path **against an adversary who cannot read `.efo/ledger.key`** (item 57), so a near miss **not** filed | `NOTE-91-to-22-to-one-raise-that-the-ledger-guard-blocks.md` |
 | hop-three closure | clean — closure **terminates** at 25 triples; `_validate_remote_url` is the only function found that raises a `ConfigurationError` on a non-string, and the one unguarded validator is a string **by construction** | `NOTE-hop-three-closes-and-the-one-unguarded-validator-is-unreachable.md` |
 | `REPORT.md`'s own evidence | map — both named refs EXIST; 3 of 6 cited outputs have no producer, but **two were re-run here** (70/70 and 77/77, OK, exit 0) and only `raw-attack4.txt` is unreproducible | `NOTE-two-of-REPORTs-outputs-were-re-run-not-merely-catalogued.md` |
 | the class-2b pattern | **census: 7 of 7 tests cannot fail on their issue** | `NOTE-class-2b-is-a-census-now-seven-of-seven.md` |
@@ -109,8 +109,9 @@ never treated my own re-run as independent confirmation.
 | my own 21 sound-verdict rows, censused cheaply | **lead, not a verdict — the cheap proxy is refuted** by item 47's hand measurement; 4 of 19 locatable probes are static censuses, 15 drive a component, and the 7 whose component carries an open issue are named for hand adjudication | `NOTE-the-cheap-way-to-census-my-clean-verdicts-is-refuted.md` |
 | the `isinstance` guard, package-wide | map — **a positive pattern, measured**: 24 of 147 functions type-check at 66 sites, and only **11** guard an ARGUMENT; the other 43 guard data the function itself read. 35 of the 37 raising sites raise an `EFOError` | `NOTE-66-guards-and-only-eleven-of-them-guard-an-argument.md` |
 | `raw-attack4.txt` W3, replayed | **replays — 6 of 6 steps**, exit codes and the rejection string identical; the driver never existed and was reconstructed, and a first reconstruction was caught wrong by the ledger event count (5, not 7). 7 of the 10 sections remain un-run; all are offline | `NOTE-w3-replays-and-the-driver-had-to-be-rebuilt.md` |
-| the 4 modules with **no** `isinstance` | map — **the absence is real in one, reachable in none**: `archive.py` gives 8 raw Python exceptions on 8 malformed manifests but all 3 call sites pass a validator's return; `doctor.py`'s 23 unguarded subscripts sit behind the ledger guard (5 tampered documents, 0 escaped); `lock.py` and `dashboard.py` read no document field at all | `NOTE-four-modules-with-no-guard-real-in-one-reachable-in-none.md` |
+| the 4 modules with **no** `isinstance` | map — **the absence is real in one, reachable in none** (reachability measured **under the declared threat model** — item 57): `archive.py` gives 8 raw Python exceptions on 8 malformed manifests but all 3 call sites pass a validator's return; `doctor.py`'s 23 unguarded subscripts sit behind the ledger guard (5 tampered documents, 0 escaped); `lock.py` and `dashboard.py` read no document field at all | `NOTE-four-modules-with-no-guard-real-in-one-reachable-in-none.md` |
 | `raw-attack4.txt` W4, and the ref it needs | map — **`transfer_orchestrator` is absent at the anchor and `7a9553b` is NOT an ancestor**, so W4/W5/W6/W6b drive a divergent line; replayed against `7a9553b` and **both tracebacks are the original driver's** (wrong path, wrong key on the CLI wrapper). The config/ledger divergence is real and by design | `NOTE-w4-needs-a-ref-the-anchor-never-took.md` |
+| the ledger signature's SCOPE | map — **the precondition under items 45, 53 and 54**: a naive tamper is caught, but the same edit with the ledger payload updated and the chain **re-signed** audits `healthy: true` with `valid/signed: true`. The key is `.efo/ledger.key` inside the workspace. `SECURITY.md:38` states this limit verbatim, so it is **documented and driven in both directions**, not a defect | `NOTE-a-tamper-that-resigns-is-healthy-and-the-document-says-so.md` |
 | `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
 
 Twenty components were probed and found sound (one with a claim since corrected — see #19).
@@ -270,8 +271,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **236 live citations across
-63 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **238 live citations across
+64 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -289,7 +290,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 286 inline spans remain undecidable by position and are named as a
+lenient. 293 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03
