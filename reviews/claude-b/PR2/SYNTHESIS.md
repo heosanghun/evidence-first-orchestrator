@@ -3,15 +3,15 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**1350 passing checks across 69 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 165 files: **71 probe scripts, 86 raw outputs, 8
+**1367 passing checks across 70 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 167 files: **72 probe scripts, 87 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
 paragraph disagrees with it. The counts exclude that probe's **own** output,
 which is the report of the run doing the counting — a self-reference with no
 fixpoint, stated rather than hidden — the same guard the citation and quote counts got.
-It also checks the headline `N checks, M unexpected` of all **63** write-ups
+It also checks the headline `N checks, M unexpected` of all **64** write-ups
 against the raw output each one names; nothing verified those until 2026-08-03.
 
 Twelve `UNEXPECTED` lines survive, in five files —
@@ -92,7 +92,7 @@ never treated my own re-run as independent confirmation.
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
-| this review's own counts | machine-checked — inventory, 63 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
+| this review's own counts | machine-checked — inventory, 64 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
 | attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed, **under the threat model `SECURITY.md:38` declares** | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
 | `monitor/collector.py` coverage | map — 27 tests, **no test ages an input**; #6 has no vocabulary to be tested by | `NOTE-the-collector-suite-never-ages-an-input.md` |
 | the 8 provenance-attack scripts | map — all self-document; **2 ran against an unpinned tree that was the stale base**, superseded by the `_main` re-runs | `NOTE-two-attack-scripts-ran-against-the-stale-base.md` |
@@ -119,6 +119,7 @@ never treated my own re-run as independent confirmation.
 | what ELSE places an output | map — **a mostly-negative result**: the named classes cover **6 of 47** open outputs, so all of them are subsumed by one derivation — the distinctive **string literals** each line contains, differenced over full ancestry. The raw difference **contradicted item 61 on 5 outputs** (`proxy_submit` is a literal on one line and an *identifier* on the other); corrected to **0 contradictions, 19 agreements**, it places 12 and leaves **35 of 79 unplaceable by any class measured** | `NOTE-what-else-places-an-output-and-the-filter-the-ground-truth-caught.md` |
 | every workspace file, tampered | map — **the width of #10, per FILE**: 27 shipped files collapse to **17 kinds**, every kind edited — **5 caught, 12 unnoticed**. The four `reports/<agent>/` kinds are reached by no earlier round, including the **evidence manifest** and the artifact/raw output whose `sha256` it carries; those hashes are checked at submit and re-checked never. The ledger is defended by **three distinct guards** — malformed shape, hash chain, signature — each measured | `NOTE-every-file-tampered-and-the-four-reports-kinds.md` |
 | the four MIXED outputs | map — **corrects a count of mine**: item 64's union reported 4 mixed; adjudicated they are **2 genuine** (each naming the other ref in its own text), **1 spurious** — `raw-full-final.txt`'s only anchor mark is a literal **2 of 2 swallowed** inside a divergent test method name, the substring trap a **third** time — and **1 not a program run** (a self-check over my Markdown). Outputs KNOWN to exercise two lines: **three**, not four | `NOTE-the-four-mixed-outputs-two-are-real.md` |
+| deleting each file kind | map — **#10 widened from edits to deletes**: all 17 kinds driven **both** ways in one run. The caught **set** is identical (**5 caught / 12 unnoticed** either way, edit reproducing item 66) but **all 5 messages differ** — a deleted `.efo/workspace.json` reports *not a workspace at all* where an edit reports a *configuration mismatch*. A whole archived bundle, every report and every submission copy can be **removed** with `doctor` healthy | `NOTE-deleting-every-file-kind-the-set-holds-the-message-moves.md` |
 | `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
 
 Twenty components were probed and found sound (one with a claim since corrected — see #19).
@@ -278,8 +279,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **257 live citations across
-75 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **258 live citations across
+76 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -297,7 +298,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 327 inline spans remain undecidable by position and are named as a
+lenient. 328 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03

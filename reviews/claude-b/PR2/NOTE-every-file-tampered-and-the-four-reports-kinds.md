@@ -103,6 +103,12 @@ negatives measure the *scope* of what is compared, not a failure to look.
 - It drives an **edit** of each kind, not a **delete**. Item 63 drove three
   deletions at directory level; a per-kind deletion sweep is **unchecked**
   here, not shown safe.
+  > **Closed 2026-08-03 by item 69.** All 17 kinds are now driven **both**
+  > ways in one run. The caught **set** is identical — 5 caught, 12 unnoticed
+  > either way — but **all five messages differ**, `.efo/workspace.json` most
+  > sharply: an edit reports a *configuration mismatch*, a deletion reports
+  > *not a workspace at all*.
+  > `NOTE-deleting-every-file-kind-the-set-holds-the-message-moves.md`.
 - No network, no GPU. Twenty `tempfile` workspaces, removed before the results
   print. The anchor's working tree is untouched, and it does **not** touch
   `main` or another agent's branch.
