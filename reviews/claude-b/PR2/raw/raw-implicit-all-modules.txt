@@ -1,0 +1,108 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   and every module named is present
+        expected: modules: 13
+        observed: modules: 13
+  [ok]   nothing in the package is silently unlisted
+        expected: unlisted: []
+        observed: unlisted: []
+  [ok]   and the only deliberate exclusion is named
+        expected: {'workspace.py'}
+        observed: {'workspace.py'}
+  My first draft of this list MISSED errors.py - caught by this very
+  check, which compares the list against the package rather than
+  trusting it. That is the third time a hand-written filter has been
+  the bug; the check for it is now cheap and permanent.
+
+########## B. integer-index reads - the IndexError shape ##########
+  [ok] integer-index reads in the whole package outside workspace.py
+        expected: sites: 3
+        observed: sites: 3
+    provenance.py:283  fields[1]
+    provenance.py:284  fields[0]
+    provenance.py:314  fields[0]
+  All three are `fields[N]` in the same expression, where
+  `fields = metadata.split()` from a `git ls-tree` line. They are safe
+  by SHORT-CIRCUIT ORDERING, which is checked here rather than assumed:
+    operands in order: ['not separator', 'tree_path != source_path', 'len(fields) != 3', "fields[1] != 'blob'", "fields[0] not in {'100644', '100755'}"]
+  [ok]   the length guard precedes every index in the same `or` chain
+        expected: guard before index: True
+        observed: guard before index: True
+  `provenance.py:314` reads `fields[0]` again, reachable only after
+  that chain did NOT raise - so the guard has already held.
+  MEASURED: the ordering. NOT MEASURED: a malformed `git ls-tree`
+  line driven end to end, which would need a crafted repository.
+
+########## C. string-key reads across every other module ##########
+  78 string-key reads over 30 (module, base) pairs
+    adapter.py        agent            1x  an agent record from list_agents()
+    adapter.py        claim            2x  the dict workspace.claim RETURNS
+    adapter.py        submitted        1x  the dict workspace.submit RETURNS
+    adapter.py        task            28x  a task projection; workspace.get_task returns it
+    archive.py        artifact         2x  an entry of the files list workspace builds
+    archive.py        extra            2x  an extra_files entry workspace builds
+    archive.py        item             2x  a retained record archive.py just appended
+    archive.py        manifest         4x  the caller passes {path, sha256}; workspace builds it
+    archive.py        raw_output       2x  a validation raw_output entry
+    archive.py        report           2x  same shape as manifest, built by workspace
+    cli.py            task             2x  a task projection returned by the API it just called
+    doctor.py         agent            3x  an agent record from list_agents()
+    doctor.py         check            2x  a check dict doctor.py just appended
+    doctor.py         projection       1x  the dict audit_projections RETURNS
+    doctor.py         result           2x  the dict this function is building
+    doctor.py         task             2x  a task projection from list_tasks()
+    evidence.py       check            2x  a known_answer_checks entry, schema-validated
+    evidence.py       claim            1x  a claims entry, schema-validated
+    evidence.py       manifest         1x  validated against the schema before use
+    evidence.py       report           1x  built by this module
+    independence.py   item             2x  an alias_chain entry this module built
+    independence.py   target           2x  an agent record from the registry
+    independence.py   task             1x  a task projection
+    independence.py   verifier         1x  an identity dict, isinstance-checked
+    independence.py   worker           2x  an identity dict, isinstance-checked
+    ledger.py         events           1x  a list of events this module just parsed
+    model.py          lease            1x  the lease dict model.py itself constructs
+    model.py          task             3x  a task projection; the state machine's input
+    provenance.py     artifact         1x  an evidence manifest artifact entry
+    provenance.py     raw_output       1x  an evidence manifest raw_output entry
+  [ok] every (module, base) pair is adjudicated
+        expected: uncovered: []
+        observed: uncovered: []
+  [ok]   and the map has no stale entries
+        expected: stale: []
+        observed: stale: []
+  Not one of these bases is a projection that any REPAIR path rebuilds.
+  That is what made #19 reachable: repair_projections writes a task
+  file with a key missing, and workspace.py reads that key. No module
+  here consumes a rebuilt projection, so the #19 shape has no second
+  home outside workspace.py.
+
+########## D. what this does NOT cover, stated rather than implied ##########
+  AttributeError and TypeError are NOT statically enumerable here.
+  `x.foo` is only unsafe if x can be None or another type, and
+  deciding that needs type inference this probe does not have. Listing
+  every attribute access would be a census of ~thousands of sites with
+  no adjudication behind it - the appearance of coverage, not coverage.
+  For scale: 963 attribute accesses in these modules.
+  So the honest claim after this round is:
+    MEASURED - every constant-key subscript read in the package is
+               adjudicated; the 3 integer indexes are guarded by
+               short-circuit ordering; no module outside workspace.py
+               reads from a repair-rebuilt projection.
+    UNMEASURED - AttributeError, TypeError, ZeroDivisionError and
+               StopIteration shapes anywhere, and dynamic-key
+               subscripts (x[variable]) everywhere.
+  Dynamic-key subscripts not covered by this census: 144.
+  Naming that number is the point: a census that reported only its
+  successes would read as complete, and it is not.
+
+########## 0 unexpected result(s) ##########
+Static analysis plus one AST ordering check. Nothing was executed
+against a live workspace in this probe. Pre-registered permissions
+unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.
