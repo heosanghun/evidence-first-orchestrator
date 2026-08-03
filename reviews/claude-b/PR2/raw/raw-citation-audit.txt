@@ -6,12 +6,12 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   and the write-ups are present
-        expected: documents: 68
-        observed: documents: 68
+        expected: documents: 69
+        observed: documents: 69
 
 ########## B. every FILE:LINE citation in the write-ups ##########
-  247 live citations across 68 documents
-  14 more appear inside correction banners and are
+  251 live citations across 69 documents
+  15 more appear inside correction banners and are
   excluded as retractions rather than claims - see the comment in the
   source for why that exclusion is principled and not self-serving.
   [ok] every cited file exists at main
@@ -30,7 +30,7 @@
     docs/PROXY_SUBMISSION.md                       2 citations, 192 lines
     README.md                                     24 citations, 452 lines
     (review) REPORT.md                             6 citations, 460 lines
-    SECURITY.md                                   12 citations, 67 lines
+    SECURITY.md                                   13 citations, 67 lines
     src/evidence_orchestrator/__main__.py          1 citations, 7 lines
     src/evidence_orchestrator/adapter.py           7 citations, 320 lines
     public/assets/app.js                           3 citations, 1566 lines
@@ -48,7 +48,7 @@
     functions/api/snapshot.js                      1 citations, 714 lines
     tests/helpers.py                               1 citations, 148 lines
     src/evidence_orchestrator/independence.py     14 citations, 281 lines
-    src/evidence_orchestrator/ledger.py            3 citations, 165 lines
+    src/evidence_orchestrator/ledger.py            6 citations, 165 lines
     src/evidence_orchestrator/model.py             7 citations, 143 lines
     monitor/collector.py                           5 citations, 1436 lines
     src/evidence_orchestrator/provenance.py       35 citations, 341 lines
@@ -153,14 +153,14 @@
   while the committed raw output beside it said 152 across 35. Nobody
   was checking. Now the run fails when prose and output disagree.
   [ok]   NOTE-citation-audit-of-this-review.md states this run's counts
-        expected: 247 citations / 68 documents
-        observed: 247 citations / 68 documents
+        expected: 251 citations / 69 documents
+        observed: 251 citations / 69 documents
   [ok]   SYNTHESIS.md states this run's counts
-        expected: 247 citations / 68 documents
-        observed: 247 citations / 68 documents
+        expected: 251 citations / 69 documents
+        observed: 251 citations / 69 documents
   [ok]   and the retraction count it excludes
-        expected: retractions: 14
-        observed: retractions: 14
+        expected: retractions: 15
+        observed: retractions: 15
 
 ########## 0 unexpected result(s) ##########
 This audits MY OWN write-ups, not EFO. Every finding it reports is a

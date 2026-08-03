@@ -23,6 +23,9 @@ sets, 3 candidate discriminators, 1 known answer.
 > | divergent line | 1 | **5** |
 > | undecidable | 41 | **45** |
 >
+> **Updated again 2026-08-03:** item 62's output landed, so the population
+> moves **77 → 78** and undecidable **45 → 46**. The pin is what said so.
+>
 > **Every table below is superseded by
 > `NOTE-the-suite-size-decided-it-and-a-substring-reversed-four.md`**, which
 > carries the measurement. Two things here survive unchanged: the test still
@@ -71,7 +74,7 @@ belonging to the other one.
 |---|---|
 | carry an **anchor-only** token → placed on the anchor's line | ~~**35**~~ → **27** |
 | carry a **`7a9553b`-only** token | ~~**1**~~ → **5**; `raw-w4-replay.txt` names both refs by design, and the other four were placed backwards here |
-| carry **neither** → **undecidable** | ~~**41**~~ → **45** |
+| carry **neither** → **undecidable** | ~~**41**~~ → **45** → **46** at `HEAD` |
 
 ## …and the test has a proven false negative
 
@@ -123,7 +126,7 @@ same treatment `probe_inventory_selfcheck.py`'s tally got.
 
 ## What this does not do
 
-- It does **not** decide the ~~41~~ **45**. It says which ~~35~~ **27** sit on
+- It does **not** decide the ~~41~~ ~~45~~ **46**. It says which ~~35~~ **27** sit on
   the anchor's line and which **5** on the divergent one, and that the rest are
   **open** — including one already known to be mixed.
 - It does **not** re-run any catalogued output, and does **not** retract item
@@ -137,7 +140,7 @@ same treatment `probe_inventory_selfcheck.py`'s tally got.
   before the results print. The anchor's working tree is untouched, and it does
   **not** touch `main` or another agent's branch.
 - **MEASURED:** both marker sets over the whole of each line, the four-way
-  scan of all 77 outputs,
+  scan of all 78 outputs,
   `REPORT.md`'s six, both `status` shapes, the usage-line census, item 55's two
   quoted sentences, the self-exclusion. **REASONED:** nothing.
 
@@ -151,5 +154,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_output_provenance_lines.py` | `6b304bc64044d0bd2a0017cd63f0c8243bb6f667462111687ef5913299f291ec` |
-| `raw/raw-output-provenance-lines.txt` | `5a6ed905b110a50cddd74f94853d0882a261e4be559f2c764dbf23418cf01515` |
+| `raw/probe_output_provenance_lines.py` | `0ab33e0acea312f9851f55f8a2cce4650ed9e68d4ef9907385d5ee0d05df62cf` |
+| `raw/raw-output-provenance-lines.txt` | `f5c795d0951cc005741ccdb53b5b007a83fe179c271d51a0ecf4b1e16ec0154f` |

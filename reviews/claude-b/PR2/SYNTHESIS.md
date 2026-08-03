@@ -3,15 +3,15 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**1180 passing checks across 62 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 151 files: **64 probe scripts, 79 raw outputs, 8
+**1205 passing checks across 63 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 153 files: **65 probe scripts, 80 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
 paragraph disagrees with it. The counts exclude that probe's **own** output,
 which is the report of the run doing the counting — a self-reference with no
 fixpoint, stated rather than hidden — the same guard the citation and quote counts got.
-It also checks the headline `N checks, M unexpected` of all **56** write-ups
+It also checks the headline `N checks, M unexpected` of all **57** write-ups
 against the raw output each one names; nothing verified those until 2026-08-03.
 
 Twelve `UNEXPECTED` lines survive, in five files —
@@ -79,7 +79,7 @@ never treated my own re-run as independent confirmation.
 | `monitor/collector.py` (redaction) | clean — **scope narrowed**: the 15 checks fed sensitive CONTENT in a well-formed shape and **never a malformed one**; of 6 driven shapes **5 degrade** and `docker inspect` returning a JSON object raises `AttributeError` past a guard that catches only `JSONDecodeError` | `NOTE-collector-redaction-holds.md`, `NOTE-what-collector-redaction-fed-and-the-malformed-output-it-never-did.md` |
 | `functions/api/local-health.js` | clean — **the strongest shape measured** | `ADDENDUM-chat-refusal-and-grounding.md` |
 | `public/assets/app.js` | clean | `NOTE-dashboard-escaping-holds.md` |
-| `ledger.projected_tasks` | clean | `NOTE-projected-tasks-holds.md` |
+| `ledger.projected_tasks` | clean — **scope narrowed**: all 6 payloads the 17 checks fed were **dicts**, and the un-fed class is `payload` present but not a dict; 5 of 5 such shapes raise a raw `AttributeError` at `ledger.py:161`, where the `{}` default covers only an ABSENT payload. `Ledger.read` **does** carry the line-level guard the collector lacked (4 non-object lines refused, an object accepted). Reachable only with the signing key — a crash, not a bypass | `NOTE-projected-tasks-holds.md`, `NOTE-what-projected-tasks-fed-and-the-payload-it-never-did.md` |
 | collector identity registry | clean, but diverges | `NOTE-two-identity-implementations.md` |
 | `util.py`, `lock.py` | clean — **scope narrowed**: all 46 checks rested on my probe, and none fed a non-string; 17 driven inputs raise raw Python exceptions, 0 `EFOError` | `NOTE-util-and-lock-hold.md`, `NOTE-what-util-is-clean-rested-on-and-the-input-it-never-fed.md` |
 | `cli.py` | clean — **scope narrowed**: all 25 checks fed strings (argparse hands strings) and **none of the 8 typed options**; driving those gives argparse rejection at parse time, the floor on `-5`, and `--lease-seconds 0` silently becoming the 1800s default | `NOTE-cli-surface-holds.md`, `NOTE-what-cli-surface-fed-and-the-eight-typed-options-it-never-did.md` |
@@ -92,7 +92,7 @@ never treated my own re-run as independent confirmation.
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
-| this review's own counts | machine-checked — inventory, 56 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
+| this review's own counts | machine-checked — inventory, 57 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
 | attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed, **under the threat model `SECURITY.md:38` declares** | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
 | `monitor/collector.py` coverage | map — 27 tests, **no test ages an input**; #6 has no vocabulary to be tested by | `NOTE-the-collector-suite-never-ages-an-input.md` |
 | the 8 provenance-attack scripts | map — all self-document; **2 ran against an unpinned tree that was the stale base**, superseded by the `_main` re-runs | `NOTE-two-attack-scripts-ran-against-the-stale-base.md` |
@@ -274,8 +274,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **247 live citations across
-68 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **251 live citations across
+69 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -293,7 +293,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 302 inline spans remain undecidable by position and are named as a
+lenient. 312 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03

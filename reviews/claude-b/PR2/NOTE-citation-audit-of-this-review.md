@@ -18,13 +18,13 @@ reading one document, I audited every citation on the branch.
 
 ## The audit
 
-**247 live citations across 68 documents, over 25 distinct files.**
+**251 live citations across 69 documents, over 25 distinct files.**
 (126 across 30 when first written; re-run after every write-up change, and
 section F now **fails the run** if this sentence and the output disagree.) Every cited
 file exists at `main`; every cited line is within its file. The run fails on
 any that is not.
 
-**14** more citations appear inside dated correction banners or carry an
+**15** more citations appear inside dated correction banners or carry an
 inline `[retracted]` marker. Those are excluded
 as *retractions rather than claims* — a banner quotes the citation it is
 retracting, so counting it as live would make a correction indistinguishable
@@ -111,7 +111,7 @@ reader would read them.
 Fragment accuracy was **not** examined here — only the nine finding-bearing
 anchors in section D. That gap is now closed for the decidable subset by
 `NOTE-quote-accuracy.md`, which found two condensed quotes and made them
-verbatim; 302 inline spans remain undecidable by position.
+verbatim; 312 inline spans remain undecidable by position.
 
 Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 `performance_metrics: false`; gates `allow_skips: false`,
@@ -122,5 +122,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_citation_audit.py` | `557e6e75c267888e80d0457c9411c3c4e0493deb98f67af94f5bb7e9682c37cd` |
-| `raw/raw-citation-audit.txt` | `a42729983d1097b63416f71b3267b35964cf0a51f3fc0a02f47cd15b9f3bb4d8` |
+| `raw/probe_citation_audit.py` | `cdfb902cf8ab30f46d917935f5ce59fe103b62720425ad051c3078c084ec3eae` |
+| `raw/raw-citation-audit.txt` | `92f16b1e9c17f7de33344ec384fa8889e666c0073b94d26ebc77b81e40a44dce` |

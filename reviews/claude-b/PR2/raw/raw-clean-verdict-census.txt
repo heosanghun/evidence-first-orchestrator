@@ -9,11 +9,11 @@
         expected: clean rows: 21
         observed: clean rows: 21
   [ok]   distinct notes they cite
-        expected: notes: 24
-        observed: notes: 24
+        expected: notes: 25
+        observed: notes: 25
   [ok]     whose probe can be located
-        expected: probes: 22
-        observed: probes: 22
+        expected: probes: 23
+        observed: probes: 23
   Twenty-two is more than one round of hand adjudication, which is what
   the item anticipated. Section B tries the cheap way; section C shows
   the cheap way does not work.
@@ -43,6 +43,7 @@
     drives   probe_identity_two_impls.py               collector identity reg  3 non-string args
     drives   probe_implicit_exceptions.py              `workspace.py` implici  1 non-string args
     drives   probe_projected_tasks.py                  `ledger.projected_task  7 non-string args
+    drives   probe_projected_tasks_input_class.py      `ledger.projected_task  5 non-string args
     drives   probe_proxy_grant.py                      `proxy_submit` + grant  4 non-string args
     drives   probe_remaining_docs.py                   `SECURITY.md` / `CONTR  4 non-string args
     drives   probe_util_and_lock.py                    `util.py`, `lock.py`    5 non-string args
@@ -51,11 +52,11 @@
         expected: static: 4
         observed: static: 4
   [ok]   probes that drive it
-        expected: driving: 18
-        observed: driving: 18
+        expected: driving: 19
+        observed: driving: 19
   [ok]     of which the proxy says feed a non-string
-        expected: flagged: 18
-        observed: flagged: 18
+        expected: flagged: 19
+        observed: flagged: 19
   For a static census the question does not arise: it reads the AST and
   never calls anything, so it has no input class to feed.
 
@@ -87,23 +88,25 @@
     `monitor/collector.py` (redaction)  #6 (done - item 59)probe_collector_redaction.py
     `dashboard.py`, `errors.py`         #19               probe_dashboard_and_errors.py
     `workspace.py` implicit exceptions  #19               probe_implicit_exceptions.py
-    `ledger.projected_tasks`            #9                probe_projected_tasks.py
+    `ledger.projected_tasks`            #9 (done - item 62)probe_projected_tasks.py
+    `ledger.projected_tasks`            #9 (done - item 62)probe_projected_tasks_input_class.py
     `proxy_submit` + grant              #7                probe_proxy_grant.py
     `util.py`, `lock.py`                (done - item 47)  probe_util_and_lock.py
     `util.py`, `lock.py`                (done - item 47)  probe_util_uncovered_input.py
   [ok] driving probes whose component carries an open issue
-        expected: with an issue: 12
-        observed: with an issue: 12
-  [ok]   of which already adjudicated by hand - items 47, 53, 56 and 59
-        expected: already done: 8
-        observed: already done: 8
+        expected: with an issue: 13
+        observed: with an issue: 13
+  [ok]   of which already adjudicated by hand - items 47, 53, 56, 59, 62
+        expected: already done: 10
+        observed: already done: 10
   [ok]     leaving the population for the next round
-        expected: remaining: 4
-        observed: remaining: 4
-  FOUR remain. That is the population the next round should take, one
+        expected: remaining: 3
+        observed: remaining: 3
+  THREE remain. That is the population the next round should take, one
   at a time and BY HAND, which is the only method shown to work here.
-  Updated 2026-08-03: items 53, 56 and 59 adjudicated `provenance.py`
-  byte-exactness, `cli.py` and the collector, moving 7 -> 4, and the
+  Updated 2026-08-03: items 53, 56, 59 and 62 adjudicated `provenance.py`
+  byte-exactness, `cli.py`, the collector and `projected_tasks`, moving
+  7 -> 3, and the
   clean-row set grew by the note that did it. Both are re-derived here
   rather than left at the number this note first published.
 
