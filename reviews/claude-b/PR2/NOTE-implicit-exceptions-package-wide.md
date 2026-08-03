@@ -58,6 +58,17 @@ driven end to end, which would need a crafted repository.
 
 ## String keys — 78 reads, 30 base objects, all adjudicated
 
+> **Bound added 2026-08-03.** This section adjudicates each base by the name it
+> carries **inside one function**, and each reason is a claim about where the
+> VALUE comes from. A name-scoped census cannot see that. Measured in
+> `NOTE-which-of-my-censuses-measured-and-which-read.md`: **24 of the 30 bases
+> are bound in the same scope** — 12 from a call, 10 loop targets, 2 built in
+> place — and their adjudication is measured. The other **6 are PARAMETERS**,
+> where five of six callers bind a different name (`worker_identity`,
+> `verifier_identity`, `record`, `evidence['manifest']`, `evidence['report']`).
+> Those six reasons were reached by READING the callers and remain correct;
+> this section presented all 30 uniformly and should not have.
+
 Every `(module, base)` pair carries the reason a missing key cannot reach it,
 and the run fails on anything uncovered. `uncovered: []`, `stale: []`.
 
