@@ -82,7 +82,7 @@ was a **checker** defect. The window now spans `start-8` to `end+10`.
 
 ## What stays undecidable, with a count
 
-**325 inline backticked spans share a line with a citation.** They are not
+**326 inline backticked spans share a line with a citation.** They are not
 checked, and cannot be by position:
 
 - *"`doctor.py:109` interpolates `agent_id` into a path"* — the span **is** a
@@ -103,7 +103,7 @@ unambiguous, compared whitespace-insensitively against the full cited range at
 --porcelain` empty). Static analysis only; nothing was executed against a
 workspace.
 
-Not examined: inline spans (325, above); whether a *paraphrase* in prose
+Not examined: inline spans (326, above); whether a *paraphrase* in prose
 accurately characterises the cited code, which is a judgement no string
 comparison can make.
 
@@ -117,4 +117,4 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 | Artifact | SHA-256 |
 |---|---|
 | `raw/probe_quote_accuracy.py` | `81a96722b58548bdb5a35ca01df05a335ab475a90cf911a7338a8cb8d665fd86` |
-| `raw/raw-quote-accuracy.txt` | `343f7f6412ef57ef6f006fffe689617796b0191b7063e27e7ecd43f5c3a6f56f` |
+| `raw/raw-quote-accuracy.txt` | `0ee01cfc7c1219e09255c6711cf63a6bbd7a684c4dd7103cfeb00b9de1a327e7` |

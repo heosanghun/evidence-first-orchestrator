@@ -30,7 +30,7 @@ assumed.
 
     python3 probe_what_else_places_an_output.py
 
-SCOPE, stated first: 80 outputs, 47 undecidable, 3 candidate classes measured
+SCOPE, stated first: 81 outputs, 47 undecidable, 3 candidate classes measured
 for coverage, 2 literal sets derived over full ancestry, 1 filter bug caught
 by ground truth, 12 newly placed, 35 left open. A MAP. No issue filed,
 nothing retracted.
@@ -89,7 +89,7 @@ every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
 check("  raw outputs scanned, the marker-printing ones excluded",
-      "outputs: 80", f"outputs: {len(outputs)}")
+      "outputs: 81", f"outputs: {len(outputs)}")
 check("    exactly three are excluded, and the third is this probe's own",
       "excluded: 3",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
@@ -138,7 +138,7 @@ token = {p.name: verdict(*by_token(p.read_text(errors="replace")))
          for p in outputs}
 print(f"    {Counter(token.values())}")
 check("the module/test-id test leaves this many undecidable",
-      "undecidable: 47",
+      "undecidable: 48",
       f"undecidable: {sum(1 for v in token.values() if v == 'undecidable')}")
 
 # ---------------------------------------------------------------- C
@@ -284,7 +284,7 @@ check("outputs newly placed on the anchor's line", "anchor: 9",
 check("  newly placed on the divergent line", "divergent: 2",
       f"divergent: {placed['divergent']}")
 check("  carrying literals from BOTH", "mixed: 1", f"mixed: {placed['mixed']}")
-check("  and STILL undecidable", "undecidable: 35",
+check("  and STILL undecidable", "undecidable: 36",
       f"undecidable: {placed['undecidable']}")
 
 union = {}
@@ -305,7 +305,7 @@ check("  on the divergent line", "divergent: 5",
       f"divergent: {sum(1 for v in union.values() if v == 'divergent')}")
 check("  and this many carry markers from BOTH - none by the token test alone",
       "mixed: 4", f"mixed: {sum(1 for v in union.values() if v == 'mixed')}")
-check("  and leaves this many OPEN", "undecidable: 35",
+check("  and leaves this many OPEN", "undecidable: 36",
       f"undecidable: {sum(1 for v in union.values() if v == 'undecidable')}")
 check("    the classes account for every output", f"total: {len(outputs)}",
       f"total: {sum(Counter(union.values()).values())}")

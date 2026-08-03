@@ -89,6 +89,12 @@ is the *scope* of what the signature covers — not a failure to look.
 - It does **not** enumerate **files** exhaustively — only directories, plus
   the four shipped files the tampers name. A file this round did not touch is
   **unchecked**, not shown safe.
+  > **Closed 2026-08-03 by item 66.** All **27** shipped files are now
+  > enumerated and collapsed to **17 kinds**, every kind driven: **5 caught,
+  > 12 unnoticed**. The four `reports/<agent>/` kinds — including the
+  > **evidence manifest** and the artifact and raw output whose `sha256` it
+  > carries — had been reached by no round.
+  > `NOTE-every-file-tampered-and-the-four-reports-kinds.md`.
 - It does **not** propose a fix, and does **not** retract or narrow #10.
 - Workspaces are keyed by **index**, not by the tamper's first word — items 57
   and 60 both hit collisions when two drives derived the same directory name.

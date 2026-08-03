@@ -4,7 +4,7 @@ Reproduce with `raw/probe_what_else_places_an_output.py`; raw output in
 `raw/raw-what-else-places-an-output.txt`. **26 checks, 0 unexpected.** A
 **map with a mostly-negative result** — no issue filed, nothing retracted.
 
-**Scope, stated first:** 79 outputs at publication (**80** at `HEAD`, item 65's output having landed), 47 undecidable, 3 candidate classes
+**Scope, stated first:** 79 outputs at publication (**81** at `HEAD`, items 65-66's outputs having landed), 47 undecidable, 3 candidate classes
 measured for coverage, 2 literal sets derived over full ancestry, 1 filter bug
 caught by ground truth, 12 newly placed, **35 left open**.
 
@@ -84,7 +84,7 @@ simply a result.
 | newly placed on the **anchor's** line | **9** |
 | newly placed on the **divergent** line | **2** |
 | carrying literals from **both** | **1** |
-| **still undecidable** | **35** |
+| **still undecidable** | **35** *(36 at `HEAD`)* |
 
 And the union of both tests over all 79:
 
@@ -144,5 +144,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_what_else_places_an_output.py` | `d4648b029712c0be90bd10f615f95b26be46875e725ad913c4ccba49338eb5d7` |
-| `raw/raw-what-else-places-an-output.txt` | `3984ba4aa5a4ed2d9bc0b1a36e091ba72132c03a3fc181a673fd9b3124c2e39a` |
+| `raw/probe_what_else_places_an_output.py` | `6b5750021a90dc2ebd9fcc74790e03cbf2b143c132bb53d34f4acdf043835cc7` |
+| `raw/raw-what-else-places-an-output.txt` | `8bbcc9742867876d4b8b4f342d4328c11f204b073d1877552e6076550959a37e` |

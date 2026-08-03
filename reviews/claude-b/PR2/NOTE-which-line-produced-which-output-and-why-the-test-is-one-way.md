@@ -34,8 +34,8 @@ sets, 3 candidate discriminators, 1 known answer.
 > are unchanged — item 64 is an additional test, reported beside it.
 >
 > **Item 65's output** moves the population to **80** and the anchor placement
-> to **28**; the undecidable count is unchanged at **47**. The pin said so
-> again.
+> to **28**; item 66's takes it to **81 / 48 undecidable**. The pin said so
+> each time.
 >
 > **Every table below is superseded by
 > `NOTE-the-suite-size-decided-it-and-a-substring-reversed-four.md`**, which
@@ -85,7 +85,7 @@ belonging to the other one.
 |---|---|
 | carry an **anchor-only** token → placed on the anchor's line | ~~**35**~~ → **27** → **28** at `HEAD` |
 | carry a **`7a9553b`-only** token | ~~**1**~~ → **5**; `raw-w4-replay.txt` names both refs by design, and the other four were placed backwards here |
-| carry **neither** → **undecidable** | ~~**41**~~ → **45** → **47** at `HEAD` |
+| carry **neither** → **undecidable** | ~~**41**~~ → **45** → **48** at `HEAD` |
 
 ## …and the test has a proven false negative
 
@@ -137,7 +137,7 @@ same treatment `probe_inventory_selfcheck.py`'s tally got.
 
 ## What this does not do
 
-- It does **not** decide the ~~41~~ ~~45~~ **47**. It says which ~~35~~ **27** sit on
+- It does **not** decide the ~~41~~ ~~45~~ **48**. It says which ~~35~~ **27** sit on
   the anchor's line and which **5** on the divergent one, and that the rest are
   **open** — including one already known to be mixed.
 - It does **not** re-run any catalogued output, and does **not** retract item
@@ -151,7 +151,7 @@ same treatment `probe_inventory_selfcheck.py`'s tally got.
   before the results print. The anchor's working tree is untouched, and it does
   **not** touch `main` or another agent's branch.
 - **MEASURED:** both marker sets over the whole of each line, the four-way
-  scan of all 80 outputs,
+  scan of all 81 outputs,
   `REPORT.md`'s six, both `status` shapes, the usage-line census, item 55's two
   quoted sentences, the self-exclusion. **REASONED:** nothing.
 
@@ -165,5 +165,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_output_provenance_lines.py` | `511cadbef74fd414701748eaf954b152efc5e1a632413fc91962552f06185d9f` |
-| `raw/raw-output-provenance-lines.txt` | `afd98f4d8a9ad589f125bc34f80d806bb6d153eb8b21687e0b829ac93c93c918` |
+| `raw/probe_output_provenance_lines.py` | `ed8296955591c046fc3ebea2c8b6e291af760517b1e55cb9a610b179abe09320` |
+| `raw/raw-output-provenance-lines.txt` | `c33a29e01f2c3279a9f17576bde8c96423626879218e683f9b5ef4e81a0a866a` |
