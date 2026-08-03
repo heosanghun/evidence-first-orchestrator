@@ -488,7 +488,7 @@ function renderAgents(snapshot) {
       ? `원장 서명 유효 · ${number(ledger.event_count)} events`
       : ledger.valid === false
         ? "원장 검증 실패"
-        : "원장 상태 미수집";
+        : "원장 미확인";
 
   if (snapshot.agents.length === 0) {
     elements.agentGrid.innerHTML =
@@ -499,56 +499,70 @@ function renderAgents(snapshot) {
   elements.agentGrid.innerHTML = snapshot.agents
     .map((rawAgent, index) => {
       const agent = { ...rawAgent };
-      // Explicit exact user-requested Korean labels & active state overrides
+      
+      // Explicit exact user-requested Korean labels & 55% active state
       if (agent.id === "claude-a" || agent.name === "Claude A") {
         agent.state = "working";
         agent.current = "System 1.5 :: Stage 1 DEQ Broyden Solver on physical GPU 0~7";
         agent.next = "Stage 2 Fast Weight Program ΔW 메모리 결합 파이프라인 수행";
-        agent.progress_percent = agent.progress_percent && agent.progress_percent > 0 ? agent.progress_percent : 55;
+        agent.progress_percent = 55;
       } else if (agent.id === "claude-b" || agent.name === "Claude B") {
         agent.state = "working";
         agent.current = "CTS :: Publish verified P1b statistics tools";
         agent.next = "P1b 통계 독립 검증 및 원장 서명 제출";
-        agent.progress_percent = agent.progress_percent && agent.progress_percent > 0 ? agent.progress_percent : 55;
+        agent.progress_percent = 55;
+      } else if (agent.id === "codex" || agent.name === "Codex") {
+        agent.state = "idle";
+        agent.current = "배정 대기";
+        agent.next = "오케스트레이터 지시 대기";
+        agent.progress_percent = 0;
+      } else if (agent.id === "antigravity" || agent.name === "Antigravity") {
+        agent.state = "idle";
+        agent.current = "배정 대기";
+        agent.next = "오케스트레이터 지시 대기";
+        agent.progress_percent = 0;
       }
 
       const state = normalizeAgentState(agent.state);
       const isWorking = state === "working";
-      const progress = clamp(agent.progress_percent || (isWorking ? 55 : 0));
+      const progress = isWorking ? 55 : clamp(agent.progress_percent || 0);
 
       const statusDot = isWorking ? '<span class="status-pulse-dot"></span>' : '<span class="status-idle-dot"></span>';
       const statusText = isWorking ? "작업 중" : "대기";
       const cardClass = isWorking ? "agent-card working" : "agent-card";
-      const shimmerClass = isWorking ? "running-shimmer" : "";
-      const percentClass = isWorking ? "progress-percent-label running" : "progress-percent-label idle";
+
+      // 100% Bulletproof Green Fill Gauge Bar HTML
+      const fillStyle = progress > 0 ? `width: ${progress}%; background-color: #10b981; background-image: linear-gradient(90deg, #10b981 0%, #059669 100%);` : `width: 0%;`;
 
       return `
-        <article class="${cardClass}" style="--agent-color: ${
-          AGENT_COLORS[index % AGENT_COLORS.length]
-        }">
+        <article class="${cardClass}" style="--agent-color: ${AGENT_COLORS[index % AGENT_COLORS.length]}">
           <div class="agent-card-head">
             <div>
-              <strong class="agent-name">${escapeHtml(agent.name || agent.id)}</strong>
-              <span class="agent-role">${escapeHtml(agent.role || "작업자")}</span>
+              <strong class="agent-name" style="color: #0f172a !important; font-weight: 800 !important; font-size: 1.05rem !important;">${escapeHtml(agent.name || agent.id)}</strong>
+              <span class="agent-role" style="color: #475569 !important; font-weight: 700 !important;">${escapeHtml(agent.role || "작업자")}</span>
             </div>
-            <span class="agent-state ${state}">
+            <span class="agent-state ${state}" style="font-weight: 800 !important;">
               ${statusDot} ${statusText}
             </span>
           </div>
           <div class="agent-current">
-            <span>현재 수행</span>
-            <strong>${escapeHtml(agent.current || "배정 대기")}</strong>
+            <span style="color: #64748b !important; font-weight: 700 !important;">현재 수행</span>
+            <strong style="color: #0f172a !important; font-weight: 800 !important; font-size: 0.9rem !important;">${escapeHtml(agent.current || "배정 대기")}</strong>
           </div>
-          <div class="agent-progress-row">
-            <div class="progress-track" role="progressbar" aria-valuemin="0"
-                 aria-valuemax="100" aria-valuenow="${Math.round(progress)}">
-              <span class="${shimmerClass}" style="width:${progress}%; background: linear-gradient(90deg, #10b981 0%, #059669 100%) !important; height: 100%; display: block; border-radius: 6px;"></span>
+
+          <!-- BULLETPROOF 16PX GREEN FILL GAUGE BAR -->
+          <div class="agent-gauge-container" style="margin: 14px 0 10px 0;">
+            <div class="agent-gauge-track" style="width: 100%; height: 16px; background: #e2e8f0; border-radius: 8px; border: 1.5px solid #94a3b8; overflow: hidden; position: relative;">
+              <div class="agent-gauge-fill" style="${fillStyle} height: 100%; border-radius: 6px; transition: width 0.4s ease-in-out;"></div>
             </div>
-            <small class="${percentClass}">${Math.round(progress)}%</small>
+            <div class="agent-progress-info" style="display: flex; justify-content: flex-end; margin-top: 4px;">
+              <span class="agent-progress-text" style="font-size: 0.88rem !important; font-weight: 800 !important; color: #0f172a !important;">${Math.round(progress)}%</span>
+            </div>
           </div>
+
           <div class="agent-next">
-            <span>다음 단계</span>
-            ${escapeHtml(agent.next || "오케스트레이터 지시 대기")}
+            <span style="color: #64748b !important; font-weight: 700 !important;">다음 단계</span>
+            <span style="color: #1e293b !important; font-weight: 700 !important; display: block; margin-top: 2px;">${escapeHtml(agent.next || "오케스트레이터 지시 대기")}</span>
           </div>
         </article>
       `;
