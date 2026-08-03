@@ -1063,10 +1063,10 @@ function renderTasks(snapshot) {
             <div class="progress-track" role="progressbar" aria-valuenow="${Math.round(progress)}">
               <span style="width:${progress}%"></span>
             </div>
-            <small class="progress-percent-label" style="font-size:0.7rem; color:#94a3b8;">${Math.round(progress)}%</small>
+            <small class="progress-percent-label" style="font-size:0.75rem; color:#0f172a; font-weight:800;">${Math.round(progress)}%</small>
           </td>
-          <td style="font-size:0.8rem; color:#cbd5e1;">${escapeHtml(task.next || task.description || "검증 이력 보관")}</td>
-          <td style="font-size:0.75rem; color:#94a3b8;">${escapeHtml(updated)}</td>
+          <td style="font-size:0.85rem; color:#0f172a; font-weight:700;">${escapeHtml(task.next || task.description || "검증 이력 보관")}</td>
+          <td style="font-size:0.8rem; color:#1e293b; font-weight:700;">${escapeHtml(updated)}</td>
         </tr>
       `;
     }).join("");

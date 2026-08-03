@@ -1827,102 +1827,138 @@ dialog input:focus {
 }
 
 
-/* === Dedicated Project Ledger Box Styles === */
+
+
+/* === ULTRA HIGH CONTRAST BOLD BLACK PROJECT LEDGER STYLES === */
 .project-ledger-container {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  margin-top: 16px;
+  margin-top: 20px;
 }
 
 .project-ledger-box {
-  background: rgba(15, 23, 42, 0.7);
+  background: #ffffff !important;
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 2px solid #cbd5e1 !important;
   padding: 20px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .project-ledger-box.cts-theme {
-  border-top: 4px solid #10b981;
+  border-top: 6px solid #059669 !important;
 }
 
 .project-ledger-box.sys15-theme {
-  border-top: 4px solid #3b82f6;
+  border-top: 6px solid #2563eb !important;
 }
 
 .project-ledger-box.core-theme {
-  border-top: 4px solid #8b5cf6;
+  border-top: 6px solid #7c3aed !important;
 }
 
 .project-ledger-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 14px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0 !important;
 }
 
 .project-ledger-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #f8fafc;
+  font-size: 1.15rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .project-ledger-badge {
-  font-size: 0.75rem;
-  padding: 3px 10px;
-  border-radius: 20px;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
+  font-size: 0.8rem !important;
+  padding: 4px 12px !important;
+  border-radius: 20px !important;
+  font-weight: 700 !important;
+  background: #f1f5f9 !important;
+  color: #1e293b !important;
+  border: 1px solid #cbd5e1 !important;
 }
 
 .ledger-table-wrapper {
   overflow-x: auto;
   border-radius: 8px;
+  background: #ffffff !important;
 }
 
 .ledger-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.84rem;
+  font-size: 0.88rem !important;
   text-align: left;
+  color: #0f172a !important;
 }
 
 .ledger-table th {
-  background: rgba(30, 41, 59, 0.8);
-  color: #94a3b8;
-  font-weight: 600;
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  font-weight: 800 !important;
+  padding: 12px 14px !important;
+  border-bottom: 2px solid #cbd5e1 !important;
   white-space: nowrap;
 }
 
 .ledger-table td {
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  color: #cbd5e1;
+  padding: 12px 14px !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+  font-weight: 700 !important;
   vertical-align: middle;
 }
 
 .ledger-table tbody tr:hover {
-  background: rgba(255, 255, 255, 0.03);
+  background: #f1f5f9 !important;
 }
 
 .task-title-cell {
-  font-weight: 600;
-  color: #f1f5f9;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  font-size: 0.92rem !important;
+  display: block;
 }
 
 .task-id-tag {
-  font-size: 0.72rem;
-  color: #64748b;
+  font-size: 0.78rem !important;
+  color: #334155 !important;
+  font-weight: 700 !important;
   display: block;
   font-family: monospace;
+  margin-top: 2px;
+}
+
+.enum-badge {
+  font-weight: 800 !important;
+  padding: 4px 10px !important;
+  border-radius: 6px !important;
+  font-size: 0.78rem !important;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.enum-badge.verified {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border: 1px solid #86efac !important;
+}
+
+.enum-badge.working {
+  background: #fef9c3 !important;
+  color: #a16207 !important;
+  border: 1px solid #fde047 !important;
+}
+
+.enum-badge.pending {
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
 }
