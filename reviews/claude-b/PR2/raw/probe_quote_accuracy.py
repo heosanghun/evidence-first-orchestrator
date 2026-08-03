@@ -187,6 +187,14 @@ ADJUDICATED = {
         "(`workspace.py:326  add_agent(command)`); it is not a quote of "
         "workspace.py at any single cited line. Sixth time this check has "
         "caught its own author on the round the note was written",
+    ("NOTE-what-byte-exactness-fed-and-the-malformed-record-it-never-did.md",
+     "provenance.py"):
+        "PROBE OUTPUT - the block is this probe's own three-line guard listing "
+        "(`provenance.py:216   if not isinstance(declared_files, list) ...`), "
+        "each line prefixed with its own file:line. It is not a quote of the "
+        "source at any ONE cited line, and the probe asserts each of the three "
+        "lines separately in section C. Seventh time this check has caught its "
+        "own author on the round the note was written",
     ("ADDENDUM-git-replace-regression.md", "provenance.py"):
         "deliberate before/after - the block quotes the argument list that "
         "was REMOVED, which is the whole point of the regression",

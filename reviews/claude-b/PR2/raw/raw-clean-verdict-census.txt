@@ -9,12 +9,12 @@
         expected: clean rows: 21
         observed: clean rows: 21
   [ok]   distinct notes they cite
-        expected: notes: 21
-        observed: notes: 21
+        expected: notes: 22
+        observed: notes: 22
   [ok]     whose probe can be located
-        expected: probes: 19
-        observed: probes: 19
-  Nineteen is more than one round of hand adjudication, which is what
+        expected: probes: 20
+        observed: probes: 20
+  Twenty is more than one round of hand adjudication, which is what
   the item anticipated. Section B tries the cheap way; section C shows
   the cheap way does not work.
   [ok]   this note has exactly one row in SYNTHESIS
@@ -32,6 +32,7 @@
     drives   probe_alias_lineage.py                    alias / `alias_chain`   3 non-string args
     drives   probe_attribute_subset.py                 attribute accesses rea  1 non-string args
     drives   probe_byte_exactness.py                   `provenance.py` byte-e  6 non-string args
+    drives   probe_byte_exactness_input_class.py       `provenance.py` byte-e  13 non-string args
     drives   probe_cli_surface.py                      `cli.py`                2 non-string args
     drives   probe_collector_redaction.py              `monitor/collector.py`  9 non-string args
     drives   probe_cross_module_hop.py                 cross-module dict-fiel  4 non-string args
@@ -48,11 +49,11 @@
         expected: static: 4
         observed: static: 4
   [ok]   probes that drive it
-        expected: driving: 15
-        observed: driving: 15
+        expected: driving: 16
+        observed: driving: 16
   [ok]     of which the proxy says feed a non-string
-        expected: flagged: 15
-        observed: flagged: 15
+        expected: flagged: 16
+        observed: flagged: 16
   For a static census the question does not arise: it reads the AST and
   never calls anything, so it has no input class to feed.
 
@@ -76,7 +77,8 @@
   would be exactly the failure this review exists to prevent.
 
 ########## D. so: the subset with an open issue, named not measured ##########
-    `provenance.py` byte-exactness      #4, #5, #18       probe_byte_exactness.py
+    `provenance.py` byte-exactness      #4/#5/#18 (done - item 53)probe_byte_exactness.py
+    `provenance.py` byte-exactness      #4/#5/#18 (done - item 53)probe_byte_exactness_input_class.py
     `cli.py`                            #19               probe_cli_surface.py
     `monitor/collector.py` (redaction)  #6                probe_collector_redaction.py
     `dashboard.py`, `errors.py`         #19               probe_dashboard_and_errors.py
@@ -86,16 +88,20 @@
     `util.py`, `lock.py`                (done - item 47)  probe_util_and_lock.py
     `util.py`, `lock.py`                (done - item 47)  probe_util_uncovered_input.py
   [ok] driving probes whose component carries an open issue
-        expected: with an issue: 9
-        observed: with an issue: 9
-  [ok]   of which already adjudicated by item 47
-        expected: already done: 2
-        observed: already done: 2
+        expected: with an issue: 10
+        observed: with an issue: 10
+  [ok]   of which already adjudicated by hand - items 47 and 53
+        expected: already done: 4
+        observed: already done: 4
   [ok]     leaving the population for the next round
-        expected: remaining: 7
-        observed: remaining: 7
-  SEVEN remain. That is the population the next round should take, one
+        expected: remaining: 6
+        observed: remaining: 6
+  SIX remain. That is the population the next round should take, one
   at a time and BY HAND, which is the only method shown to work here.
+  Updated 2026-08-03: item 53 adjudicated `provenance.py`
+  byte-exactness, so this note's own population moved 7 -> 6 and the
+  clean-row set grew by the note that did it. Both are re-derived here
+  rather than left at the number this note first published.
 
 ########## E. what this does NOT do ##########
   * It does not retract ANY clean verdict. Nothing here measures a

@@ -6,11 +6,11 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   and the write-ups are present
-        expected: documents: 59
-        observed: documents: 59
+        expected: documents: 60
+        observed: documents: 60
 
 ########## B. every FILE:LINE citation in the write-ups ##########
-  227 live citations across 59 documents
+  231 live citations across 60 documents
   13 more appear inside correction banners and are
   excluded as retractions rather than claims - see the comment in the
   source for why that exclusion is principled and not self-serving.
@@ -51,7 +51,7 @@
     src/evidence_orchestrator/ledger.py            3 citations, 165 lines
     src/evidence_orchestrator/model.py             6 citations, 143 lines
     monitor/collector.py                           5 citations, 1436 lines
-    src/evidence_orchestrator/provenance.py       31 citations, 341 lines
+    src/evidence_orchestrator/provenance.py       35 citations, 341 lines
     functions/api/snapshot.js                      1 citations, 714 lines
     src/evidence_orchestrator/adapter.py           1 citations, 320 lines
     tests/test_evidence.py                         1 citations, 151 lines
@@ -153,11 +153,11 @@
   while the committed raw output beside it said 152 across 35. Nobody
   was checking. Now the run fails when prose and output disagree.
   [ok]   NOTE-citation-audit-of-this-review.md states this run's counts
-        expected: 227 citations / 59 documents
-        observed: 227 citations / 59 documents
+        expected: 231 citations / 60 documents
+        observed: 231 citations / 60 documents
   [ok]   SYNTHESIS.md states this run's counts
-        expected: 227 citations / 59 documents
-        observed: 227 citations / 59 documents
+        expected: 231 citations / 60 documents
+        observed: 231 citations / 60 documents
   [ok]   and the retraction count it excludes
         expected: retractions: 13
         observed: retractions: 13

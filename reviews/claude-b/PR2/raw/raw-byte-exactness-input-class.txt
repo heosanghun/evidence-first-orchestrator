@@ -1,0 +1,109 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   checks in the committed byte-exactness output
+        expected: checks: 20
+        observed: checks: 20
+  [ok]     and the note's headline agrees with the file
+        expected: stated: 20 / 0
+        observed: stated: 20 / 0
+
+########## B. the twenty, classified BY HAND ##########
+  [ok] every one of the twenty labels is classified - the table is exhaustive
+        expected: unclassified: []
+        observed: unclassified: []
+     11  byte mutation
+      4  control (well-formed)
+      3  membership
+      2  altered prose
+  [ok]   byte-level mutations of a well-formed file
+        expected: byte mutation: 11
+        observed: byte mutation: 11
+  [ok]   well-formed provenance lists with the wrong membership
+        expected: membership: 3
+        observed: membership: 3
+  [ok]     and the classes sum to the whole population
+        expected: sum: 20
+        observed: sum: 20
+  All three membership cases are a `list[dict[str, str]]`. Only WHICH
+  entries are present changes - never the SHAPE of an entry.
+
+########## C. the class the twenty never fed ##########
+    provenance.py:216  if not isinstance(declared_files, list) or not declared_files:
+    provenance.py:230  if not isinstance(record, dict):
+    provenance.py:234  if not isinstance(submitted_value, str) or not submitted_value:
+  [ok]   provenance.py:216 rejects a non-list `files`
+        expected: isinstance(declared_files, list)
+        observed:     if not isinstance(declared_files, list) or not declared_files:
+  [ok]     :230 rejects an entry that is not an object
+        expected: isinstance(record, dict)
+        observed:         if not isinstance(record, dict):
+  [ok]       :234 rejects a non-string submitted_path
+        expected: isinstance(submitted_value, str)
+        observed:         if not isinstance(submitted_value, str) or not submitted_value:
+  Three guards, and the clean note fed none of them. Same shape as
+  issues 8, 13 and 14 and as item 47 - a guard whose test supplies only
+  the input it already handles - this time in MY OWN clean note.
+
+########## D. DRIVEN - the un-fed class, against a live submission ##########
+    the untouched envelope (CONTROL)        ACCEPTED, state: submitted
+    files = None                            EvidenceError
+    files = {} (an object, not a list)      EvidenceError
+    files = [] (empty list)                 EvidenceError
+    files = ["a string"]                    EvidenceError
+    files = [null]                          EvidenceError
+    submitted_path = 123                    ConfigurationError
+    submitted_path = ""                     ConfigurationError
+  [ok] the control still submits - the driver is right before the code is
+        expected: ACCEPTED, state: submitted
+        observed: ACCEPTED, state: submitted
+  [ok]   every un-fed input is refused - none is ACCEPTED
+        expected: accepted: []
+        observed: accepted: []
+  [ok]     and every one becomes an EFOError, not a raw Python exception
+        expected: raw python: {}
+        observed: raw python: {}
+  [ok]       seven inputs driven
+        expected: driven: 7
+        observed: driven: 7
+  This is the OPPOSITE of item 47's answer. There, 17 driven inputs
+  gave 17 raw Python exceptions and 0 EFOError. Here all seven convert.
+  Item 51 says why: these are guards on a value PARSED FROM A DOCUMENT,
+  which is the class EFO does guard - `util.py`'s were on ARGUMENTS,
+  which is the class it does not.
+
+########## E. the verdict, narrowed and not retracted ##########
+  * `provenance.py byte-exactness is clean` STANDS. All 20 checks still
+    pass and nothing here contradicts one of them.
+  * What is now stated: those 20 fed byte mutations and membership
+    errors, never a malformed record. That gap is REAL and was
+    invisible until asked.
+  * Driving the gap found EFO sound there too, so this closes rather
+    than opens. A NEGATIVE result, and worth publishing as one.
+  * NOT filed. Nothing was accepted that should not have been.
+
+########## F. what this does NOT do ##########
+  * It does not re-run probe_byte_exactness.py's twenty checks; it
+    classifies them from the COMMITTED output and drives what they
+    missed.
+  * It does not adjudicate the other six notes item 50 named.
+  * It does not reach provenance.py:294-297, the TOCTOU backstop the
+    original note already recorded as unmeasured. Still unmeasured.
+  * It does not cover malformed `source_path`, `commit`, `branch` or
+    `remote_url` - item 48 drove `_validate_remote_url` and item 51
+    censused the guards; this section is about the `files` list.
+  * No network: the remote is example.invalid and proxy submission
+    never fetches. Workspaces are tempfile directories, removed above.
+  * MEASURED: the 20-label classification, its exhaustiveness, the
+    three guard lines, all seven driven outcomes and the control.
+    REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+One clean note re-examined by hand and its un-fed input class driven.
+Anchor untouched, no `main` write, no issue filed, no verdict
+retracted. Pre-registered permissions unchanged -
+gpu/network/performance_metrics all false. SUBMITTED, not VERIFIED.
