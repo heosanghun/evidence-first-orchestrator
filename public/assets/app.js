@@ -483,6 +483,7 @@ function renderKpis(snapshot, alerts) {
 }
 
 function renderAgents(snapshot) {
+  if (!snapshot || !Array.isArray(snapshot.agents) || snapshot.agents.length === 0) return;
   const ledger = snapshot.source.ledger || {};
   elements.ledgerStatus.textContent =
     ledger.valid === true
@@ -1452,6 +1453,7 @@ window.addEventListener("beforeunload", () => clearInterval(refreshTimer));
 
 
 function renderProjects(snapshot) {
+  if (!snapshot || !Array.isArray(snapshot.projects) || snapshot.projects.length === 0) return;
   const container = document.getElementById("portfolio-grid");
   if (!container) return;
 

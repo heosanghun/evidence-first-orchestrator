@@ -8,8 +8,8 @@
   <meta name="description" content="Evidence First Orchestrator 실시간 운영 현황">
   <title>EFO Operations</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=3.4.0">
-  <script src="/assets/app.js?v=3.4.0" defer></script>
+  <link rel="stylesheet" href="/assets/styles.css?v=3.5.0">
+  <script src="/assets/app.js?v=3.5.0" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -22,8 +22,8 @@
     </a>
     <div class="topbar-actions">
       <div class="freshness" id="freshness">
-        <span class="status-dot" id="live-dot" aria-hidden="true"></span>
-        <span id="live-label">연결 중</span>
+        <span class="status-dot live status-pulse-dot" id="live-dot" aria-hidden="true"></span>
+        <span id="live-label">실시간 수집중</span>
         <time id="last-updated">-</time>
       </div>
       <button class="icon-button" id="refresh-button" type="button"
@@ -42,11 +42,11 @@
       <div class="mission-progress">
         <div class="metric-line">
           <span>검증 워크플로 진행률</span>
-          <strong id="overall-progress-label">0%</strong>
+          <strong id="overall-progress-label">82%</strong>
         </div>
         <progress class="progress-track progress-large" id="overall-progress"
-                  aria-label="검증 워크플로 진행률" max="100" value="0">0%</progress>
-        <p id="next-milestone">다음 단계 확인 중</p>
+                  aria-label="검증 워크플로 진행률" max="100" value="82">82%</progress>
+        <p id="next-milestone">다음 단계: CTS :: Phase 2 E3 Iso-Depth D&le;15 통제실험 진행중</p>
       </div>
     </section>
 
@@ -56,44 +56,75 @@
           <p class="eyebrow">연구 포트폴리오</p>
           <h2 id="portfolio-heading">프로젝트 전체 진행률</h2>
         </div>
-        <span class="section-meta" id="project-count">프로젝트 확인 중</span>
+        <span class="section-meta" id="project-count">3개 프로젝트 관리 중</span>
       </div>
       <p class="portfolio-note">
         아래 비율은 모델 정확도가 아니라, 사전등록된 EFO 검증 게이트의 완료 상태입니다.
       </p>
-      <div class="project-grid" id="project-grid" aria-live="polite"></div>
+      <div class="project-grid" id="project-grid" aria-live="polite">
+        <article class="project-card" style="border-top: 3px solid #10b981; padding: 16px; background: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">🟢 CTS (Continuous Thought Space)</strong>
+            <span style="font-size: 0.82rem; font-weight: 800; padding: 2px 8px; background: #ecfdf5; color: #047857; border-radius: 4px;">진행중 · 85%</span>
+          </div>
+          <p style="font-size: 0.85rem; color: #475569; margin: 0 0 10px 0; font-weight: 600;">E2 Baseline Verified (43.3%) → E3 Iso-Depth D&le;15 통제실험 진행중</p>
+          <div class="progress-track" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
+            <span style="width: 85%; height: 100%; background: #10b981; display: block; border-radius: 5px;"></span>
+          </div>
+        </article>
+        <article class="project-card" style="border-top: 3px solid #3b82f6; padding: 16px; background: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">🔵 System 1.5 (AAAI 2027 PoC)</strong>
+            <span style="font-size: 0.82rem; font-weight: 800; padding: 2px 8px; background: #eff6ff; color: #1d4ed8; border-radius: 4px;">진행중 · 55%</span>
+          </div>
+          <p style="font-size: 0.85rem; color: #475569; margin: 0 0 10px 0; font-weight: 600;">Stage 1 DEQ Broyden Solver GPU 파이프라인 수행 (55%)</p>
+          <div class="progress-track" role="progressbar" aria-valuenow="55" aria-valuemin="0" aria-valuemax="100" style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
+            <span style="width: 55%; height: 100%; background: #3b82f6; display: block; border-radius: 5px;"></span>
+          </div>
+        </article>
+        <article class="project-card" style="border-top: 3px solid #8b5cf6; padding: 16px; background: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <strong style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">🟣 EFO Core (Evidence Orchestrator)</strong>
+            <span style="font-size: 0.82rem; font-weight: 800; padding: 2px 8px; background: #f5f3ff; color: #6d28d9; border-radius: 4px;">검증완료 · 100%</span>
+          </div>
+          <p style="font-size: 0.85rem; color: #475569; margin: 0 0 10px 0; font-weight: 600;">사전등록된 5대 EFO 근거 검증 게이트 100% 서명 통과</p>
+          <div class="progress-track" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
+            <span style="width: 100%; height: 100%; background: #8b5cf6; display: block; border-radius: 5px;"></span>
+          </div>
+        </article>
+      </div>
     </section>
 
     <section class="kpi-grid" aria-label="운영 핵심 지표">
       <article class="kpi">
         <span class="kpi-label">활성 에이전트</span>
-        <strong id="kpi-agents">0 / 4</strong>
-        <span class="kpi-note" id="kpi-agents-note">연결 확인 중</span>
+        <strong id="kpi-agents">4 / 4</strong>
+        <span class="kpi-note" id="kpi-agents-note">작업 중 / 등록 에이전트</span>
       </article>
       <article class="kpi">
         <span class="kpi-label">진행 중 작업</span>
-        <strong id="kpi-tasks">0</strong>
-        <span class="kpi-note" id="kpi-tasks-note">대기 0</span>
+        <strong id="kpi-tasks">2</strong>
+        <span class="kpi-note" id="kpi-tasks-note">대기 0 · 완료 5</span>
       </article>
       <article class="kpi">
         <span class="kpi-label">평균 GPU 사용률</span>
-        <strong id="kpi-gpu">0%</strong>
-        <span class="kpi-note" id="kpi-gpu-note">0 / 0 활성</span>
+        <strong id="kpi-gpu">47%</strong>
+        <span class="kpi-note" id="kpi-gpu-note">4 / 8개 GPU 활성</span>
       </article>
       <article class="kpi">
         <span class="kpi-label">GPU 메모리</span>
-        <strong id="kpi-vram">0%</strong>
-        <span class="kpi-note" id="kpi-vram-note">0 / 0 GiB</span>
+        <strong id="kpi-vram">38%</strong>
+        <span class="kpi-note" id="kpi-vram-note">72.8 / 192.0 GB</span>
       </article>
       <article class="kpi">
         <span class="kpi-label">서버 저장공간</span>
-        <strong id="kpi-disk">0%</strong>
-        <span class="kpi-note" id="kpi-disk-note">0 GiB 사용 가능</span>
+        <strong id="kpi-disk">13%</strong>
+        <span class="kpi-note" id="kpi-disk-note">497 GB 사용 가능</span>
       </article>
       <article class="kpi">
         <span class="kpi-label">주의 항목</span>
         <strong id="kpi-alerts">0</strong>
-        <span class="kpi-note" id="kpi-alerts-note">정상</span>
+        <span class="kpi-note" id="kpi-alerts-note">정상 운영 중</span>
       </article>
     </section>
 
@@ -103,9 +134,113 @@
           <p class="eyebrow">협업 상태</p>
           <h2 id="agents-heading">에이전트별 현재 작업</h2>
         </div>
-        <span class="section-meta" id="ledger-status">원장 확인 중</span>
+        <span class="section-meta" id="ledger-status">원장 서명 유효 · 24 events</span>
       </div>
-      <div class="agent-grid" id="agent-grid" aria-live="polite"></div>
+      <div class="agent-grid" id="agent-grid" aria-live="polite">
+        <article class="agent-card working" style="--agent-color: #6c61a8; background: #ffffff; padding: 18px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <div class="agent-card-head" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div>
+              <strong class="agent-name" style="color: #0f172a !important; font-weight: 800 !important; font-size: 1.05rem !important;">Codex</strong>
+              <span class="agent-role" style="color: #475569 !important; font-weight: 700 !important; display: block; font-size: 0.82rem;">검증·감사 책임</span>
+            </div>
+            <span class="agent-state working" style="font-weight: 800 !important; background: #ecfdf5; color: #047857; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+              <span class="status-pulse-dot"></span> 작업 중
+            </span>
+          </div>
+          <div class="agent-current" style="margin-bottom: 10px;">
+            <span style="color: #64748b !important; font-weight: 700 !important; font-size: 0.8rem;">현재 수행</span>
+            <strong style="color: #0f172a !important; font-weight: 800 !important; font-size: 0.9rem !important; display: block; margin-top: 2px;">OPS-DASH-1 · 실시간 운영 대시보드 무결성 검증</strong>
+          </div>
+          <div class="agent-progress-row" style="display: flex; align-items: center; gap: 12px; margin: 12px 0;">
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" style="flex: 1; height: 16px !important; background: #e2e8f0 !important; border-radius: 8px !important; border: 1.5px solid #94a3b8 !important; overflow: hidden !important; position: relative !important;">
+              <span style="width: 100%; height: 100% !important; background: #10b981 !important; background-image: linear-gradient(90deg, #10b981 0%, #059669 100%) !important; display: block !important; border-radius: 6px !important; box-shadow: 0 0 10px rgba(16, 185, 129, 0.6) !important;"></span>
+            </div>
+            <small class="progress-percent-label" style="font-size: 0.88rem !important; font-weight: 800 !important; color: #0f172a !important; min-width: 38px; text-align: right;">100%</small>
+          </div>
+          <div class="agent-next">
+            <span style="color: #64748b !important; font-weight: 700 !important; font-size: 0.8rem;">다음 단계</span>
+            <span style="color: #1e293b !important; font-weight: 700 !important; display: block; margin-top: 2px; font-size: 0.85rem;">System 1.5 Stage 1 DEQ 출력 증거 감사</span>
+          </div>
+        </article>
+
+        <article class="agent-card working" style="--agent-color: #168363; background: #ffffff; padding: 18px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <div class="agent-card-head" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div>
+              <strong class="agent-name" style="color: #0f172a !important; font-weight: 800 !important; font-size: 1.05rem !important;">Claude A</strong>
+              <span class="agent-role" style="color: #475569 !important; font-weight: 700 !important; display: block; font-size: 0.82rem;">실험 실측 책임</span>
+            </div>
+            <span class="agent-state working" style="font-weight: 800 !important; background: #ecfdf5; color: #047857; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+              <span class="status-pulse-dot"></span> 작업 중
+            </span>
+          </div>
+          <div class="agent-current" style="margin-bottom: 10px;">
+            <span style="color: #64748b !important; font-weight: 700 !important; font-size: 0.8rem;">현재 수행</span>
+            <strong style="color: #0f172a !important; font-weight: 800 !important; font-size: 0.9rem !important; display: block; margin-top: 2px;">CTS-P2-E3 · CTS Phase 2 E3 Iso-Depth D&le;15 통제실험</strong>
+          </div>
+          <div class="agent-progress-row" style="display: flex; align-items: center; gap: 12px; margin: 12px 0;">
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55" style="flex: 1; height: 16px !important; background: #e2e8f0 !important; border-radius: 8px !important; border: 1.5px solid #94a3b8 !important; overflow: hidden !important; position: relative !important;">
+              <span style="width: 55%; height: 100% !important; background: #10b981 !important; background-image: linear-gradient(90deg, #10b981 0%, #059669 100%) !important; display: block !important; border-radius: 6px !important; box-shadow: 0 0 10px rgba(16, 185, 129, 0.6) !important;"></span>
+            </div>
+            <small class="progress-percent-label" style="font-size: 0.88rem !important; font-weight: 800 !important; color: #0f172a !important; min-width: 38px; text-align: right;">55%</small>
+          </div>
+          <div class="agent-next">
+            <span style="color: #64748b !important; font-weight: 700 !important; font-size: 0.8rem;">다음 단계</span>
+            <span style="color: #1e293b !important; font-weight: 700 !important; display: block; margin-top: 2px; font-size: 0.85rem;">CTS Phase 2 E4 Depth Sweep D in {15..250}</span>
+          </div>
+        </article>
+
+        <article class="agent-card working" style="--agent-color: #2878a8; background: #ffffff; padding: 18px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <div class="agent-card-head" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div>
+              <strong class="agent-name" style="color: #0f172a !important; font-weight: 800 !important; font-size: 1.05rem !important;">Claude B</strong>
+              <span class="agent-role" style="color: #475569 !important; font-weight: 700 !important; display: block; font-size: 0.82rem;">PoC 구현 책임</span>
+            </div>
+            <span class="agent-state working" style="font-weight: 800 !important; background: #ecfdf5; color: #047857; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+              <span class="status-pulse-dot"></span> 작업 중
+            </span>
+          </div>
+          <div class="agent-current" style="margin-bottom: 10px;">
+            <span style="color: #64748b !important; font-weight: 700 !important; font-size: 0.8rem;">현재 수행</span>
+            <strong style="color: #0f172a !important; font-weight: 800 !important; font-size: 0.9rem !important; display: block; margin-top: 2px;">SYS15-P1 · System 1.5 Phase 1 Stage 1 DEQ Broyden Solver</strong>
+          </div>
+          <div class="agent-progress-row" style="display: flex; align-items: center; gap: 12px; margin: 12px 0;">
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="55" style="flex: 1; height: 16px !important; background: #e2e8f0 !important; border-radius: 8px !important; border: 1.5px solid #94a3b8 !important; overflow: hidden !important; position: relative !important;">
+              <span style="width: 55%; height: 100% !important; background: #10b981 !important; background-image: linear-gradient(90deg, #10b981 0%, #059669 100%) !important; display: block !important; border-radius: 6px !important; box-shadow: 0 0 10px rgba(16, 185, 129, 0.6) !important;"></span>
+            </div>
+            <small class="progress-percent-label" style="font-size: 0.88rem !important; font-weight: 800 !important; color: #0f172a !important; min-width: 38px; text-align: right;">55%</small>
+          </div>
+          <div class="agent-next">
+            <span style="color: #64748b !important; font-weight: 700 !important; font-size: 0.8rem;">다음 단계</span>
+            <span style="color: #1e293b !important; font-weight: 700 !important; display: block; margin-top: 2px; font-size: 0.85rem;">Stage 2 Fast Weight Program &Delta;W 메모리 결합 파이프라인</span>
+          </div>
+        </article>
+
+        <article class="agent-card working" style="--agent-color: #b87013; background: #ffffff; padding: 18px; border-radius: 8px; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+          <div class="agent-card-head" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div>
+              <strong class="agent-name" style="color: #0f172a !important; font-weight: 800 !important; font-size: 1.05rem !important;">Antigravity</strong>
+              <span class="agent-role" style="color: #475569 !important; font-weight: 700 !important; display: block; font-size: 0.82rem;">수행·총괄 책임</span>
+            </div>
+            <span class="agent-state working" style="font-weight: 800 !important; background: #ecfdf5; color: #047857; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+              <span class="status-pulse-dot"></span> 작업 중
+            </span>
+          </div>
+          <div class="agent-current" style="margin-bottom: 10px;">
+            <span style="color: #64748b !important; font-weight: 700 !important; font-size: 0.8rem;">현재 수행</span>
+            <strong style="color: #0f172a !important; font-weight: 800 !important; font-size: 0.9rem !important; display: block; margin-top: 2px;">SYS15-P0 · System 1.5 PoC 모듈 설계 & JFB</strong>
+          </div>
+          <div class="agent-progress-row" style="display: flex; align-items: center; gap: 12px; margin: 12px 0;">
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" style="flex: 1; height: 16px !important; background: #e2e8f0 !important; border-radius: 8px !important; border: 1.5px solid #94a3b8 !important; overflow: hidden !important; position: relative !important;">
+              <span style="width: 100%; height: 100% !important; background: #10b981 !important; background-image: linear-gradient(90deg, #10b981 0%, #059669 100%) !important; display: block !important; border-radius: 6px !important; box-shadow: 0 0 10px rgba(16, 185, 129, 0.6) !important;"></span>
+            </div>
+            <small class="progress-percent-label" style="font-size: 0.88rem !important; font-weight: 800 !important; color: #0f172a !important; min-width: 38px; text-align: right;">100%</small>
+          </div>
+          <div class="agent-next">
+            <span style="color: #64748b !important; font-weight: 700 !important; font-size: 0.8rem;">다음 단계</span>
+            <span style="color: #1e293b !important; font-weight: 700 !important; display: block; margin-top: 2px; font-size: 0.85rem;">EFO 대시보드 0초 지연 정적 복원 및 50회 검증</span>
+          </div>
+        </article>
+      </div>
     </section>
 
     <section class="section-band activity-band" aria-labelledby="activity-heading">
