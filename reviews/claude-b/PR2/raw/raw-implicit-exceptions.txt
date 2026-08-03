@@ -1,0 +1,93 @@
+########## A. POSITIVE CONTROL - none of these is a caught family ##########
+  [ok] cli.main's catch tuple is unchanged since the earlier census
+        expected: (EFOError, OSError, ValueError, json.JSONDecodeError)
+        observed: except (EFOError, OSError, ValueError, json.JSONDecodeError) as exc:
+  [ok]   every implicit exception type would escape it
+        expected: ['AttributeError', 'IndexError', 'KeyError', 'StopIteration', 'TypeError', 'ZeroDivisionError']
+        observed: ['AttributeError', 'IndexError', 'KeyError', 'StopIteration', 'TypeError', 'ZeroDivisionError']
+  ValueError IS caught, so a UnicodeDecodeError (a ValueError) would
+  not escape. The six above would. That is the shape of the gap.
+
+########## B. exactly which keys does repair drop? ##########
+  [ok] a task carries this many distinct keys across its lifecycle
+        expected: keys: 21
+        observed: keys: 21
+  [ok]   repair drops exactly one key
+        expected: dropped: ['last_event_hash']
+        observed: dropped: ['last_event_hash']
+  [ok]   and invents none
+        expected: added: []
+        observed: added: []
+  So #19 is the SOLE instance of its class, not the first of many.
+  That is a negative result and it is the useful half of this probe:
+  a reviewer does not need to re-walk the repair path looking for more.
+
+########## C. every string-key READ in workspace.py, by AST ##########
+  133 read sites across 52 distinct expressions, on 19 base objects:
+     54x  task                     task-projection key; section D proves every one is guaranteed
+     13x  self.config              workspace config, ledger-bound; section E
+     12x  evidence                 the dict validate_submission RETURNS, not user input
+     10x  provenance               the dict validate_git_provenance RETURNS, not user input
+      8x  grant                    built by authorize_proxy_submission in this process
+      8x  task_for_validation      same projection - and last_event_hash is #19
+      5x  verification             a local dict built in verify() before any read
+      4x  record                   an agent record from list_agents()
+      3x  agent                    agent record written by add_agent(); id/role always set
+      3x  candidate                a task projection from list_tasks()
+      2x  defaults                 self.config['defaults'], written by initialize()
+      2x  independence             the dict evaluate_independence RETURNS
+      2x  renewed                  the dict this method just built
+      2x  target_identity          guarded by an isinstance(dict) check before use
+      1x  event                    a ledger event this method just appended
+      1x  existing                 task.get('proxy_grant'), guarded by isinstance(dict) and a consumed_at check before the index
+      1x  self.get_task(task_id)   get_task raises EFOError for a missing task
+      1x  transport_independence   the dict evaluate_independence RETURNS
+      1x  worker                   an agent record from list_agents()
+  [ok] every base object is adjudicated
+        expected: uncovered: []
+        observed: uncovered: []
+  [ok]   and the map has no stale entries
+        expected: stale: []
+        observed: stale: []
+  The FIRST census this round filtered by a hand-written list of
+  variable names and missed `task_for_validation` - the variable #19
+  lives on. This one filters by nothing.
+
+########## D. is every task key that code reads actually guaranteed? ##########
+  `existing` is EXCLUDED here and that is a correction: my first draft
+  called it a task projection. workspace.py:750 assigns it
+  `task.get('proxy_grant')` - it is a GRANT, guarded by an isinstance
+  check, and its `expires_at` is not a task key at all. Lumping it in
+  produced a false 'absent' that I would have had to explain away.
+  keys read off a task projection: ['attempt', 'gates', 'id', 'idempotency_key', 'last_event_hash', 'owner', 'permissions', 'prerequisites', 'state']
+  [ok] every key read is present on a NORMAL projection
+        expected: absent: []
+        observed: absent: []
+  [ok]   on a REPAIRED projection, exactly one is not
+        expected: absent: ['last_event_hash']
+        observed: absent: ['last_event_hash']
+  This is the whole of #19 stated as a set difference, and it confirms
+  there is no second key in the same position.
+
+########## E. the config reads ##########
+  Only TOP-LEVEL config keys: `self.config['defaults']['lease_seconds']`
+  is one read of `defaults`, not a read of a config key named
+  `lease_seconds`. Taking the innermost literal was my second
+  misclassification this round, and it invented a missing key.
+  [ok] every config key read exists in a real workspace config
+        expected: missing: []
+        observed: missing: []
+  keys read: ['defaults', 'name', 'orchestrator', 'workspace_id']
+  A workspace config is bound to the signed ledger - editing it is
+  refused with `Workspace configuration differs from the signed
+  ledger` (measured previously in probe_doctor_coverage.py), so a
+  hand-removed key cannot reach these reads. Nested reads use
+  `.get(...)` with a default at workspace.py:736 and :1147.
+
+########## 0 unexpected result(s) ##########
+Adjudication basis, stated plainly: sections B, D and E are MEASURED
+against a live workspace. Section C's per-base reasons are read from
+the source - each says why a missing key is impossible or where it is
+handled - and are NOT individually executed. Only #19's row was driven
+to an actual traceback, in probe_architecture_claims.py.
+SUBMITTED, not VERIFIED.

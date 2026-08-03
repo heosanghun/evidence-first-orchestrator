@@ -43,8 +43,9 @@ never treated my own re-run as independent confirmation.
 | `cli.py` | clean | `NOTE-cli-surface-holds.md` |
 | `dashboard.py`, `errors.py` | clean, **one claim corrected** | `NOTE-dashboard-and-errors-hold.md` — its `escapes: []` is disproved by #19 |
 | alias / `alias_chain` machinery | clean | `NOTE-alias-lineage-holds.md` |
+| `workspace.py` implicit exceptions | clean — #19 is the only instance | `NOTE-issue19-is-the-only-one.md` |
 
-Eleven components were probed and found sound (one with a claim since corrected — see #19). That is half the value of this
+Twelve components were probed and found sound (one with a claim since corrected — see #19). That is half the value of this
 pass: it says where *not* to look next.
 
 ---
