@@ -574,62 +574,18 @@ function normalizedActivityCategory(value) {
   return "planning";
 }
 
-function generateRichActivityEvents(reference) {
-  const HOUR_MS = 60 * 60 * 1000;
-  const templates = [
-    { actor: "antigravity", actor_name: "Antigravity", action: "task.created", category: "planning", label: "작업 생성", title: "CTS :: Phase 2 E3 Iso-Depth D15 Control Experiment" },
-    { actor: "claude-a", actor_name: "Claude A", action: "evidence.submitted", category: "evidence", label: "증거 제출", title: "E2-BENCHMARK · Native Think Baseline Verification (43.3%)" },
-    { actor: "antigravity", actor_name: "Antigravity", action: "task.verified", category: "success", label: "검증 통과", title: "E2-BENCHMARK · Abort Rule Pass +/- 3.3pp" },
-    { actor: "claude-b", actor_name: "Claude B", action: "task.claimed", category: "work", label: "작업 수행", title: "CTS :: Publish verified P1b statistics tools" },
-    { actor: "antigravity", actor_name: "Antigravity", action: "ledger.signed", category: "success", label: "원장 서명", title: "Cryptographic SHA-256 Ledger Signature Sequence #315" },
-    { actor: "codex", actor_name: "Codex", action: "task.archived", category: "planning", label: "계획 동기화", title: "EFO Core :: CSP-safe progress bars and project portfolio surface" },
-    { actor: "claude-a", actor_name: "Claude A", action: "task.claimed", category: "work", label: "작업 수행", title: "System 1.5 :: Stage 1 DEQ Broyden Solver on physical GPU 0~7" },
-    { actor: "antigravity", actor_name: "Antigravity", action: "evidence.submitted", category: "evidence", label: "증거 제출", title: "UI :: Local Workstation 4-Card Clean White Grid v2.4.0" },
-    { actor: "claude-b", actor_name: "Claude B", action: "task.verified", category: "success", label: "검증 완료", title: "P1b-9 :: Gated Router Meta-Policy Verification" },
-    { actor: "codex", actor_name: "Codex", action: "task.blocked", category: "issue", label: "차단·반려", title: "Disk usage 92.1% alert handled & verified" }
-  ];
-
-  const events = [];
-  for (let i = 0; i < 24; i++) {
-    const t = reference - i * HOUR_MS - Math.floor(Math.random() * 15 * 60 * 1000);
-    const tmpl = templates[i % templates.length];
-    events.push({
-      ...tmpl,
-      at: new Date(t).toISOString(),
-      timestamp: t
-    });
-  }
-  return events;
-}
-
 function activityWindow(snapshot) {
   const generatedAt = new Date(snapshot.generated_at).getTime();
   const fallback = Date.now();
   const reference = Number.isFinite(generatedAt) ? generatedAt : fallback;
   const end = Math.floor(reference / HOUR_MS) * HOUR_MS + HOUR_MS;
   const start = end - activityRangeHours * HOUR_MS;
-
-  let rawEvents = Array.isArray(snapshot.activity) ? snapshot.activity : [];
-  
-  // Re-anchor timestamps if out of window
-  let mappedEvents = rawEvents.map((event, idx) => {
-    let evtTime = new Date(event.at).getTime();
-    if (!Number.isFinite(evtTime) || evtTime < start || evtTime >= end) {
-      evtTime = reference - (idx % activityRangeHours) * HOUR_MS - Math.floor(Math.random() * 10 * 60 * 1000);
-    }
-    return {
+  const events = snapshot.activity
+    .map((event) => ({
       ...event,
-      timestamp: evtTime,
-      at: new Date(evtTime).toISOString(),
+      timestamp: new Date(event.at).getTime(),
       category: normalizedActivityCategory(event.category),
-    };
-  });
-
-  if (mappedEvents.length < 10) {
-    mappedEvents = generateRichActivityEvents(reference);
-  }
-
-  const events = mappedEvents
+    }))
     .filter(
       (event) =>
         Number.isFinite(event.timestamp) &&
@@ -637,7 +593,6 @@ function activityWindow(snapshot) {
         event.timestamp < end,
     )
     .sort((left, right) => left.timestamp - right.timestamp);
-
   const buckets = Array.from({ length: activityRangeHours }, (_value, index) => ({
     at: start + index * HOUR_MS,
     events: [],
@@ -650,7 +605,6 @@ function activityWindow(snapshot) {
     buckets[index].events.push(event);
     buckets[index].counts[event.category] += 1;
   });
-
   return { start, end, events, buckets };
 }
 
@@ -1072,166 +1026,13 @@ function renderResources(snapshot) {
 }
 
 function renderTasks(snapshot) {
-  const defaultTasks = [
-    // CTS Tasks
-    { id: "CTS-P0", title: "CTS :: Phase 0 (강등·출처추적 및 경우A)", owner: "antigravity", state: "verified", progress_percent: 100, next: "Phase 1 백본확정 및 모델카드정합성", updated_at: "2026-08-03T15:13:00Z" },
-    { id: "CTS-P1", title: "CTS :: Phase 1 (백본확정 및 Gemma 4)", owner: "antigravity", state: "verified", progress_percent: 100, next: "Phase 2 E2 Baseline 실측 런", updated_at: "2026-08-03T15:13:00Z" },
-    { id: "CTS-P2-E2", title: "CTS :: Phase 2 (E2 Baseline Verified)", owner: "claude", state: "verified", progress_percent: 100, next: "Phase 2 E3 Iso-Depth D<=15 통제실험", updated_at: "2026-08-03T15:13:00Z" },
-    { id: "CTS-P2-E3", title: "CTS :: Phase 2 (E3 Iso-Depth D<=15)", owner: "claude", state: "running", progress_percent: 10, next: "Phase 2 E4 Depth Sweep D in {15..250}", updated_at: "2026-08-03T16:38:00Z" },
-    
-    // System 1.5 Tasks
-    { id: "SYS15-P0", title: "System 1.5 :: Phase 0 (PoC 모듈 설계 & JFB)", owner: "antigravity", state: "verified", progress_percent: 100, next: "Phase 1 Stage 1 DEQ Broyden Solver 물리 GPU 파이프라인", updated_at: "2026-08-03T15:13:00Z" },
-    { id: "SYS15-P1", title: "System 1.5 :: Phase 1 (Stage 1 DEQ Broyden Solver)", owner: "claude", state: "running", progress_percent: 55, next: "Stage 2 Fast Weight Program ΔW 메모리 결합 파이프라인 수행", updated_at: "2026-08-03T16:38:00Z" },
-    { id: "SYS15-P2", title: "System 1.5 :: Phase 2 (Stage 2 FWP ΔW)", owner: "claude", state: "pending", progress_percent: 0, next: "Stage 3 Gated Router 학습", updated_at: "2026-08-03T15:13:00Z" },
+  elements.taskCount.textContent = `${snapshot.tasks.length}개 작업`;
 
-    // EFO Core Tasks
-    { id: "EFO-UI-COLLECTOR", title: "EFO Core :: Project portfolio collector projection", owner: "claude", state: "verified", progress_percent: 100, next: "검증 결과 보관", updated_at: "2026-08-03T15:13:00Z" },
-    { id: "EFO-UI-SURFACE", title: "EFO Core :: CSP-safe progress bars and project portfolio surface", owner: "codex", state: "pending", progress_percent: 45, next: "차단 원인 해소", updated_at: "2026-08-03T15:13:00Z" },
-    { id: "GATE-PROBE-2", title: "EFO Core :: Probe: can a verifier-role agent verify", owner: "antigravity-worker", state: "pending", progress_percent: 65, next: "수정 수 제출", updated_at: "2026-08-03T15:13:00Z" },
-    { id: "GATE-PROBE", title: "EFO Core :: Probe: is self-verification blocked", owner: "antigravity-worker", state: "verified", progress_percent: 100, next: "완료", updated_at: "2026-08-03T15:13:00Z" }
-  ];
-
-  const tasksToRender = (Array.isArray(snapshot.tasks) && snapshot.tasks.length > 0) ? snapshot.tasks : defaultTasks;
-  elements.taskCount.textContent = `${tasksToRender.length}개 작업`;
-
-  // Filter tasks into Dedicated Project Groups
-  const ctsTasks = tasksToRender.filter(t => {
-    const id = String(t.id || "").toUpperCase();
-    const title = String(t.title || "").toUpperCase();
-    return id.startsWith("CTS") || id.startsWith("E1") || id.startsWith("E2") || id.startsWith("E3") || id.startsWith("E4") || id.startsWith("E5") || id.startsWith("E6") || id.startsWith("E7") || title.includes("CTS");
-  });
-
-  const sys15Tasks = tasksToRender.filter(t => {
-    const id = String(t.id || "").toUpperCase();
-    const title = String(t.title || "").toUpperCase();
-    return id.startsWith("SYS15") || title.includes("SYSTEM 1.5") || title.includes("SYSTEM1.5") || title.includes("STAGE");
-  });
-
-  const coreTasks = tasksToRender.filter(t => !ctsTasks.includes(t) && !sys15Tasks.includes(t));
-
-  function renderTaskRows(taskList) {
-    if (taskList.length === 0) return '<tr><td colspan="6" class="empty-cell" style="text-align:center; padding:12px; color:#64748b;">해당 프로젝트 과업이 없습니다.</td></tr>';
-    return taskList.map(task => {
-      const state = String(task.state || "pending").toLowerCase();
-      const progress = clamp(task.progress_percent || 0);
-      const updated = task.updated_at ? formatClock(task.updated_at) : "-";
-      
-      let stateBadge = '<span class="enum-badge pending">⚪ 미착수</span>';
-      if (["verified", "completed", "accepted", "signed"].includes(state)) {
-        stateBadge = '<span class="enum-badge verified">🟢 원장서명완료</span>';
-      } else if (["running", "claimed", "submitted", "working"].includes(state)) {
-        stateBadge = '<span class="enum-badge working">🟡 진행중</span>';
-      }
-
-      return `
-        <tr>
-          <td>
-            <strong class="task-title-cell" style="color: #0f172a !important; font-weight: 800 !important;">${escapeHtml(task.title || task.id)}</strong>
-            <span class="task-id-tag">${escapeHtml(task.id)}</span>
-          </td>
-          <td style="color: #0f172a !important; font-weight: 700 !important;">${escapeHtml(task.owner || "미배정")}</td>
-          <td>${stateBadge}</td>
-          <td style="width: 140px;">
-            <div class="progress-track" role="progressbar" aria-valuenow="${Math.round(progress)}" style="height: 14px; background: #e2e8f0; border-radius: 7px; border: 1px solid #94a3b8; overflow: hidden;">
-              <span style="width:${progress}%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); display: block; border-radius: 5px;"></span>
-            </div>
-            <small class="progress-percent-label" style="font-size:0.78rem; color:#0f172a; font-weight:800;">${Math.round(progress)}%</small>
-          </td>
-          <td style="font-size:0.85rem; color:#0f172a; font-weight:700;">${escapeHtml(task.next || task.description || "검증 이력 보관")}</td>
-          <td style="font-size:0.8rem; color:#1e293b; font-weight:700;">${escapeHtml(updated)}</td>
-        </tr>
-      `;
-    }).join("");
+  if (snapshot.tasks.length === 0) {
+    elements.taskTable.innerHTML =
+      '<div class="empty-state">등록된 EFO 작업이 없습니다.</div>';
+    return;
   }
-
-  elements.taskTable.innerHTML = `
-    <div class="project-ledger-container" style="display: flex; flex-direction: column; gap: 20px;">
-      <!-- 1. CTS Dedicated Project Ledger Box -->
-      <div class="project-ledger-box cts-theme" style="background: #ffffff; border: 2px solid #cbd5e1; border-left: 6px solid #10b981; border-radius: 12px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-        <div class="project-ledger-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <div class="project-ledger-title" style="font-size: 1.1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
-            <span>🟢 CTS 프로젝트 전용 작업 원장</span>
-            <span class="project-ledger-badge" style="background: #e6f4ea; color: #0d652d; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 800;">Phase 0 ~ Phase 6 단계 매핑 (진행률 12%)</span>
-          </div>
-          <span class="project-ledger-badge" style="background: #f1f5f9; color: #334155; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 800;">${ctsTasks.length}개 과업 관리 중</span>
-        </div>
-        <div class="ledger-table-wrapper" style="overflow-x: auto;">
-          <table class="ledger-table" style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">Phase / 과업명</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">담당자</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">상태</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">진행률</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">다음 단계 (Next Step)</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">최근 변경</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${renderTaskRows(ctsTasks)}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- 2. System 1.5 Dedicated Project Ledger Box -->
-      <div class="project-ledger-box sys15-theme" style="background: #ffffff; border: 2px solid #cbd5e1; border-left: 6px solid #2563eb; border-radius: 12px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-        <div class="project-ledger-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <div class="project-ledger-title" style="font-size: 1.1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
-            <span>🔵 System 1.5 프로젝트 전용 작업 원장</span>
-            <span class="project-ledger-badge" style="background: #e8f0fe; color: #1967d2; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 800;">Phase 0 ~ Phase 5 단계 매핑 (진행률 33%)</span>
-          </div>
-          <span class="project-ledger-badge" style="background: #f1f5f9; color: #334155; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 800;">${sys15Tasks.length}개 과업 관리 중</span>
-        </div>
-        <div class="ledger-table-wrapper" style="overflow-x: auto;">
-          <table class="ledger-table" style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">Phase / 과업명</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">담당자</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">상태</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">진행률</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">다음 단계 (Next Step)</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">최근 변경</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${renderTaskRows(sys15Tasks)}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- 3. EFO Core & Other Tasks Ledger Box -->
-      <div class="project-ledger-box core-theme" style="background: #ffffff; border: 2px solid #cbd5e1; border-left: 6px solid #8b5cf6; border-radius: 12px; padding: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
-        <div class="project-ledger-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-          <div class="project-ledger-title" style="font-size: 1.1rem; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 10px;">
-            <span>🟣 EFO Core & 기타 검증 원장</span>
-            <span class="project-ledger-badge" style="background: #f3e8ff; color: #6b21a8; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 800;">인프라 및 오케스트레이터 관리</span>
-          </div>
-          <span class="project-ledger-badge" style="background: #f1f5f9; color: #334155; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 800;">${coreTasks.length}개 과업 관리 중</span>
-        </div>
-        <div class="ledger-table-wrapper" style="overflow-x: auto;">
-          <table class="ledger-table" style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr style="background: #f1f5f9; border-bottom: 2px solid #cbd5e1;">
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">과업명</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">담당자</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">상태</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">진행률</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">다음 단계 (Next Step)</th>
-                <th style="padding: 10px; text-align: left; color: #0f172a; font-weight: 800; font-size: 0.88rem;">최근 변경</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${renderTaskRows(coreTasks)}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  `;
-}
 
   // Filter tasks into Dedicated Project Groups
   const ctsTasks = snapshot.tasks.filter(t => {

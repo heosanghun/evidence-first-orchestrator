@@ -8,8 +8,8 @@
   <meta name="description" content="Evidence First Orchestrator 실시간 운영 현황">
   <title>EFO Operations</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=2.7.0">
-  <script src="/assets/app.js?v=2.7.0" defer></script>
+  <link rel="stylesheet" href="/assets/styles.css?v=2.3.0">
+  <script src="/assets/app.js?v=2.3.0" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -264,86 +264,59 @@
       </article>
     </section>
 
-        <section class="section-band local-health-band" id="local-health-section" aria-labelledby="local-health-heading">
+    <section class="section-band local-health-band" aria-labelledby="local-health-heading">
       <div class="section-heading">
         <div>
           <p class="eyebrow">로컬 워크스테이션</p>
           <h2 id="local-health-heading">PC 부하와 운영 피로 지수</h2>
         </div>
-        <span class="section-meta" id="local-health-updated">수집기 연결 정상 (실시간)</span>
+        <span class="section-meta" id="local-health-updated">수집기 연결 대기</span>
       </div>
-      <p class="local-health-note" style="color: #475569; font-weight: 700; font-size: 0.88rem; margin-bottom: 12px;">
-        CPU·메모리·디스크 압박 및 연속 가동시간을 종합 산출한 4대 주요 운영 메트릭 카드입니다.
+      <p class="local-health-note">
+        CPU·메모리·디스크 압박·연속 가동시간을 합친 운영용 지표입니다.
+        의료적 스트레스나 하드웨어 수명 진단이 아닙니다.
       </p>
-
-      <div class="local-health-cards-grid">
-        <!-- Card 1: CPU 부하 지수 -->
-        <article class="local-card">
-          <div class="local-card-head">
-            <span class="local-card-title">💻 CPU 부하 지수</span>
-            <span class="local-card-badge normal" id="local-cpu-badge">🟢 정상</span>
+      <div class="local-health-grid">
+        <article class="local-stress-summary" id="local-stress-card">
+          <div>
+            <span class="local-metric-label">합성 부하 지수</span>
+            <strong id="local-stress-label">연결 대기</strong>
           </div>
-          <div class="local-card-value">
-            <strong id="local-cpu-val">14.2%</strong>
-            <small id="local-cpu-sub">멀티스레드 부하 정상</small>
-          </div>
-          <div class="local-card-gauge">
-            <div class="local-gauge-track">
-              <div id="local-cpu-bar" class="local-gauge-fill cpu" style="width: 14.2%;"></div>
-            </div>
-          </div>
+          <progress class="progress-track progress-large" id="local-stress"
+                    aria-label="로컬 PC 합성 부하 지수" max="100" value="0">0%</progress>
+          <span class="local-stress-status" id="local-stress-status">
+            수집되지 않음
+          </span>
         </article>
-
-        <!-- Card 2: System 메모리 -->
-        <article class="local-card">
-          <div class="local-card-head">
-            <span class="local-card-title">🧠 System 메모리</span>
-            <span class="local-card-badge normal" id="local-mem-badge">🟢 여유</span>
+        <article class="local-metric">
+          <div class="local-metric-head">
+            <span class="local-metric-label">CPU</span>
+            <strong id="local-cpu-label">-</strong>
           </div>
-          <div class="local-card-value">
-            <strong id="local-mem-val">27.4 GiB</strong>
-            <small id="local-mem-sub">251.5 GiB 중 사용 (11%)</small>
-          </div>
-          <div class="local-card-gauge">
-            <div class="local-gauge-track">
-              <div id="local-mem-bar" class="local-gauge-fill memory" style="width: 11%;"></div>
-            </div>
-          </div>
+          <progress class="progress-track local-progress" id="local-cpu"
+                    aria-label="로컬 PC CPU 사용률" max="100" value="0">0%</progress>
         </article>
-
-        <!-- Card 3: C: 저장 공간 -->
-        <article class="local-card">
-          <div class="local-card-head">
-            <span class="local-card-title">💾 C: 저장 공간</span>
-            <span class="local-card-badge warning" id="local-disk-badge">🟡 92.1%</span>
+        <article class="local-metric">
+          <div class="local-metric-head">
+            <span class="local-metric-label">메모리</span>
+            <strong id="local-memory-label">-</strong>
           </div>
-          <div class="local-card-value">
-            <strong id="local-disk-val">3,203 GiB</strong>
-            <small id="local-disk-sub">3,666.4 GiB 중 사용 (사용 가능 463 GiB)</small>
-          </div>
-          <div class="local-card-gauge">
-            <div class="local-gauge-track">
-              <div id="local-disk-bar" class="local-gauge-fill disk" style="width: 92.1%;"></div>
-            </div>
-          </div>
+          <progress class="progress-track local-progress" id="local-memory"
+                    aria-label="로컬 PC 메모리 사용률" max="100" value="0">0%</progress>
         </article>
-
-        <!-- Card 4: 운영 연속성 지수 -->
-        <article class="local-card">
-          <div class="local-card-head">
-            <span class="local-card-title">⚡ 운영 연속성 지수</span>
-            <span class="local-card-badge info" id="local-stress-badge">⚡ 120s 수집</span>
+        <article class="local-metric">
+          <div class="local-metric-head">
+            <span class="local-metric-label">C: 저장공간</span>
+            <strong id="local-disk-label">-</strong>
           </div>
-          <div class="local-card-value">
-            <strong id="local-stress-val">54일 18시간</strong>
-            <small id="local-stress-sub">연속 가동 안정성 지수 (부하 0.07)</small>
-          </div>
-          <div class="local-card-gauge">
-            <div class="local-gauge-track">
-              <div id="local-stress-bar" class="local-gauge-fill stress" style="width: 18%;"></div>
-            </div>
-          </div>
+          <progress class="progress-track local-progress" id="local-disk"
+                    aria-label="로컬 PC C 드라이브 사용률" max="100" value="0">0%</progress>
         </article>
+      </div>
+      <div class="local-health-details">
+        <span id="local-device">장치: -</span>
+        <span id="local-uptime">가동 시간: -</span>
+        <span id="local-processes">프로세스: -</span>
       </div>
     </section>
 
