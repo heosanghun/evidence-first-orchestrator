@@ -31,6 +31,7 @@ never treated my own re-run as independent confirmation.
 | `model.py` | **1 issue** | #15 `permissions`/`gates` are never type-checked |
 | `doctor.py` (legacy path) | **1 issue** | #17 `--write-test` writes outside `reports/<agent>/` and reports a path that hides it |
 | `archive.py` / `provenance.py` limit | **1 issue** | #18 one config key is a copy threshold on one path and a hard ceiling on the other |
+| `repair_projections` / `cli.py` | **1 issue** | #19 repair drops `last_event_hash`; a later proxy submit escapes the CLI as a `KeyError` traceback |
 | `proxy_submit` + grant | clean | `NOTE-proxy-grant-holds.md` |
 | `provenance.py` byte-exactness | clean — 9 mutations, all refused | `NOTE-byte-exactness-holds.md` |
 | `monitor/collector.py` (redaction) | clean | `NOTE-collector-redaction-holds.md` |
@@ -40,10 +41,10 @@ never treated my own re-run as independent confirmation.
 | collector identity registry | clean, but diverges | `NOTE-two-identity-implementations.md` |
 | `util.py`, `lock.py` | clean | `NOTE-util-and-lock-hold.md` |
 | `cli.py` | clean | `NOTE-cli-surface-holds.md` |
-| `dashboard.py`, `errors.py` | clean | `NOTE-dashboard-and-errors-hold.md` |
+| `dashboard.py`, `errors.py` | clean, **one claim corrected** | `NOTE-dashboard-and-errors-hold.md` — its `escapes: []` is disproved by #19 |
 | alias / `alias_chain` machinery | clean | `NOTE-alias-lineage-holds.md` |
 
-Eleven components were probed and found sound. That is half the value of this
+Eleven components were probed and found sound (one with a claim since corrected — see #19). That is half the value of this
 pass: it says where *not* to look next.
 
 ---
@@ -73,6 +74,7 @@ the name, not as the whole name or a `\b`-delimited word.
 | Where | What happens |
 |---|---|
 | `repair_projections` (#12) | rebuilds the projection **from the tampered ledger**, reverts a real `task.claimed`, reports `repaired: ['T1']`, leaves `doctor healthy=True` |
+| `repair_projections` again (#19) | silently drops `last_event_hash`; `audit_projections` excludes that key so nothing notices, and the next proxy submit dies with an uncaught `KeyError` |
 | the same command via the CLI (`NOTE-cli-surface-holds.md`) | the only mutating subcommand of 30 that appends no event — even in the honest case |
 | `archive.py` (#10) | the ledger holds every per-file sha256; no shipped code ever recomputes them. Tamper, replace `bundle.json`, or `rm -rf` the bundle — `ledger.verify`, `get_task`, `audit_projections` and `doctor` all stay clean |
 

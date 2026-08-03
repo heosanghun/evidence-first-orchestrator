@@ -1,4 +1,16 @@
-# `dashboard.py` and `errors.py` at `main` `5694ab45` — the bind guard is a strict allow-list and nothing escapes the CLI; no issue filed
+# `dashboard.py` and `errors.py` at `main` `5694ab45` — the bind guard is a strict allow-list; no issue filed
+
+> **CORRECTED 2026-08-03.** The `escapes: []` result below is **too strong** and
+> is disproved by issue #19. See
+> `ADDENDUM-architecture-claims-and-repair-drops-a-field.md`: a `KeyError` from
+> `workspace.py:1182` reaches a real `efo task proxy-submit` invocation as an
+> uncaught traceback. The census below enumerated `raise` **statements**, so it
+> structurally could not see an exception arriving from a dict index, and
+> `KeyError` is a `LookupError` — in none of `cli.main`'s four caught families.
+> Everything else in this note stands as measured. The lesson is kept rather
+> than the claim: an exhaustive census is exhaustive over *the thing it
+> enumerates*, and the shape it cannot enumerate is where the counterexample
+> lives.
 
 Reproduce with `raw/probe_dashboard_and_errors.py`; raw output in
 `raw/raw-dashboard-errors.txt`. **28 checks, 0 unexpected.**
@@ -86,8 +98,11 @@ failing on anything unadjudicated:
 | `ValueError` | not an `EFOError`, but **in** the catch tuple — exit 2 | cli |
 | `SystemExit` | `__main__.py:7`, `raise SystemExit(main())` — the exit itself | `__main__` |
 
-`escapes: []`. Both `ValueError` sites were driven through `main()` and produce
-a one-line message with exit 2, no traceback.
+`escapes: []` **among raised statements** — which is the limit of this census,
+not a property of the package. Both `ValueError` sites were driven through
+`main()` and produce a one-line message with exit 2, no traceback. An
+exception raised implicitly by the interpreter is outside what this table can
+see; issue #19 is one, and it does escape.
 
 One of them is a dead branch: `cli.py:28`'s
 `raise ValueError("Either --description or --description-file is required")` is
