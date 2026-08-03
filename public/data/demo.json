@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-07-30T05:30:00Z",
+  "generated_at": "2026-08-03T07:46:51Z",
   "collection_interval_seconds": 120,
   "source": {
     "mode": "demo",
@@ -208,136 +208,220 @@
   },
   "activity": [
     {
-      "sequence": 7,
-      "at": "2026-07-29T08:12:00Z",
+      "at": "2026-08-03T07:46:51Z",
       "actor": "antigravity",
       "actor_name": "Antigravity",
       "action": "task.created",
-      "label": "작업 생성",
       "category": "planning",
-      "task_id": "P1b-3",
-      "title": "통계 프로토콜 사전등록"
+      "label": "작업 생성",
+      "title": "CTS :: Phase 2 E3 Iso-Depth D15 Control Experiment"
     },
     {
-      "sequence": 8,
-      "at": "2026-07-29T08:18:00Z",
+      "at": "2026-08-03T06:46:51Z",
       "actor": "claude-a",
       "actor_name": "Claude A",
-      "action": "task.claimed",
-      "label": "작업 할당",
-      "category": "work",
-      "task_id": "P1b-3",
-      "title": "통계 프로토콜 사전등록"
-    },
-    {
-      "sequence": 9,
-      "at": "2026-07-29T08:21:00Z",
-      "actor": "claude-a",
-      "actor_name": "Claude A",
-      "action": "task.started",
-      "label": "작업 시작",
-      "category": "work",
-      "task_id": "P1b-3",
-      "title": "통계 프로토콜 사전등록"
-    },
-    {
-      "sequence": 10,
-      "at": "2026-07-29T10:05:00Z",
-      "actor": "claude-a",
-      "actor_name": "Claude A",
-      "action": "task.heartbeat",
-      "label": "진행 신호",
-      "category": "work",
-      "task_id": "P1b-3",
-      "title": "통계 프로토콜 사전등록"
-    },
-    {
-      "sequence": 11,
-      "at": "2026-07-29T12:40:00Z",
-      "actor": "claude-a",
-      "actor_name": "Claude A",
-      "action": "task.submitted",
-      "label": "증거 제출",
+      "action": "evidence.submitted",
       "category": "evidence",
-      "task_id": "P1b-3",
-      "title": "통계 프로토콜 사전등록"
+      "label": "증거 제출",
+      "title": "E2-BENCHMARK · Native Think Baseline Verification (43.3%)"
     },
     {
-      "sequence": 12,
-      "at": "2026-07-29T13:16:00Z",
-      "actor": "codex",
-      "actor_name": "Codex",
-      "action": "task.verified",
-      "label": "검증 통과",
-      "category": "success",
-      "task_id": "P1b-3",
-      "title": "통계 프로토콜 사전등록"
-    },
-    {
-      "sequence": 13,
-      "at": "2026-07-29T16:04:00Z",
-      "actor": "claude-b",
-      "actor_name": "Claude B",
-      "action": "task.blocked",
-      "label": "작업 차단",
-      "category": "issue",
-      "task_id": "C1",
-      "title": "공통 백본 진입 검증"
-    },
-    {
-      "sequence": 14,
-      "at": "2026-07-29T18:32:00Z",
+      "at": "2026-08-03T05:46:51Z",
       "actor": "antigravity",
       "actor_name": "Antigravity",
-      "action": "task.requeued",
-      "label": "작업 재대기",
-      "category": "planning",
-      "task_id": "C1",
-      "title": "공통 백본 진입 검증"
+      "action": "task.verified",
+      "category": "success",
+      "label": "검증 통과",
+      "title": "E2-BENCHMARK · Abort Rule Pass +/- 3.3pp"
     },
     {
-      "sequence": 15,
-      "at": "2026-07-30T00:11:00Z",
-      "actor": "codex",
-      "actor_name": "Codex",
+      "at": "2026-08-03T04:46:51Z",
+      "actor": "claude-b",
+      "actor_name": "Claude B",
       "action": "task.claimed",
-      "label": "작업 할당",
       "category": "work",
-      "task_id": "OPS-DASH-1",
-      "title": "실시간 운영 대시보드"
+      "label": "작업 수행",
+      "title": "CTS :: Publish verified P1b statistics tools"
     },
     {
-      "sequence": 16,
-      "at": "2026-07-30T00:14:00Z",
-      "actor": "codex",
-      "actor_name": "Codex",
-      "action": "task.started",
-      "label": "작업 시작",
-      "category": "work",
-      "task_id": "OPS-DASH-1",
-      "title": "실시간 운영 대시보드"
+      "at": "2026-08-03T03:46:51Z",
+      "actor": "antigravity",
+      "actor_name": "Antigravity",
+      "action": "ledger.signed",
+      "category": "success",
+      "label": "원장 서명",
+      "title": "Cryptographic SHA-256 Ledger Signature Sequence #315"
     },
     {
-      "sequence": 17,
-      "at": "2026-07-30T03:42:00Z",
+      "at": "2026-08-03T02:46:51Z",
       "actor": "codex",
       "actor_name": "Codex",
-      "action": "task.heartbeat",
-      "label": "진행 신호",
-      "category": "work",
-      "task_id": "OPS-DASH-1",
-      "title": "실시간 운영 대시보드"
+      "action": "task.archived",
+      "category": "planning",
+      "label": "계획 동기화",
+      "title": "EFO Core :: CSP-safe progress bars and project portfolio surface"
     },
     {
-      "sequence": 18,
-      "at": "2026-07-30T05:18:00Z",
-      "actor": "codex",
-      "actor_name": "Codex",
-      "action": "task.submitted",
-      "label": "증거 제출",
+      "at": "2026-08-03T01:46:51Z",
+      "actor": "claude-a",
+      "actor_name": "Claude A",
+      "action": "task.claimed",
+      "category": "work",
+      "label": "작업 수행",
+      "title": "System 1.5 :: Stage 1 DEQ Broyden Solver on physical GPU 0~7"
+    },
+    {
+      "at": "2026-08-03T00:46:51Z",
+      "actor": "antigravity",
+      "actor_name": "Antigravity",
+      "action": "evidence.submitted",
       "category": "evidence",
-      "task_id": "OPS-DASH-1",
-      "title": "실시간 운영 대시보드"
+      "label": "증거 제출",
+      "title": "UI :: Local Workstation 4-Card Clean White Grid v2.4.0"
+    },
+    {
+      "at": "2026-08-02T23:46:51Z",
+      "actor": "antigravity",
+      "actor_name": "Antigravity",
+      "action": "task.created",
+      "category": "planning",
+      "label": "작업 생성",
+      "title": "CTS :: Phase 2 E3 Iso-Depth D15 Control Experiment"
+    },
+    {
+      "at": "2026-08-02T22:46:51Z",
+      "actor": "claude-a",
+      "actor_name": "Claude A",
+      "action": "evidence.submitted",
+      "category": "evidence",
+      "label": "증거 제출",
+      "title": "E2-BENCHMARK · Native Think Baseline Verification (43.3%)"
+    },
+    {
+      "at": "2026-08-02T21:46:51Z",
+      "actor": "antigravity",
+      "actor_name": "Antigravity",
+      "action": "task.verified",
+      "category": "success",
+      "label": "검증 통과",
+      "title": "E2-BENCHMARK · Abort Rule Pass +/- 3.3pp"
+    },
+    {
+      "at": "2026-08-02T20:46:51Z",
+      "actor": "claude-b",
+      "actor_name": "Claude B",
+      "action": "task.claimed",
+      "category": "work",
+      "label": "작업 수행",
+      "title": "CTS :: Publish verified P1b statistics tools"
+    },
+    {
+      "at": "2026-08-02T19:46:51Z",
+      "actor": "antigravity",
+      "actor_name": "Antigravity",
+      "action": "ledger.signed",
+      "category": "success",
+      "label": "원장 서명",
+      "title": "Cryptographic SHA-256 Ledger Signature Sequence #315"
+    },
+    {
+      "at": "2026-08-02T18:46:51Z",
+      "actor": "codex",
+      "actor_name": "Codex",
+      "action": "task.archived",
+      "category": "planning",
+      "label": "계획 동기화",
+      "title": "EFO Core :: CSP-safe progress bars and project portfolio surface"
+    },
+    {
+      "at": "2026-08-02T17:46:51Z",
+      "actor": "claude-a",
+      "actor_name": "Claude A",
+      "action": "task.claimed",
+      "category": "work",
+      "label": "작업 수행",
+      "title": "System 1.5 :: Stage 1 DEQ Broyden Solver on physical GPU 0~7"
+    },
+    {
+      "at": "2026-08-02T16:46:51Z",
+      "actor": "antigravity",
+      "actor_name": "Antigravity",
+      "action": "evidence.submitted",
+      "category": "evidence",
+      "label": "증거 제출",
+      "title": "UI :: Local Workstation 4-Card Clean White Grid v2.4.0"
+    },
+    {
+      "at": "2026-08-02T15:46:51Z",
+      "actor": "antigravity",
+      "actor_name": "Antigravity",
+      "action": "task.created",
+      "category": "planning",
+      "label": "작업 생성",
+      "title": "CTS :: Phase 2 E3 Iso-Depth D15 Control Experiment"
+    },
+    {
+      "at": "2026-08-02T14:46:51Z",
+      "actor": "claude-a",
+      "actor_name": "Claude A",
+      "action": "evidence.submitted",
+      "category": "evidence",
+      "label": "증거 제출",
+      "title": "E2-BENCHMARK · Native Think Baseline Verification (43.3%)"
+    },
+    {
+      "at": "2026-08-02T13:46:51Z",
+      "actor": "antigravity",
+      "actor_name": "Antigravity",
+      "action": "task.verified",
+      "category": "success",
+      "label": "검증 통과",
+      "title": "E2-BENCHMARK · Abort Rule Pass +/- 3.3pp"
+    },
+    {
+      "at": "2026-08-02T12:46:51Z",
+      "actor": "claude-b",
+      "actor_name": "Claude B",
+      "action": "task.claimed",
+      "category": "work",
+      "label": "작업 수행",
+      "title": "CTS :: Publish verified P1b statistics tools"
+    },
+    {
+      "at": "2026-08-02T11:46:51Z",
+      "actor": "antigravity",
+      "actor_name": "Antigravity",
+      "action": "ledger.signed",
+      "category": "success",
+      "label": "원장 서명",
+      "title": "Cryptographic SHA-256 Ledger Signature Sequence #315"
+    },
+    {
+      "at": "2026-08-02T10:46:51Z",
+      "actor": "codex",
+      "actor_name": "Codex",
+      "action": "task.archived",
+      "category": "planning",
+      "label": "계획 동기화",
+      "title": "EFO Core :: CSP-safe progress bars and project portfolio surface"
+    },
+    {
+      "at": "2026-08-02T09:46:51Z",
+      "actor": "claude-a",
+      "actor_name": "Claude A",
+      "action": "task.claimed",
+      "category": "work",
+      "label": "작업 수행",
+      "title": "System 1.5 :: Stage 1 DEQ Broyden Solver on physical GPU 0~7"
+    },
+    {
+      "at": "2026-08-02T08:46:51Z",
+      "actor": "antigravity",
+      "actor_name": "Antigravity",
+      "action": "evidence.submitted",
+      "category": "evidence",
+      "label": "증거 제출",
+      "title": "UI :: Local Workstation 4-Card Clean White Grid v2.4.0"
     }
   ],
   "history": [
