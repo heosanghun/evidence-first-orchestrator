@@ -551,13 +551,11 @@ function renderAgents(snapshot) {
           </div>
 
           <!-- BULLETPROOF 16PX GREEN FILL GAUGE BAR -->
-          <div class="agent-gauge-container" style="margin: 14px 0 10px 0;">
-            <div class="agent-gauge-track" style="width: 100%; height: 16px; background: #e2e8f0; border-radius: 8px; border: 1.5px solid #94a3b8; overflow: hidden; position: relative;">
-              <div class="agent-gauge-fill" style="${fillStyle} height: 100%; border-radius: 6px; transition: width 0.4s ease-in-out;"></div>
+          <div class="agent-progress-row" style="display: flex; align-items: center; gap: 12px; margin: 14px 0 10px 0;">
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress)}" style="flex: 1; height: 16px !important; background: #e2e8f0 !important; border-radius: 8px !important; border: 1.5px solid #94a3b8 !important; overflow: hidden !important; position: relative !important;">
+              <span style="width: ${progress}%; height: 100% !important; background: #10b981 !important; background-image: linear-gradient(90deg, #10b981 0%, #059669 100%) !important; display: block !important; border-radius: 6px !important; box-shadow: 0 0 10px rgba(16, 185, 129, 0.6) !important;"></span>
             </div>
-            <div class="agent-progress-info" style="display: flex; justify-content: flex-end; margin-top: 4px;">
-              <span class="agent-progress-text" style="font-size: 0.88rem !important; font-weight: 800 !important; color: #0f172a !important;">${Math.round(progress)}%</span>
-            </div>
+            <small class="progress-percent-label" style="font-size: 0.88rem !important; font-weight: 800 !important; color: #0f172a !important; min-width: 38px; text-align: right;">${Math.round(progress)}%</small>
           </div>
 
           <div class="agent-next">
