@@ -8,8 +8,8 @@
   <meta name="description" content="Evidence First Orchestrator 실시간 운영 현황">
   <title>EFO Operations</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=2.2.0">
-  <script src="/assets/app.js?v=2.2.0" defer></script>
+  <link rel="stylesheet" href="/assets/styles.css?v=2.3.0">
+  <script src="/assets/app.js?v=2.3.0" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -359,56 +359,53 @@
     <section class="chat-band" aria-labelledby="chat-heading">
       <div class="chat-heading">
         <div>
-          <p class="eyebrow">운영 대화</p>
-          <h2 id="chat-heading">Codex 오케스트레이션에게 묻기</h2>
+          <p class="eyebrow">🤖 OpenAI Architecture Assistant</p>
+          <h2 id="chat-heading">Codex AI 오케스트레이션 프롬프트 Center</h2>
           <p>
-            최신 EFO 원장, 프로젝트, 에이전트, GPU 상태를 근거로 답합니다.
-            이 창은 읽기 전용이며 작업 실행이나 서버 변경은 하지 않습니다.
+            최신 EFO 실시간 원장, 프로젝트, 에이전트, GPU 멀티 클러스터 상태를 기반으로 분석 답변을 제공합니다.
           </p>
         </div>
-        <span class="chat-mode-badge" id="chat-mode">라이브 스냅샷</span>
+        <span class="chat-mode-badge" id="chat-mode"><span class="status-pulse-dot"></span> 라이브 스냅샷 준비됨</span>
       </div>
 
-      <div class="chat-quick-prompts" aria-label="빠른 질문">
+      <div class="chat-quick-prompts" aria-label="빠른 프롬프트 선택">
         <button type="button" data-chat-prompt="전체 프로젝트 진행률과 다음 단계를 요약해줘">
-          전체 진행률
+          📊 전체 진행률
         </button>
         <button type="button" data-chat-prompt="현재 각 에이전트가 무엇을 하고 있는지 알려줘">
-          에이전트 현황
+          🤖 에이전트 현황
         </button>
         <button type="button" data-chat-prompt="막힌 작업과 해결해야 할 항목을 알려줘">
-          막힌 작업
+          ⚠️ 막힌 작업
         </button>
         <button type="button" data-chat-prompt="현재 GPU 사용 현황과 실행 중인 프로젝트를 알려줘">
-          GPU 현황
+          ⚡ GPU 현황
         </button>
       </div>
 
-      <div class="chat-log" id="chat-log" role="log" aria-live="polite"
-           aria-label="Codex 운영 대화">
+      <div class="chat-log" id="chat-log" role="log" aria-live="polite" aria-label="Codex 운영 대화">
         <article class="chat-message assistant">
           <div class="chat-message-meta">
-            <strong>Codex 운영 어시스턴트</strong>
-            <span>준비됨</span>
+            <strong>🤖 Codex AI 어시스턴트</strong>
+            <span>실시간 대기 중</span>
           </div>
           <p>
-            진행률, 현재 담당자, 막힌 작업, 다음 단계, GPU 상태를 물어보세요.
-            답변에는 사용한 스냅샷 시각이 함께 표시됩니다.
+            안녕하세요! CTS 및 System 1.5 연구 파이프라인 진행률, 각 에이전트 작업 상태, GPU 사용 현황 및 다음 단계를 프롬프트로 자유롭게 질문하세요.
           </p>
         </article>
       </div>
 
       <form class="chat-form" id="chat-form">
-        <label for="chat-input">질문 또는 프롬프트</label>
+        <label for="chat-input">✨ OpenAI AI 질문 및 프롬프트 입력</label>
         <div class="chat-compose">
-          <textarea id="chat-input" name="message" rows="3" maxlength="1500"
-                    placeholder="예: CTS와 System 1.5의 현재 진행률, 막힌 항목, 다음 단계를 한 번에 알려줘"
+          <textarea id="chat-input" name="message" rows="2" maxlength="1500"
+                    placeholder="예: CTS와 System 1.5의 현재 진행률, 막힌 항목, 다음 단계를 알려줘..."
                     required></textarea>
-          <button class="chat-send" id="chat-send" type="submit">전송</button>
+          <button class="chat-send" id="chat-send" type="submit" title="프롬프트 전송">↑</button>
         </div>
         <div class="chat-form-meta">
-          <span>Enter 전송 · Shift+Enter 줄바꿈</span>
-          <span id="chat-status">최신 스냅샷 대기 중</span>
+          <span>⌨️ Enter 전송 · Shift+Enter 줄바꿈</span>
+          <span id="chat-status">최신 스냅샷 준비 완료</span>
         </div>
       </form>
     </section>

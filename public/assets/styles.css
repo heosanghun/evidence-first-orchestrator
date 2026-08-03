@@ -2102,3 +2102,224 @@ dialog input:focus {
   background-color: #10b981 !important;
   background-image: linear-gradient(90deg, #10b981 0%, #059669 100%) !important;
 }
+
+
+/* === OPENAI CHATGPT STYLE PREMIUM PROMPT DESIGN (v2.3.0) === */
+.chat-band {
+  background: #0f172a !important;
+  border: 2px solid #334155 !important;
+  border-radius: 20px !important;
+  padding: 24px 28px !important;
+  color: #f8fafc !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3) !important;
+  margin-top: 28px !important;
+}
+
+.chat-heading {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-start !important;
+  border-bottom: 1px solid #334155 !important;
+  padding-bottom: 16px !important;
+  margin-bottom: 18px !important;
+}
+
+.chat-heading .eyebrow {
+  color: #10b981 !important;
+  font-weight: 800 !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+}
+
+.chat-heading h2 {
+  color: #ffffff !important;
+  font-size: 1.4rem !important;
+  font-weight: 800 !important;
+  margin: 4px 0 !important;
+}
+
+.chat-heading p {
+  color: #94a3b8 !important;
+  font-size: 0.88rem !important;
+  margin: 0 !important;
+}
+
+.chat-mode-badge {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: #10b981 !important;
+  border: 1px solid #10b981 !important;
+  padding: 6px 14px !important;
+  border-radius: 20px !important;
+  font-weight: 800 !important;
+  font-size: 0.82rem !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.chat-quick-prompts {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  margin-bottom: 20px !important;
+}
+
+.chat-quick-prompts button {
+  background: #1e293b !important;
+  color: #e2e8f0 !important;
+  border: 1.5px solid #475569 !important;
+  border-radius: 20px !important;
+  padding: 8px 16px !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.chat-quick-prompts button:hover {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: #10b981 !important;
+  color: #ffffff !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2) !important;
+}
+
+.chat-log {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  border-radius: 16px !important;
+  padding: 18px !important;
+  max-height: 320px !important;
+  overflow-y: auto !important;
+  margin-bottom: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+}
+
+.chat-message {
+  padding: 14px 18px !important;
+  border-radius: 16px !important;
+  font-size: 0.92rem !important;
+  line-height: 1.5 !important;
+}
+
+.chat-message.assistant {
+  background: #0f172a !important;
+  border: 1.5px solid #334155 !important;
+  color: #f8fafc !important;
+  border-bottom-left-radius: 4px !important;
+}
+
+.chat-message.user {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  align-self: flex-end !important;
+  border-bottom-right-radius: 4px !important;
+  max-width: 80% !important;
+}
+
+.chat-message-meta {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-bottom: 6px !important;
+  font-size: 0.8rem !important;
+}
+
+.chat-message.assistant .chat-message-meta strong {
+  color: #10b981 !important;
+  font-weight: 800 !important;
+}
+
+.chat-message.user .chat-message-meta strong {
+  color: #ffffff !important;
+  font-weight: 800 !important;
+}
+
+/* OpenAI Premium Prompt Input Bar */
+.chat-form {
+  margin-top: 10px !important;
+}
+
+.chat-form label {
+  display: block !important;
+  color: #cbd5e1 !important;
+  font-weight: 800 !important;
+  font-size: 0.88rem !important;
+  margin-bottom: 8px !important;
+}
+
+.chat-compose {
+  background: #1e293b !important;
+  border: 2px solid #475569 !important;
+  border-radius: 24px !important;
+  padding: 6px 10px 6px 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.chat-compose:focus-within {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.35), inset 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+#chat-input {
+  background: transparent !important;
+  color: #ffffff !important;
+  border: none !important;
+  outline: none !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  resize: none !important;
+  flex: 1 !important;
+  font-family: inherit !important;
+  padding: 8px 0 !important;
+  line-height: 1.4 !important;
+}
+
+#chat-input::placeholder {
+  color: #64748b !important;
+  font-weight: 500 !important;
+}
+
+.chat-send {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  background: #10b981 !important;
+  background-image: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  color: #ffffff !important;
+  font-size: 1.3rem !important;
+  font-weight: 900 !important;
+  border: none !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4) !important;
+}
+
+.chat-send:hover {
+  transform: scale(1.08) !important;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.6) !important;
+}
+
+.chat-form-meta {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  margin-top: 10px !important;
+  padding: 0 8px !important;
+  color: #94a3b8 !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+}
