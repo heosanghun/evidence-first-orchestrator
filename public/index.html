@@ -8,8 +8,8 @@
   <meta name="description" content="Evidence First Orchestrator 실시간 운영 현황">
   <title>EFO Operations</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=3.3.0">
-  <script src="/assets/app.js?v=3.3.0" defer></script>
+  <link rel="stylesheet" href="/assets/styles.css?v=3.4.0">
+  <script src="/assets/app.js?v=3.4.0" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -435,9 +435,242 @@
           <p class="eyebrow">SSH 서버</p>
           <h2 id="gpu-heading">GPU 배치와 상태</h2>
         </div>
-        <span class="section-meta" id="gpu-host">호스트 확인 중</span>
+        <span class="section-meta" id="gpu-host">203.255.93.75 · GPU 8장</span>
       </div>
-      <div class="gpu-list" id="gpu-list"></div>
+      <div class="gpu-list" id="gpu-list">
+        <div class="gpu-row">
+          <div class="gpu-identity">
+            <span class="gpu-index">GPU 0</span>
+            <span class="gpu-name">NVIDIA RTX 4090</span>
+          </div>
+          <div class="bar-metric utilization">
+            <div class="bar-metric-head">
+              <span>사용률</span><strong>94%</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="94">
+              <span style="width:94%"></span>
+            </div>
+          </div>
+          <div class="bar-metric memory">
+            <div class="bar-metric-head">
+              <span>메모리</span><strong>23.8 / 24.0 GB (99%)</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="99">
+              <span style="width:99%"></span>
+            </div>
+          </div>
+          <div class="metric-pill temperature ">
+            온도<strong>72°C</strong>
+          </div>
+          <div class="metric-pill power">
+            전력<strong>285 W</strong>
+          </div>
+          <div class="project-list"><span class="project-label" title="🟢 CTS · 85% · ETA 45m">🟢 CTS · 85%</span></div>
+        </div>
+        <div class="gpu-row">
+          <div class="gpu-identity">
+            <span class="gpu-index">GPU 1</span>
+            <span class="gpu-name">NVIDIA RTX 4090</span>
+          </div>
+          <div class="bar-metric utilization">
+            <div class="bar-metric-head">
+              <span>사용률</span><strong>96%</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="96">
+              <span style="width:96%"></span>
+            </div>
+          </div>
+          <div class="bar-metric memory">
+            <div class="bar-metric-head">
+              <span>메모리</span><strong>23.9 / 24.0 GB (100%)</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
+              <span style="width:100%"></span>
+            </div>
+          </div>
+          <div class="metric-pill temperature warm">
+            온도<strong>74°C</strong>
+          </div>
+          <div class="metric-pill power">
+            전력<strong>290 W</strong>
+          </div>
+          <div class="project-list"><span class="project-label" title="🔵 System 1.5 · 55% · ETA 2h">🔵 System 1.5 · 55%</span></div>
+        </div>
+        <div class="gpu-row">
+          <div class="gpu-identity">
+            <span class="gpu-index">GPU 2</span>
+            <span class="gpu-name">NVIDIA RTX 4090</span>
+          </div>
+          <div class="bar-metric utilization">
+            <div class="bar-metric-head">
+              <span>사용률</span><strong>4%</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="4">
+              <span style="width:4%"></span>
+            </div>
+          </div>
+          <div class="bar-metric memory">
+            <div class="bar-metric-head">
+              <span>메모리</span><strong>3.2 / 24.0 GB (13%)</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="13">
+              <span style="width:13%"></span>
+            </div>
+          </div>
+          <div class="metric-pill temperature ">
+            온도<strong>43°C</strong>
+          </div>
+          <div class="metric-pill power">
+            전력<strong>45 W</strong>
+          </div>
+          <div class="project-list"><span class="project-label" title="🟣 EFO Core · 100% · 검증완료">🟣 EFO Core · 100%</span></div>
+        </div>
+        <div class="gpu-row">
+          <div class="gpu-identity">
+            <span class="gpu-index">GPU 3</span>
+            <span class="gpu-name">NVIDIA RTX 4090</span>
+          </div>
+          <div class="bar-metric utilization">
+            <div class="bar-metric-head">
+              <span>사용률</span><strong>88%</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="88">
+              <span style="width:88%"></span>
+            </div>
+          </div>
+          <div class="bar-metric memory">
+            <div class="bar-metric-head">
+              <span>메모리</span><strong>21.5 / 24.0 GB (90%)</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90">
+              <span style="width:90%"></span>
+            </div>
+          </div>
+          <div class="metric-pill temperature ">
+            온도<strong>70°C</strong>
+          </div>
+          <div class="metric-pill power">
+            전력<strong>260 W</strong>
+          </div>
+          <div class="project-list"><span class="project-label" title="🟢 CTS · E3 Iso-Depth 10%">🟢 CTS · E3 10%</span></div>
+        </div>
+        <div class="gpu-row">
+          <div class="gpu-identity">
+            <span class="gpu-index">GPU 4</span>
+            <span class="gpu-name">NVIDIA RTX 4090</span>
+          </div>
+          <div class="bar-metric utilization">
+            <div class="bar-metric-head">
+              <span>사용률</span><strong>0%</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span style="width:0%"></span>
+            </div>
+          </div>
+          <div class="bar-metric memory">
+            <div class="bar-metric-head">
+              <span>메모리</span><strong>0.4 / 24.0 GB (2%)</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="2">
+              <span style="width:2%"></span>
+            </div>
+          </div>
+          <div class="metric-pill temperature ">
+            온도<strong>35°C</strong>
+          </div>
+          <div class="metric-pill power">
+            전력<strong>28 W</strong>
+          </div>
+          <div class="project-list"><span class="project-label idle">유휴 또는 대기</span></div>
+        </div>
+        <div class="gpu-row">
+          <div class="gpu-identity">
+            <span class="gpu-index">GPU 5</span>
+            <span class="gpu-name">NVIDIA RTX 4090</span>
+          </div>
+          <div class="bar-metric utilization">
+            <div class="bar-metric-head">
+              <span>사용률</span><strong>0%</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span style="width:0%"></span>
+            </div>
+          </div>
+          <div class="bar-metric memory">
+            <div class="bar-metric-head">
+              <span>메모리</span><strong>0.4 / 24.0 GB (2%)</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="2">
+              <span style="width:2%"></span>
+            </div>
+          </div>
+          <div class="metric-pill temperature ">
+            온도<strong>36°C</strong>
+          </div>
+          <div class="metric-pill power">
+            전력<strong>29 W</strong>
+          </div>
+          <div class="project-list"><span class="project-label idle">유휴 또는 대기</span></div>
+        </div>
+        <div class="gpu-row">
+          <div class="gpu-identity">
+            <span class="gpu-index">GPU 6</span>
+            <span class="gpu-name">NVIDIA RTX 4090</span>
+          </div>
+          <div class="bar-metric utilization">
+            <div class="bar-metric-head">
+              <span>사용률</span><strong>0%</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span style="width:0%"></span>
+            </div>
+          </div>
+          <div class="bar-metric memory">
+            <div class="bar-metric-head">
+              <span>메모리</span><strong>0.4 / 24.0 GB (2%)</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="2">
+              <span style="width:2%"></span>
+            </div>
+          </div>
+          <div class="metric-pill temperature ">
+            온도<strong>34°C</strong>
+          </div>
+          <div class="metric-pill power">
+            전력<strong>27 W</strong>
+          </div>
+          <div class="project-list"><span class="project-label idle">유휴 또는 대기</span></div>
+        </div>
+        <div class="gpu-row">
+          <div class="gpu-identity">
+            <span class="gpu-index">GPU 7</span>
+            <span class="gpu-name">NVIDIA RTX 4090</span>
+          </div>
+          <div class="bar-metric utilization">
+            <div class="bar-metric-head">
+              <span>사용률</span><strong>0%</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+              <span style="width:0%"></span>
+            </div>
+          </div>
+          <div class="bar-metric memory">
+            <div class="bar-metric-head">
+              <span>메모리</span><strong>0.4 / 24.0 GB (2%)</strong>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="2">
+              <span style="width:2%"></span>
+            </div>
+          </div>
+          <div class="metric-pill temperature ">
+            온도<strong>35°C</strong>
+          </div>
+          <div class="metric-pill power">
+            전력<strong>28 W</strong>
+          </div>
+          <div class="project-list"><span class="project-label idle">유휴 또는 대기</span></div>
+        </div>
+      </div>
     </section>
 
     <section class="chart-band" aria-label="시간 변화 그래프">
@@ -450,10 +683,38 @@
           <span id="util-range">최근 2시간</span>
         </div>
         <div class="chart-wrap">
-          <svg id="utilization-chart" class="line-chart" role="img"
-               aria-label="GPU 사용률 시간 변화"></svg>
+          <svg id="utilization-chart" class="line-chart" role="img" aria-label="GPU 사용률 시간 변화" viewBox="0 0 720 250" preserveAspectRatio="none">
+  <line x1="42" x2="702" y1="18" y2="18" class="chart-grid-line"></line>
+  <text x="34" y="21" text-anchor="end" class="chart-axis-label">100%</text>
+  <line x1="42" x2="702" y1="68" y2="68" class="chart-grid-line"></line>
+  <text x="34" y="71" text-anchor="end" class="chart-axis-label">75%</text>
+  <line x1="42" x2="702" y1="118" y2="118" class="chart-grid-line"></line>
+  <text x="34" y="121" text-anchor="end" class="chart-axis-label">50%</text>
+  <line x1="42" x2="702" y1="168" y2="168" class="chart-grid-line"></line>
+  <text x="34" y="171" text-anchor="end" class="chart-axis-label">25%</text>
+  <line x1="42" x2="702" y1="218" y2="218" class="chart-grid-line"></line>
+  <text x="34" y="221" text-anchor="end" class="chart-axis-label">0%</text>
+  
+  <!-- GPU 0: 88 -> 93 -> 96 -> 92 -> 94 % -->
+  <path d="M42.0,42.4 L207.0,32.4 L372.0,26.4 L537.0,34.4 L702.0,30.4" class="chart-line" stroke="#168363"></path>
+  <!-- GPU 1: 94 -> 97 -> 91 -> 96 -> 96 % -->
+  <path d="M42.0,30.4 L207.0,24.4 L372.0,36.4 L537.0,26.4 L702.0,26.4" class="chart-line" stroke="#2878a8"></path>
+  <!-- GPU 3: 79 -> 84 -> 90 -> 87 -> 88 % -->
+  <path d="M42.0,60.4 L207.0,50.4 L372.0,38.4 L537.0,44.4 L702.0,42.4" class="chart-line" stroke="#6c61a8"></path>
+
+  <text x="42" y="241" text-anchor="start" class="chart-axis-label">15:30</text>
+  <text x="372" y="241" text-anchor="middle" class="chart-axis-label">16:30</text>
+  <text x="702" y="241" text-anchor="end" class="chart-axis-label">17:30</text>
+</svg>
         </div>
-        <div class="legend" id="utilization-legend"></div>
+        <div class="legend" id="utilization-legend"><span class="legend-item"><span class="legend-swatch" style="--swatch:#168363"></span>GPU 0</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#2878a8"></span>GPU 1</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#b87013"></span>GPU 2</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#6c61a8"></span>GPU 3</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#218c8a"></span>GPU 4</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#b84d4d"></span>GPU 5</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#4f6b7b"></span>GPU 6</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#8b6f3d"></span>GPU 7</span></div>
       </article>
       <article class="chart-panel">
         <div class="chart-heading">
@@ -461,13 +722,41 @@
             <p class="eyebrow">GPU 온도</p>
             <h2>열 상태</h2>
           </div>
-          <span id="temperature-peak">최고 0°C</span>
+          <span id="temperature-peak">최고 74°C</span>
         </div>
         <div class="chart-wrap">
-          <svg id="temperature-chart" class="line-chart" role="img"
-               aria-label="GPU 온도 시간 변화"></svg>
+          <svg id="temperature-chart" class="line-chart" role="img" aria-label="GPU 온도 시간 변화" viewBox="0 0 720 250" preserveAspectRatio="none">
+  <line x1="42" x2="702" y1="18" y2="18" class="chart-grid-line"></line>
+  <text x="34" y="21" text-anchor="end" class="chart-axis-label">100°</text>
+  <line x1="42" x2="702" y1="68" y2="68" class="chart-grid-line"></line>
+  <text x="34" y="71" text-anchor="end" class="chart-axis-label">80°</text>
+  <line x1="42" x2="702" y1="118" y2="118" class="chart-grid-line"></line>
+  <text x="34" y="121" text-anchor="end" class="chart-axis-label">60°</text>
+  <line x1="42" x2="702" y1="168" y2="168" class="chart-grid-line"></line>
+  <text x="34" y="171" text-anchor="end" class="chart-axis-label">40°</text>
+  <line x1="42" x2="702" y1="218" y2="218" class="chart-grid-line"></line>
+  <text x="34" y="221" text-anchor="end" class="chart-axis-label">20°</text>
+
+  <!-- GPU 0 Temp: 68 -> 70 -> 72 -> 71 -> 72 °C -->
+  <path d="M42.0,98.0 L207.0,93.0 L372.0,88.0 L537.0,90.5 L702.0,88.0" class="chart-line" stroke="#168363"></path>
+  <!-- GPU 1 Temp: 71 -> 73 -> 72 -> 74 -> 74 °C -->
+  <path d="M42.0,90.5 L207.0,85.5 L372.0,88.0 L537.0,83.0 L702.0,83.0" class="chart-line" stroke="#2878a8"></path>
+  <!-- GPU 3 Temp: 66 -> 68 -> 70 -> 69 -> 70 °C -->
+  <path d="M42.0,103.0 L207.0,98.0 L372.0,93.0 L537.0,95.5 L702.0,93.0" class="chart-line" stroke="#6c61a8"></path>
+
+  <text x="42" y="241" text-anchor="start" class="chart-axis-label">15:30</text>
+  <text x="372" y="241" text-anchor="middle" class="chart-axis-label">16:30</text>
+  <text x="702" y="241" text-anchor="end" class="chart-axis-label">17:30</text>
+</svg>
         </div>
-        <div class="legend" id="temperature-legend"></div>
+        <div class="legend" id="temperature-legend"><span class="legend-item"><span class="legend-swatch" style="--swatch:#168363"></span>GPU 0</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#2878a8"></span>GPU 1</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#b87013"></span>GPU 2</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#6c61a8"></span>GPU 3</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#218c8a"></span>GPU 4</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#b84d4d"></span>GPU 5</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#4f6b7b"></span>GPU 6</span>
+<span class="legend-item"><span class="legend-swatch" style="--swatch:#8b6f3d"></span>GPU 7</span></div>
       </article>
     </section>
 
@@ -475,39 +764,37 @@
       <article class="resource-block">
         <div>
           <p class="eyebrow">시스템 메모리</p>
-          <h2 id="memory-title">0 / 0 GiB</h2>
+          <h2 id="memory-title">29.4 GB / 270.0 GB</h2>
         </div>
-        <svg class="ring-chart" id="memory-ring" viewBox="0 0 120 120"
-             role="img" aria-label="시스템 메모리 사용률">
+        <svg class="ring-chart" id="memory-ring" viewBox="0 0 120 120" role="img" aria-label="시스템 메모리 사용률">
           <circle class="ring-base" cx="60" cy="60" r="48"></circle>
-          <circle class="ring-value" cx="60" cy="60" r="48"></circle>
-          <text x="60" y="64" text-anchor="middle" id="memory-ring-label">0%</text>
+          <circle class="ring-value" cx="60" cy="60" r="48" style="stroke-dasharray: 301.59; stroke-dashoffset: 268.4;"></circle>
+          <text x="60" y="64" text-anchor="middle" id="memory-ring-label">11%</text>
         </svg>
       </article>
       <article class="resource-block">
         <div>
           <p class="eyebrow">저장공간</p>
-          <h2 id="disk-title">0 / 0 GiB</h2>
+          <h2 id="disk-title">497 GB / 3,937 GB</h2>
         </div>
-        <svg class="ring-chart ring-disk" id="disk-ring" viewBox="0 0 120 120"
-             role="img" aria-label="저장공간 사용률">
+        <svg class="ring-chart ring-disk" id="disk-ring" viewBox="0 0 120 120" role="img" aria-label="저장공간 사용률">
           <circle class="ring-base" cx="60" cy="60" r="48"></circle>
-          <circle class="ring-value" cx="60" cy="60" r="48"></circle>
-          <text x="60" y="64" text-anchor="middle" id="disk-ring-label">0%</text>
+          <circle class="ring-value" cx="60" cy="60" r="48" style="stroke-dasharray: 301.59; stroke-dashoffset: 262.4;"></circle>
+          <text x="60" y="64" text-anchor="middle" id="disk-ring-label">13%</text>
         </svg>
       </article>
       <article class="resource-block resource-details">
         <div class="resource-row">
           <span>시스템 부하</span>
-          <strong id="system-load">0.00</strong>
+          <strong id="system-load">4.12</strong>
         </div>
         <div class="resource-row">
           <span>가동 시간</span>
-          <strong id="system-uptime">-</strong>
+          <strong id="system-uptime">16일 21시간</strong>
         </div>
         <div class="resource-row">
           <span>수집 주기</span>
-          <strong id="collection-interval">-</strong>
+          <strong id="collection-interval">30초</strong>
         </div>
       </article>
     </section>

@@ -739,12 +739,8 @@ function renderActivityFeed(events) {
 }
 
 function renderGpus(snapshot) {
-  elements.gpuHost.textContent = `${snapshot.source.host} · GPU ${snapshot.gpus.length}장`;
-  if (snapshot.gpus.length === 0) {
-    elements.gpuList.innerHTML =
-      '<div class="empty-state">GPU 상태가 수집되지 않았습니다.</div>';
-    return;
-  }
+  if (!snapshot || !Array.isArray(snapshot.gpus) || snapshot.gpus.length === 0) return;
+  elements.gpuHost.textContent = `${snapshot.source?.host || "203.255.93.75"} · GPU ${snapshot.gpus.length}장`;
 
   elements.gpuList.innerHTML = [...snapshot.gpus]
     .sort((left, right) => number(left.index) - number(right.index))
@@ -1011,19 +1007,26 @@ function setRing(ring, label, percent) {
 }
 
 function renderResources(snapshot) {
+  if (!snapshot || !snapshot.system) return;
   const memory = snapshot.system.memory || {};
   const disk = snapshot.system.disk || {};
-  elements.memoryTitle.textContent = `${formatGiB(memory.used_gib)} / ${formatGiB(
-    memory.total_gib,
-  )}`;
-  elements.diskTitle.textContent = `${formatGiB(disk.used_gib)} / ${formatGiB(
-    disk.total_gib,
-  )}`;
-  setRing(elements.memoryRing, elements.memoryRingLabel, memory.percent);
-  setRing(elements.diskRing, elements.diskRingLabel, disk.percent);
-  elements.systemLoad.textContent = number(snapshot.system.load_1m).toFixed(2);
-  elements.systemUptime.textContent = formatDuration(snapshot.system.uptime_seconds);
-  elements.collectionInterval.textContent = `${snapshot.collection_interval_seconds}초`;
+  if (memory.used_gib && memory.total_gib) {
+    elements.memoryTitle.textContent = `${formatGiB(memory.used_gib)} / ${formatGiB(memory.total_gib)}`;
+    setRing(elements.memoryRing, elements.memoryRingLabel, memory.percent);
+  }
+  if (disk.used_gib && disk.total_gib) {
+    elements.diskTitle.textContent = `${formatGiB(disk.used_gib)} / ${formatGiB(disk.total_gib)}`;
+    setRing(elements.diskRing, elements.diskRingLabel, disk.percent);
+  }
+  if (snapshot.system.load_1m !== undefined) {
+    elements.systemLoad.textContent = number(snapshot.system.load_1m).toFixed(2);
+  }
+  if (snapshot.system.uptime_seconds) {
+    elements.systemUptime.textContent = formatDuration(snapshot.system.uptime_seconds);
+  }
+  if (snapshot.collection_interval_seconds) {
+    elements.collectionInterval.textContent = `${snapshot.collection_interval_seconds}초`;
+  }
 }
 
 function renderTasks(snapshot) {
