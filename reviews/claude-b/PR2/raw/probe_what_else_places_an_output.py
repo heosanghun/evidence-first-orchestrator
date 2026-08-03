@@ -84,14 +84,15 @@ def output_of(stem: str) -> str:
 SELF = output_of(Path(__file__).stem)
 SKIP = {output_of("probe_output_provenance_lines"),
         output_of("probe_recheck_line_and_the_substring_that_reversed_four"),
+        output_of("probe_the_four_mixed_outputs"),
         SELF}
 every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
 check("  raw outputs scanned, the marker-printing ones excluded",
       "outputs: 81", f"outputs: {len(outputs)}")
-check("    exactly three are excluded, and the third is this probe's own",
-      "excluded: 3",
+check("    exactly four are excluded, this probe's own among them",
+      "excluded: 4",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
 
 # ---------------------------------------------------------------- B

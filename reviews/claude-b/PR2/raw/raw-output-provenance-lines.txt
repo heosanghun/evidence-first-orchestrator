@@ -11,9 +11,9 @@
   [ok]   raw outputs in the corpus, the marker-printing ones excluded
         expected: outputs: 81
         observed: outputs: 81
-  [ok]     exactly three outputs are excluded
-        expected: excluded: 3
-        observed: excluded: 3
+  [ok]     exactly four outputs are excluded
+        expected: excluded: 4
+        observed: excluded: 4
   This probe's OWN classification is therefore the one number here
   that is not machine-checked; it is read off the section below.
 

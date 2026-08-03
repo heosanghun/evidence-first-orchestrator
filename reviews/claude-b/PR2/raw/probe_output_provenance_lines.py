@@ -13,7 +13,7 @@ six cited outputs.
 
     published   35 anchor / 1 other / 41 undecidable
     corrected   27 anchor / 5 other / 45 undecidable
-    at HEAD     28 anchor / 5 other / 48 undecidable (items 62-66 landed;
+    at HEAD     28 anchor / 5 other / 48 undecidable (items 62-67 landed;
                 item 64's own output is EXCLUDED, being marker-printing)
 
 The known answer that would have caught it was inside the document being
@@ -143,7 +143,9 @@ ITEM61 = output_of("probe_recheck_line_and_the_substring_that_reversed_four")
 # the same reason. Three deep now, and the count is asserted below so a
 # fourth cannot appear unnoticed.
 ITEM64 = output_of("probe_what_else_places_an_output")
-SKIP = (SELF, ITEM61, ITEM64)
+# Item 67's probe prints markers too - FOURTH in the set, same reason.
+ITEM67 = output_of("probe_the_four_mixed_outputs")
+SKIP = (SELF, ITEM61, ITEM64, ITEM67)
 every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
@@ -154,7 +156,7 @@ outputs = [p for p in every if p.name not in SKIP]
 # output is excluded rather than counted, so the population stays 77.
 check("  raw outputs in the corpus, the marker-printing ones excluded",
       "outputs: 81", f"outputs: {len(outputs)}")
-check("    exactly three outputs are excluded", "excluded: 3",
+check("    exactly four outputs are excluded", "excluded: 4",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
 print("  This probe's OWN classification is therefore the one number here")
 print("  that is not machine-checked; it is read off the section below.")

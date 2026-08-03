@@ -97,6 +97,15 @@ And the union of both tests over all 79:
 > from the literal test and become **mixed** rather than staying put. Four
 > outputs do — where the token test alone found **none**. Corrected to the
 > measured union, with the mixed class asserted rather than absorbed.
+>
+> **Adjudicated 2026-08-03 by item 67.** The four are named and classified:
+> **2 genuine** (`raw-attack-prov-main.txt`, `raw-w4-replay.txt` — each names
+> the other ref in its own text), **1 spurious** (`raw-full-final.txt`, whose
+> only anchor mark is the literal `author_identity`, **2 of 2 occurrences
+> swallowed** inside a divergent-only test method name — the substring trap a
+> third time), and **1 that is not a program run at all**
+> (`raw-quote-accuracy.txt`, a self-check over my own Markdown).
+> `NOTE-the-four-mixed-outputs-two-are-real.md`.
 
 ## The headline is the negative
 
@@ -144,5 +153,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_what_else_places_an_output.py` | `6b5750021a90dc2ebd9fcc74790e03cbf2b143c132bb53d34f4acdf043835cc7` |
-| `raw/raw-what-else-places-an-output.txt` | `8bbcc9742867876d4b8b4f342d4328c11f204b073d1877552e6076550959a37e` |
+| `raw/probe_what_else_places_an_output.py` | `aef1ac285f103af622ad2cc3c1234a305160d438ebe7e51943bff6104f795683` |
+| `raw/raw-what-else-places-an-output.txt` | `58b0c241389c232659c94fa8d941330dc10c5b37dda0ce1d0add86b66cd4d51a` |
