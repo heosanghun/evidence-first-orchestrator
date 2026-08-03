@@ -3,15 +3,15 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**1103 passing checks across 60 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 147 files: **62 probe scripts, 77 raw outputs, 8
+**1117 passing checks across 61 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 149 files: **63 probe scripts, 78 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
 paragraph disagrees with it. The counts exclude that probe's **own** output,
 which is the report of the run doing the counting — a self-reference with no
 fixpoint, stated rather than hidden — the same guard the citation and quote counts got.
-It also checks the headline `N checks, M unexpected` of all **55** write-ups
+It also checks the headline `N checks, M unexpected` of all **56** write-ups
 against the raw output each one names; nothing verified those until 2026-08-03.
 
 Twelve `UNEXPECTED` lines survive, in five files —
@@ -92,7 +92,7 @@ never treated my own re-run as independent confirmation.
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
-| this review's own counts | machine-checked — inventory, 55 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
+| this review's own counts | machine-checked — inventory, 56 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
 | attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed, **under the threat model `SECURITY.md:38` declares** | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
 | `monitor/collector.py` coverage | map — 27 tests, **no test ages an input**; #6 has no vocabulary to be tested by | `NOTE-the-collector-suite-never-ages-an-input.md` |
 | the 8 provenance-attack scripts | map — all self-document; **2 ran against an unpinned tree that was the stale base**, superseded by the `_main` re-runs | `NOTE-two-attack-scripts-ran-against-the-stale-base.md` |
@@ -113,6 +113,7 @@ never treated my own re-run as independent confirmation.
 | `raw-attack4.txt` W4, and the ref it needs | map — **`transfer_orchestrator` is absent at the anchor and `7a9553b` is NOT an ancestor**, so W4/W5/W6/W6b drive a divergent line; replayed against `7a9553b` and **both tracebacks are the original driver's** (wrong path, wrong key on the CLI wrapper). The config/ledger divergence is real and by design | `NOTE-w4-needs-a-ref-the-anchor-never-took.md` |
 | the ledger signature's SCOPE | map — **the precondition under items 45, 53 and 54**: a naive tamper is caught, but the same edit with the ledger payload updated and the chain **re-signed** audits `healthy: true` with `valid/signed: true`. The key is `.efo/ledger.key` inside the workspace. `SECURITY.md:38` states this limit verbatim, so it is **documented and driven in both directions**, not a defect | `NOTE-a-tamper-that-resigns-is-healthy-and-the-document-says-so.md` |
 | which LINE produced each raw output | map — **a negative result**: a two-way token test derived from the module-set difference places **35 of 75** on the anchor's line and leaves **39 undecidable**, and it has a **proven false negative** — `raw-attack4.txt`, which item 55 showed is mixed, carries no marker. 4 of `REPORT.md`'s 6 are placed | `NOTE-which-line-produced-which-output-and-why-the-test-is-one-way.md` |
+| `reports/`, `submissions/`, `archive/` | map — **the measured width of #10**: the 6 comparison messages name only Agent, Task and Workspace, and **6 of 6 tampers go unnoticed** — including deleting the whole archived bundle and rewriting `archive/T1.json`. All **7** archived files' sha256 are in signed ledger events; nothing recomputes them | `NOTE-reports-submissions-and-archive-are-compared-against-nothing.md` |
 | `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
 
 Twenty components were probed and found sound (one with a claim since corrected — see #19).
@@ -272,8 +273,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **244 live citations across
-66 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **245 live citations across
+67 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -291,7 +292,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 294 inline spans remain undecidable by position and are named as a
+lenient. 295 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03

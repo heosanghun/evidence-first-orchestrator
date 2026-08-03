@@ -305,7 +305,7 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 
 ########## D. what stays UNDECIDABLE, with a count ##########
-  inline backticked spans sharing a line with a citation: 294
+  inline backticked spans sharing a line with a citation: 295
   These are NOT checked. A sentence like "`doctor.py:109` interpolates
   `agent_id` into a path" contains a citation and a span that is a
   quote, and a sentence like "`workspace.py:1182` reads it by direct
@@ -331,14 +331,14 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
         expected: adjudicated non-quotes: 15
         observed: adjudicated non-quotes: 15
   [ok]   the note states this run's inline spans
-        expected: inline spans: 294
-        observed: inline spans: 294
+        expected: inline spans: 295
+        observed: inline spans: 295
   [ok]   NOTE-citation-audit-of-this-review.md cross-reference agrees
-        expected: inline: 294
-        observed: inline: 294
+        expected: inline: 295
+        observed: inline: 295
   [ok]   SYNTHESIS.md cross-reference agrees
-        expected: inline: 294
-        observed: inline: 294
+        expected: inline: 295
+        observed: inline: 295
 
 ########## 0 unexpected result(s) ##########
 This audits MY OWN write-ups, not EFO. Static analysis only; nothing

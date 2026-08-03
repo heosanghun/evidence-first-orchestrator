@@ -4,11 +4,11 @@ Reproduce with `raw/probe_output_provenance_lines.py`; raw output in
 `raw/raw-output-provenance-lines.txt`. **21 checks, 0 unexpected.** A **map with
 a negative result** — no issue filed, nothing retracted.
 
-**Scope, stated first:** 76 outputs, 6 cited by `REPORT.md`, 2 derived marker
+**Scope, stated first:** 77 outputs, 6 cited by `REPORT.md`, 2 derived marker
 sets, 3 candidate discriminators, 1 known answer.
 
 > **Updated 2026-08-03.** The corpus grew by one when item 59 landed, so the
-> population moved **75 → 76** outputs and **39 → 40** undecidable. Those two
+> population moved **75 → 77** outputs and **39 → 41** undecidable (items 59 and 60). Those two
 > counts are **pinned on purpose** — the population is the thing under
 > discussion, so a corpus that grows must force this note to be re-read rather
 > than silently re-measured. The pin is what said so.
@@ -40,7 +40,7 @@ belonging to the other one.
 |---|---|
 | carry an **anchor-only** token → placed on the anchor's line | **35** |
 | carry a **`7a9553b`-only** token | **1** — `raw-w4-replay.txt`, my own item-55 probe, which names both refs by design |
-| carry **neither** → **undecidable** | **40** |
+| carry **neither** → **undecidable** | **41** |
 
 ## …and the test has a proven false negative
 
@@ -74,7 +74,7 @@ produced it, and **this round does not answer that either**.
 | candidate | result |
 |---|---|
 | the CLI `status` JSON shape | **identical on both lines** (`['status', 'tasks']`) — **ruled out by measurement**, not by guessing |
-| the CLI subcommand list | **is** a discriminator (`workspace` and `audit` exist only at `7a9553b`) but appears in only **2 of 76** outputs, neither of them `raw-attack4.txt` |
+| the CLI subcommand list | **is** a discriminator (`workspace` and `audit` exist only at `7a9553b`) but appears in only **2 of 77** outputs, neither of them `raw-attack4.txt` |
 
 ## The self-reference, excluded and counted
 
@@ -91,7 +91,7 @@ same treatment `probe_inventory_selfcheck.py`'s tally got.
 
 ## What this does not do
 
-- It does **not** decide the 40. It says which 35 are placed, which one is
+- It does **not** decide the 41. It says which 35 are placed, which one is
   mine, and that the rest are **open** — including one already known to be
   mixed.
 - It does **not** re-run any catalogued output, and does **not** retract item
@@ -104,7 +104,7 @@ same treatment `probe_inventory_selfcheck.py`'s tally got.
 - No network. Two local checkouts and one `tempfile` workspace pair, removed
   before the results print. The anchor's working tree is untouched, and it does
   **not** touch `main` or another agent's branch.
-- **MEASURED:** both module sets, the three-way scan of all 76 outputs,
+- **MEASURED:** both module sets, the three-way scan of all 77 outputs,
   `REPORT.md`'s six, both `status` shapes, the usage-line census, item 55's two
   quoted sentences, the self-exclusion. **REASONED:** nothing.
 
@@ -118,5 +118,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_output_provenance_lines.py` | `9b3ae33a0c7c46ca35e9899b3ac580fcc74a51abca17886f162c34b9cae6b976` |
-| `raw/raw-output-provenance-lines.txt` | `017c0d0689dd88a08401008321105db2ced70a51ba3f4d89e71bd3ebc3db49c3` |
+| `raw/probe_output_provenance_lines.py` | `809c4cf3b1b29e3c134b52a37724db3b4a3e6b36e9b5331c1b6b1b35dcd82a57` |
+| `raw/raw-output-provenance-lines.txt` | `4619f94324a4600460ebc67119917bb594aeff1de1d1db70612ada8b2760b847` |
