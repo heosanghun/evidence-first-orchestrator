@@ -691,7 +691,7 @@ function renderActivityFeed(events) {
   elements.activityVisibleCount.textContent = `${visible.length}건 표시`;
   if (visible.length === 0) {
     elements.activityFeed.innerHTML =
-      '<div class="empty-state">선택한 기간에 기록된 원장 이벤트가 없습니다.</div>';
+      '<div class="empty-state" style="padding: 20px; text-align: center; color: #64748b; font-weight: 700;">선택한 기간에 기록된 원장 이벤트가 없습니다.</div>';
     return;
   }
 
@@ -701,6 +701,7 @@ function renderActivityFeed(events) {
     if (!groups.has(hour)) groups.set(hour, []);
     groups.get(hour).push(event);
   });
+
   elements.activityFeed.innerHTML = [...groups.entries()]
     .map(([hour, group]) => {
       const rows = group
@@ -709,31 +710,41 @@ function renderActivityFeed(events) {
             event.task_id || event.title
               ? [event.task_id, event.title].filter(Boolean).join(" · ")
               : "시스템 원장";
+
+          const categoryClass = 
+            event.category === 'verified' || event.label?.includes('서명') ? 'verified-item' :
+            event.category === 'evidence' || event.label?.includes('증거') ? 'evidence-item' : 'work-item';
+
+          const badgeClass =
+            categoryClass === 'verified-item' ? 'badge-signature' :
+            categoryClass === 'evidence-item' ? 'badge-evidence' : 'badge-work';
+
+          const badgeLabel = escapeHtml(event.label || event.action || '원장 기록');
+          const badgeEmoji = categoryClass === 'verified-item' ? '🟢' : categoryClass === 'evidence-item' ? '🟡' : '🔵';
+
           return `
-            <div class="activity-event">
-              <time class="activity-event-time" datetime="${escapeHtml(event.at)}">
-                ${escapeHtml(formatMinute(event.at))}
-              </time>
-              <div class="activity-event-main">
-                <div class="activity-event-head">
-                  <span class="activity-actor">${escapeHtml(
-                    event.actor_name || event.actor || "system",
-                  )}</span>
-                  <span class="activity-event-label ${event.category}">${escapeHtml(
-                    event.label || event.action,
-                  )}</span>
+            <div class="feed-item ${categoryClass}">
+              <div style="flex: 1;">
+                <div style="display: flex; align-items: center;">
+                  <strong class="feed-item-actor">${escapeHtml(event.actor_name || event.actor || "system")}</strong>
+                  <span class="feed-badge ${badgeClass}">${badgeEmoji} ${badgeLabel}</span>
                 </div>
-                <span class="activity-event-detail">${escapeHtml(detail)}</span>
+                <p class="feed-item-detail">${escapeHtml(detail)}</p>
               </div>
+              <time class="feed-item-time">${escapeHtml(formatMinute(event.at))}</time>
             </div>
           `;
         })
         .join("");
+
       return `
-        <section class="activity-group">
-          <h3>${escapeHtml(formatActivityHour(hour))}<span>${group.length}건</span></h3>
+        <div class="feed-group">
+          <div class="feed-group-header">
+            <span>🕒 ${escapeHtml(formatActivityHour(hour))}</span>
+            <small style="color: #64748b; font-weight: 700;">${group.length}건 기록</small>
+          </div>
           ${rows}
-        </section>
+        </div>
       `;
     })
     .join("");

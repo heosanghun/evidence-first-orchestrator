@@ -8,8 +8,8 @@
   <meta name="description" content="Evidence First Orchestrator 실시간 운영 현황">
   <title>EFO Operations</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=3.5.0">
-  <script src="/assets/app.js?v=3.5.0" defer></script>
+  <link rel="stylesheet" href="/assets/styles.css?v=3.6.0">
+  <script src="/assets/app.js?v=3.6.0" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -528,35 +528,51 @@
             <span id="activity-visible-count">24건 표시</span>
           </div>
           <div class="activity-feed" id="activity-feed" aria-live="polite">
-            <!-- Statically embedded Activity Feed Events -->
+            <!-- Statically embedded Activity Feed Events (v3.6.0 Legible Timeline) -->
             <div class="feed-group">
-              <div class="feed-group-header" style="font-weight: 800; color: #0f172a; padding: 6px 0; border-bottom: 1px solid #e2e8f0;">8월 3일 17시</div>
-              <div class="feed-item" style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <strong style="color: #0f172a; font-weight: 800;">Antigravity</strong>
-                  <span class="enum-badge verified" style="margin-left: 6px;">🟢 원장 서명</span>
-                  <p style="margin: 4px 0 0 0; color: #334155; font-size: 0.88rem; font-weight: 700;">Cryptographic SHA-256 Ledger Signature Sequence #315</p>
-                </div>
-                <small style="color: #64748b; font-weight: 700;">17:15</small>
+              <div class="feed-group-header">
+                <span>🕒 8월 3일 17시</span>
+                <small style="color: #64748b; font-weight: 700;">2건 기록</small>
               </div>
-              <div class="feed-item" style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <strong style="color: #0f172a; font-weight: 800;">Claude A</strong>
-                  <span class="enum-badge working" style="margin-left: 6px;">🟡 증거 제출</span>
-                  <p style="margin: 4px 0 0 0; color: #334155; font-size: 0.88rem; font-weight: 700;">E2-BENCHMARK · Native Think Baseline Verification (43.3%)</p>
+              
+              <div class="feed-item verified-item">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center;">
+                    <strong class="feed-item-actor">Antigravity</strong>
+                    <span class="feed-badge badge-signature"><span class="status-pulse-dot"></span> 🟢 원장 서명</span>
+                  </div>
+                  <p class="feed-item-detail">Cryptographic SHA-256 Ledger Signature Sequence #315</p>
                 </div>
-                <small style="color: #64748b; font-weight: 700;">17:10</small>
+                <time class="feed-item-time">17:15</time>
+              </div>
+
+              <div class="feed-item evidence-item">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center;">
+                    <strong class="feed-item-actor">Claude A</strong>
+                    <span class="feed-badge badge-evidence">🟡 증거 제출</span>
+                  </div>
+                  <p class="feed-item-detail">E2-BENCHMARK · Native Think Baseline Verification (43.3%)</p>
+                </div>
+                <time class="feed-item-time">17:10</time>
               </div>
             </div>
+
             <div class="feed-group">
-              <div class="feed-group-header" style="font-weight: 800; color: #0f172a; padding: 6px 0; border-bottom: 1px solid #e2e8f0;">8월 3일 16시</div>
-              <div class="feed-item" style="padding: 10px 0; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                  <strong style="color: #0f172a; font-weight: 800;">Antigravity</strong>
-                  <span class="enum-badge working" style="margin-left: 6px;">🟡 작업 생성</span>
-                  <p style="margin: 4px 0 0 0; color: #334155; font-size: 0.88rem; font-weight: 700;">CTS :: Phase 2 E3 Iso-Depth D15 Control Experiment</p>
+              <div class="feed-group-header">
+                <span>🕒 8월 3일 16시</span>
+                <small style="color: #64748b; font-weight: 700;">1건 기록</small>
+              </div>
+
+              <div class="feed-item work-item">
+                <div style="flex: 1;">
+                  <div style="display: flex; align-items: center;">
+                    <strong class="feed-item-actor">Antigravity</strong>
+                    <span class="feed-badge badge-work">🔵 작업 생성</span>
+                  </div>
+                  <p class="feed-item-detail">CTS :: Phase 2 E3 Iso-Depth D15 Control Experiment</p>
                 </div>
-                <small style="color: #64748b; font-weight: 700;">16:38</small>
+                <time class="feed-item-time">16:38</time>
               </div>
             </div>
           </div>
