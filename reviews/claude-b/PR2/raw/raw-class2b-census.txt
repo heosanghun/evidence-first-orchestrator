@@ -1,0 +1,119 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   and no compiled bytecode is read as a source
+        expected: pycache: False
+        observed: pycache: False
+
+########## B. #3 - re-attestation IS tested, three times ##########
+  #3 is: re-attest the VERIFIER to a different control principal, then
+  replay a byte-identical verification, and it is accepted.
+    test_independence.py:161  attests 'antigravity'   role: declared elsewhere
+    test_independence.py:243  attests 'codex'   role: declared elsewhere
+    test_independence.py:193  attests 'alias-one'   role: worker
+  [ok]   re-attestation call sites in the suite
+        expected: sites: 3
+        observed: sites: 3
+  [ok]   of which re-attest an agent whose declared role is VERIFIER
+        expected: verifiers: 0
+        observed: verifiers: 0
+  The two guarded shapes ARE tested and both refuse:
+    test_attested_alias_lineage_cannot_be_removed - re-attesting an
+      agent that carries an alias lineage
+    test_submission_snapshot_prevents_identity_laundering - re-attesting
+      the WORKER after submit; the snapshot preserves authorship
+  Neither is #3's shape. #3 re-attests the VERIFIER, before verifying,
+  on an agent with no alias lineage - the one combination the suite
+  never builds. Both existing tests pass with #3 present.
+
+########## C. #8 - the two paths are tested, and never crossed ##########
+  #8 is: a known-answer check whose expected AND observed are both
+  `[FILL]` satisfies require_known_answer_check.
+    helpers.py:87 expected=4 observed=4 if known_answer_passed else 5
+  [ok]   known-answer fixtures visible as DICT LITERALS
+        expected: fixtures: 1
+        observed: fixtures: 1
+    plus a fixture inside a generated worker script: ['test_adapter.py']
+  [ok]   the embedded one compares two real values, not [FILL]
+        expected: "expected": "known-output",
+        observed: "expected": "known-output", | "observed": "known-output",
+  [ok]   and no known-answer expected/observed anywhere is [FILL]
+        expected: fill in a known answer: False
+        observed: fill in a known answer: False
+    the one test that asserts on [FILL] is in ['test_evidence.py']
+    test_unmeasured_claim_requires_fill sets a CLAIM's value to 0.7 and
+    asserts validation REFUSES it - the opposite direction, on the
+    claims path. The suite tests known-answer checks with real values
+    (4 vs 4, and 4 vs 5 for the failing case) and tests `[FILL]` on
+    claims, and never crosses the two. #8 lives exactly in the cross.
+
+########## D. #10 and #11 - token matches that are about something else ##########
+  [ok] #10: mentions of archive_evidence_bundle in the suite
+        expected: mentions: 1
+        observed: mentions: 1
+  [ok]   and that mention is a patch() target, i.e. the function is MOCKED OUT
+        expected: patched at: [260]
+        observed: patched at: [260]
+  #10 is `archived evidence is never re-verified`. The suite's only
+  reference to the archiver REPLACES it with a stub returning
+  {'retained': 0, 'external': 0}. There is no test of the archiver.
+  [ok] #11: does the file mentioning events.jsonl import the adapter?
+        expected: adapter imported: False
+        observed: adapter imported: False
+  #11 is `the command adapter grants the child write access to
+  ledger/events.jsonl`. The two mentions of that filename are in
+  test_monitor_collector.py, building a ledger path for the COLLECTOR.
+  Unrelated to the adapter grant. A token match, and a lead that does
+  not survive reading - which is why the earlier note called presence a
+  lead and absence decisive.
+
+########## E. the census ##########
+    #3    test exists, feeds a shape the guard already refuses
+    #8    both paths tested, never crossed
+    #10   the function is MOCKED OUT in its only appearance
+    #11   token match, unrelated file
+    #13   Korean-only input; and the second finding is ASSERTED by the test
+    #14   feeds `password`, a key the set contains
+    #19   the one repair test asserts state, not the dropped key
+  [ok] issues examined for the pattern
+        expected: examined: 7
+        observed: examined: 7
+  Of the 16 issues this review filed, 10 have no test that names them
+  and 6 do - plus #14, whose test lives in web_tests. Every one of the
+  seven examined has a test that CANNOT fail on the defect, for one of
+  four reasons: it feeds a covered input, it asserts the behaviour the
+  issue objects to, it mocks the component out, or the match was
+  spurious.
+  That is a statement about COVERAGE SHAPE, not about test quality.
+  Every one of these tests asserts something true.
+
+########## F. what this does NOT establish ##########
+  * It does not run the suite. CI does that; the counts this review
+    quotes are CI's, bound to job ids.
+  * `#3 has no verifier re-attestation` is measured from the AST by
+    matching add_agent(role=...) to attest_agent_identity(agent_id=...)
+    IN THE SAME FILE. Two of the three attested agents are declared in
+    a shared fixture, so their role is reported as `declared elsewhere`
+    rather than guessed - and neither is a verifier, which was checked
+    by reading those two tests.
+  * The known-answer census matches DICT LITERALS carrying both
+    `expected` and `observed`, and it found ONE. The second fixture is
+    source code inside a textwrap.dedent string and is invisible to it;
+    that one is checked by text. A census over syntax cannot see a
+    fixture that is a program, which is the same family of blind spot
+    as the rename-across-a-return bound.
+  * MEASURED: every count and call site above. REASONED: that a test
+    which exercises only a guarded shape cannot fail on an unguarded
+    one - which for #3 rests on reading the two tests, and is stated
+    as such.
+
+########## 0 unexpected result(s) ##########
+Static analysis of the test sources only; nothing was executed. No
+issue filed - a suite that does not test a defect is not itself a
+defect, and all seven issues are already open. Pre-registered
+permissions unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

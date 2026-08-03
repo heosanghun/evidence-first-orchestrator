@@ -133,6 +133,14 @@ ADJUDICATED = {
         "`adapter.py:180  shell=False`, not a quote of the source at :180. "
         "Caught by this check on the very round the note was written, which "
         "is the self-check working as intended",
+    ("NOTE-class-2b-is-a-census-now-seven-of-seven.md", "test_independence.py"):
+        "PROBE OUTPUT - the block is this census's own listing of the three "
+        "attest_agent_identity call sites with the role of each agent, not a "
+        "quote of any one line of the test file",
+    ("NOTE-class-2b-is-a-census-now-seven-of-seven.md", "helpers.py"):
+        "PROBE OUTPUT - `helpers.py:87 expected=4 observed=4 if "
+        "known_answer_passed else 5` is the census line, which renders the "
+        "dict's two values on one line; the source spells them across four",
     ("ADDENDUM-git-replace-regression.md", "provenance.py"):
         "deliberate before/after - the block quotes the argument list that "
         "was REMOVED, which is the whole point of the regression",
