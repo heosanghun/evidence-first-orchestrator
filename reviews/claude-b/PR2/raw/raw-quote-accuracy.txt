@@ -8,9 +8,9 @@
 
 ########## B. citation + fenced block, the decidable subset ##########
   [ok] every decidable pair was examined
-        expected: pairs: 11
-        observed: pairs: 11
-  verbatim-verified: 7   not matched: 4
+        expected: pairs: 12
+        observed: pairs: 12
+  verbatim-verified: 7   not matched: 5
     ADDENDUM-git-replace-regression.md  ->  provenance.py:47
         deliberate before/after - the block quotes the argument list that was REMOVED, which is the whole point of the regression
     NOTE-collector-redaction-holds.md  ->  collector.py:1277
@@ -19,6 +19,8 @@
         extractor artifact - the citation is INSIDE a fenced listing, so the following PROSE paragraph was captured as the block
     NOTE-proxy-grant-holds.md  ->  workspace.py:1308
         extractor artifact - same shape, citation inside a fenced listing
+    NOTE-remaining-docs-adjudicated.md  ->  src/evidence_orchestrator/adapter.py:180
+        PROBE OUTPUT again - the block is this review's own census line `adapter.py:180  shell=False`, not a quote of the source at :180. Caught by this check on the very round the note was written, which is the self-check working as intended
   [ok] every unmatched block is adjudicated
         expected: uncovered: []
         observed: uncovered: []
@@ -283,7 +285,7 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 
 ########## D. what stays UNDECIDABLE, with a count ##########
-  inline backticked spans sharing a line with a citation: 194
+  inline backticked spans sharing a line with a citation: 215
   These are NOT checked. A sentence like "`doctor.py:109` interpolates
   `agent_id` into a path" contains a citation and a span that is a
   quote, and a sentence like "`workspace.py:1182` reads it by direct

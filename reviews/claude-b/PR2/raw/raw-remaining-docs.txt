@@ -1,0 +1,118 @@
+########## PRECONDITION ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+
+########## A. SECURITY.md:61-63 nested ignore rules ##########
+  [ok] a fresh workspace writes nested ignore files
+        expected: ['.efo/.gitignore', 'runs/.gitignore']
+        observed: ['.efo/.gitignore', 'runs/.gitignore']
+  [ok]   the key is ignored
+        expected: ledger.key
+        observed: ['ledger.key', 'locks/']
+  [ok]   lock files are ignored
+        expected: locks/
+        observed: ['ledger.key', 'locks/']
+  [ok]   and runs/ ignores everything but the rule itself
+        expected: ['*', '!.gitignore']
+        observed: ['*', '!.gitignore']
+  All three things the sentence names are covered. The `runs/` rule is
+  the strict form (`*` then re-include the rule), so a new file added
+  under runs/ later is ignored without anyone updating the pattern.
+  NOT MEASURED: whether git actually honours them when the workspace is
+  embedded in a parent repository - that needs a real parent repo, and
+  the sentence's own next line is the caveat ('Keep those rules in
+  place when embedding a workspace in another Git repository').
+
+########## B. SECURITY.md:11 / CONTRIBUTING.md:18 no shell=True ##########
+  [ok] every `shell=` keyword in the package, by AST
+        expected: uses: 1
+        observed: uses: 1
+    src/evidence_orchestrator/adapter.py:174  shell=False
+  [ok]   and none of them is True
+        expected: shell=True count: 0
+        observed: shell=True count: 0
+  Counted from the AST rather than by grepping the string, so a
+  `shell = True` with spaces, or a variable, would still be seen. A
+  subprocess call with NO shell keyword defaults to False, which is
+  why the count of explicit uses being 1 is not itself a worry.
+
+########## C. SECURITY.md:29 reports stay in their owned directory ##########
+  [ok]   a report outside the workspace entirely
+        expected: Report must be under the actor's report directory
+        observed: AuthorizationError: Report must be under the actor's report directory: /tmp/efo-docs-20t0kb4i/ws/reports/claude
+  [ok]   a report another agent's report directory
+        expected: Report must be under the actor's report directory
+        observed: AuthorizationError: Report must be under the actor's report directory: /tmp/efo-docs-20t0kb4i/ws/reports/claude
+  The guard is `is_relative_to` at workspace.py:1017 and :1021, the
+  same helper NOTE-util-and-lock-hold.md measured as correct - it
+  distinguishes `reports/wombat` from `reports/w` and fails CLOSED on a
+  symlink pointing outside. Two more call sites enforce the same rule
+  for the transport envelope (:1118, :1123) and the verifier (:1335);
+  NOTE-proxy-grant-holds.md covers the transport pair.
+
+########## D. every falsifiable claim in the three documents ##########
+  >>SECURITY.md:11 commands use an argument list and shell=False
+        PROBED HERE - section B
+    SECURITY.md:12 lease tokens stored only as SHA-256
+        covered - ADDENDUM-architecture-claims-and-repair-drops-a-field.md
+    SECURITY.md:13-14 proxy tokens one-time, task-bound, digest-only
+        covered - NOTE-proxy-grant-holds.md
+    SECURITY.md:15-16 Git evidence compared to raw blob bytes, no fetch
+        covered - NOTE-byte-exactness-holds.md
+    SECURITY.md:17 the ledger is hash-chained and HMAC-signed
+        covered - ADDENDUM-ledger-truncation.md; issue #9 is the gap
+    SECURITY.md:18 the dashboard is read-only and loopback by default
+        covered - NOTE-dashboard-and-errors-hold.md
+    SECURITY.md:19-21 HMAC, replay windows, bounded payloads, strict schemas, constant-time checks
+        covered - ADDENDUM-chat-refusal-and-grounding.md (local-health) and ADDENDUM-forbidden-keys-exact-match.md (snapshot)
+    SECURITY.md:22-23 Windows telemetry is aggregate-only
+        covered - ADDENDUM-chat-refusal-and-grounding.md
+    SECURITY.md:24-25 the assistant has no mutation tools and refuses infrastructure control
+        covered - issue #13 (the refusal is Korean-gated)
+    SECURITY.md:26-28 model-backed chat needs both the flag and viewer auth
+        covered - ADDENDUM-chat-refusal-and-grounding.md
+  >>SECURITY.md:29 reports and manifests stay in the owned report directory
+        PROBED HERE - section C
+    SECURITY.md:30 permissions default to no GPU, network or perf metrics
+        covered - issue #15 (a string 'false' opens them)
+    SECURITY.md:34-46 three stated limitations
+        not falsifiable - stated limitations, and honest ones
+    SECURITY.md:50-59 the never-commit list
+        advice to the operator, not a property of the code
+  >>SECURITY.md:61-63 new workspaces create nested ignore rules
+        PROBED HERE - section A
+    CONTRIBUTING.md:10 only Python 3.10+ and the stdlib at runtime
+        covered - NOTE-readme-claims-adjudicated.md section B
+    CONTRIBUTING.md:14-21 seven change expectations
+        project norms for contributors, not properties of the shipped code; `no shell=True` is the one that is also a code property - section B
+    CONTRIBUTING.md:24-31 what a pull request must describe
+        process, not a code property
+    OPERATIONS_DASHBOARD.md trust boundary / collector permissions / read-only chat
+        covered - NOTE-collector-redaction-holds.md, issue #13, issue #14
+    OPERATIONS_DASHBOARD.md agent-card projection
+        covered - NOTE-two-identity-implementations.md
+    OPERATIONS_DASHBOARD.md Cloudflare Pages and local verification
+        deployment instructions, not behavioural promises
+  [ok] claims probed for the first time here
+        expected: 3
+        observed: 3
+  [ok]   claims already covered by an existing write-up
+        expected: 13
+        observed: 13
+  [ok]   the rest are limitations, operator advice, or process
+        expected: 5
+        observed: 5
+  OPERATIONS_DASHBOARD.md is 319 lines and is mostly deployment
+  instructions - wrangler config, SSH setup, systemd units. Its
+  behavioural claims restate the collector and chat properties this
+  review already measured, which is why it yields no new probe.
+  Stated plainly rather than counted as a thorough pass over 319 lines.
+
+########## 0 unexpected result(s) ##########
+No network call. Pre-registered permissions unchanged -
+gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

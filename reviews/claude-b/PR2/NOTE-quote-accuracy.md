@@ -26,14 +26,18 @@ Eleven such pairs exist.
 | Disposition | Count |
 |---|---|
 | verbatim-verified against the cited range | 7 |
-| adjudicated non-quotes | 4 |
+| adjudicated non-quotes | 5 |
 
-The four are: two extractor artifacts (the citation sits *inside* a fenced
-listing, so the following prose paragraph was captured as the "block"); one
-block that is **probe output**, presented as output and not claiming to be
+The five are: two extractor artifacts (the citation sits *inside* a fenced
+listing, so the following prose paragraph was captured as the "block"); **two**
+blocks that are **probe output**, presented as output and not claiming to be
 source; and one **deliberate before/after** — `ADDENDUM-git-replace-regression.md`
 quotes the argument list that was *removed*, which is the whole point of the
 regression.
+
+The second probe-output block arrived with `NOTE-remaining-docs-adjudicated.md`
+and was flagged **on the round that note was written** — the self-check working
+as intended rather than as a historical artifact.
 
 ## Two blocks were condensed, and are now verbatim
 
@@ -83,7 +87,7 @@ written, not to the checker.
 
 ## Scope
 
-Every `(citation, fenced block)` pair in the 32 write-ups where the pairing is
+Every `(citation, fenced block)` pair in the write-ups where the pairing is
 unambiguous, compared whitespace-insensitively against the full cited range at
 `main` `5694ab45` (precondition verified: `HEAD` matches, `git status
 --porcelain` empty). Static analysis only; nothing was executed against a
@@ -102,5 +106,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_quote_accuracy.py` | `1e3dcce19559d5a9a05a8028aeb08d33e8ad7e78051da055280e67472dfcd886` |
-| `raw/raw-quote-accuracy.txt` | `bc73534218a1b5de8488d59ce86aa9aa7346b76e082adc684fe850dd3c3beb96` |
+| `raw/probe_quote_accuracy.py` | `11026155361bd12b9ddaadf7dbb6edbb2c7d7ede97dd81022e2e422dffd27e28` |
+| `raw/raw-quote-accuracy.txt` | `0eda316f019516d71bdb20f13b9659c5351602a6802b085c636f2b9a88951f81` |

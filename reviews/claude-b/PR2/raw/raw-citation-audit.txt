@@ -6,11 +6,11 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   and the write-ups are present
-        expected: documents: 34
-        observed: documents: 34
+        expected: documents: 35
+        observed: documents: 35
 
 ########## B. every FILE:LINE citation in the write-ups ##########
-  141 live citations across 34 documents
+  152 live citations across 35 documents
   11 more appear inside correction banners and are
   excluded as retractions rather than claims - see the comment in the
   source for why that exclusion is principled and not self-serving.
@@ -20,11 +20,12 @@
   [ok]   and every cited line is within its file
         expected: out of range: []
         observed: out of range: []
-  distinct files cited: 25
-    docs/MIGRATION.md                              3 citations, 167 lines
+  distinct files cited: 27
+    CONTRIBUTING.md                                2 citations, 31 lines
+    docs/MIGRATION.md                              4 citations, 167 lines
     docs/PROXY_SUBMISSION.md                       2 citations, 192 lines
-    README.md                                     23 citations, 452 lines
-    SECURITY.md                                    4 citations, 67 lines
+    README.md                                     24 citations, 452 lines
+    SECURITY.md                                    9 citations, 67 lines
     src/evidence_orchestrator/__main__.py          1 citations, 7 lines
     src/evidence_orchestrator/adapter.py           6 citations, 320 lines
     public/assets/app.js                           3 citations, 1566 lines
@@ -44,8 +45,9 @@
     monitor/collector.py                           3 citations, 1436 lines
     src/evidence_orchestrator/provenance.py       15 citations, 341 lines
     functions/api/snapshot.js                      1 citations, 714 lines
+    src/evidence_orchestrator/adapter.py           1 citations, 320 lines
     tests/test_concurrency.py                      1 citations, 59 lines
-    src/evidence_orchestrator/workspace.py        34 citations, 1562 lines
+    src/evidence_orchestrator/workspace.py        35 citations, 1562 lines
 
 ########## C. the two that did NOT resolve, and what they should be ##########
   [ok] README.md is shorter than one citation claimed

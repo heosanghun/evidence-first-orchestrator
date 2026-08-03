@@ -121,5 +121,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_citation_audit.py` | `b65c3ffc19ad6cf6e1b242e04c10d0c46800606bb3119121a167b6db6693984f` |
-| `raw/raw-citation-audit.txt` | `c7591f26f78db8ec1526bdecb0a6d6705a0f55377bcd33f8518cb63dc7ac54e4` |
+| `raw/probe_citation_audit.py` | `5aa45719c52d762acff66b2c7e01b2ee3ff0976ca285dbad8b4ada6615f65404` |
+| `raw/raw-citation-audit.txt` | `513d16c809ab8ba9274f864d8e4a996f5e77d116021bf38a5191c1b388c32243` |

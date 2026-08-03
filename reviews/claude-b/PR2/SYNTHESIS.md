@@ -45,8 +45,14 @@ never treated my own re-run as independent confirmation.
 | alias / `alias_chain` machinery | clean | `NOTE-alias-lineage-holds.md` |
 | `workspace.py` implicit exceptions | clean — #19 is the only instance | `NOTE-issue19-is-the-only-one.md` |
 | the rest of the package, implicit exceptions | clean — 78 reads, 3 guarded indexes | `NOTE-implicit-exceptions-package-wide.md` |
+| `SECURITY.md` / `CONTRIBUTING.md` claims | clean — ignore rules, no `shell=True`, report containment | `NOTE-remaining-docs-adjudicated.md` |
 
-Thirteen components were probed and found sound (one with a claim since corrected — see #19). That is half the value of this
+Fourteen components were probed and found sound (one with a claim since corrected — see #19).
+
+**Every Markdown document in the repository has now been read end to end and
+every falsifiable sentence adjudicated** — `README.md`, `docs/ARCHITECTURE.md`,
+`docs/PROXY_SUBMISSION.md`, `docs/MIGRATION.md`, `SECURITY.md`,
+`CONTRIBUTING.md` and `docs/OPERATIONS_DASHBOARD.md`. That is half the value of this
 pass: it says where *not* to look next.
 
 ---

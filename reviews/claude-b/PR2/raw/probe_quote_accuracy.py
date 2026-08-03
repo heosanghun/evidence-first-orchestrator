@@ -128,6 +128,11 @@ ADJUDICATED = {
     ("NOTE-collector-redaction-holds.md", "collector.py"):
         "the block is PROBE OUTPUT, presented as output; it is not a source "
         "quote and does not claim to be",
+    ("NOTE-remaining-docs-adjudicated.md", "src/evidence_orchestrator/adapter.py"):
+        "PROBE OUTPUT again - the block is this review's own census line "
+        "`adapter.py:180  shell=False`, not a quote of the source at :180. "
+        "Caught by this check on the very round the note was written, which "
+        "is the self-check working as intended",
     ("ADDENDUM-git-replace-regression.md", "provenance.py"):
         "deliberate before/after - the block quotes the argument list that "
         "was REMOVED, which is the whole point of the regression",
