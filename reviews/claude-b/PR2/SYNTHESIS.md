@@ -3,8 +3,8 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**666 passing checks across 33 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 91 files: **34 probe scripts, 49 raw outputs, 8
+**677 passing checks across 34 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 93 files: **35 probe scripts, 50 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. These four numbers are **not yet
 machine-checked** — unlike the citation and quote counts below, nothing fails
@@ -25,6 +25,15 @@ document.
 > recounted with the rule stated: `[ok]` lines across `raw-*.txt`, and file
 > counts by prefix. This is the same defect as the two below — a count copied
 > into prose and never re-derived.
+
+> **`main` has moved, 2026-08-03 06:19–06:51Z.** This review stays anchored at
+> `5694ab45`; every write-up and every SHA-256 below is bound to it and
+> `/tmp/efo-prov` was deliberately not re-pointed. `origin/main` is now
+> `0d67750` and has been **red on nine consecutive pushes** — a UI rewrite
+> deleted the whole security-header block and the transport-badge rendering.
+> That is issue **#20** and
+> `ADDENDUM-main-is-red-and-a-push-run-is-not-a-pr-run.md`, the only document
+> here that reads a ref other than the anchor. It names both.
 
 **Nothing here is VERIFIED.** Every issue and note is a *submission*. No
 third-party reply exists on any of issues #3–#15 as of this writing, and I have
@@ -68,6 +77,7 @@ never treated my own re-run as independent confirmation.
 | `SECURITY.md` / `CONTRIBUTING.md` claims | clean — ignore rules, no `shell=True`, report containment | `NOTE-remaining-docs-adjudicated.md` |
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
+| `public/` at **main `0d67750`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
 
 Fifteen components were probed and found sound (one with a claim since corrected — see #19).
 
@@ -178,8 +188,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **173 live citations across
-38 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **174 live citations across
+39 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -197,7 +207,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 240 inline spans remain undecidable by position and are named as a
+lenient. 242 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03
@@ -265,6 +275,15 @@ the commits and false of the branch.
 
 It was caught by a line-number mismatch: a CI traceback cited
 `tests/test_concurrency.py:49`, and `main` has that statement at `:54`.
+
+> **Correction, 2026-08-03.** Diagnosing the `test_concurrency` divergence I
+> wrote that the `push` and `pull_request` jobs were *"same commit, OS,
+> Python"*. The **commit** claim is wrong as a general statement: a push run
+> checks out the branch head, a pull_request run checks out
+> `refs/pull/N/merge` — the branch **merged into `main`**. They share a head
+> SHA and not a tree. The concurrency conclusion survives (`barrier.wait()`
+> outside the `try` is independent of the base), but the argument did not, and
+> the same shortcut would have made me call issue #20's failure a flake.
 
 `c16df6d` merges `origin/main` in. The branch is now `main` plus
 `reviews/claude-b/` alone — 17,011 insertions, **zero deletions**, nothing

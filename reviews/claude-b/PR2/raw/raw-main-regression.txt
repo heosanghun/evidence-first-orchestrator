@@ -1,0 +1,105 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  This probe does not re-point it. Every other write-up on this branch
+  is bound to 5694ab45, and moving the anchor would invalidate them.
+  [ok]   and main has MOVED past it
+        expected: 0d67750b99d3950e38baf06979e685cc82cabc14
+        observed: 0d67750b99d3950e38baf06979e685cc82cabc14
+  [ok]   node is available for an independent run
+        expected: v22
+        observed: v22.22.2
+
+########## B. what the two shipped tests assert, and what main now has ##########
+  [ok] the assertions are UNCHANGED between the two refs
+        expected: identical: True
+        observed: identical: True
+  So nothing about the TEST changed. Only the source it reads.
+  property                                      5694ab45   0d67750
+  the transport-badge branch  (test 25)                2         0
+  the badge class            (test 25)                 1         0
+  the badge text at all      (test 25)                 4         0
+  the CSP header             (test 21)                 1         0
+  clickjacking protection    (no test)                 1         0
+  MIME sniffing protection   (no test)                 1         0
+  referrer suppression       (no test)                 1         0
+  camera/mic/geolocation     (no test)                 1         0
+  [ok] properties present at the anchor and GONE at main
+        expected: lost: 8
+        observed: lost: 8
+
+  and what was ADDED - the thing test 21 forbids:
+    inline `style=` in public/assets/app.js          0 ->   32
+    inline `style=` in public/index.html             0 ->   22
+  [ok]   inline styles in app.js, which was zero
+        expected: 0 -> 32
+        observed: 0 -> 32
+
+########## C. an INDEPENDENT run, not a reading of CI's log ##########
+    5694ab45 (anchor)    tests 37  pass 37  fail 0   (exit 0)
+    0d67750 (main)       tests 37  pass 35  fail 2   (exit 1)
+        not ok 21 - CSP-safe visual fills use native progress and no inline styles
+        not ok 25 - browser renders a distinct transport badge on agent cards
+  [ok] the suite is GREEN at the review's anchor
+        expected: (37, 37, 0)
+        observed: (37, 37, 0)
+  [ok]   and RED at current main
+        expected: (37, 35, 2)
+        observed: (37, 35, 2)
+  This is a KNOWN-ANSWER check in the strict sense: CI reported
+  `# tests 37 / # pass 35 / # fail 2` for job 91616795908, and this
+  container reproduces exactly that from the same ref. The anchor
+  passes 37/37, so the harness is not simply broken.
+  Executed here: `node --test` over three files that read local files
+  and a stubbed KV. No network, no GPU, no performance measurement -
+  the pre-registered permissions are unchanged.
+
+########## D. when it broke, per commit ##########
+  commit     CSP  badge  inline style=
+  5694ab4      1      1              0
+  b78c63d      1      0             17
+  548b616      1      0             22
+  b10b226      1      0             22
+  2564f28      1      0             22
+  86f2587      1      0             22
+  e03baf9      1      0             33
+  e754076      1      0             32
+  c4d359d      1      0             32
+  0d67750      0      0             32
+  [ok]   the badge and the inline styles arrive together at b78c63d
+        expected: badge 0, inline 17
+        observed: badge 0, inline 17
+  [ok]   and the security headers survive until the CURRENT head
+        expected: c4d359d: 1, 0d67750: 0
+        observed: c4d359d: 1, 0d67750: 0
+  Two stages, not one. The rendering regression is 32 minutes older
+  than the header deletion, and only the first has a test.
+
+########## E. what this does NOT establish ##########
+  * WHY the rewrite dropped them. The commit messages are about
+    gauge colours and goal text; none mentions the badge, inline
+    styles, or the headers. Whether the loss was intended is
+    UNMEASURED and not guessable from a diff.
+  * Whether the deployed Pages site actually serves without those
+    headers. `public/_headers` is Cloudflare's mechanism, and the
+    Pages project may set headers elsewhere. Checking the live site
+    is a NETWORK operation and `network: false` forbids it. What is
+    measured is the repository content, nothing more.
+  * Exploitability. No XSS was demonstrated. `escapeHtml` still
+    appears 32 times in the new app.js, so the escaping
+    path was not wholesale removed - only the CSP that backstops it.
+  * MEASURED: every count above, the timeline, and both suite runs.
+    REASONED: that losing CSP + gaining 32 inline styles is a
+    weakening rather than a neutral refactor.
+
+########## 0 unexpected result(s) ##########
+The failing check on PR #16 is INHERITED from main, not caused by this
+branch: the push run on 2b0ca5c passed, the pull_request run merged it
+with a broken main and failed. Nothing on this branch touches
+public/, web_tests/ or src/.
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED.
