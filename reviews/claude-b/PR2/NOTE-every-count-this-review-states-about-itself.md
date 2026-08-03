@@ -15,14 +15,14 @@ the run** when it disagrees.
 Surveying the branch to build the inventory check showed something worse:
 
 > **Every write-up opens with `N checks, M unexpected`, and nothing had
-> ever verified one of them.** There are 54 such claims.
+> ever verified one of them.** There are 55 such claims.
 
 That number is the *headline* of every document here — the first quantitative
 claim a reader meets. It was hand-typed in every case. Each is now compared
 against the raw output the same sentence names, and the run fails on any
 disagreement.
 
-All 54 currently match. That is luck rather than process, exactly as it was for
+All 55 currently match. That is luck rather than process, exactly as it was for
 citations: nothing in the workflow checked them before this probe existed.
 
 ## What the recount found
@@ -34,12 +34,12 @@ kind, and the last one that will go unnoticed.
 
 | Quantity | Measured, 2026-08-03 (this run) |
 |---|---|
-| files in `raw/` | 145 |
-| probe scripts | 61 |
-| raw outputs | 76 |
+| files in `raw/` | 147 |
+| probe scripts | 62 |
+| raw outputs | 77 |
 | provenance-attack scripts | 8 |
-| passing checks | 1085 |
-| instrumented outputs | 59 |
+| passing checks | 1103 |
+| instrumented outputs | 60 |
 | `UNEXPECTED` lines | 12, in 5 files |
 
 > **Correction, 2026-08-03.** The `UNEXPECTED` row read **13**, and so did every
@@ -76,7 +76,7 @@ moment this very note was added, which is the defect the probe exists to catch,
 reintroduced inside the probe. The strict census is now checked against a
 **loose** one — every `**N checks, M unexpected.**` anywhere must also be
 matched by the pattern that pairs it with a raw filename — so both sides are
-derived and neither can drift. The count is 54 as of this round. A second, smaller bug in the same round: the
+derived and neither can drift. The count is 55 as of this round. A second, smaller bug in the same round: the
 mismatch check printed `len(mismatched)` while comparing against `[]`, so it
 could never have passed. Both fixed before the run reported here.
 
@@ -168,4 +168,4 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 | Artifact | SHA-256 |
 |---|---|
 | `raw/probe_inventory_selfcheck.py` | `9abb9ad8b22bed303339d5bdc4a2edea57581e116b9e6c6214992e2b3a9ce9f5` |
-| `raw/raw-inventory-selfcheck.txt` | `863b668a28a6d5108b4fa56cced983ca701da8e890e20726d8f763cdf9e3b40b` |
+| `raw/raw-inventory-selfcheck.txt` | `aa69eef5d73805884178b52f7e86b64b4621cbfd2dd650c09bfe50c0d1e36649` |

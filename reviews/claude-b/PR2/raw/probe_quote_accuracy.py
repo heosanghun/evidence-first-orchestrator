@@ -203,6 +203,14 @@ ADJUDICATED = {
         "quote of workspace.py at any single cited line; the expressions are "
         "ast.unparse output, not source text. Eighth time this check has "
         "caught its own author on the round the note was written",
+    ("NOTE-what-collector-redaction-fed-and-the-malformed-output-it-never-did.md",
+     "collector.py"):
+        "PROBE OUTPUT - the block is this probe's own five-line guard listing, "
+        "each line prefixed `collector.py:NNN` with its own line number. It is "
+        "not a quote of the source at any ONE cited line, and the probe "
+        "asserts three of the five lines separately in section D. Ninth time "
+        "this check has caught its own author on the round the note was "
+        "written",
     ("ADDENDUM-git-replace-regression.md", "provenance.py"):
         "deliberate before/after - the block quotes the argument list that "
         "was REMOVED, which is the whole point of the regression",

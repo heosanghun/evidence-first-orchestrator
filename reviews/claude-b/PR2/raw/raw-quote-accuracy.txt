@@ -8,9 +8,9 @@
 
 ########## B. citation + fenced block, the decidable subset ##########
   [ok] every decidable pair was examined
-        expected: pairs: 31
-        observed: pairs: 31
-  verbatim-verified: 17   not matched: 14
+        expected: pairs: 32
+        observed: pairs: 32
+  verbatim-verified: 17   not matched: 15
     ADDENDUM-git-replace-regression.md  ->  provenance.py:47
         deliberate before/after - the block quotes the argument list that was REMOVED, which is the whole point of the regression
     NOTE-487-is-too-many-and-the-two-that-survive-are-guarded.md  ->  provenance.py:78
@@ -37,6 +37,8 @@
         PROBE OUTPUT again - the block is this review's own census line `adapter.py:180  shell=False`, not a quote of the source at :180. Caught by this check on the very round the note was written, which is the self-check working as intended
     NOTE-what-byte-exactness-fed-and-the-malformed-record-it-never-did.md  ->  provenance.py:234
         PROBE OUTPUT - the block is this probe's own three-line guard listing (`provenance.py:216   if not isinstance(declared_files, list) ...`), each line prefixed with its own file:line. It is not a quote of the source at any ONE cited line, and the probe asserts each of the three lines separately in section C. Seventh time this check has caught its own author on the round the note was written
+    NOTE-what-collector-redaction-fed-and-the-malformed-output-it-never-did.md  ->  collector.py:330
+        PROBE OUTPUT - the block is this probe's own five-line guard listing, each line prefixed `collector.py:NNN` with its own line number. It is not a quote of the source at any ONE cited line, and the probe asserts three of the five lines separately in section D. Ninth time this check has caught its own author on the round the note was written
     NOTE-what-util-is-clean-rested-on-and-the-input-it-never-fed.md  ->  provenance.py:156
         PROBE OUTPUT - the block is this census's own caller listing, each line prefixed `str()` or `  -  ` to mark whether the site coerces. It renders provenance.py:156 alongside four other call sites and is not a quote of any single line
   [ok] every unmatched block is adjudicated
@@ -303,7 +305,7 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 
 ########## D. what stays UNDECIDABLE, with a count ##########
-  inline backticked spans sharing a line with a citation: 293
+  inline backticked spans sharing a line with a citation: 294
   These are NOT checked. A sentence like "`doctor.py:109` interpolates
   `agent_id` into a path" contains a citation and a span that is a
   quote, and a sentence like "`workspace.py:1182` reads it by direct
@@ -320,23 +322,23 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
   silently is indistinguishable from one that was never measured, so
   the run now fails when prose and output disagree.
   [ok]   the note states this run's pairs
-        expected: pairs: 31
-        observed: pairs: 31
+        expected: pairs: 32
+        observed: pairs: 32
   [ok]   the note states this run's verbatim-verified
         expected: verbatim-verified: 17
         observed: verbatim-verified: 17
   [ok]   the note states this run's adjudicated non-quotes
-        expected: adjudicated non-quotes: 14
-        observed: adjudicated non-quotes: 14
+        expected: adjudicated non-quotes: 15
+        observed: adjudicated non-quotes: 15
   [ok]   the note states this run's inline spans
-        expected: inline spans: 293
-        observed: inline spans: 293
+        expected: inline spans: 294
+        observed: inline spans: 294
   [ok]   NOTE-citation-audit-of-this-review.md cross-reference agrees
-        expected: inline: 293
-        observed: inline: 293
+        expected: inline: 294
+        observed: inline: 294
   [ok]   SYNTHESIS.md cross-reference agrees
-        expected: inline: 293
-        observed: inline: 293
+        expected: inline: 294
+        observed: inline: 294
 
 ########## 0 unexpected result(s) ##########
 This audits MY OWN write-ups, not EFO. Static analysis only; nothing

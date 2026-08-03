@@ -9,8 +9,8 @@
         expected: 7a9553b
         observed: 7a9553b
   [ok]   raw outputs in the corpus, this probe's own excluded
-        expected: outputs: 75
-        observed: outputs: 75
+        expected: outputs: 76
+        observed: outputs: 76
   [ok]     exactly one output is excluded, and it is this one
         expected: excluded: ['raw-output-provenance-lines.txt']
         observed: excluded: ['raw-output-provenance-lines.txt']
@@ -42,11 +42,11 @@
         expected: other: ['raw-w4-replay.txt']
         observed: other: ['raw-w4-replay.txt']
   [ok]   outputs the test cannot place
-        expected: undecidable: 39
-        observed: undecidable: 39
+        expected: undecidable: 40
+        observed: undecidable: 40
   [ok]     and the three classes account for every output
-        expected: total: 75
-        observed: total: 75
+        expected: total: 76
+        observed: total: 76
 
 ########## D. the KNOWN ANSWER that shows the test is ONE-WAY ##########
   [ok] raw-attack4.txt is in the UNDECIDABLE set

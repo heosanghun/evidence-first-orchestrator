@@ -7,13 +7,13 @@ said to SCOPE FIRST and, if the population is too large, take the subset whose
 component carries an open issue.
 
     21  clean rows in SYNTHESIS
-    23  distinct notes they cite  (three rows cite two apiece)
-    21  whose probe file can be located
+    24  distinct notes they cite  (four rows cite two apiece)
+    22  whose probe file can be located
      4  of those are STATIC CENSUSES - they never execute the component, so
         "which input class did it feed" is not a question about them
-    17  actually drive the component
+    18  actually drive the component
 
-Adjudicating 17 notes by hand is more than one round. So this tried the cheap
+Adjudicating 18 notes by hand is more than one round. So this tried the cheap
 proxy: does the probe file contain a call passing None, an int, an empty list
 or an empty dict?
 
@@ -24,7 +24,7 @@ a util function. The `None`s it counts are `re.search(..., None)` and default
 arguments: the probe's OWN plumbing, not input to the component under test.
 
 So the answer to item 50 is that the cheap census cannot answer it, and saying
-so is better than shipping 17 verdicts derived from a filter I can show to be
+so is better than shipping 18 verdicts derived from a filter I can show to be
 wrong on the one case I have already checked by hand. The subset with an open
 issue is named for the next round instead.
 
@@ -32,7 +32,7 @@ A LEAD, not a verdict. No issue filed, no clean verdict retracted.
 
     python3 probe_clean_verdict_census.py
 
-SCOPE, stated first: 21 clean rows, 21 locatable probes, 1 known answer.
+SCOPE, stated first: 21 clean rows, 22 locatable probes, 1 known answer.
 """
 
 from __future__ import annotations
@@ -83,9 +83,9 @@ for row in rows:
         if found and (RAW / found.group(1)).is_file():
             probes[found.group(1)] = component
 check("clean rows in SYNTHESIS", "clean rows: 21", f"clean rows: {len(rows)}")
-check("  distinct notes they cite", "notes: 23", f"notes: {len(notes)}")
-check("    whose probe can be located", "probes: 21", f"probes: {len(probes)}")
-print("  Twenty-one is more than one round of hand adjudication, which is what")
+check("  distinct notes they cite", "notes: 24", f"notes: {len(notes)}")
+check("    whose probe can be located", "probes: 22", f"probes: {len(probes)}")
+print("  Twenty-two is more than one round of hand adjudication, which is what")
 print("  the item anticipated. Section B tries the cheap way; section C shows")
 print("  the cheap way does not work.")
 
@@ -161,8 +161,8 @@ for probe, (component, count) in sorted(driving.items()):
     print(f"    drives   {probe:<42}{component[:22]:<24}{count} non-string args")
 check("probes that never execute the component - a static census",
       "static: 4", f"static: {len(static)}")
-check("  probes that drive it", "driving: 17", f"driving: {len(driving)}")
-check("    of which the proxy says feed a non-string", "flagged: 17",
+check("  probes that drive it", "driving: 18", f"driving: {len(driving)}")
+check("    of which the proxy says feed a non-string", "flagged: 18",
       f"flagged: {sum(1 for _, n in driving.values() if n)}")
 print("  For a static census the question does not arise: it reads the AST and")
 print("  never calls anything, so it has no input class to feed.")
@@ -197,7 +197,7 @@ print("  would be exactly the failure this review exists to prevent.")
 print("\n########## D. so: the subset with an open issue, named not measured ##########")
 ISSUES = {
     "`provenance.py` byte-exactness": "#4/#5/#18 (done - item 53)",
-    "`monitor/collector.py` (redaction)": "#6",
+    "`monitor/collector.py` (redaction)": "#6 (done - item 59)",
     "`ledger.projected_tasks`": "#9",
     "`cli.py`": "#19 (done - item 56)",
     "`dashboard.py`, `errors.py`": "#19",
@@ -213,17 +213,17 @@ for probe, component, issues in named:
 # it appears twice in this listing. Corrected to the measurement; the remainder
 # is still seven because both of its entries are already adjudicated.
 check("driving probes whose component carries an open issue",
-      "with an issue: 11", f"with an issue: {len(named)}")
-check("  of which already adjudicated by hand - items 47, 53 and 56",
-      "already done: 6",
+      "with an issue: 12", f"with an issue: {len(named)}")
+check("  of which already adjudicated by hand - items 47, 53, 56 and 59",
+      "already done: 8",
       f"already done: {sum(1 for _, _, i in named if 'done' in i)}")
 check("    leaving the population for the next round",
-      "remaining: 5",
+      "remaining: 4",
       f"remaining: {len(named) - sum(1 for _, _, i in named if 'done' in i)}")
-print("  FIVE remain. That is the population the next round should take, one")
+print("  FOUR remain. That is the population the next round should take, one")
 print("  at a time and BY HAND, which is the only method shown to work here.")
-print("  Updated 2026-08-03: items 53 and 56 adjudicated `provenance.py`")
-print("  byte-exactness and `cli.py`, so this population moved 7 -> 5 and the")
+print("  Updated 2026-08-03: items 53, 56 and 59 adjudicated `provenance.py`")
+print("  byte-exactness, `cli.py` and the collector, moving 7 -> 4, and the")
 print("  clean-row set grew by the note that did it. Both are re-derived here")
 print("  rather than left at the number this note first published.")
 

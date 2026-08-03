@@ -20,7 +20,7 @@ proposed. Scanned across every `raw-*.txt`:
     35  carry an ANCHOR-only token  -> positively placed on the anchor's line
      1  carries 7a9553b-only tokens -> `raw-w4-replay.txt`, my own item-55
         probe, which names both refs by design
-    39  carry NEITHER              -> UNDECIDABLE by this test
+    40  carry NEITHER              -> UNDECIDABLE by this test
 
 AND THE TEST HAS A PROVEN FALSE NEGATIVE. `raw-attack4.txt` is in the
 undecidable set - yet item 55 established, by the ABSENT API rather than by any
@@ -37,11 +37,11 @@ Two further discriminators were considered and MEASURED rather than assumed:
                                   - ruled out, not a discriminator
     the CLI subcommand list       IS a discriminator (`workspace` and `audit`
                                   exist only at 7a9553b) but appears in only
-                                  2 of 75 outputs, neither of them attack4
+                                  2 of 76 outputs, neither of them attack4
 
     python3 probe_output_provenance_lines.py
 
-SCOPE, stated first: 75 outputs, 6 cited by REPORT.md, 2 derived marker sets,
+SCOPE, stated first: 76 outputs, 6 cited by REPORT.md, 2 derived marker sets,
 3 candidate discriminators, 1 known answer. A MAP with a NEGATIVE result.
 No issue filed.
 """
@@ -97,8 +97,12 @@ SELF = "raw-" + Path(__file__).stem[len("probe_"):].replace("_", "-") + ".txt"
 every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name != SELF]
+# These two counts are PINNED on purpose, not because they cannot be derived:
+# the population is the thing under discussion, so a corpus that grows must
+# force this note to be re-read rather than silently re-measured. Item 59's
+# output pushed 75 -> 76 and 39 -> 40, and the pin is what said so.
 check("  raw outputs in the corpus, this probe's own excluded",
-      "outputs: 75", f"outputs: {len(outputs)}")
+      "outputs: 76", f"outputs: {len(outputs)}")
 check("    exactly one output is excluded, and it is this one",
       f"excluded: ['{SELF}']",
       f"excluded: {[p.name for p in every if p.name == SELF]}")
@@ -156,7 +160,7 @@ check("  outputs carrying a 7a9553b-only token", "other: 1",
       f"other: {len(placed_other)}")
 check("    and it is my OWN item-55 probe, which names both refs",
       "other: ['raw-w4-replay.txt']", f"other: {placed_other}")
-check("  outputs the test cannot place", "undecidable: 39",
+check("  outputs the test cannot place", "undecidable: 40",
       f"undecidable: {len(undecidable)}")
 check("    and the three classes account for every output",
       f"total: {len(outputs)}",
