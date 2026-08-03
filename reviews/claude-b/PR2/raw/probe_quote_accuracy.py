@@ -189,6 +189,34 @@ print("  index\" contains a citation and a span that is not. Position does not")
 print("  distinguish them, and guessing produced a 15-in-19 false-positive")
 print("  rate on the first attempt. Named as a gap rather than papered over.")
 
+# ---------------------------------------------------------------- E
+print("\n########## E. does the write-up STATE the numbers this run measured? ##########")
+print("  On 2026-08-03 NOTE-quote-accuracy.md read `Eleven such pairs exist`")
+print("  and `194 inline backticked spans` while the committed raw output")
+print("  beside it said 12 pairs and 215 spans. The table (7 verbatim, 5")
+print("  adjudicated) had been refreshed and the prose had not. Both were true")
+print("  when written; neither was true when read. A count that drifts")
+print("  silently is indistinguishable from one that was never measured, so")
+print("  the run now fails when prose and output disagree.")
+note = (REVIEWS / "NOTE-quote-accuracy.md").read_text(encoding="utf-8")
+STATED_PAIRS = re.compile(r"\*\*(\d+)\*\* such pairs exist")
+STATED_VERBATIM = re.compile(r"verbatim-verified against the cited range \| (\d+)")
+STATED_ADJUDICATED = re.compile(r"adjudicated non-quotes \| (\d+)")
+STATED_INLINE = re.compile(r"\*\*(\d+) inline backticked spans")
+for label, pattern, measured in (
+        ("pairs", STATED_PAIRS, len(pairs)),
+        ("verbatim-verified", STATED_VERBATIM, len(verified)),
+        ("adjudicated non-quotes", STATED_ADJUDICATED, len(unmatched)),
+        ("inline spans", STATED_INLINE, inline)):
+    found = pattern.search(note)
+    check(f"  the note states this run's {label}", f"{label}: {measured}",
+          f"{label}: {found.group(1) if found else 'NO MACHINE-READABLE COUNT'}")
+for label in ("NOTE-citation-audit-of-this-review.md", "SYNTHESIS.md"):
+    text = (REVIEWS / label).read_text(encoding="utf-8")
+    found = re.search(r"(\d+) inline spans remain undecidable", text)
+    check(f"  {label} cross-reference agrees", f"inline: {inline}",
+          f"inline: {found.group(1) if found else 'NOT FOUND'}")
+
 print(f"\n########## {FAIL} unexpected result(s) ##########")
 print("This audits MY OWN write-ups, not EFO. Static analysis only; nothing")
 print("was executed against a workspace. Pre-registered permissions unchanged")

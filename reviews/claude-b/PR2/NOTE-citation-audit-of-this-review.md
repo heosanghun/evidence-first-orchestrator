@@ -1,7 +1,7 @@
 # Every citation this review makes, audited — three were wrong, all three now corrected
 
 Reproduce with `raw/probe_citation_audit.py`; raw output in
-`raw/raw-citation-audit.txt`. **22 checks, 0 unexpected.**
+`raw/raw-citation-audit.txt`. **25 checks, 0 unexpected.**
 
 This audits **my own write-ups**, not EFO. Every defect it reports is a defect
 in the review.
@@ -18,12 +18,13 @@ reading one document, I audited every citation on the branch.
 
 ## The audit
 
-**141 live citations across 34 documents, over 25 distinct files.**
-(126 across 30 when first written; re-run after every write-up change.) Every cited
+**166 live citations across 36 documents, over 25 distinct files.**
+(126 across 30 when first written; re-run after every write-up change, and
+section F now **fails the run** if this sentence and the output disagree.) Every cited
 file exists at `main`; every cited line is within its file. The run fails on
 any that is not.
 
-Eleven more citations appear inside dated correction banners or carry an
+**12** more citations appear inside dated correction banners or carry an
 inline `[retracted]` marker. Those are excluded
 as *retractions rather than claims* — a banner quotes the citation it is
 retracting, so counting it as live would make a correction indistinguishable
@@ -110,7 +111,7 @@ reader would read them.
 Fragment accuracy was **not** examined here — only the nine finding-bearing
 anchors in section D. That gap is now closed for the decidable subset by
 `NOTE-quote-accuracy.md`, which found two condensed quotes and made them
-verbatim; 194 inline spans remain undecidable by position.
+verbatim; 230 inline spans remain undecidable by position.
 
 Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 `performance_metrics: false`; gates `allow_skips: false`,
@@ -121,5 +122,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_citation_audit.py` | `5aa45719c52d762acff66b2c7e01b2ee3ff0976ca285dbad8b4ada6615f65404` |
-| `raw/raw-citation-audit.txt` | `513d16c809ab8ba9274f864d8e4a996f5e77d116021bf38a5191c1b388c32243` |
+| `raw/probe_citation_audit.py` | `f5b15318c902f4c88a8a985569d893571f75042977a3ddf102fac044bcf766c3` |
+| `raw/raw-citation-audit.txt` | `25d4697b8f5e1b438ac1caedd61baa3ce22be198d4352a447a1d8ec48bf6b429` |

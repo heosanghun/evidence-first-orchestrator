@@ -59,7 +59,7 @@ check("probe source is main 5694ab45",
       "5694ab455139f1e72d946bc2fe7e42c7c0c8a43a", head)
 check("  with no working-tree modification", "dirty: ''", f"dirty: {dirty!r}")
 documents = sorted(REVIEWS.glob("*.md"))
-check("  and the write-ups are present", "documents: 35",
+check("  and the write-ups are present", "documents: 36",
       f"documents: {len(documents)}")
 
 # ---------------------------------------------------------------- B
@@ -237,6 +237,29 @@ print("  that the document never NAMES that subject, so a reader who follows")
 print("  a citation against main lands nowhere and reasonably concludes the")
 print("  review invented it. Fixed by labelling the document, not by editing")
 print("  its citations - they were right all along.")
+
+# ---------------------------------------------------------------- F
+print("\n########## F. do the write-ups STATE the numbers this run measured? ##########")
+print("  Counts copied into prose go stale the moment another document is")
+print("  added, and a stale count is indistinguishable from an invented one.")
+print("  On 2026-08-03 this note said `141 live citations across 34 documents`")
+print("  while the committed raw output beside it said 152 across 35. Nobody")
+print("  was checking. Now the run fails when prose and output disagree.")
+audit_note = (REVIEWS / "NOTE-citation-audit-of-this-review.md").read_text(
+    encoding="utf-8")
+synthesis = (REVIEWS / "SYNTHESIS.md").read_text(encoding="utf-8")
+STATED = re.compile(r"\*\*(\d+) live citations across\s+(\d+) documents")
+for label, text in (("NOTE-citation-audit-of-this-review.md", audit_note),
+                    ("SYNTHESIS.md", synthesis)):
+    stated = STATED.search(text)
+    check(f"  {label} states this run's counts",
+          f"{len(citations)} citations / {len(documents)} documents",
+          (f"{stated.group(1)} citations / {stated.group(2)} documents"
+           if stated else "NO MACHINE-READABLE COUNT FOUND"))
+banner = re.search(r"\*\*(\d+)\*\* more citations appear inside", audit_note)
+check("  and the retraction count it excludes",
+      f"retractions: {quoted_in_corrections}",
+      f"retractions: {banner.group(1) if banner else 'NOT FOUND'}")
 
 print(f"\n########## {FAIL} unexpected result(s) ##########")
 print("This audits MY OWN write-ups, not EFO. Every finding it reports is a")

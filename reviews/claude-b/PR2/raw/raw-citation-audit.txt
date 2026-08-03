@@ -6,12 +6,12 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   and the write-ups are present
-        expected: documents: 35
-        observed: documents: 35
+        expected: documents: 36
+        observed: documents: 36
 
 ########## B. every FILE:LINE citation in the write-ups ##########
-  152 live citations across 35 documents
-  11 more appear inside correction banners and are
+  166 live citations across 36 documents
+  12 more appear inside correction banners and are
   excluded as retractions rather than claims - see the comment in the
   source for why that exclusion is principled and not self-serving.
   [ok] every cited file exists at main
@@ -20,7 +20,7 @@
   [ok]   and every cited line is within its file
         expected: out of range: []
         observed: out of range: []
-  distinct files cited: 27
+  distinct files cited: 28
     CONTRIBUTING.md                                2 citations, 31 lines
     docs/MIGRATION.md                              4 citations, 167 lines
     docs/PROXY_SUBMISSION.md                       2 citations, 192 lines
@@ -29,7 +29,7 @@
     src/evidence_orchestrator/__main__.py          1 citations, 7 lines
     src/evidence_orchestrator/adapter.py           6 citations, 320 lines
     public/assets/app.js                           3 citations, 1566 lines
-    src/evidence_orchestrator/archive.py           2 citations, 163 lines
+    src/evidence_orchestrator/archive.py           3 citations, 163 lines
     functions/api/chat.js                          3 citations, 445 lines
     src/evidence_orchestrator/cli.py               5 citations, 635 lines
     monitor/collector.py                           3 citations, 1436 lines
@@ -38,12 +38,13 @@
     docs/MIGRATION.md                              3 citations, 167 lines
     docs/PROXY_SUBMISSION.md                       1 citations, 192 lines
     src/evidence_orchestrator/doctor.py            7 citations, 220 lines
-    src/evidence_orchestrator/evidence.py          3 citations, 297 lines
+    src/evidence_orchestrator/evidence.py          6 citations, 297 lines
     functions/api/snapshot.js                      1 citations, 714 lines
-    src/evidence_orchestrator/independence.py      3 citations, 281 lines
+    src/evidence_orchestrator/independence.py      6 citations, 281 lines
+    src/evidence_orchestrator/ledger.py            2 citations, 165 lines
     src/evidence_orchestrator/model.py             4 citations, 143 lines
     monitor/collector.py                           3 citations, 1436 lines
-    src/evidence_orchestrator/provenance.py       15 citations, 341 lines
+    src/evidence_orchestrator/provenance.py       20 citations, 341 lines
     functions/api/snapshot.js                      1 citations, 714 lines
     src/evidence_orchestrator/adapter.py           1 citations, 320 lines
     tests/test_concurrency.py                      1 citations, 59 lines
@@ -132,6 +133,22 @@
   a citation against main lands nowhere and reasonably concludes the
   review invented it. Fixed by labelling the document, not by editing
   its citations - they were right all along.
+
+########## F. do the write-ups STATE the numbers this run measured? ##########
+  Counts copied into prose go stale the moment another document is
+  added, and a stale count is indistinguishable from an invented one.
+  On 2026-08-03 this note said `141 live citations across 34 documents`
+  while the committed raw output beside it said 152 across 35. Nobody
+  was checking. Now the run fails when prose and output disagree.
+  [ok]   NOTE-citation-audit-of-this-review.md states this run's counts
+        expected: 166 citations / 36 documents
+        observed: 166 citations / 36 documents
+  [ok]   SYNTHESIS.md states this run's counts
+        expected: 166 citations / 36 documents
+        observed: 166 citations / 36 documents
+  [ok]   and the retraction count it excludes
+        expected: retractions: 12
+        observed: retractions: 12
 
 ########## 0 unexpected result(s) ##########
 This audits MY OWN write-ups, not EFO. Every finding it reports is a

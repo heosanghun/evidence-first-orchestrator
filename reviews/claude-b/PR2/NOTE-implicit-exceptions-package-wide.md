@@ -1,5 +1,14 @@
 # The implicit-exception census, package-wide — no second #19, and the boundary of what static analysis can say
 
+> **Correction, 2026-08-03.** The last row of the coverage table below said
+> *"dynamic-key subscripts, `x[variable]` — **unmeasured** — 144 sites"*. The
+> count of 144 reproduces exactly, but it is **misleading**: 128 of those sites
+> are type annotations (`dict[str, Any]`) and 9 are stores (`d[k] = v`, which
+> cannot raise `KeyError`). The runtime read population is **7**, and all seven
+> are now adjudicated in `NOTE-the-144-was-my-own-misleading-number.md` —
+> exactly one is keyed by parsed input. The row is amended below rather than
+> deleted, so the error stays visible.
+
 Reproduce with `raw/probe_implicit_exceptions_all_modules.py`; raw output in
 `raw/raw-implicit-all-modules.txt`. **9 checks, 0 unexpected.** No issue filed.
 
@@ -74,7 +83,7 @@ as complete when it is not:
 | constant-key subscript reads, whole package | **measured** — all adjudicated |
 | `IndexError` from integer indexes | **measured** — 3 sites, all guarded |
 | `AttributeError`, `TypeError`, `ZeroDivisionError`, `StopIteration` | **unmeasured** |
-| dynamic-key subscripts, `x[variable]` | **unmeasured** — 144 sites |
+| dynamic-key subscripts, `x[variable]` | ~~**unmeasured** — 144 sites~~ → **measured**: 7 runtime reads, all adjudicated (see the correction banner) |
 
 `AttributeError` and `TypeError` are **not statically enumerable here**. `x.foo`
 is unsafe only if `x` can be `None` or another type, and deciding that needs

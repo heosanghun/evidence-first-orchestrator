@@ -3,9 +3,25 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**460 passing checks across 20 instrumented probes**, plus eight shell-script
-provenance attacks that predate the `[ok]` convention. 26 probe scripts and 65
-raw outputs live in `raw/`, each SHA-256 bound in the write-up that cites it.
+**636 passing checks across 31 instrumented raw outputs.** `raw/` holds 87
+files: **32 probe scripts, 47 raw outputs, 8 provenance-attack scripts** that
+predate the `[ok]` convention. Each is SHA-256 bound in the write-up that cites
+it.
+
+Thirteen `UNEXPECTED` lines survive, in five files —
+`raw-evidence-gates.txt` (5), `raw-lifecycle-gates.txt` (3),
+`raw-alias-lineage.txt` (2), `raw-attack-prov5-main.txt` (2),
+`raw-ledger-chain.txt` (1). All are **findings** recorded under the older
+counting convention, not harness failures; see the caveat at the end of this
+document.
+
+> **Correction, 2026-08-03.** This paragraph previously read *"460 passing
+> checks across 20 instrumented probes … 26 probe scripts and 65 raw outputs"*.
+> All four numbers were stale, and the 65 does not reconcile with any state of
+> `raw/` I can reconstruct (32 + 65 exceeds the 87 files present). They are now
+> recounted with the rule stated: `[ok]` lines across `raw-*.txt`, and file
+> counts by prefix. This is the same defect as the two below — a count copied
+> into prose and never re-derived.
 
 **Nothing here is VERIFIED.** Every issue and note is a *submission*. No
 third-party reply exists on any of issues #3–#15 as of this writing, and I have
@@ -45,9 +61,10 @@ never treated my own re-run as independent confirmation.
 | alias / `alias_chain` machinery | clean | `NOTE-alias-lineage-holds.md` |
 | `workspace.py` implicit exceptions | clean — #19 is the only instance | `NOTE-issue19-is-the-only-one.md` |
 | the rest of the package, implicit exceptions | clean — 78 reads, 3 guarded indexes | `NOTE-implicit-exceptions-package-wide.md` |
+| dynamic-key subscripts, whole package | clean — 7 runtime reads, 1 keyed by parsed input; a **published count of mine corrected** | `NOTE-the-144-was-my-own-misleading-number.md` |
 | `SECURITY.md` / `CONTRIBUTING.md` claims | clean — ignore rules, no `shell=True`, report containment | `NOTE-remaining-docs-adjudicated.md` |
 
-Fourteen components were probed and found sound (one with a claim since corrected — see #19).
+Fifteen components were probed and found sound (one with a claim since corrected — see #19).
 
 **Every Markdown document in the repository has now been read end to end and
 every falsifiable sentence adjudicated** — `README.md`, `docs/ARCHITECTURE.md`,
@@ -156,8 +173,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **126 live citations across
-30 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **166 live citations across
+36 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -175,8 +192,52 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 194 inline spans remain undecidable by position and are named as a
+lenient. 230 inline spans remain undecidable by position and are named as a
 gap.
+
+## A misleading number I published, corrected on 2026-08-03
+
+`NOTE-implicit-exceptions-package-wide.md` named its own next gap as
+*"dynamic-key subscripts, `x[variable]` — unmeasured — **144** sites"*. The
+count reproduces exactly, and that is what makes it worse than an arithmetic
+slip: **128 of the 144 are type annotations** (`dict[str, Any]`) and 9 are
+stores, which create their key and cannot `KeyError`. The runtime read
+population is **7**. A reader would have taken the uncovered surface to be
+twenty times its real size.
+
+All seven are now adjudicated by key provenance in
+`NOTE-the-144-was-my-own-misleading-number.md`: **one** is keyed by parsed
+input (`provenance.py:295`, guarded 54 lines earlier at `:241`), two index a
+dict from its own keyspace, two are slices, two are local literals.
+`workspace.py` has **zero** runtime dynamic-key reads.
+
+That is the **fifth** hand-written filter in this review to be the bug — after
+the `raise` census blind to a dict index (#19), the variable-name filter that
+missed `task_for_validation`, the module list that missed `errors.py`, and the
+quote-accuracy window built from a range's start only — and the **second** time
+the bug was in a figure already on the record.
+
+## Counts that drifted, caught and made self-checking on 2026-08-03
+
+Pulling on the 144 exposed a wider version of the same problem: **numbers
+copied into prose and never re-derived.** Three pairs disagreed with the raw
+output committed beside them.
+
+| Document | Stated | Raw output said |
+|---|---|---|
+| `NOTE-quote-accuracy.md` | "Eleven such pairs exist"; 194 inline spans | 12 pairs; 215 spans |
+| `NOTE-citation-audit-of-this-review.md` | 141 citations / 34 documents | 152 / 35 |
+| this document, header | 460 checks, 20 probes, 26 scripts, 65 outputs | 636 / 31 / 32 / 47 |
+
+Every one was true when written. None was true when read, and *"Eleven"* sat
+directly above a table of 7 + 5 that does not sum to eleven — an inconsistency
+visible on the page for two rounds without being pulled.
+
+The fix is not another refresh. `probe_citation_audit.py` section F and
+`probe_quote_accuracy.py` section E now **read the prose and fail the run** when
+a stated count disagrees with the count that run measured. A drifting number is
+indistinguishable from an invented one, which is the failure this project
+exists to prevent.
 
 ## A defect in this branch, found and fixed on 2026-08-03
 
