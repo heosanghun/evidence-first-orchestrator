@@ -10,6 +10,9 @@
         observed: exists: True
 
 ########## B. no attack4 script has EVER existed ##########
+    c33ba96 review: 91 -> 22 -> 16 -> one driven raise, blocked by the ledger guard
+    reviews/claude-b/PR2/NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md
+    reviews/claude-b/PR2/raw/raw-attack4-provenance.txt
     2e6187d review: seven of fifteen modules the suite never names, and five issues live there
     reviews/claude-b/PR2/NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md
     reviews/claude-b/PR2/raw/probe_attack4_provenance.py
@@ -77,7 +80,7 @@
   script: the artifact under test is not in the tree.
 
 ########## E. what still rests on it ##########
-    documents citing it: ['NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md', 'NOTE-two-attack-scripts-ran-against-the-stale-base.md', 'REPORT.md', 'SYNTHESIS.md']
+    documents citing it: ['NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md', 'NOTE-two-attack-scripts-ran-against-the-stale-base.md', 'NOTE-two-of-REPORTs-outputs-were-re-run-not-merely-catalogued.md', 'REPORT.md', 'SYNTHESIS.md']
       REPORT.md:305  *measured.* `raw/raw-attack4.txt`, W6 / W6b.
       REPORT.md:322  *measured.* `raw/raw-attack4.txt`, W3.
       REPORT.md:342  *measured.* `raw/raw-attack4.txt`, W2 / W2b.
