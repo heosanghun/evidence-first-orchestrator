@@ -3,6 +3,18 @@
 Reproduce with `raw/probe_implicit_exceptions.py`; raw output in
 `raw/raw-implicit-exceptions.txt`. **10 checks, 0 unexpected.**
 
+> **EXTENDED 2026-08-03 by item 71 — the measurement below is unretracted, the
+> word `class` was wrong.** This probe fed exactly **two** classes of task
+> projection — the normal one and the repair-dropped one — and never wrote a
+> projection file at all, so it fed no **edited** class. Of the three edited
+> classes, two are covered (a non-object is refused by `read_json`; any other
+> key altered raises `IntegrityError`), and one is not: `last_event_hash` is
+> excluded by name from **all four** comparisons in the package, so it can be
+> set to anything. Forged to `"f"*64` it is written into the **signed**
+> `task.proxy_submitted` event with `doctor healthy: True`. See
+> `NOTE-the-class-19s-probe-never-fed-and-the-hash-that-can-be-forged.md`.
+> This note named a class of **repair**; that one names a class of **input**.
+
 Issue #19 is a `KeyError` from `task_for_validation["last_event_hash"]` that
 escapes `cli.main` as a traceback. It was found by accident while reading
 `ARCHITECTURE.md`, and it disproved an earlier clean result of mine

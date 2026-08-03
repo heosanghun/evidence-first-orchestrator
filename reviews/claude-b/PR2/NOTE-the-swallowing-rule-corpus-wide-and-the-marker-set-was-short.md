@@ -9,6 +9,11 @@ claimed.
 verdict changes under the sweep, 2 under the correction, 1 incomplete marker
 class found, 5 doubled slots.
 
+> **Updated 2026-08-03, same day:** item 71's output landed and is placed on the
+> anchor's line, so the population is **84** at `HEAD` and the corrected union's
+> anchor count **37 → 38**. Everything else below is unchanged, and the pin in
+> the probe is what forced this line.
+
 ## What item 67 left open, in its own words
 
 That round applied the swallowing rule — *a marker occurrence that sits inside
@@ -145,5 +150,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_swallowed_marks_corpus_wide.py` | `cea8829c34534aca4523763ea7987bac23113d5af92e3e77396d78dba7812f12` |
-| `raw/raw-swallowed-marks-corpus-wide.txt` | `d9d5cfc4cb9465f2b678ba40da45aba6367664f7a5cb10dd9d2190043c63db20` |
+| `raw/probe_swallowed_marks_corpus_wide.py` | `e7d79d15ab7118971d1649a8024bf521d0b409a0fba0833ea40ea189dc7323a6` |
+| `raw/raw-swallowed-marks-corpus-wide.txt` | `e1b49132d21cc915abdddbaad456423c8952519cedddf1ac75d763a4300b438a` |

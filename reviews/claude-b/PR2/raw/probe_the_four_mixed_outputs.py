@@ -95,7 +95,7 @@ every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
 check("  raw outputs scanned, the marker-printing ones excluded",
-      "outputs: 83", f"outputs: {len(outputs)}")
+      "outputs: 84", f"outputs: {len(outputs)}")
 check("    five are excluded now, this probe's own among them", "excluded: 5",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
 

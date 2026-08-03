@@ -10,11 +10,11 @@
 
 ########## B. raw/ recounted, and the classification checked ##########
   [ok] every file in raw/ is classified
-        expected: total: 169
-        observed: total: 169
-    73 probe scripts, 88 raw outputs, 8 provenance-attack scripts
+        expected: total: 171
+        observed: total: 171
+    74 probe scripts, 89 raw outputs, 8 provenance-attack scripts
     the attack scripts, named rather than lumped in: ['attack2.sh', 'attack2_cef.sh', 'attack3.sh', 'attack_main.sh', 'attack_main2.sh', 'attack_prov5_main.py', 'attack_prov_main.sh', 'attack_proxy.sh']
-    1398 passing checks across 71 instrumented outputs; 12 UNEXPECTED lines
+    1430 passing checks across 72 instrumented outputs; 12 UNEXPECTED lines
     (excluding raw-inventory-selfcheck.txt, this run's own report - see the comment above)
     the UNEXPECTED lines, by file: {'raw-alias-lineage.txt': 2, 'raw-attack-prov5-main.txt': 1, 'raw-evidence-gates.txt': 5, 'raw-ledger-chain.txt': 1, 'raw-lifecycle-gates.txt': 3}
 
@@ -23,20 +23,20 @@
         expected: found: True
         observed: found: True
   [ok]   passing checks
-        expected: passing checks: 1398
-        observed: passing checks: 1398
+        expected: passing checks: 1430
+        observed: passing checks: 1430
   [ok]   instrumented outputs
-        expected: instrumented outputs: 71
-        observed: instrumented outputs: 71
+        expected: instrumented outputs: 72
+        observed: instrumented outputs: 72
   [ok]   files in raw/
-        expected: files in raw/: 169
-        observed: files in raw/: 169
+        expected: files in raw/: 171
+        observed: files in raw/: 171
   [ok]   probe scripts
-        expected: probe scripts: 73
-        observed: probe scripts: 73
+        expected: probe scripts: 74
+        observed: probe scripts: 74
   [ok]   raw outputs
-        expected: raw outputs: 88
-        observed: raw outputs: 88
+        expected: raw outputs: 89
+        observed: raw outputs: 89
   [ok]   attack scripts
         expected: attack scripts: 8
         observed: attack scripts: 8
@@ -60,18 +60,18 @@
   Write-ups open with `N checks, M unexpected`. Nothing has ever
   checked one. Each is now compared against the raw output it names.
   [ok] every stated check-count is paired with a raw output
-        expected: strict: 65
-        observed: strict: 65
-    65 checkable headline claims across the write-ups
+        expected: strict: 66
+        observed: strict: 66
+    66 checkable headline claims across the write-ups
     (An earlier draft pinned this at 30, from `grep -l` counting FILES
      rather than occurrences. The census said 29 and was right. The
      number is now derived on both sides, so neither can go stale.)
   [ok] SYNTHESIS states the write-up count in its opening paragraph
-        expected: claims: 65
-        observed: claims: 65
+        expected: claims: 66
+        observed: claims: 66
   [ok] SYNTHESIS states   and the one in its own-counts row
-        expected: claims: 65
-        observed: claims: 65
+        expected: claims: 66
+        observed: claims: 66
   [ok]   every named raw output exists
         expected: missing: []
         observed: missing: []

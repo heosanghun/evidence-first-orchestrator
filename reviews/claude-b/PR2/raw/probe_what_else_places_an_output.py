@@ -91,7 +91,7 @@ every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
 check("  raw outputs scanned, the marker-printing ones excluded",
-      "outputs: 83", f"outputs: {len(outputs)}")
+      "outputs: 84", f"outputs: {len(outputs)}")
 check("    exactly five are excluded, this probe's own among them",
       "excluded: 5",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
@@ -140,7 +140,7 @@ token = {p.name: verdict(*by_token(p.read_text(errors="replace")))
          for p in outputs}
 print(f"    {Counter(token.values())}")
 check("the module/test-id test leaves this many undecidable",
-      "undecidable: 50",
+      "undecidable: 51",
       f"undecidable: {sum(1 for v in token.values() if v == 'undecidable')}")
 
 # ---------------------------------------------------------------- C
@@ -281,7 +281,7 @@ print("\n########## G. what the corrected class places ##########")
 placed = Counter(classify(p.read_text(errors="replace"), DA, DD)
                  for p in open_set)
 print(f"    the {len(open_set)} previously undecidable: {dict(placed)}")
-check("outputs newly placed on the anchor's line", "anchor: 9",
+check("outputs newly placed on the anchor's line", "anchor: 10",
       f"anchor: {placed['anchor']}")
 check("  newly placed on the divergent line", "divergent: 2",
       f"divergent: {placed['divergent']}")
@@ -301,7 +301,7 @@ print(f"    UNION of both tests: {dict(Counter(union.values()))}")
 # already placed by one test can pick up the OTHER line's marker from the
 # second, becoming MIXED rather than staying put. Corrected to the measured
 # union, and the mixed class is asserted rather than absorbed.
-check("the union places this many on the anchor's line", "anchor: 36",
+check("the union places this many on the anchor's line", "anchor: 37",
       f"anchor: {sum(1 for v in union.values() if v == 'anchor')}")
 check("  on the divergent line", "divergent: 5",
       f"divergent: {sum(1 for v in union.values() if v == 'divergent')}")

@@ -99,7 +99,7 @@ every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
 check("  raw outputs scanned, the marker-printing ones excluded",
-      "outputs: 83", f"outputs: {len(outputs)}")
+      "outputs: 84", f"outputs: {len(outputs)}")
 check("    five are excluded now, this probe's own among them", "excluded: 5",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
 
@@ -323,7 +323,7 @@ check("outputs that move under BOTH corrections", "moved: 2",
 check("  one loses a mixture", "raw-full-final.txt", str(final_moved))
 check("  and one is newly PLACED", "raw-proxy-mocks.txt", str(final_moved))
 check("the corrected union places this many on the anchor's line",
-      "anchor: 37",
+      "anchor: 38",
       f"anchor: {sum(1 for v in corrected.values() if v == 'anchor')}")
 check("  on the divergent line", "divergent: 6",
       f"divergent: {sum(1 for v in corrected.values() if v == 'divergent')}")

@@ -40,6 +40,10 @@ sets, 3 candidate discriminators, 1 known answer.
 > corpus-wide swallowing sweep leaves this probe's own four-way numbers
 > unchanged and moves the *union* to **37 / 6 / 3 / 37**.
 >
+> **Item 71's output lands and IS counted** — it prints no markers — so the
+> population moves **83 → 84** and this test's undecidable **50 → 51**. The pin
+> is what said so.
+>
 > **Every table below is superseded by
 > `NOTE-the-suite-size-decided-it-and-a-substring-reversed-four.md`**, which
 > carries the measurement. Two things here survive unchanged: the test still
@@ -168,5 +172,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_output_provenance_lines.py` | `94164eded8122f604ff8fc33ab4791912764deef901a3d81a50591ee7f3acde7` |
-| `raw/raw-output-provenance-lines.txt` | `ece6ece641bbdb620e2ef978fd4eb1d9f5c3a79ad668622091e9eac3f1697928` |
+| `raw/probe_output_provenance_lines.py` | `aadf6c1aea5d0d5c9a15a1e26860947a42f36862f0b844c2fd521c42fc649d50` |
+| `raw/raw-output-provenance-lines.txt` | `1eca9456936a36cff32982501f14c0d51a4009a43ecdca8d0a884895b5420ccf` |

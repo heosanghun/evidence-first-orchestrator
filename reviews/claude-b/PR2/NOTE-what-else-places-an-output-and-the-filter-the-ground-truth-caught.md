@@ -4,7 +4,7 @@ Reproduce with `raw/probe_what_else_places_an_output.py`; raw output in
 `raw/raw-what-else-places-an-output.txt`. **26 checks, 0 unexpected.** A
 **map with a mostly-negative result** — no issue filed, nothing retracted.
 
-**Scope, stated first:** 79 outputs at publication (**83** at `HEAD`, items 65-69's outputs having landed), 47 undecidable, 3 candidate classes
+**Scope, stated first:** 79 outputs at publication (**84** at `HEAD`, items 65-71's outputs having landed), 47 undecidable, 3 candidate classes
 measured for coverage, 2 literal sets derived over full ancestry, 1 filter bug
 caught by ground truth, 12 newly placed, **35 left open**.
 
@@ -150,6 +150,10 @@ assumed.
 > **36/5/4/38** to **37 anchor / 6 divergent / 3 mixed / 37 undecidable**.
 > Nothing in this note's own measurement is retracted; two outputs move,
 > `raw-full-final.txt` and `raw-proxy-mocks.txt`.
+>
+> **Updated again by item 71**, whose output lands and is placed on the
+> **anchor's** line by the string-literal test: population **83 → 84**,
+> undecidable **50 → 51**, newly placed **9 → 10**, union anchor **36 → 37**.
 
 Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 `performance_metrics: false`; gates `allow_skips: false`,
@@ -161,5 +165,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_what_else_places_an_output.py` | `48832e785b67b3a7a3c66c828904f99039c413f5d6db3be5d88421c30ad1db62` |
-| `raw/raw-what-else-places-an-output.txt` | `801406f6f0937fb2bc814e82a3cbbd0c7ca5163b2633cd78e801ba3de21cdaa0` |
+| `raw/probe_what_else_places_an_output.py` | `bf537bdb00cc382f603146b23fcb4369a3c5be5ca41f41fad8c6109545f43d3a` |
+| `raw/raw-what-else-places-an-output.txt` | `e9ff92f87d8e40dabe84b22af0849bd3f05b8c3b491312c426d6860f0aabc573` |
