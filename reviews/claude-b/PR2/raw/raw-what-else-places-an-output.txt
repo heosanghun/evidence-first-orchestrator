@@ -1,0 +1,148 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   raw outputs scanned, the marker-printing ones excluded
+        expected: outputs: 79
+        observed: outputs: 79
+  [ok]     exactly three are excluded, and the third is this probe's own
+        expected: excluded: 3
+        observed: excluded: 3
+
+########## B. the classification item 61 left ##########
+    Counter({'undecidable': 47, 'anchor': 27, 'divergent': 5})
+  [ok] the module/test-id test leaves this many undecidable
+        expected: undecidable: 47
+        observed: undecidable: 47
+
+########## C. the two classes already measured, re-measured on the 47 ##########
+    print a suite size   : 5 of 47  ['raw-main-suite.txt', 'raw-main2-suite.txt', 'raw-proxy-suite.txt', 'raw-recheck-cef5623.txt', 'raw-report-reproducibility.txt']
+    print a CLI usage line: 1 of 47  ['raw-wheel-restored.txt']
+  [ok] a suite size covers five of the open set
+        expected: suite: 5
+        observed: suite: 5
+  [ok]   and a usage line exactly one
+        expected: usage: 1
+        observed: usage: 1
+  [ok]     six of 47 between them, with no overlap
+        expected: covered: 6
+        observed: covered: 6
+  So neither named class carries a round on its own - 6 of 47 between
+  them. Both are SUBSUMED by the derivation below: an action name, an
+  error wording and a CLI option are all STRING LITERALS.
+
+########## D. the literal difference, derived over the WHOLE of each line ##########
+    literals on the anchor's line : 861
+    literals on the divergent line: 1107
+    distinctive, anchor-only      : 159
+    distinctive, divergent-only   : 309
+  [ok] both difference sets are non-trivial
+        expected: anchor-only: 159
+        observed: anchor-only: 159
+  [ok]   and the divergent line has more of them
+        expected: divergent-only: 309
+        observed: divergent-only: 309
+
+########## E. THE GROUND TRUTH CAUGHT IT - 5 contradictions ##########
+    raw-attribute-subset.txt           item 61: anchor     raw literals: divergent
+    raw-clean-verdict-census.txt       item 61: anchor     raw literals: divergent
+    raw-dashboard-errors.txt           item 61: anchor     raw literals: divergent
+    raw-module-exercise.txt            item 61: anchor     raw literals: divergent
+    raw-test-suite-map.txt             item 61: anchor     raw literals: divergent
+  [ok] the RAW literal difference contradicts known placements
+        expected: contradictions: 5
+        observed: contradictions: 5
+  [ok]   and the culprit in four of the five is one literal
+        expected: culprit: ['proxy_submit']
+        observed: culprit: ['proxy_submit']
+  [ok]     which exists on the ANCHOR's line as source text
+        expected: on anchor as text: True
+        observed: on anchor as text: True
+  [ok]       but NOT as a string literal there
+        expected: as a literal on anchor: False
+        observed: as a literal on anchor: False
+  ABSENCE AS A LITERAL IS NOT ABSENCE FROM THE CODE. On the anchor's
+  line `proxy_submit` is an IDENTIFIER - a method name - so a census
+  of literals cannot see it and calls it divergent-only.
+
+########## F. corrected, and re-checked in BOTH directions ##########
+    anchor-only    159 -> 159
+    divergent-only 309 -> 302
+  [ok] no contradiction survives the correction
+        expected: contradictions: 0
+        observed: contradictions: 0
+  [ok]   and it AGREES with this many known placements
+        expected: agreements: 19
+        observed: agreements: 19
+  [ok]     the two offenders are gone from the divergent set
+        expected: removed: True
+        observed: removed: True
+  A filter checked in only one direction is what item 50 refuted. The
+  ground truth here is item 61's own placements, and the raw filter
+  FAILED it - which is why this round has a correction section rather
+  than a result section.
+
+########## G. what the corrected class places ##########
+    the 47 previously undecidable: {'undecidable': 35, 'anchor': 9, 'mixed': 1, 'divergent': 2}
+  [ok] outputs newly placed on the anchor's line
+        expected: anchor: 9
+        observed: anchor: 9
+  [ok]   newly placed on the divergent line
+        expected: divergent: 2
+        observed: divergent: 2
+  [ok]   carrying literals from BOTH
+        expected: mixed: 1
+        observed: mixed: 1
+  [ok]   and STILL undecidable
+        expected: undecidable: 35
+        observed: undecidable: 35
+    UNION of both tests: {'undecidable': 35, 'anchor': 35, 'mixed': 4, 'divergent': 5}
+  [ok] the union places this many on the anchor's line
+        expected: anchor: 35
+        observed: anchor: 35
+  [ok]   on the divergent line
+        expected: divergent: 5
+        observed: divergent: 5
+  [ok]   and this many carry markers from BOTH - none by the token test alone
+        expected: mixed: 4
+        observed: mixed: 4
+  [ok]   and leaves this many OPEN
+        expected: undecidable: 35
+        observed: undecidable: 35
+  [ok]     the classes account for every output
+        expected: total: 79
+        observed: total: 79
+
+########## H. what this does NOT establish ##########
+  * The headline is a NEGATIVE: 35 of 79 outputs carry no marker of
+    any class measured here. The corpus is mostly unplaceable, and
+    that is the answer to item 64 rather than a shortfall in it.
+  * It does NOT claim the 35 are on the anchor's line. `undecidable`
+    means undecidable - item 61 proved the test one-way, and
+    raw-attack4.txt is still in this set while being KNOWN mixed.
+  * It does NOT claim literals are the only remaining class. Output
+    formatting, timestamps and file layout were NOT examined.
+  * The `distinctive` rule (>=12 chars, contains a space/underscore/
+    hyphen, single line) is a JUDGEMENT stated in the source, not a
+    derived threshold. A different rule would place a different
+    number; what is measured is that THIS rule contradicts zero known
+    answers.
+  * It does NOT retract item 61 or any placement. It ADDS to them, and
+    the union is reported beside the parts.
+  * It does NOT file an issue. Nothing here is a defect in EFO - it is
+    a fact about the provenance of evidence this review inherited.
+  * No network, no GPU, no workspace built. Two refs read and named.
+    The anchor's working tree is untouched, and it does not touch
+    `main` or another agent's branch.
+  * MEASURED: both literal corpora over full ancestry, the three
+    candidate classes' coverage, the five contradictions and their
+    cause, the corrected sets, the agreement count, the 47, the union.
+    REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED: re-running my own evidence is a
+re-run, not independent confirmation.

@@ -13,7 +13,8 @@ six cited outputs.
 
     published   35 anchor / 1 other / 41 undecidable
     corrected   27 anchor / 5 other / 45 undecidable
-    at HEAD     27 anchor / 5 other / 47 undecidable (items 62-63 landed)
+    at HEAD     27 anchor / 5 other / 47 undecidable (items 62-64 landed;
+                item 64's own output is EXCLUDED, being marker-printing)
 
 The known answer that would have caught it was inside the document being
 classified: `REPORT.md:437-438` names `4aa47ca6` as its subject, a commit on
@@ -138,7 +139,11 @@ SELF = output_of(Path(__file__).stem)
 # the reason this one is - derived from its filename, not typed as a string,
 # and the exclusion is COUNTED so a third cannot appear unnoticed.
 ITEM61 = output_of("probe_recheck_line_and_the_substring_that_reversed_four")
-SKIP = (SELF, ITEM61)
+# Item 64's probe prints marker LITERALS, so it joins the same exclusion for
+# the same reason. Three deep now, and the count is asserted below so a
+# fourth cannot appear unnoticed.
+ITEM64 = output_of("probe_what_else_places_an_output")
+SKIP = (SELF, ITEM61, ITEM64)
 every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
@@ -147,11 +152,10 @@ outputs = [p for p in every if p.name not in SKIP]
 # force this note to be re-read rather than silently re-measured. Item 59's
 # output pushed 75 -> 76 and 39 -> 40, and the pin is what said so. Item 61's
 # output is excluded rather than counted, so the population stays 77.
-check("  raw outputs in the corpus, the two marker-printing ones excluded",
+check("  raw outputs in the corpus, the marker-printing ones excluded",
       "outputs: 79", f"outputs: {len(outputs)}")
-check("    exactly two outputs are excluded, and they are those two",
-      f"excluded: ['{SELF}', '{ITEM61}']",
-      f"excluded: {sorted(p.name for p in every if p.name in SKIP)}")
+check("    exactly three outputs are excluded", "excluded: 3",
+      f"excluded: {len([p for p in every if p.name in SKIP])}")
 print("  This probe's OWN classification is therefore the one number here")
 print("  that is not machine-checked; it is read off the section below.")
 

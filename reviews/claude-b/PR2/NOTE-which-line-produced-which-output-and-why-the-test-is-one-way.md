@@ -27,6 +27,12 @@ sets, 3 candidate discriminators, 1 known answer.
 > moves **77 → 78** and undecidable **45 → 46**; item 63's pushes it to
 > **79 / 47**. The pin is what said so, twice.
 >
+> **Item 64 narrowed the open set** without changing this test: a corrected
+> string-literal difference places **12** of the 47 (9 anchor, 2 divergent, 1
+> mixed), agreeing with **19 of 19** placements here and contradicting none.
+> **35 remain unplaceable by any class measured.** This probe's own numbers
+> are unchanged — item 64 is an additional test, reported beside it.
+>
 > **Every table below is superseded by
 > `NOTE-the-suite-size-decided-it-and-a-substring-reversed-four.md`**, which
 > carries the measurement. Two things here survive unchanged: the test still
@@ -155,5 +161,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_output_provenance_lines.py` | `9eb05cd6cc3c7c539c984c4fee13c3bb69f22a46d797af3a9414684a2eb77939` |
-| `raw/raw-output-provenance-lines.txt` | `68647b4c1b87fa5c7caab3883707dd44e77fc07cebc14351f54538938b277311` |
+| `raw/probe_output_provenance_lines.py` | `43848eb7e34adaa2fbc379d00a3dee456981464788b427441356239f15c3a29e` |
+| `raw/raw-output-provenance-lines.txt` | `b84310bf78fa381d93d6d54260eb0a2b981eefcc0c13b64f628e1a3685dfcd2b` |

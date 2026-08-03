@@ -8,12 +8,12 @@
   [ok]   the second checkout is still 7a9553b
         expected: 7a9553b
         observed: 7a9553b
-  [ok]   raw outputs in the corpus, the two marker-printing ones excluded
+  [ok]   raw outputs in the corpus, the marker-printing ones excluded
         expected: outputs: 79
         observed: outputs: 79
-  [ok]     exactly two outputs are excluded, and they are those two
-        expected: excluded: ['raw-output-provenance-lines.txt', 'raw-recheck-line-and-the-substring-that-reversed-four.txt']
-        observed: excluded: ['raw-output-provenance-lines.txt', 'raw-recheck-line-and-the-substring-that-reversed-four.txt']
+  [ok]     exactly three outputs are excluded
+        expected: excluded: 3
+        observed: excluded: 3
   This probe's OWN classification is therefore the one number here
   that is not machine-checked; it is read off the section below.
 
