@@ -142,6 +142,14 @@ assumed.
 > **4 mixed**). This probe's own output joins the corpus it scans and prints
 > marker literals, so it is excluded structurally — the **third** such
 > exclusion, and the count is asserted so a fourth cannot appear unnoticed.
+>
+> **Updated 2026-08-03 by item 70.** The exclusion set is now **five**, and the
+> assertion here is what forced each new one to be named. Item 70's
+> corpus-wide swallowing sweep also found the marker set **short by one class**
+> — test-module filenames — which moves the union reported above from
+> **36/5/4/38** to **37 anchor / 6 divergent / 3 mixed / 37 undecidable**.
+> Nothing in this note's own measurement is retracted; two outputs move,
+> `raw-full-final.txt` and `raw-proxy-mocks.txt`.
 
 Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 `performance_metrics: false`; gates `allow_skips: false`,
@@ -153,5 +161,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_what_else_places_an_output.py` | `0ad984397b58bdc211e34440783bd6e07050b4b27cdc8e5ecc30c0d8ae98262b` |
-| `raw/raw-what-else-places-an-output.txt` | `31a2b457a53cda32976264038c15088bc11fdc775b1ddef6f945c2f1f40f7928` |
+| `raw/probe_what_else_places_an_output.py` | `48832e785b67b3a7a3c66c828904f99039c413f5d6db3be5d88421c30ad1db62` |
+| `raw/raw-what-else-places-an-output.txt` | `801406f6f0937fb2bc814e82a3cbbd0c7ca5163b2633cd78e801ba3de21cdaa0` |

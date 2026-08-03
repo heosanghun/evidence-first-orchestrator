@@ -84,17 +84,19 @@ def output_of(stem: str) -> str:
 
 
 # This probe prints markers, so it joins the marker-printing exclusion set -
-# fourth now, and the count is asserted so a fifth cannot appear unnoticed.
+# fourth to join, fifth in the set since item 70 landed, and the count is
+# asserted so a sixth cannot appear unnoticed.
 SKIP = {output_of("probe_output_provenance_lines"),
         output_of("probe_recheck_line_and_the_substring_that_reversed_four"),
         output_of("probe_what_else_places_an_output"),
+        output_of("probe_swallowed_marks_corpus_wide"),
         output_of(Path(__file__).stem)}
 every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
 check("  raw outputs scanned, the marker-printing ones excluded",
       "outputs: 83", f"outputs: {len(outputs)}")
-check("    four are excluded now, this probe's own among them", "excluded: 4",
+check("    five are excluded now, this probe's own among them", "excluded: 5",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
 
 # ---------------------------------------------------------------- B

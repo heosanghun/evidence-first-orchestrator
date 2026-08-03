@@ -145,7 +145,10 @@ ITEM61 = output_of("probe_recheck_line_and_the_substring_that_reversed_four")
 ITEM64 = output_of("probe_what_else_places_an_output")
 # Item 67's probe prints markers too - FOURTH in the set, same reason.
 ITEM67 = output_of("probe_the_four_mixed_outputs")
-SKIP = (SELF, ITEM61, ITEM64, ITEM67)
+# Item 70's probe prints both marker sets AND every swallowed occurrence -
+# FIFTH, same reason. The count below is what forces each new one to be named.
+ITEM70 = output_of("probe_swallowed_marks_corpus_wide")
+SKIP = (SELF, ITEM61, ITEM64, ITEM67, ITEM70)
 every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
@@ -156,7 +159,7 @@ outputs = [p for p in every if p.name not in SKIP]
 # output is excluded rather than counted, so the population stays 77.
 check("  raw outputs in the corpus, the marker-printing ones excluded",
       "outputs: 83", f"outputs: {len(outputs)}")
-check("    exactly four outputs are excluded", "excluded: 4",
+check("    exactly five outputs are excluded", "excluded: 5",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
 print("  This probe's OWN classification is therefore the one number here")
 print("  that is not machine-checked; it is read off the section below.")

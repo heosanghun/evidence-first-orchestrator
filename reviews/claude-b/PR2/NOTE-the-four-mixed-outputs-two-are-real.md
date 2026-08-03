@@ -7,6 +7,18 @@ that corrects a count of mine** — no issue filed, nothing about EFO claimed.
 **Scope, stated first:** 81 outputs at publication (**83** at `HEAD`), 4 mixed, 3 categories, 2 genuine, 1
 swallowed literal measured occurrence-by-occurrence, 1 subject test.
 
+> **EXTENDED 2026-08-03 by item 70 — nothing here is retracted.**
+> This round said plainly that a **corpus-wide sweep for swallowed literals
+> was UNCHECKED**. It has now been run over all 83 outputs
+> (`NOTE-the-swallowing-rule-corpus-wide-and-the-marker-set-was-short.md`).
+> `raw-full-final.txt`'s result below is reproduced **by rule** rather than by
+> hand, and the other three mixed outputs are unchanged. The sweep moved
+> **one further** verdict — `raw-class2b-census.txt` — and that one exposed an
+> **incomplete marker set** rather than a mis-placement: test-module filenames
+> were never matched. With them added the union moves **36/5/4/38 →
+> 37/6/3/37**, so **the mixed class shrinks from 4 to 3** — `raw-full-final.txt`
+> leaves it and no output joins.
+
 ## What item 64 left open
 
 That round's union found **four** outputs carrying markers from both lines,
@@ -126,5 +138,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_the_four_mixed_outputs.py` | `ca692a97f388dc6d3924a082bedbddb8ab84a7c7ed67f06557749b1470500023` |
-| `raw/raw-the-four-mixed-outputs.txt` | `040fa87cc8489b7ece84a110d56fe2b0a5aa5c773a2424c6f57581d0806d68de` |
+| `raw/probe_the_four_mixed_outputs.py` | `951cc0cf050bb5d1367412d48dd01bfe6f8f975e9f63421da58d08b64b58a58d` |
+| `raw/raw-the-four-mixed-outputs.txt` | `5f662c5a4c278f4a2bd53f5bb9052fce99213b1009530e0ab2a2ceb45538f091` |

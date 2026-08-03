@@ -35,7 +35,10 @@ sets, 3 candidate discriminators, 1 known answer.
 >
 > **Item 65's output** moves the population to **80** and the anchor placement
 > to **28**; items 66, 68 and 69 take it to **83 / 50 undecidable**. The pin said
-> so each time.
+> so each time. **Item 70's output is excluded** rather than counted — the
+> fifth marker-printing exclusion — so the population stays **83**; its
+> corpus-wide swallowing sweep leaves this probe's own four-way numbers
+> unchanged and moves the *union* to **37 / 6 / 3 / 37**.
 >
 > **Every table below is superseded by
 > `NOTE-the-suite-size-decided-it-and-a-substring-reversed-four.md`**, which
@@ -165,5 +168,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_output_provenance_lines.py` | `538fad6cfe9604150ed6fffcf8bd0725ecda693780d846056fa4d18a9f37d031` |
-| `raw/raw-output-provenance-lines.txt` | `1a88997ab7961a2c788a89d9c9c03844eae81cebcace0c35c730bfdd8f186efe` |
+| `raw/probe_output_provenance_lines.py` | `94164eded8122f604ff8fc33ab4791912764deef901a3d81a50591ee7f3acde7` |
+| `raw/raw-output-provenance-lines.txt` | `ece6ece641bbdb620e2ef978fd4eb1d9f5c3a79ad668622091e9eac3f1697928` |

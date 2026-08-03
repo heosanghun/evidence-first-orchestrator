@@ -75,8 +75,8 @@ check("  with no working-tree modification", "dirty: ''",
       f"dirty: {git('status', '--porcelain').strip()!r}")
 
 # This probe PRINTS marker literals, so its own output would classify itself.
-# Excluded structurally along with the two earlier provenance probes' outputs,
-# and the exclusions are COUNTED - item 58's treatment, now three deep.
+# Excluded structurally along with the earlier provenance probes' outputs,
+# and the exclusions are COUNTED - item 58's treatment, now five deep.
 def output_of(stem: str) -> str:
     return "raw-" + stem[len("probe_"):].replace("_", "-") + ".txt"
 
@@ -85,14 +85,15 @@ SELF = output_of(Path(__file__).stem)
 SKIP = {output_of("probe_output_provenance_lines"),
         output_of("probe_recheck_line_and_the_substring_that_reversed_four"),
         output_of("probe_the_four_mixed_outputs"),
+        output_of("probe_swallowed_marks_corpus_wide"),
         SELF}
 every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
 check("  raw outputs scanned, the marker-printing ones excluded",
       "outputs: 83", f"outputs: {len(outputs)}")
-check("    exactly four are excluded, this probe's own among them",
-      "excluded: 4",
+check("    exactly five are excluded, this probe's own among them",
+      "excluded: 5",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
 
 # ---------------------------------------------------------------- B
