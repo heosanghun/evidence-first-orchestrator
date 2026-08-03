@@ -128,7 +128,8 @@ function formatPercent(value, digits = 0) {
 }
 
 function formatGiB(value, digits = 1) {
-  return `${number(value).toFixed(digits)} GiB`;
+  const gbVal = number(value) * 1.073741824;
+  return `${gbVal.toFixed(digits)} GB`;
 }
 
 function formatClock(value) {
@@ -473,9 +474,9 @@ function renderKpis(snapshot, alerts) {
   elements.kpiVram.textContent = formatPercent(vramPercent);
   elements.kpiVramNote.textContent = `${(vramUsedMib / 1024).toFixed(1)} / ${(
     vramTotalMib / 1024
-  ).toFixed(1)} GiB`;
+  ).toFixed(1)} GB`;
   elements.kpiDisk.textContent = formatPercent(disk.percent);
-  elements.kpiDiskNote.textContent = `${number(disk.free_gib).toFixed(1)} GiB 사용 가능`;
+  elements.kpiDiskNote.textContent = `${number(disk.free_gib).toFixed(1)} GB 사용 가능`;
   elements.kpiAlerts.textContent = String(alerts.length);
   elements.kpiAlertsNote.textContent =
     alerts.length === 0 ? "정상" : "확인 필요";
@@ -800,7 +801,7 @@ function renderGpus(snapshot) {
               <span>VRAM</span>
               <strong>${(memoryUsed / 1024).toFixed(1)} / ${(
                 memoryTotal / 1024
-              ).toFixed(1)} GiB</strong>
+              ).toFixed(1)} GB</strong>
             </div>
             <div class="progress-track" role="progressbar" aria-valuemin="0"
                  aria-valuemax="100" aria-valuenow="${Math.round(memoryPercent)}">
