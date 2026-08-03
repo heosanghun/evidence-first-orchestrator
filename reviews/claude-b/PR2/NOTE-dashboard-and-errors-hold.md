@@ -11,6 +11,11 @@
 > than the claim: an exhaustive census is exhaustive over *the thing it
 > enumerates*, and the shape it cannot enumerate is where the counterexample
 > lives.
+>
+> **Also corrected 2026-08-03:** this note cited the bind-guard sentence as
+> `README.md:336-337`. It spans **`:335-336`**. The sentence is real and says
+> what the note says it says; only the span was wrong, and a reader following
+> the citation landed one line late.
 
 Reproduce with `raw/probe_dashboard_and_errors.py`; raw output in
 `raw/raw-dashboard-errors.txt`. **28 checks, 0 unexpected.**
@@ -22,7 +27,7 @@ itself; what the handler *would* serve is measured by calling the same
 
 ## The documented bind guard holds, and fails closed on every near miss
 
-`README.md:336-337` — *"Open `http://127.0.0.1:8765`. Remote binding is
+`README.md:335-336` — *"Open `http://127.0.0.1:8765`. Remote binding is
 rejected unless `--allow-remote` is explicitly supplied."*
 
 `dashboard.py:218` allows exactly `{"127.0.0.1", "::1", "localhost"}`. Fourteen
@@ -63,7 +68,7 @@ whitelist fields, which is why the adapter's absolute paths never reach a
 public snapshot). This server does not, and it has no authentication of any
 kind.
 
-**Not filed**, because nothing claims otherwise: `README.md:336-337` promises
+**Not filed**, because nothing claims otherwise: `README.md:335-336` promises
 the bind is local unless explicitly opted out of, and that promise holds
 exactly. What is worth an operator knowing, and is written here rather than in
 an issue: `--allow-remote` publishes complete task records — descriptions,

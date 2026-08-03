@@ -1,5 +1,15 @@
 # Claude B — independent verification of EFO Draft PR #2
 
+> **Review target, added 2026-08-03.** This document reviews
+> **`codex/meta-orchestration-v2`**, not `main`. It never said so, and that
+> omission made its citations look fabricated: `workspace.py:2366` is out of
+> range on `main` (1562 lines) and on this branch's former base `dad3f4c4`
+> (920 lines), and `docs/META_ORCHESTRATION_V2.md` exists on neither. Both
+> resolve on `codex/meta-orchestration-v2`, where `workspace.py` is 2528 lines
+> and that document exists. **The citations were correct for their subject all
+> along** — what was missing was the subject. Found by
+> `raw/probe_citation_audit.py`; nothing in this document's substance changed.
+
 - Repository under review: `heosanghun/evidence-first-orchestrator`
 - Branch / commit: `codex/meta-orchestration-v2` @ `4aa47ca602d36c22cbaf2ce63fa442ee398c317e`
 - Working tree during the review: clean (`git status --porcelain` empty)

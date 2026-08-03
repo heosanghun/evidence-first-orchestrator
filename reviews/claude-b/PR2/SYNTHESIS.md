@@ -147,6 +147,22 @@ task stricter than intended.
 
 ---
 
+## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
+
+`NOTE-citation-audit-of-this-review.md` audits all **126 live citations across
+30 documents**; every one now resolves at `main`. Three did not:
+
+- `README.md:590` was really `cli.py:590` — right line, wrong file, in a file
+  of 452 lines. I had cited an argparse `help=` string as documented intent.
+- `README.md:336-337` was `:335-336` — off by one.
+- `REPORT.md` reviews `codex/meta-orchestration-v2` (`workspace.py` = 2528
+  lines) and never named it, so its correct citations looked invented against
+  `main`.
+
+Nothing in the workflow checked a citation before that probe existed. The nine
+anchors the filed issues rest on were spot-checked and all hold, but that is
+luck rather than process.
+
 ## A defect in this branch, found and fixed on 2026-08-03
 
 Until `c16df6d`, this branch was based on `dad3f4c4`, an ancestor of `main`,

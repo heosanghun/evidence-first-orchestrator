@@ -67,6 +67,16 @@ does. Nothing here is looser.
 
 ### `evidence check` validates arbitrary paths, by design
 
+> **CORRECTED 2026-08-03.** The paragraph below originally cited
+> `README.md:590` for the phrase *"Validate a submission bundle"*. That
+> citation was wrong: `README.md` has 452 lines, and the phrase appears in no
+> Markdown file in the repository. It is **`cli.py:590`**, an argparse `help=`
+> string. The line number was right and the file was wrong, which is why it
+> read as plausible. It matters for the argument — I leaned on it as
+> *documented intent*, and a `help=` string is a weaker basis than README
+> prose. The conclusion is unchanged, because it never rested on the quote: it
+> rests on the measurement that the command appends nothing.
+
 `Workspace.submit` requires the report and manifest to live under
 `reports/<actor>/`. `efo evidence check` does not — it takes any two paths:
 
@@ -77,9 +87,9 @@ does. Nothing here is looser.
 ```
 
 It failed on the **content**, never reaching an ownership question, and wrote
-nothing. `README.md:590` calls this *"Validate a submission bundle"*, which is
-what it does: a dry run for an author checking their own bundle before
-submitting it. The looser path check is a convenience, not a bypass, because
+nothing. `cli.py:590` registers this subcommand with
+`help="Validate a submission bundle"`, which is what it does: a dry run for an
+author checking their own bundle before submitting it. The looser path check is a convenience, not a bypass, because
 nothing it does is recorded.
 
 ## Harness bugs, caught before any conclusion
