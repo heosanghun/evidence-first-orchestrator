@@ -1,17 +1,48 @@
 # Which line produced which output — and why the cheap test is one-way
 
 Reproduce with `raw/probe_output_provenance_lines.py`; raw output in
-`raw/raw-output-provenance-lines.txt`. **21 checks, 0 unexpected.** A **map with
-a negative result** — no issue filed, nothing retracted.
+`raw/raw-output-provenance-lines.txt`. **26 checks, 0 unexpected** *(21 as
+published; the corrected probe adds five)*. A **map with a negative result** —
+no issue filed, nothing retracted.
 
 **Scope, stated first:** 77 outputs, 6 cited by `REPORT.md`, 2 derived marker
 sets, 3 candidate discriminators, 1 known answer.
+
+> **CORRECTED 2026-08-03 by item 61 — this note's headline result was wrong.**
+> The marker set below ended with a **bare `"independence"`** substring beside
+> the precise `independence.py`. It matches `independence_dimensions`, a key
+> that appears in **no commit of the anchor's ancestry** and is introduced by
+> `7a9553b` itself, and `test_known_independence_cases`, a method in the
+> divergent-line module `test_meta_orchestration.py`. Eleven of the 35 outputs
+> placed on the anchor rested on that token alone, and **four were placed
+> backwards**.
+>
+> | | published here | corrected |
+> |---|---|---|
+> | anchor's line | 35 | **27** |
+> | divergent line | 1 | **5** |
+> | undecidable | 41 | **45** |
+>
+> **Every table below is superseded by
+> `NOTE-the-suite-size-decided-it-and-a-substring-reversed-four.md`**, which
+> carries the measurement. Two things here survive unchanged: the test still
+> has the proven false negative (§ *"…and the test has a proven false
+> negative"*), and both extra discriminators were measured rather than
+> assumed. The probe is corrected in place, not superseded.
+>
+> The known answer that would have caught it was inside the document being
+> classified: `REPORT.md:437-438` names `4aa47ca6` as its subject, a commit on
+> the divergent line. The corrected placement agrees with that declaration;
+> this one contradicted it.
 
 > **Updated 2026-08-03.** The corpus grew by one when item 59 landed, so the
 > population moved **75 → 77** outputs and **39 → 41** undecidable (items 59 and 60). Those two
 > counts are **pinned on purpose** — the population is the thing under
 > discussion, so a corpus that grows must force this note to be re-read rather
-> than silently re-measured. The pin is what said so.
+> than silently re-measured. The pin is what said so. Item 61's output is
+> **excluded** rather than counted, for the same reason this note's own output
+> is: it prints both marker sets. The population therefore stays **77**, and
+> the corrected undecidable count is **45**.
 
 ## The question
 
@@ -36,11 +67,11 @@ belonging to the other one.
 
 ## The scan
 
-| | outputs |
+| | outputs (**as published — see the correction above**) |
 |---|---|
-| carry an **anchor-only** token → placed on the anchor's line | **35** |
-| carry a **`7a9553b`-only** token | **1** — `raw-w4-replay.txt`, my own item-55 probe, which names both refs by design |
-| carry **neither** → **undecidable** | **41** |
+| carry an **anchor-only** token → placed on the anchor's line | ~~**35**~~ → **27** |
+| carry a **`7a9553b`-only** token | ~~**1**~~ → **5**; `raw-w4-replay.txt` names both refs by design, and the other four were placed backwards here |
+| carry **neither** → **undecidable** | ~~**41**~~ → **45** |
 
 ## …and the test has a proven false negative
 
@@ -56,18 +87,19 @@ prose and never names the identifier.
 
 ## `REPORT.md`'s six
 
-| output | placed |
-|---|---|
-| `raw-attack2.txt` | **anchor** |
-| `raw-attack2-cef5623.txt` | **anchor** |
-| `raw-attack3.txt` | **anchor** |
-| `raw-full-final.txt` | **anchor** |
-| `raw-attack4.txt` | **undecidable** — and known from item 55 to be **mixed** |
-| `raw-recheck-cef5623.txt` | **undecidable** |
+| output | placed here | **corrected (item 61)** |
+|---|---|---|
+| `raw-attack2.txt` | anchor | **divergent** |
+| `raw-attack2-cef5623.txt` | anchor | **divergent** |
+| `raw-attack3.txt` | anchor | **divergent** |
+| `raw-full-final.txt` | anchor | **divergent** — its 70 test ids match `7a9553b`/`4aa47ca` exactly |
+| `raw-attack4.txt` | undecidable | **mixed** — unchanged, item 55 |
+| `raw-recheck-cef5623.txt` | undecidable | **`cef5623`** — by its suite size, `Ran 77 tests` |
 
-Four of six are positively placed. The second undecidable one is left open:
-item 46 re-ran its suite section (77/77, `OK`, exit 0) without asking which v2
-produced it, and **this round does not answer that either**.
+This note said **four of six are positively placed** on the anchor's line.
+The corrected answer is **none of them are** — which is what `REPORT.md`
+declares about itself. The second undecidable one is no longer open: item 61
+decided it from the one thing this scan could not see, a **suite size**.
 
 ## Two more discriminators, measured rather than assumed
 
@@ -91,9 +123,9 @@ same treatment `probe_inventory_selfcheck.py`'s tally got.
 
 ## What this does not do
 
-- It does **not** decide the 41. It says which 35 are placed, which one is
-  mine, and that the rest are **open** — including one already known to be
-  mixed.
+- It does **not** decide the ~~41~~ **45**. It says which ~~35~~ **27** sit on
+  the anchor's line and which **5** on the divergent one, and that the rest are
+  **open** — including one already known to be mixed.
 - It does **not** re-run any catalogued output, and does **not** retract item
   46's catalogue or its two re-runs.
 - It does **not** claim the token sets are the only possible markers. Two more
@@ -104,7 +136,8 @@ same treatment `probe_inventory_selfcheck.py`'s tally got.
 - No network. Two local checkouts and one `tempfile` workspace pair, removed
   before the results print. The anchor's working tree is untouched, and it does
   **not** touch `main` or another agent's branch.
-- **MEASURED:** both module sets, the three-way scan of all 77 outputs,
+- **MEASURED:** both marker sets over the whole of each line, the four-way
+  scan of all 77 outputs,
   `REPORT.md`'s six, both `status` shapes, the usage-line census, item 55's two
   quoted sentences, the self-exclusion. **REASONED:** nothing.
 
@@ -118,5 +151,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_output_provenance_lines.py` | `809c4cf3b1b29e3c134b52a37724db3b4a3e6b36e9b5331c1b6b1b35dcd82a57` |
-| `raw/raw-output-provenance-lines.txt` | `4619f94324a4600460ebc67119917bb594aeff1de1d1db70612ada8b2760b847` |
+| `raw/probe_output_provenance_lines.py` | `6b304bc64044d0bd2a0017cd63f0c8243bb6f667462111687ef5913299f291ec` |
+| `raw/raw-output-provenance-lines.txt` | `5a6ed905b110a50cddd74f94853d0882a261e4be559f2c764dbf23418cf01515` |

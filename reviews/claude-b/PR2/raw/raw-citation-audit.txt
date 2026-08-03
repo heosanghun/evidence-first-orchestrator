@@ -6,12 +6,12 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   and the write-ups are present
-        expected: documents: 67
-        observed: documents: 67
+        expected: documents: 68
+        observed: documents: 68
 
 ########## B. every FILE:LINE citation in the write-ups ##########
-  245 live citations across 67 documents
-  13 more appear inside correction banners and are
+  247 live citations across 68 documents
+  14 more appear inside correction banners and are
   excluded as retractions rather than claims - see the comment in the
   source for why that exclusion is principled and not self-serving.
   [ok] every cited file exists at main
@@ -29,7 +29,7 @@
     docs/MIGRATION.md                              4 citations, 167 lines
     docs/PROXY_SUBMISSION.md                       2 citations, 192 lines
     README.md                                     24 citations, 452 lines
-    (review) REPORT.md                             4 citations, 460 lines
+    (review) REPORT.md                             6 citations, 460 lines
     SECURITY.md                                   12 citations, 67 lines
     src/evidence_orchestrator/__main__.py          1 citations, 7 lines
     src/evidence_orchestrator/adapter.py           7 citations, 320 lines
@@ -153,14 +153,14 @@
   while the committed raw output beside it said 152 across 35. Nobody
   was checking. Now the run fails when prose and output disagree.
   [ok]   NOTE-citation-audit-of-this-review.md states this run's counts
-        expected: 245 citations / 67 documents
-        observed: 245 citations / 67 documents
+        expected: 247 citations / 68 documents
+        observed: 247 citations / 68 documents
   [ok]   SYNTHESIS.md states this run's counts
-        expected: 245 citations / 67 documents
-        observed: 245 citations / 67 documents
+        expected: 247 citations / 68 documents
+        observed: 247 citations / 68 documents
   [ok]   and the retraction count it excludes
-        expected: retractions: 13
-        observed: retractions: 13
+        expected: retractions: 14
+        observed: retractions: 14
 
 ########## 0 unexpected result(s) ##########
 This audits MY OWN write-ups, not EFO. Every finding it reports is a

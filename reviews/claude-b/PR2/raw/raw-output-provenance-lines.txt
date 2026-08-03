@@ -8,43 +8,58 @@
   [ok]   the second checkout is still 7a9553b
         expected: 7a9553b
         observed: 7a9553b
-  [ok]   raw outputs in the corpus, this probe's own excluded
+  [ok]   raw outputs in the corpus, the two marker-printing ones excluded
         expected: outputs: 77
         observed: outputs: 77
-  [ok]     exactly one output is excluded, and it is this one
-        expected: excluded: ['raw-output-provenance-lines.txt']
-        observed: excluded: ['raw-output-provenance-lines.txt']
+  [ok]     exactly two outputs are excluded, and they are those two
+        expected: excluded: ['raw-output-provenance-lines.txt', 'raw-recheck-line-and-the-substring-that-reversed-four.txt']
+        observed: excluded: ['raw-output-provenance-lines.txt', 'raw-recheck-line-and-the-substring-that-reversed-four.txt']
   This probe's OWN classification is therefore the one number here
   that is not machine-checked; it is read off the section below.
 
 ########## B. the markers, DERIVED from the two trees ##########
-    only at 7a9553b : ['identity.py', 'job_runner.py']
-    only at anchor  : ['independence.py']
-  [ok] modules present only on 7a9553b's line
-        expected: only other: ['identity.py', 'job_runner.py']
-        observed: only other: ['identity.py', 'job_runner.py']
+    modules only on the divergent line : ['fingerprint.py', 'identity.py', 'job_runner.py']
+    modules only on the anchor's       : ['independence.py']
+    test modules only on the divergent : ['test_fingerprint.py', 'test_meta_orchestration.py']
+    test modules only on the anchor's  : ['test_independence.py', 'test_monitor_collector.py', 'test_proxy_status.py', 'test_proxy_submission.py']
+  [ok] modules present only on the divergent line
+        expected: only other: ['fingerprint.py', 'identity.py', 'job_runner.py']
+        observed: only other: ['fingerprint.py', 'identity.py', 'job_runner.py']
   [ok]   and present only on the anchor's
         expected: only anchor: ['independence.py']
         observed: only anchor: ['independence.py']
   A TWO-WAY discriminator, which is stronger than the one-way test the
   item proposed: an output can be placed on EITHER line, not just
   flagged as belonging to the other one.
+  [ok]   the bare substring is gone from the anchor token set
+        expected: bare present: False
+        observed: bare present: False
 
 ########## C. the scan ##########
-    7a9553b-only tokens  raw-w4-replay.txt  ['transfer_orchestrator', 'transfer-orchestrator', 'orchestrator_transferred']
+    divergent-only tokens  raw-attack2-cef5623.txt  ['independence_dimensions']
+    divergent-only tokens  raw-attack2.txt  ['independence_dimensions']
+    divergent-only tokens  raw-attack3.txt  ['independence_dimensions']
+    divergent-only tokens  raw-full-final.txt  ['test_meta_orchestration']
+    divergent-only tokens  raw-w4-replay.txt  ['transfer_orchestrator', 'transfer-orchestrator', 'orchestrator_transferred']
   [ok] outputs positively placed on the ANCHOR's line
-        expected: anchor: 35
-        observed: anchor: 35
-  [ok]   outputs carrying a 7a9553b-only token
-        expected: other: 1
-        observed: other: 1
-  [ok]     and it is my OWN item-55 probe, which names both refs
-        expected: other: ['raw-w4-replay.txt']
-        observed: other: ['raw-w4-replay.txt']
+        expected: anchor: 27
+        observed: anchor: 27
+  [ok]   outputs carrying a divergent-only token
+        expected: other: 5
+        observed: other: 5
+  [ok]     my own item-55 probe among them, which names both refs by design
+        expected: raw-w4-replay.txt
+        observed: other: ['raw-attack2-cef5623.txt', 'raw-attack2.txt', 'raw-attack3.txt', 'raw-full-final.txt', 'raw-w4-replay.txt']
+  [ok]     and the four this probe first placed BACKWARDS
+        expected: ['raw-attack2-cef5623.txt', 'raw-attack2.txt', 'raw-attack3.txt', 'raw-full-final.txt', 'raw-w4-replay.txt']
+        observed: other: ['raw-attack2-cef5623.txt', 'raw-attack2.txt', 'raw-attack3.txt', 'raw-full-final.txt', 'raw-w4-replay.txt']
+  [ok]   outputs carrying tokens from BOTH lines
+        expected: mixed: 0
+        observed: mixed: 0
   [ok]   outputs the test cannot place
-        expected: undecidable: 41
-        observed: undecidable: 41
-  [ok]     and the three classes account for every output
+        expected: undecidable: 45
+        observed: undecidable: 45
+  [ok]     and the four classes account for every output
         expected: total: 77
         observed: total: 77
 
@@ -63,25 +78,36 @@
   filter checked in only one direction is what item 50 refuted.
 
 ########## E. REPORT.md's six cited outputs ##########
-    raw-attack2-cef5623.txt       ANCHOR
-    raw-attack2.txt               ANCHOR
-    raw-attack3.txt               ANCHOR
+    raw-attack2-cef5623.txt       DIVERGENT
+    raw-attack2.txt               DIVERGENT
+    raw-attack3.txt               DIVERGENT
     raw-attack4.txt               undecidable
-    raw-full-final.txt            ANCHOR
+    raw-full-final.txt            DIVERGENT
     raw-recheck-cef5623.txt       undecidable
   [ok] REPORT.md cites six outputs with no probe of mine beside them
         expected: cited: 6
         observed: cited: 6
-  [ok]   four are positively placed on the anchor's line
-        expected: on anchor: 4
-        observed: on anchor: 4
-  [ok]     and two are undecidable
+  [ok]   NOT ONE is positively placed on the anchor's line
+        expected: on anchor: 0
+        observed: on anchor: 0
+  [ok]     four are positively placed on the DIVERGENT line
+        expected: on divergent: 4
+        observed: on divergent: 4
+  [ok]     and two are undecidable BY THIS TEST
         expected: undecidable: ['raw-attack4.txt', 'raw-recheck-cef5623.txt']
         observed: undecidable: ['raw-attack4.txt', 'raw-recheck-cef5623.txt']
-  One of those two is the file item 55 already showed to be MIXED.
-  The other, raw-recheck-cef5623.txt, is left open - item 46 re-ran its
-  suite section (77/77, OK) without asking which v2 produced it, and
-  this round does not answer that either.
+  [ok]   and REPORT.md names its own subject on the DIVERGENT line
+        expected: 4aa47ca6
+        observed: 4aa47ca602d36c22cbaf2ce63fa442ee398c317e
+  So the corrected placement AGREES with what REPORT.md declares.
+  The published version said FOUR were on the anchor's line, which
+  contradicted that declaration - the known answer was three lines
+  from the manifest item 46 read, and this probe did not check
+  against it. Item 61 does.
+  Of the two left undecidable here: raw-attack4.txt is the file item
+  55 showed to be MIXED, and raw-recheck-cef5623.txt is placed on
+  cef5623 by item 61, using its SUITE SIZE - a discriminator this
+  token scan is structurally unable to see.
 
 ########## F. two more discriminators, MEASURED not assumed ##########
     CLI status keys, anchor  : ['status', 'tasks']
@@ -100,9 +126,12 @@
   line would settle it - but the corpus almost never records one.
 
 ########## G. what this does NOT do ##########
-  * It does not decide the 39. It says which 35 are placed, which one
-    is mine, and that the remaining 39 are OPEN - including one already
-    known to be mixed.
+  * It does not decide the 45. It says which 27 sit on the anchor's
+    line and which 5 on the divergent one, and that the remaining 45
+    are OPEN - including one already known to be mixed.
+  * Its first published answer, 35 / 1 / 41, was WRONG - a bare
+    substring in the anchor token set. Item 61 measured that; this
+    probe is the corrected version, not a second opinion.
   * It does not re-run any catalogued output, and does not retract
     item 46's catalogue or its two re-runs.
   * It does not claim the token sets are the only possible markers.
@@ -112,9 +141,10 @@
     a fact about the PROVENANCE of evidence this review inherited.
   * No network. Two local checkouts and one tempfile workspace pair,
     removed above. The anchor's working tree is untouched.
-  * MEASURED: both module sets, the three-way scan of all 75 outputs,
-    REPORT.md's six, both status shapes, the usage-line census, item
-    55's two quoted sentences. REASONED: nothing.
+  * MEASURED: both marker sets over the whole of each line, the
+    four-way scan of all 77 outputs, REPORT.md's six and its declared
+    subject, both status shapes, the usage-line census, item 55's two
+    quoted sentences. REASONED: nothing.
 
 ########## 0 unexpected result(s) ##########
 Two refs read and named. No `main` write, no issue filed, nothing

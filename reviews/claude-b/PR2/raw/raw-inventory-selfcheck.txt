@@ -10,11 +10,11 @@
 
 ########## B. raw/ recounted, and the classification checked ##########
   [ok] every file in raw/ is classified
-        expected: total: 149
-        observed: total: 149
-    63 probe scripts, 78 raw outputs, 8 provenance-attack scripts
+        expected: total: 151
+        observed: total: 151
+    64 probe scripts, 79 raw outputs, 8 provenance-attack scripts
     the attack scripts, named rather than lumped in: ['attack2.sh', 'attack2_cef.sh', 'attack3.sh', 'attack_main.sh', 'attack_main2.sh', 'attack_prov5_main.py', 'attack_prov_main.sh', 'attack_proxy.sh']
-    1117 passing checks across 61 instrumented outputs; 12 UNEXPECTED lines
+    1180 passing checks across 62 instrumented outputs; 12 UNEXPECTED lines
     (excluding raw-inventory-selfcheck.txt, this run's own report - see the comment above)
     the UNEXPECTED lines, by file: {'raw-alias-lineage.txt': 2, 'raw-attack-prov5-main.txt': 1, 'raw-evidence-gates.txt': 5, 'raw-ledger-chain.txt': 1, 'raw-lifecycle-gates.txt': 3}
 
@@ -23,20 +23,20 @@
         expected: found: True
         observed: found: True
   [ok]   passing checks
-        expected: passing checks: 1117
-        observed: passing checks: 1117
+        expected: passing checks: 1180
+        observed: passing checks: 1180
   [ok]   instrumented outputs
-        expected: instrumented outputs: 61
-        observed: instrumented outputs: 61
+        expected: instrumented outputs: 62
+        observed: instrumented outputs: 62
   [ok]   files in raw/
-        expected: files in raw/: 149
-        observed: files in raw/: 149
+        expected: files in raw/: 151
+        observed: files in raw/: 151
   [ok]   probe scripts
-        expected: probe scripts: 63
-        observed: probe scripts: 63
+        expected: probe scripts: 64
+        observed: probe scripts: 64
   [ok]   raw outputs
-        expected: raw outputs: 78
-        observed: raw outputs: 78
+        expected: raw outputs: 79
+        observed: raw outputs: 79
   [ok]   attack scripts
         expected: attack scripts: 8
         observed: attack scripts: 8

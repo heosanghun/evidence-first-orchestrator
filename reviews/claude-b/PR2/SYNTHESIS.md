@@ -3,8 +3,8 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**1117 passing checks across 61 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 149 files: **63 probe scripts, 78 raw outputs, 8
+**1180 passing checks across 62 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 151 files: **64 probe scripts, 79 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
@@ -112,8 +112,9 @@ never treated my own re-run as independent confirmation.
 | the 4 modules with **no** `isinstance` | map — **the absence is real in one, reachable in none** (reachability measured **under the declared threat model** — item 57): `archive.py` gives 8 raw Python exceptions on 8 malformed manifests but all 3 call sites pass a validator's return; `doctor.py`'s 23 unguarded subscripts sit behind the ledger guard (5 tampered documents, 0 escaped); `lock.py` and `dashboard.py` read no document field at all | `NOTE-four-modules-with-no-guard-real-in-one-reachable-in-none.md` |
 | `raw-attack4.txt` W4, and the ref it needs | map — **`transfer_orchestrator` is absent at the anchor and `7a9553b` is NOT an ancestor**, so W4/W5/W6/W6b drive a divergent line; replayed against `7a9553b` and **both tracebacks are the original driver's** (wrong path, wrong key on the CLI wrapper). The config/ledger divergence is real and by design | `NOTE-w4-needs-a-ref-the-anchor-never-took.md` |
 | the ledger signature's SCOPE | map — **the precondition under items 45, 53 and 54**: a naive tamper is caught, but the same edit with the ledger payload updated and the chain **re-signed** audits `healthy: true` with `valid/signed: true`. The key is `.efo/ledger.key` inside the workspace. `SECURITY.md:38` states this limit verbatim, so it is **documented and driven in both directions**, not a defect | `NOTE-a-tamper-that-resigns-is-healthy-and-the-document-says-so.md` |
-| which LINE produced each raw output | map — **a negative result**: a two-way token test derived from the module-set difference places **35 of 75** on the anchor's line and leaves **39 undecidable**, and it has a **proven false negative** — `raw-attack4.txt`, which item 55 showed is mixed, carries no marker. 4 of `REPORT.md`'s 6 are placed | `NOTE-which-line-produced-which-output-and-why-the-test-is-one-way.md` |
+| which LINE produced each raw output | map — **a negative result, and its first answer was WRONG**: the token test places **27 of 77** on the anchor's line, **5** on the divergent one and leaves **45 undecidable**, and it has a **proven false negative** — `raw-attack4.txt`, which item 55 showed is mixed, carries no marker. **Not one** of `REPORT.md`'s 6 is on the anchor's line. As published this row read *35 / 1 / 41, four of six placed*; a bare `"independence"` substring reversed four — corrected by item 61 | `NOTE-which-line-produced-which-output-and-why-the-test-is-one-way.md`, `NOTE-the-suite-size-decided-it-and-a-substring-reversed-four.md` |
 | `reports/`, `submissions/`, `archive/` | map — **the measured width of #10**: the 6 comparison messages name only Agent, Task and Workspace, and **6 of 6 tampers go unnoticed** — including deleting the whole archived bundle and rewriting `archive/T1.json`. All **7** archived files' sha256 are in signed ledger events; nothing recomputes them | `NOTE-reports-submissions-and-archive-are-compared-against-nothing.md` |
+| the **suite size** as a provenance marker | map — **a correction of my own work**: no test count is shared between the two lines across all **20** reachable commits, so `Ran 77 tests` places `raw-recheck-cef5623.txt` on **`cef5623`** — the one commit anywhere with a 77-test suite, and no ancestor of the anchor. All three suites run (93 / 77 / 70). `REPORT.md:437` names `4aa47ca6` as its own subject, the known answer item 58 failed | `NOTE-the-suite-size-decided-it-and-a-substring-reversed-four.md` |
 | `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
 
 Twenty components were probed and found sound (one with a claim since corrected — see #19).
@@ -273,8 +274,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **245 live citations across
-67 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **247 live citations across
+68 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -292,7 +293,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 295 inline spans remain undecidable by position and are named as a
+lenient. 302 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03
