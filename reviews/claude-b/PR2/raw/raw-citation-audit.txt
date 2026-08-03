@@ -6,11 +6,11 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   and the write-ups are present
-        expected: documents: 36
-        observed: documents: 36
+        expected: documents: 37
+        observed: documents: 37
 
 ########## B. every FILE:LINE citation in the write-ups ##########
-  166 live citations across 36 documents
+  170 live citations across 37 documents
   12 more appear inside correction banners and are
   excluded as retractions rather than claims - see the comment in the
   source for why that exclusion is principled and not self-serving.
@@ -20,7 +20,7 @@
   [ok]   and every cited line is within its file
         expected: out of range: []
         observed: out of range: []
-  distinct files cited: 28
+  distinct files cited: 30
     CONTRIBUTING.md                                2 citations, 31 lines
     docs/MIGRATION.md                              4 citations, 167 lines
     docs/PROXY_SUBMISSION.md                       2 citations, 192 lines
@@ -47,8 +47,10 @@
     src/evidence_orchestrator/provenance.py       20 citations, 341 lines
     functions/api/snapshot.js                      1 citations, 714 lines
     src/evidence_orchestrator/adapter.py           1 citations, 320 lines
+    tests/test_proxy_status.py                     2 citations, 287 lines
+    tests/test_workspace.py                        1 citations, 234 lines
     tests/test_concurrency.py                      1 citations, 59 lines
-    src/evidence_orchestrator/workspace.py        35 citations, 1562 lines
+    src/evidence_orchestrator/workspace.py        36 citations, 1562 lines
 
 ########## C. the two that did NOT resolve, and what they should be ##########
   [ok] README.md is shorter than one citation claimed
@@ -141,11 +143,11 @@
   while the committed raw output beside it said 152 across 35. Nobody
   was checking. Now the run fails when prose and output disagree.
   [ok]   NOTE-citation-audit-of-this-review.md states this run's counts
-        expected: 166 citations / 36 documents
-        observed: 166 citations / 36 documents
+        expected: 170 citations / 37 documents
+        observed: 170 citations / 37 documents
   [ok]   SYNTHESIS.md states this run's counts
-        expected: 166 citations / 36 documents
-        observed: 166 citations / 36 documents
+        expected: 170 citations / 37 documents
+        observed: 170 citations / 37 documents
   [ok]   and the retraction count it excludes
         expected: retractions: 12
         observed: retractions: 12

@@ -1,0 +1,173 @@
+########## A. POSITIVE CONTROL and suite inventory ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   no compiled bytecode is being read as a test source
+        expected: pycache in sources: False
+        observed: pycache in sources: False
+    __init__.py                    0 tests,   0 assertions
+    helpers.py                     0 tests,   0 assertions
+    test_adapter.py                1 tests,   2 assertions
+    test_concurrency.py            1 tests,   5 assertions
+    test_doctor.py                 2 tests,   6 assertions
+    test_evidence.py              10 tests,  12 assertions
+    test_independence.py          13 tests,  23 assertions
+    test_ledger.py                 1 tests,   2 assertions
+    test_monitor_collector.py     27 tests, 150 assertions
+    test_proxy_status.py           9 tests,  51 assertions
+    test_proxy_submission.py      17 tests,  37 assertions
+    test_workspace.py             12 tests,  30 assertions
+  [ok] Python test functions in tests/
+        expected: functions: 93
+        observed: functions: 93
+  [ok]   assertions across them
+        expected: assertions: 318
+        observed: assertions: 318
+  plus 3 Node test files: ['chat.test.mjs', 'local-health.test.mjs', 'snapshot.test.mjs']
+  NOTE: the standing check-in text has carried `33 test methods` for
+  several rounds. That figure is from the branch's OLD base dad3f4c4,
+  which was missing four whole test modules - the branch-base defect
+  already recorded in SYNTHESIS.md, resurfacing in a number. The real
+  count at main is 93.
+
+########## B. what the suite STUBS OUT ##########
+    test_monitor_collector.py:38  monitor.collector.run_command
+    test_monitor_collector.py:180  monitor.collector.parse_json_command
+    test_monitor_collector.py:310  monitor.collector.parse_json_command
+    test_monitor_collector.py:365  monitor.collector.parse_json_command
+    test_monitor_collector.py:398  monitor.collector.parse_json_command
+    test_monitor_collector.py:427  monitor.collector.parse_json_command
+    test_monitor_collector.py:553  monitor.collector.parse_json_command
+    test_monitor_collector.py:655  monitor.collector.read_uptime
+    test_monitor_collector.py:656  monitor.collector.read_meminfo
+    test_monitor_collector.py:657  monitor.collector.shutil.disk_usage
+    test_monitor_collector.py:1051  monitor.collector.save_history
+    test_monitor_collector.py:1052  monitor.collector.load_history
+    test_monitor_collector.py:1053  monitor.collector.collect_system
+    test_monitor_collector.py:1054  monitor.collector.map_projects_to_gpus
+    test_monitor_collector.py:1055  monitor.collector.query_gpus
+    test_monitor_collector.py:1117  monitor.collector.parse_json_command
+    test_monitor_collector.py:1132  monitor.collector.urllib.request.urlopen
+    test_monitor_collector.py:1133  monitor.collector.time.time
+    test_proxy_status.py:252  evidence_orchestrator.workspace.validate_submission
+    test_proxy_status.py:256  evidence_orchestrator.workspace.validate_git_provenance
+    test_proxy_status.py:260  evidence_orchestrator.workspace.archive_evidence_bundle
+  [ok] mock targets across the whole suite
+        expected: patched: 21
+        observed: patched: 21
+  [ok]   of which are in the EFO package proper
+        expected: package: 3
+        observed: package: 3
+  [ok]   the rest are the collector's own helpers
+        expected: collector: 18
+        observed: collector: 18
+  [ok]   and the package ones sit in a single file
+        expected: files: ['test_proxy_status.py']
+        observed: files: ['test_proxy_status.py']
+  A first version of this section matched any line naming the
+  package and counted an IMPORT at test_proxy_status.py:8 as a
+  mock. It is now read from the AST: a call to `patch` with a
+  string first argument. Seventh filter bug of the pass, and it
+  changed the answer - the real count is 21, not 3.
+  The 18 collector patches are a different thing: the collector
+  shells out to nvidia-smi and reads /proc, so stubbing those is
+  what makes it testable at all. Worth noting only because it means
+  the collector suite measures the collector's LOGIC and never its
+  interaction with a real machine.
+  The 3 package patches sit in ONE test - the suite's only end-to-end
+  proxy submission. It mocks evidence validation, Git provenance
+  verification, and evidence archiving: the three components carrying
+  issues #4, #5, #8, #10 and #18. The test measures that proxy_submit
+  ORCHESTRATES them, which it does. It cannot measure what they do.
+
+########## C. every issue this review filed, against the suite ##########
+  [ok] every function this map names exists in its module
+        expected: not found: []
+        observed: not found: []
+  (that check is the point: a typo in the map would have turned a
+   covered issue into an uncovered one, silently.)
+    #3   independence.py::resolve_identity_registry   token 'alias_of' -> ['test_independence.py', 'test_monitor_collector.py', 'test_proxy_submission.py']
+    #4   provenance.py::validate_git_provenance       token 'no-replace-objects' -> ABSENT from every test source
+    #5   provenance.py::validate_git_provenance       token 'refs/remotes' -> ABSENT from every test source
+    #6   JS / dashboard                               token 'stale' -> ABSENT from every test source
+    #7   model.py::lease_expiry                       token 'lease_ceiling' -> ABSENT from every test source
+    #8   evidence.py::validate_submission             token '[FILL]' -> ['helpers.py', 'test_adapter.py']
+    #9   ledger.py::Ledger.verify                     token 'truncat' -> ABSENT from every test source
+    #10  archive.py::archive_evidence_bundle          token 'archive_evidence_bundle' -> ['test_proxy_status.py']
+    #11  adapter.py::run_once                         token 'events.jsonl' -> ['test_monitor_collector.py']
+    #12  doctor.py::_scan_secrets                     token 'AWS_SECRET' -> ABSENT from every test source
+    #13  JS / dashboard                               token 'instructions' -> ['chat.test.mjs']
+    #14  JS / dashboard                               token 'FORBIDDEN_KEYS' -> ABSENT from every test source
+    #15  model.py::validate_task                      token 'allow_skips' -> ABSENT from every test source
+    #17  doctor.py::audit_legacy_workspace            token 'write_test' -> ABSENT from every test source
+    #18  archive.py::archive_evidence_bundle          token 'max_evidence_bytes' -> ABSENT from every test source
+    #19  workspace.py::Workspace.repair_projections   token 'last_event_hash' -> ['test_proxy_status.py']
+  [ok] issues whose defect token appears NOWHERE in either suite
+        expected: absent: 10
+        observed: absent: 10 ['#4', '#5', '#6', '#7', '#9', '#12', '#14', '#15', '#17', '#18']
+  ABSENCE is decisive: a token no test source contains cannot be
+  asserted by one. PRESENCE is only a lead - section D reads them.
+
+########## D. the two blind spots worth naming, read rather than grepped ##########
+  [ok]   repair_projections is exercised by exactly one test
+        expected: call sites: 1
+        observed: call sites: 1
+    test_workspace.py:178 test_projection_loss_is_detected_and_repairable
+      before the repair call:
+        with self.assertRaises(IntegrityError):
+      after it:
+        self.assertEqual(result["repaired"], ["T1"])
+        self.assertEqual(self.workspace.get_task("T1")["state"], "pending")
+  [ok]   assertions about what the repair PRODUCED
+        expected: after: 2
+        observed: after: 2
+  [ok]   neither of which mentions the key #19 drops
+        expected: mentions last_event_hash: False
+        observed: mentions last_event_hash: False
+    So #19 sits directly underneath the one test of the function that
+    causes it. The test asserts the projection is REBUILT and that its
+    `state` is right. #19 is a different key going missing from the
+    same rebuild, so this test passes with the defect present.
+  [ok]   the suite's only mention of last_event_hash
+        expected: mentions: 1
+        observed: mentions: 1
+    test_proxy_status.py:86  if key != "last_event_hash"
+  [ok]   and it is an EXCLUSION, not an assertion
+        expected: if key != "last_event_hash"
+        observed: if key != "last_event_hash"
+    workspace.py:1511  key: value for key, value in disk_task.items() if key != "last_event_hash"
+    The test excludes the key from its comparison for the same reason
+    `audit_projections` excludes it: a projection carries it and a
+    ledger snapshot does not. The exclusion is correct in both places.
+    What neither does is assert the key is STILL THERE after a rebuild,
+    and that gap is #19. The suite encodes the same blindness as the
+    code it tests - which is the general shape worth taking away.
+
+########## E. what this pass does NOT establish ##########
+  * It does not run the suite. `pytest` is absent from this container
+    and the shipped runner is `python -m unittest`; every pass/fail
+    count this review has ever quoted is CI's, bound to a job id.
+  * It does not claim the suite is bad. 93 tests and 318 assertions
+    cover the paths they were written for; nothing here found a test
+    that asserts something FALSE.
+  * Section C classifies by TOKEN. A defect could in principle be
+    caught by a test that never names it - so 'absent' means
+    'cannot be asserted by name', not 'provably uncaught'. The two in
+    section D are read directly and are not subject to that caveat.
+  * The three Node test files are searched for tokens but not read.
+    #13 and #14 live in `functions/api/*.js`, and adjudicating
+    `chat.test.mjs` and `snapshot.test.mjs` line by line is a separate
+    pass.
+  * MEASURED: the inventory, the patch targets, the token map, and
+    both section-D readings. REASONED: that a token's absence implies
+    the class is unasserted.
+
+########## 0 unexpected result(s) ##########
+Static analysis of the test sources only; nothing was executed.
+No issue is filed from this pass - a suite that does not test a defect
+is not itself a defect. Pre-registered permissions unchanged -
+gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

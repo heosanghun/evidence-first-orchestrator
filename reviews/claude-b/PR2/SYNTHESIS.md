@@ -3,10 +3,13 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**636 passing checks across 31 instrumented raw outputs.** `raw/` holds 87
-files: **32 probe scripts, 47 raw outputs, 8 provenance-attack scripts** that
-predate the `[ok]` convention. Each is SHA-256 bound in the write-up that cites
-it.
+**652 passing checks across 32 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 89 files: **33 probe scripts, 48 raw outputs, 8
+provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
+bound in the write-up that cites it. These four numbers are **not yet
+machine-checked** — unlike the citation and quote counts below, nothing fails
+when they drift. Recount with `ls raw/ | ...` and `grep -c '[ok]' raw/raw-*.txt`
+rather than trusting them; making them self-checking is queued.
 
 Thirteen `UNEXPECTED` lines survive, in five files —
 `raw-evidence-gates.txt` (5), `raw-lifecycle-gates.txt` (3),
@@ -63,6 +66,7 @@ never treated my own re-run as independent confirmation.
 | the rest of the package, implicit exceptions | clean — 78 reads, 3 guarded indexes | `NOTE-implicit-exceptions-package-wide.md` |
 | dynamic-key subscripts, whole package | clean — 7 runtime reads, 1 keyed by parsed input; a **published count of mine corrected** | `NOTE-the-144-was-my-own-misleading-number.md` |
 | `SECURITY.md` / `CONTRIBUTING.md` claims | clean — ignore rules, no `shell=True`, report containment | `NOTE-remaining-docs-adjudicated.md` |
+| `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 
 Fifteen components were probed and found sound (one with a claim since corrected — see #19).
 
@@ -173,8 +177,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **166 live citations across
-36 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **170 live citations across
+37 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -192,7 +196,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 230 inline spans remain undecidable by position and are named as a
+lenient. 235 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03
