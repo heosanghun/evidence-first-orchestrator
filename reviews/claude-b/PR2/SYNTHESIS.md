@@ -3,8 +3,8 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**677 passing checks across 34 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 93 files: **35 probe scripts, 50 raw outputs, 8
+**690 passing checks across 35 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 95 files: **36 probe scripts, 51 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. These four numbers are **not yet
 machine-checked** — unlike the citation and quote counts below, nothing fails
@@ -76,6 +76,7 @@ never treated my own re-run as independent confirmation.
 | dynamic-key subscripts, whole package | clean — 7 runtime reads, 1 keyed by parsed input; a **published count of mine corrected** | `NOTE-the-144-was-my-own-misleading-number.md` |
 | `SECURITY.md` / `CONTRIBUTING.md` claims | clean — ignore rules, no `shell=True`, report containment | `NOTE-remaining-docs-adjudicated.md` |
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
+| `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
 | `public/` at **main `0d67750`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
 
@@ -120,6 +121,23 @@ the name, not as the whole name or a `\b`-delimited word.
 
 The thread: the system is careful about recording *work* and careless about
 recording *maintenance*. An auditor sees the effect and not the cause.
+
+### 2b. Tests that encode the decision the issue objects to
+
+Two instances now, and they are the reason "CI is green" and "the property
+holds" come apart:
+
+| Where | What the test does |
+|---|---|
+| `test_proxy_status.py:86` (#19) | **excludes** `last_event_hash` from the comparison — the same exclusion `workspace.py:1511` makes |
+| `chat.test.mjs` (#13) | **asserts** snapshot text lands in the model `instructions` block — the placement the issue objects to |
+
+Neither test is wrong on its own terms. What both mean is that the suite cannot
+be the thing that notices. A third, weaker instance: the only tests of #13's
+refusal gate and of #14's `FORBIDDEN_KEYS` each feed the guard an input it
+already handles — Korean, and `password` — so both pass with the defect present
+(`NOTE-the-node-tests-exercise-only-the-covered-input.md`, where each is driven
+through the shipped function).
 
 ### 3. Two implementations of agent identity, already diverging
 
@@ -188,8 +206,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **174 live citations across
-39 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **179 live citations across
+40 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -207,7 +225,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 242 inline spans remain undecidable by position and are named as a
+lenient. 249 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03

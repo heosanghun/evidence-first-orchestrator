@@ -1,0 +1,311 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+    chat.test.mjs             10 tests,  37 assertions
+    local-health.test.mjs      6 tests,  21 assertions
+    snapshot.test.mjs         21 tests,  62 assertions
+  [ok] Node test functions
+        expected: tests: 37
+        observed: tests: 37
+  [ok]   assertions across them
+        expected: assertions: 120
+        observed: assertions: 120
+  37 matches the `# tests 37` the runner itself reports, so the
+  count is checked against the runner rather than assumed.
+
+########## B. #13 first finding - the refusal gate is Korean-only ##########
+    chat.js:204  /실행|시작|중단|정지|재시작|삭제|수정|배포|학습해|돌려|할당/.test(query);
+  [ok]   the gate has this many alternatives
+        expected: alternatives: 11
+        observed: alternatives: 11
+  [ok]   and not one contains a Latin letter
+        expected: latin: 0
+        observed: latin: 0 []
+    the only test of it, chat.test.mjs:221-225:
+      test("action requests are refused as read-only", () => {
+        const body = internals.deterministicAnswer("GPU 0 학습을 중단해줘", snapshot());
+        assert.match(body, /읽기 전용/);
+        assert.match(body, /실행하거나 서버를 변경하지 않았습니다/);
+      });
+  [ok]   its input is Korean, so it exercises only the covered path
+        expected: 중단해줘
+        observed: test("action requests are refused as read-only", () => {
+  const body = internals.deterministicAnswer("GPU 0 학습을 중단해줘", snapshot());
+  assert.match(body, /읽기 전용/);
+  assert.match(body, /실행하거나 서버를 변경하지 않았습니다/);
+});
+    REFUSED   ko  the test's own input
+    not refused  en  stop the training on GPU 0
+    not refused  en  restart the run
+    not refused  en  delete the checkpoint
+    not refused  en  deploy to the server
+  [ok]   only the Korean phrasing draws the read-only refusal
+        expected: refused: 1
+        observed: refused: 1 ["ko  the test's own input"]
+  That is #13's first finding, driven rather than argued. The
+  test at chat.test.mjs:221 passes either way, because its input
+  is one the gate already matches. It cannot fail on this defect.
+
+########## C. #13 second finding - the test ASSERTS the behaviour ##########
+    chat.test.mjs  assert.match(captured.instructions, /최신 EFO 스냅샷 JSON/);
+  [ok]   the suite asserts snapshot text lands in `instructions`
+        expected: assert.match(captured.instructions, /최신 EFO 스냅샷 JSON/)
+        observed: assert.match(captured.instructions, /최신 EFO 스냅샷 JSON/);
+  #13's second finding is that snapshot text is concatenated into
+  the model `instructions` block. The suite does not merely miss
+  that - it REQUIRES it. A fix that moved the snapshot out of
+  `instructions` would turn this test red.
+  This is the second instance of the shape #19 showed: the test
+  encodes the same decision the issue objects to. There the test
+  EXCLUDED `last_event_hash` from a comparison; here it ASSERTS
+  the grounding placement. Neither test is wrong on its own terms.
+  What both mean is that the suite cannot be the thing that
+  notices - and #13 is about placement, not about whether the
+  snapshot is sanitized first: `sanitizeSnapshot` at chat.js:235
+  does run, and the write-up should not be read as saying
+  otherwise.
+
+########## D. #14 - the guard is exact-match, the test picks a listed key ##########
+  [ok]   FORBIDDEN_KEYS entries
+        expected: entries: 12
+        observed: entries: 12
+    ["password","passwd","secret","token","environment","env","command","cmdline","pid","uuid","ssh","authorization"]
+    the only test of it:  snapshot.source.password = "must-not-pass";
+  [ok]   and the key it injects is IN the set
+        expected: password
+        observed: snapshot.source.password = "must-not-pass";
+    CAUGHT   password       the test's own key
+    passes   api_key        #14
+    passes   gpu_uuid       #14
+    passes   command_line   #14
+    passes   ssh_key        #14
+    passes   access_token   #14 shape
+    passes   env_vars       #14 shape
+  [ok]   of the seven, this many are caught
+        expected: caught: 1
+        observed: caught: 1 ["password"]
+  #14 driven through the shipped guard rather than argued from
+  the source. This is a RE-CONFIRMATION of an issue already
+  filed, so it is reported here and NOT filed again.
+  The point for this pass is the test: it injects `password`, a
+  key the set contains, so it passes with the defect present.
+
+########## E. local-health.test.mjs yielded NOTHING new ##########
+  Six tests: a reproducible stress-index known answer, signature
+  validation and fail-closed on extra fields, session-aware
+  smoothing, view-token protection, and a health endpoint that
+  reports configuration state without secrets.
+  `ADDENDUM-chat-refusal-and-grounding.md` already measured
+  local-health.js as the strongest shape in the repository, and
+  reading its tests did not change that or add a finding.
+  Said plainly rather than dressed up as a thorough pass.
+  [ok]   it does contain a genuine known-answer test
+        expected: stress index has a reproducible known answer
+        observed: import assert from "node:assert/strict";
+import { webcrypto } from "node:crypto";
+import test from "node:test";
+
+if (!globalThis.crypto) {
+  Object.defineProperty(globalThis, "crypto", { value: webcrypto });
+}
+
+const { internals, onRequestGet, onRequestPost } = await import(
+  "../functions/api/local-health.js"
+);
+const { internals: snapshotInternals } = await import(
+  "../functions/api/snapshot.js"
+);
+
+class MemoryKv {
+  constructor() {
+    this.values = new Map();
+  }
+
+  async get(key) {
+    return this.values.get(key) ?? null;
+  }
+
+  async put(key, value) {
+    this.values.set(key, value);
+  }
+}
+
+function payload(overrides = {}) {
+  return {
+    schema_version: "1.0",
+    generated_at: new Date().toISOString(),
+    collection_interval_seconds: 120,
+    device_alias: "Local research workstation",
+    cpu_percent: 8,
+    memory: {
+      used_gib: 26.2,
+      total_gib: 31.8,
+      percent: 82.4,
+    },
+    disk: {
+      free_gib: 26.5,
+      total_gib: 954,
+      percent: 97.2,
+    },
+    uptime_seconds: 3000,
+    process_count: 458,
+    ...overrides,
+  };
+}
+
+async function signedRequest(value, secret = "x".repeat(40)) {
+  const body = JSON.stringify(value);
+  const timestamp = Math.floor(Date.now() / 1000).toString();
+  const signature = await snapshotInternals.hmacHex(
+    secret,
+    `${timestamp}.${body}`,
+  );
+  return new Request("https://dashboard.example/api/local-health", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-efo-timestamp": timestamp,
+      "x-efo-signature": `sha256=${signature}`,
+    },
+    body,
+  });
+}
+
+test("stress index has a reproducible known answer", () => {
+  assert.equal(internals.rawStressIndex(payload()), 49.4);
+  assert.equal(internals.stressStatus(49.4), "moderate");
+  assert.equal(internals.stressStatus(70), "high");
+  assert.equal(internals.stressStatus(85), "critical");
+});
+
+test("signed local health is validated, projected, and stored", async () => {
+  const kv = new MemoryKv();
+  const secret = "s".repeat(40);
+  const response = await onRequestPost({
+    request: await signedRequest(payload(), secret),
+    env: {
+      EFO_MONITOR_KV: kv,
+      EFO_LOCAL_INGEST_SECRET: secret,
+    },
+  });
+  assert.equal(response.status, 200);
+  const result = await response.json();
+  assert.equal(result.stress_index, 49.4);
+  assert.equal(result.stress_status, "moderate");
+
+  const stored = JSON.parse(await kv.get("local:latest"));
+  assert.equal(stored.device_alias, "Local research workstation");
+  assert.equal(stored.history.length, 1);
+  assert.equal(stored.history[0].memory_percent, 82.4);
+  assert.doesNotMatch(JSON.stringify(stored), /secret|hostname|command|processes/);
+});
+
+test("invalid signature and extra fields fail closed", async () => {
+  const environment = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_LOCAL_INGEST_SECRET: "s".repeat(40),
+  };
+  const invalidSignature = await onRequestPost({
+    request: await signedRequest(payload(), "wrong".repeat(10)),
+    env: environment,
+  });
+  assert.equal(invalidSignature.status, 401);
+
+  const withExtraField = await onRequestPost({
+    request: await signedRequest(
+      { ...payload(), hostname: "private-host" },
+      environment.EFO_LOCAL_INGEST_SECRET,
+    ),
+    env: environment,
+  });
+  assert.equal(withExtraField.status, 400);
+  const body = await withExtraField.json();
+  assert.match(body.detail, /top-level fields/);
+});
+
+test("recent same-session samples are smoothed but reboot samples are not", () => {
+  const current = payload({
+    cpu_percent: 100,
+    memory: { used_gib: 31.8, total_gib: 31.8, percent: 100 },
+    disk: { free_gib: 0, total_gib: 954, percent: 100 },
+    uptime_seconds: 4000,
+  });
+  const previous = {
+    generated_at: new Date(Date.now() - 120_000).toISOString(),
+    uptime_seconds: 3880,
+    stress_index: 50,
+  };
+  const smoothed = internals.projectHealth(current, previous);
+  assert.ok(smoothed.stress_index < smoothed.stress_index_raw);
+
+  const rebooted = internals.projectHealth(
+    { ...current, uptime_seconds: 30 },
+    previous,
+  );
+  assert.equal(rebooted.stress_index, rebooted.stress_index_raw);
+});
+
+test("view token protects local health reads", async () => {
+  const kv = new MemoryKv();
+  await kv.put("local:latest", JSON.stringify({ ok: true }));
+  const unauthorized = await onRequestGet({
+    request: new Request("https://dashboard.example/api/local-health"),
+    env: { EFO_MONITOR_KV: kv, EFO_VIEW_TOKEN: "correct" },
+  });
+  assert.equal(unauthorized.status, 401);
+
+  const authorized = await onRequestGet({
+    request: new Request("https://dashboard.example/api/local-health", {
+      headers: { authorization: "Bearer correct" },
+    }),
+    env: { EFO_MONITOR_KV: kv, EFO_VIEW_TOKEN: "correct" },
+  });
+  assert.equal(authorized.status, 200);
+});
+
+test("health check reveals configuration state without secrets", async () => {
+  const response = await onRequestGet({
+    request: new Request(
+      "https://dashboard.example/api/local-health?health=1",
+    ),
+    env: {
+      EFO_MONITOR_KV: new MemoryKv(),
+      EFO_LOCAL_INGEST_SECRET: "hidden",
+    },
+  });
+  const body = await response.json();
+  assert.equal(body.configured, true);
+  assert.equal(body.has_snapshot, false);
+  assert.doesNotMatch(JSON.stringify(body), /hidden/);
+});
+
+
+########## F. what this pass does NOT establish ##########
+  * It does not run the three files as a SUITE - that is what CI
+    does, and `ADDENDUM-main-is-red-and-a-push-run-is-not-a-pr-run.md`
+    reports the current 35/2. This probe calls exported functions
+    directly, which is a different thing and is labelled as such.
+  * It does not claim the Node tests are weak. 37 tests and 120
+    assertions include several this review has cited APPROVINGLY -
+    the transport-assertion projection tests are why #6's data
+    contract holds. Nothing here asserts something false.
+  * #13's OpenAI path is exercised with a stubbed `globalThis.fetch`.
+    Whether a real model ignores the read-only instruction is
+    UNMEASURED and unmeasurable here - `network: false`.
+  * MEASURED: the inventory, the gate's alternatives, all five
+    phrasings, all seven key candidates, both test inputs.
+    REASONED: that a test passing on the covered input means it
+    cannot fail on the uncovered one - which for these two guards
+    follows from the executed results above, not from inspection.
+
+########## 0 unexpected result(s) ##########
+Executed here: exported functions from chat.js and snapshot.js,
+offline, against literals built in this file. No network, no GPU,
+no performance measurement - pre-registered permissions unchanged.
+No issue filed: #13 and #14 already exist and a re-confirmation is
+a comment, not a new issue.
+SUBMITTED, not VERIFIED.
