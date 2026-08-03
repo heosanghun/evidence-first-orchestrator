@@ -150,4 +150,4 @@ runs on `main` are the independent record.
 | Artifact | SHA-256 |
 |---|---|
 | `raw/probe_main_regression.py` | `bccefcc835b63c0bf771ee1eb42cbd9bc5197c524202b5444691cce8ea0116f2` |
-| `raw/raw-main-regression.txt` | `ba208c3286bbbdb0871b74046498bbcf056c9108867081b121a5bb01110dcdcb` |
+| `raw/raw-main-regression.txt` | `7e1c31f43e3d353797ff41a4d139896d6283a6c72928ce09e4daf2b32a102eeb` |

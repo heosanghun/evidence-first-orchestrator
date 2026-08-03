@@ -1,0 +1,100 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] the review's anchor is unmoved at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   the attack category is the size every inventory reports
+        expected: scripts: 8
+        observed: scripts: 8
+
+########## B. the category is NOT opaque - every script says what it did ##########
+    attack2.sh               Claude B / sub-task (2): can a declared-identity mutation forge verifier
+    attack2_cef.sh           Claude B / sub-task (2): can a declared-identity mutation forge verifier
+    attack3.sh               Claude B / sub-task (3): Git provenance attacks against proxy delivery.
+    attack_main.sh           Does P1-1 survive codex/proxy-submission (e2cf6b4), the reimplementation?
+    attack_main2.sh          Does P1-1 survive codex/proxy-submission (e2cf6b4), the reimplementation?
+    attack_prov5_main.py     The five Git provenance attacks not yet re-run against main's rewritten
+    attack_prov_main.sh      Does the rewritten provenance.py on main (5694ab45, 341 lines) still rejec
+    attack_proxy.sh          Does P1-1 survive codex/proxy-submission (e2cf6b4), the reimplementation?
+  [ok] scripts whose purpose could not be read from the file itself
+        expected: undocumented: []
+        observed: undocumented: []
+  The item's premise was that this category is permanently opaque. It
+  is not, and saying so is better than writing a rationale I would have
+  had to invent.
+
+########## C. what WAS never recorded: the ref each ran against ##########
+  !!attack2.sh               /workspace/evidence-first-orchestrator
+    attack2_cef.sh           /tmp/efo-cef5623
+  !!attack3.sh               /workspace/evidence-first-orchestrator
+    attack_main.sh           /tmp/efo-main
+    attack_main2.sh          /tmp/efo-main2
+    attack_prov5_main.py     (not declared)
+    attack_prov_main.sh      /tmp/efo-prov
+    attack_proxy.sh          /tmp/efo-proxy
+  [ok] scripts pointed at the branch's own working tree, unpinned
+        expected: unpinned: ['attack2.sh', 'attack3.sh']
+        observed: unpinned: ['attack2.sh', 'attack3.sh']
+
+########## D. and at that time the branch was the STALE base ##########
+    attack2.sh               first committed a820891 2026-07-30
+    attack3.sh               first committed a820891 2026-07-30
+    branch-base merge        c16df6d 2026-08-03
+  [ok]   the unpinned runs predate the merge that brought main in
+        expected: 2026-07-30
+        observed: a820891 2026-07-30
+  [ok]   and the merge is later
+        expected: 2026-08-03
+        observed: c16df6d 2026-08-03
+  Until c16df6d the branch was based on dad3f4c4 - behind main by 9,457
+  lines, provenance.py -341, per SYNTHESIS.md. attack3.sh is the GIT
+  PROVENANCE suite (G1 wrong remote, G2 local-only commit, G3 replace-ref
+  swap, G4 partial submission), so its results describe a 193-line
+  provenance.py, not main's 341-line rewrite.
+  That is precisely why attack_prov_main.sh and attack_prov5_main.py
+  exist - they re-ran the same attacks against /tmp/efo-prov at main.
+  The re-runs were done. What was never written down is that the two
+  ORIGINALS are superseded, so a reader takes all eight as evidence
+  about main. Same defect as REPORT.md reviewing an unnamed ref.
+
+########## E. two smaller gaps in the same category ##########
+  [ok] raw-attack outputs present, excluding this probe's own
+        expected: outputs: 9
+        observed: outputs: 9
+  [ok]   and the self-exclusion is exactly one file
+        expected: self: True
+        observed: self: True
+    ['raw-attack-main.txt', 'raw-attack-main2.txt', 'raw-attack-prov-main.txt', 'raw-attack-prov5-main.txt', 'raw-attack-proxy.txt', 'raw-attack2-cef5623.txt', 'raw-attack2.txt', 'raw-attack3.txt', 'raw-attack4.txt']
+    raw-attack4.txt has NO attack4 script in raw/. Nine outputs, eight
+    scripts: one result on this branch cannot be reproduced from what
+    the branch ships. Named rather than quietly dropped from the count.
+  [ok]   none of the attack outputs uses the [ok] convention
+        expected: instrumented: []
+        observed: instrumented: []
+  [ok]   but one carries a bare UNEXPECTED marker instead
+        expected: {'raw-attack-prov5-main.txt': 1}
+        observed: {'raw-attack-prov5-main.txt': 1}
+  [ok]     and substring counting would have doubled it
+        expected: {'raw-attack-prov5-main.txt': 2}
+        observed: {'raw-attack-prov5-main.txt': 2}
+    So `predate the [ok] convention` is exact for 8 of 9 and slightly
+    generous for the ninth, which uses the failure marker alone - ONE
+    marker, not the two a substring count reports.
+
+########## F. what this does NOT do ##########
+  * It does not re-run any attack. The scripts drive real git
+    repositories and several need refs that no longer exist in this
+    container; re-running them is not possible here and is not claimed.
+  * It does not retract any finding. #3, #4 and #5 were each re-run
+    against a PINNED ref - /tmp/efo-prov at main, or /tmp/efo-main*,
+    /tmp/efo-proxy for the named commits - and those re-runs are what
+    the issues cite. The gap is bookkeeping on this branch, not a
+    defect in the findings.
+  * MEASURED: every header, every declared REPO, both commit dates, the
+    output inventory. REASONED: that attack3's results describe the old
+    provenance.py - which follows from the date and the declared path,
+    not from re-reading the 193-line file.
+
+########## 0 unexpected result(s) ##########
+This audits MY OWN evidence, not EFO. Static file reads and two git log
+queries; no attack was executed. No issue filed. Pre-registered
+permissions unchanged. SUBMITTED, not VERIFIED.

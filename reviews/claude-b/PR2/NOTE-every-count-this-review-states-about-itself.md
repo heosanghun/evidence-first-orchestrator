@@ -1,7 +1,7 @@
 # The inventory is machine-checked now — and so is the headline count of every write-up, which nothing had ever verified
 
 Reproduce with `raw/probe_inventory_selfcheck.py`; raw output in
-`raw/raw-inventory-selfcheck.txt`. **19 checks, 0 unexpected.** Audits **my own
+`raw/raw-inventory-selfcheck.txt`. **24 checks, 0 unexpected.** Audits **my own
 write-ups**, not EFO.
 
 Queue item 34. `SYNTHESIS.md`'s inventory had been recounted **by hand five
@@ -15,14 +15,14 @@ the run** when it disagrees.
 Surveying the branch to build the inventory check showed something worse:
 
 > **Every write-up opens with `N checks, M unexpected`, and nothing had
-> ever verified one of them.** There are 32 such claims.
+> ever verified one of them.** There are 35 such claims.
 
 That number is the *headline* of every document here — the first quantitative
 claim a reader meets. It was hand-typed in every case. Each is now compared
 against the raw output the same sentence names, and the run fails on any
 disagreement.
 
-All 32 currently match. That is luck rather than process, exactly as it was for
+All 35 currently match. That is luck rather than process, exactly as it was for
 citations: nothing in the workflow checked them before this probe existed.
 
 ## What the recount found
@@ -32,15 +32,30 @@ checks where `raw/` holds **692**. Two checks had been added to
 `probe_main_regression.py` after the last hand-recount. Sixth drift of the same
 kind, and the last one that will go unnoticed.
 
-| Quantity | Measured |
+| Quantity | Measured, 2026-08-03 (this run) |
 |---|---|
-| files in `raw/` | 101 |
-| probe scripts | 39 |
-| raw outputs | 54 |
+| files in `raw/` | 107 |
+| probe scripts | 42 |
+| raw outputs | 57 |
 | provenance-attack scripts | 8 |
-| passing checks | 726 |
-| instrumented outputs | 38 |
-| `UNEXPECTED` lines | 13, in 5 files |
+| passing checks | 741 |
+| instrumented outputs | 40 |
+| `UNEXPECTED` lines | 12, in 5 files |
+
+> **Correction, 2026-08-03.** The `UNEXPECTED` row read **13**, and so did every
+> earlier round of this table. The tally counted the marker as a **substring**,
+> so a legend line in `raw-attack-prov5-main.txt` reading *"Any
+> `'!! UNEXPECTED !!'` above is a finding"* was itself counted as a finding. It
+> is now counted by **position** — bracketed at the start of a line, or bare at
+> the end — and the total is 12. No finding changed; a sentence *about* a marker
+> had been counted as the marker.
+>
+> The same rule had a second victim in the same run: a probe with a check
+> *named* after the `[ok]` token reported its 10 checks as 12. And the first fix
+> was worse than the bug — `endswith` on both markers matched 163 sentences
+> ending in the letters `ok` and took this table's 740 to 922. Caught by a
+> known-answer check before it was believed. Detail in
+> `NOTE-two-attack-scripts-ran-against-the-stale-base.md`.
 
 The classification is checked for **exhaustiveness**, not just computed: a file
 matching none of the three prefixes would otherwise vanish from the inventory
@@ -61,7 +76,7 @@ moment this very note was added, which is the defect the probe exists to catch,
 reintroduced inside the probe. The strict census is now checked against a
 **loose** one — every `**N checks, M unexpected.**` anywhere must also be
 matched by the pattern that pairs it with a raw filename — so both sides are
-derived and neither can drift. The count is 32 as of this round. A second, smaller bug in the same round: the
+derived and neither can drift. The count is 35 as of this round. A second, smaller bug in the same round: the
 mismatch check printed `len(mismatched)` while comparing against `[]`, so it
 could never have passed. Both fixed before the run reported here.
 
@@ -119,7 +134,7 @@ machine-checked.** It is verified by reading the raw output beside it, the way
 every number here was verified before this probe existed. Saying that is the
 point; a self-check that quietly graded its own report would be worse than none.
 
-The probe reaches a clean fixpoint: two consecutive runs agree at **19 checks,
+The probe reaches a clean fixpoint: two consecutive runs agree at **24 checks,
 0 unexpected**.
 
 ## Scope
@@ -152,5 +167,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_inventory_selfcheck.py` | `3d972063730783d57b2d7df4fe32d960218a6623a8d10a24115836ad535f0e4b` |
-| `raw/raw-inventory-selfcheck.txt` | `f0e90e642ea0d55deccbf1c5bb304131ed5fc0555b979585419ebf7990151e25` |
+| `raw/probe_inventory_selfcheck.py` | `83236c0390f40fd6d19c817e2e7ee9a4f00998dc1cbe69f0007bf3a8eea26360` |
+| `raw/raw-inventory-selfcheck.txt` | `4ae8453ab0b43fe894ad16cfa388311b44e3549f0661c1cb36f96b0c82e251d0` |

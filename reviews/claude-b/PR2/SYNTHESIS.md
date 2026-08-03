@@ -3,23 +3,31 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**730 passing checks across 39 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 105 files: **41 probe scripts, 56 raw outputs, 8
+**741 passing checks across 40 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 107 files: **42 probe scripts, 57 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
 paragraph disagrees with it. The counts exclude that probe's **own** output,
 which is the report of the run doing the counting — a self-reference with no
 fixpoint, stated rather than hidden — the same guard the citation and quote counts got.
-It also checks the headline `N checks, M unexpected` of all **32** write-ups
+It also checks the headline `N checks, M unexpected` of all **35** write-ups
 against the raw output each one names; nothing verified those until 2026-08-03.
 
-Thirteen `UNEXPECTED` lines survive, in five files —
+Twelve `UNEXPECTED` lines survive, in five files —
 `raw-evidence-gates.txt` (5), `raw-lifecycle-gates.txt` (3),
-`raw-alias-lineage.txt` (2), `raw-attack-prov5-main.txt` (2),
+`raw-alias-lineage.txt` (2), `raw-attack-prov5-main.txt` (1),
 `raw-ledger-chain.txt` (1). All are **findings** recorded under the older
 counting convention, not harness failures; see the caveat at the end of this
 document.
+
+> **Correction, 2026-08-03.** This read *"Thirteen … `raw-attack-prov5-main.txt`
+> (2)"* until the tally was fixed to count markers **by position** rather than
+> by substring. That file has one finding and one *legend line* explaining the
+> marker, and `text.count()` could not tell them apart. Both the total and the
+> per-file list are now parsed out of this paragraph and compared against the
+> measurement, so neither side is pinned —
+> `NOTE-two-attack-scripts-ran-against-the-stale-base.md` has the detail.
 
 > **Correction, 2026-08-03.** This paragraph previously read *"460 passing
 > checks across 20 instrumented probes … 26 probe scripts and 65 raw outputs"*.
@@ -84,9 +92,10 @@ never treated my own re-run as independent confirmation.
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
-| this review's own counts | machine-checked — inventory, 30 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
+| this review's own counts | machine-checked — inventory, 35 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
 | attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
 | `monitor/collector.py` coverage | map — 27 tests, **no test ages an input**; #6 has no vocabulary to be tested by | `NOTE-the-collector-suite-never-ages-an-input.md` |
+| the 8 provenance-attack scripts | map — all self-document; **2 ran against an unpinned tree that was the stale base**, superseded by the `_main` re-runs | `NOTE-two-attack-scripts-ran-against-the-stale-base.md` |
 | the class-2b pattern | **census: 7 of 7 tests cannot fail on their issue** | `NOTE-class-2b-is-a-census-now-seven-of-seven.md` |
 | this review's own censuses | bounded — **24 of 30 measured, 6 reasoned from reading** | `NOTE-which-of-my-censuses-measured-and-which-read.md` |
 | `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
@@ -249,7 +258,7 @@ task stricter than intended.
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
 `NOTE-citation-audit-of-this-review.md` audits all **196 live citations across
-45 documents**; every one now resolves at `main`. Three did not:
+46 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -355,6 +364,16 @@ that verification is now a standing precondition of the review rather than an
 assumption. What *was* affected is PR #16's CI — every green run before
 `c16df6d` exercised stale source, so none of them is evidence about `main`. The
 first honest run is `30776534613`, all 11 checks green.
+
+**A second consequence, found 2026-08-03.** `attack2.sh` and `attack3.sh`
+declare `REPO=/workspace/evidence-first-orchestrator` — the branch's own working
+tree, unpinned — and were committed 2026-07-30, four days before `c16df6d`. They
+therefore ran against `dad3f4c4`'s 193-line `provenance.py`, not main's 341-line
+rewrite. Both were re-run against pinned refs (`attack_prov_main.sh`,
+`attack_prov5_main.py`), which is what the issues cite, but the branch never
+said the originals were superseded. Recorded in
+`NOTE-two-attack-scripts-ran-against-the-stale-base.md`, which also notes that
+`raw-attack4.txt` has no script in `raw/`.
 
 Related, measured while checking for further contamination of my own making:
 `reviews/claude-b/PR2/test_p1_1.py` is named `test_*`, but neither test runner

@@ -9,7 +9,7 @@
   is bound to 5694ab45, and moving the anchor would invalidate them.
   [ok]   and main has MOVED past it
         expected: moved: True
-        observed: moved: True   (main is now 14e6461)
+        observed: moved: True   (main is now 3cf9a67)
   [ok]   node is available for an independent run
         expected: v22
         observed: v22.22.2
@@ -33,15 +33,15 @@
         observed: lost: 8
 
   and what was ADDED - the thing test 21 forbids:
-    inline `style=` in public/assets/app.js          0 ->   84
-    inline `style=` in public/index.html             0 ->    5
+    inline `style=` in public/assets/app.js          0 ->   75
+    inline `style=` in public/index.html             0 ->  227
   [ok]   inline styles: none at the anchor, some at main
         expected: 0 -> non-zero
-        observed: 0 -> non-zero  (exact count now 84, it was 32 when #20 was filed)
+        observed: 0 -> non-zero  (exact count now 75, it was 32 when #20 was filed)
 
 ########## C. an INDEPENDENT run, not a reading of CI's log ##########
     5694ab45 (anchor)    tests 37  pass 37  fail 0   (exit 0)
-    14e6461 (main)       tests 37  pass 35  fail 2   (exit 1)
+    3cf9a67 (main)       tests 37  pass 35  fail 2   (exit 1)
         not ok 21 - CSP-safe visual fills use native progress and no inline styles
         not ok 25 - browser renders a distinct transport badge on agent cards
   [ok] the suite is GREEN at the review's anchor
@@ -75,7 +75,7 @@
   f724211      0      0             32
   c9c4189      0      0             32
   a93e720      0      0             32
-  14e6461      0      0             84
+  3cf9a67      0      0             75
   [ok]   the badge and the inline styles arrive together at b78c63d
         expected: badge 0, inline 17
         observed: badge 0, inline 17
@@ -107,7 +107,7 @@
     is a NETWORK operation and `network: false` forbids it. What is
     measured is the repository content, nothing more.
   * Exploitability. No XSS was demonstrated. `escapeHtml` still
-    appears 37 times in the new app.js, so the escaping
+    appears 36 times in the new app.js, so the escaping
     path was not wholesale removed - only the CSP that backstops it.
   * MEASURED: every count above, the timeline, and both suite runs.
     REASONED: that losing CSP + gaining 32 inline styles is a

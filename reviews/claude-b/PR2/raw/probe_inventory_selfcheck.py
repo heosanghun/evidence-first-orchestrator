@@ -41,9 +41,41 @@ def check(name: str, expected: str, observed: str) -> None:
 
 
 def tally(path: Path) -> tuple[int, int]:
-    """(passing checks, unexpected results) in one raw output."""
-    text = path.read_text(encoding="utf-8", errors="replace")
-    return text.count("[ok]"), text.count("!! UNEXPECTED !!")
+    """(passing checks, unexpected results) in one raw output.
+
+    Counted by POSITION, not by substring. This used `text.count("[ok]")` and
+    `text.count("!! UNEXPECTED !!")`, which counted every occurrence anywhere -
+    including inside a check's own NAME and inside explanatory prose. Two live
+    examples, both found by this fix:
+
+      * `raw-attack-provenance.txt` has a check literally named `none of the
+        attack outputs uses the [ok] convention`, plus a prose line quoting the
+        same token. Substring counting made a 10-check probe report 12.
+      * `raw-attack-prov5-main.txt` has ONE finding (`G2b  !! UNEXPECTED !!`)
+        and one legend line reading `Any '!! UNEXPECTED !!' above is a
+        finding`. Substring counting made one failure look like two.
+
+    Two result conventions exist in raw/ and both are recognised structurally:
+    the `check()` convention prints the marker BRACKETED at the start of the
+    line, and the older attack scripts print a bare `!! UNEXPECTED !!` at the
+    END of a status line with no `[ok]` counterpart. A marker anywhere else on
+    a line is prose and is not a result.
+
+    A first attempt at this used `endswith` for BOTH markers - and matched 163
+    ordinary sentences that happen to end in the letters `ok`, inflating the
+    census from 740 to 922. The filter was checked against a known answer
+    before it was believed, which is the only reason that is a footnote rather
+    than a number in SYNTHESIS.
+    """
+    ok = bad = 0
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        stripped = line.strip()
+        if stripped.startswith("[ok]"):
+            ok += 1
+        if (stripped.startswith("[!! UNEXPECTED !!]")
+                or stripped.endswith("!! UNEXPECTED !!")):
+            bad += 1
+    return ok, bad
 
 
 # ---------------------------------------------------------------- A
@@ -111,13 +143,34 @@ if match:
     for label, want, got in zip(labels, stated, measured):
         check(f"  {label}", f"{label}: {got}", f"{label}: {want}")
 
-banner = re.search(r"Thirteen `UNEXPECTED` lines survive, in (\w+) files",
-                   synthesis)
-check("  and the UNEXPECTED tally it reports", "files: 5",
-      f"files: {len(flagged)}"
-      + ("" if banner else "   (SYNTHESIS's sentence not found)"))
-check("    with the total it names", "unexpected: 13",
-      f"unexpected: {unexpected}")
+# Both sides DERIVED. This block used to pin `unexpected: 13` and to hard-code
+# the word `Thirteen` into the regex that finds the sentence - so the day the
+# tally changed, the check did not fail, it stopped matching. SYNTHESIS spells
+# the total as a WORD and lists the files with digits; both are read out of the
+# paragraph and compared against the measurement.
+WORDS = {w: n for n, w in enumerate(
+    "zero one two three four five six seven eight nine ten eleven twelve "
+    "thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty"
+    .split())}
+banner = re.search(r"(\w+) `UNEXPECTED` lines survive, in (\w+) files", synthesis)
+check("SYNTHESIS states an UNEXPECTED tally", "found: True",
+      f"found: {banner is not None}")
+if banner:
+    stated_total = WORDS.get(banner.group(1).lower(), -1)
+    stated_files = WORDS.get(banner.group(2).lower(), -1)
+    per_file = dict(
+        (name, int(n)) for name, n in re.findall(
+            r"`(raw-[a-z0-9-]+\.txt)` \((\d+)\)",
+            synthesis[banner.start():banner.start() + 400]))
+    check("  the number of flagged files it names", f"files: {len(flagged)}",
+          f"files: {stated_files}")
+    check("    the total it spells out", f"unexpected: {unexpected}",
+          f"unexpected: {stated_total}")
+    check("    and the per-file breakdown, file by file",
+          f"per-file: {dict(sorted(flagged.items()))}",
+          f"per-file: {dict(sorted(per_file.items()))}")
+    check("      which is also the sum it spells",
+          f"sum: {stated_total}", f"sum: {sum(per_file.values())}")
 
 # ---------------------------------------------------------------- D
 print("\n########## D. every write-up's OWN headline count ##########")
@@ -147,6 +200,18 @@ print(f"    {len(claims)} checkable headline claims across the write-ups")
 print("    (An earlier draft pinned this at 30, from `grep -l` counting FILES")
 print("     rather than occurrences. The census said 29 and was right. The")
 print("     number is now derived on both sides, so neither can go stale.)")
+
+# SYNTHESIS states this census TWICE, in two different phrasings, and both were
+# stale (32 and 30 against a measured 35) until this check existed. Section F
+# used to name them as hand-maintained; they are hand-maintained no longer.
+for label, pattern in (
+        ("the write-up count in its opening paragraph",
+         r"headline `N checks, M unexpected` of all \*\*(\d+)\*\* write-ups"),
+        ("  and the one in its own-counts row",
+         r"machine-checked . inventory, (\d+) headline claims")):
+    stated = re.search(pattern, synthesis)
+    check(f"SYNTHESIS states {label}", f"claims: {len(claims)}",
+          f"claims: {stated.group(1) if stated else 'sentence not found'}")
 
 mismatched: list[str] = []
 missing: list[str] = []
