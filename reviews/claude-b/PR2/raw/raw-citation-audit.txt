@@ -6,11 +6,11 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   and the write-ups are present
-        expected: documents: 47
-        observed: documents: 47
+        expected: documents: 48
+        observed: documents: 48
 
 ########## B. every FILE:LINE citation in the write-ups ##########
-  196 live citations across 47 documents
+  198 live citations across 48 documents
   12 more appear inside correction banners and are
   excluded as retractions rather than claims - see the comment in the
   source for why that exclusion is principled and not self-serving.
@@ -20,7 +20,7 @@
   [ok]   and every cited line is within its file
         expected: out of range: []
         observed: out of range: []
-  distinct files cited: 33
+  distinct files cited: 34
     CONTRIBUTING.md                                2 citations, 31 lines
     docs/MIGRATION.md                              4 citations, 167 lines
     docs/PROXY_SUBMISSION.md                       2 citations, 192 lines
@@ -39,7 +39,7 @@
     docs/MIGRATION.md                              3 citations, 167 lines
     docs/PROXY_SUBMISSION.md                       1 citations, 192 lines
     src/evidence_orchestrator/doctor.py            7 citations, 220 lines
-    src/evidence_orchestrator/evidence.py          6 citations, 297 lines
+    src/evidence_orchestrator/evidence.py          7 citations, 297 lines
     functions/api/snapshot.js                      1 citations, 714 lines
     tests/helpers.py                               1 citations, 148 lines
     src/evidence_orchestrator/independence.py      9 citations, 281 lines
@@ -49,6 +49,7 @@
     src/evidence_orchestrator/provenance.py       22 citations, 341 lines
     functions/api/snapshot.js                      1 citations, 714 lines
     src/evidence_orchestrator/adapter.py           1 citations, 320 lines
+    tests/test_evidence.py                         1 citations, 151 lines
     tests/test_independence.py                     3 citations, 373 lines
     tests/test_proxy_status.py                     4 citations, 287 lines
     tests/test_workspace.py                        1 citations, 234 lines
@@ -146,11 +147,11 @@
   while the committed raw output beside it said 152 across 35. Nobody
   was checking. Now the run fails when prose and output disagree.
   [ok]   NOTE-citation-audit-of-this-review.md states this run's counts
-        expected: 196 citations / 47 documents
-        observed: 196 citations / 47 documents
+        expected: 198 citations / 48 documents
+        observed: 198 citations / 48 documents
   [ok]   SYNTHESIS.md states this run's counts
-        expected: 196 citations / 47 documents
-        observed: 196 citations / 47 documents
+        expected: 198 citations / 48 documents
+        observed: 198 citations / 48 documents
   [ok]   and the retraction count it excludes
         expected: retractions: 12
         observed: retractions: 12

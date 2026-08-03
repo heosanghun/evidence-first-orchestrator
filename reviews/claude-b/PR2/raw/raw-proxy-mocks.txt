@@ -1,0 +1,122 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   and the suite is the size every write-up reports
+        expected: test files: 12
+        observed: test files: 12
+  SCOPE: 12 files, 3 components, 4 issues. Stated before starting, so
+  that a population too large to adjudicate would have stopped here.
+
+########## B. the premise: are the three mocks the ONLY path? ##########
+    test_proxy_status.py         patches ['validate_submission', 'validate_git_provenance', 'archive_evidence_bundle']
+  [ok] files that patch any of the three
+        expected: patching: 1
+        observed: patching: 1
+  [ok]   and the OTHER file driving proxy_submit patches nothing
+        expected: patches in test_proxy_submission.py: 0
+        observed: patches in test_proxy_submission.py: 0
+    workspace.proxy_submit   calls [('archive_evidence_bundle', 1220), ('validate_git_provenance', 1153), ('validate_submission', 1141)]
+    workspace.submit         calls [('archive_evidence_bundle', 1054), ('validate_submission', 1026)]
+    workspace.verify         calls [('archive_evidence_bundle', 1355)]
+  [ok]   the entry points that reach them, from the AST
+        expected: entry points: ['proxy_submit', 'submit', 'verify']
+        observed: entry points: ['proxy_submit', 'submit', 'verify']
+    test call sites driving them: {'submit': 10, 'proxy_submit': 16, 'verify': 14}
+  [ok]   every entry point is driven by more than the patching file
+        expected: min call sites: True
+        observed: min call sites: True   ({'submit': 10, 'proxy_submit': 16, 'verify': 14})
+  So the three functions run for real on every unpatched submit,
+  verify and proxy_submit. The item's premise does not hold, and
+  saying so is the finding rather than something to work around.
+
+########## C. #4 - `git replace`: no vocabulary at all ##########
+  [ok] tests mentioning a git replace ref
+        expected: sites: {}
+        observed: sites: {}
+  ADJUDICATED, not counted. Every whole-word `replace` hit, listed so
+  the reader can check the adjudication rather than trust the count:
+    test_ledger.py:26  text.replace("task.created", "task.changed", 1),
+    test_proxy_submission.py:57  self.artifact.read_bytes().replace(b"\r\n", b"\n")
+    test_proxy_submission.py:321  self.artifact.read_bytes().replace(b"\n", b"\r\n")
+  [ok]   whole-word hits, each adjudicated as NOT a git replace
+        expected: adjudicated: 3
+        observed: adjudicated: 3
+  [ok]     and what a SUBSTRING search would have added
+        expected: substring: 5
+        observed: substring: 5
+  All three whole-word hits are `str.replace` / `bytes.replace`. The
+  two a substring search adds are identifier-internal - the test names
+  `test_ready_does_not_replace_proxy_submission_requirements` and
+  `test_active_proxy_grant_cannot_be_replaced`. Five leads, zero real.
+  That is the trap this review has fallen into twice, and the reason
+  every count here is tokenised on a word boundary. Absence of the
+  PHRASE is decisive: no test constructs a replace ref, so #4's
+  mechanism is not exercised, refuted or regression-guarded anywhere.
+  I expected five whole-word hits going in. There are three. The
+  expectation was corrected to the measurement.
+
+########## D. #5 and #18 - the same shape ##########
+  [ok] #5  never-pushed commit: occurrences in the whole suite
+        expected: sites: {}
+        observed: sites: {}
+  [ok] #18 max_evidence_bytes: occurrences in the whole suite
+        expected: sites: {}
+        observed: sites: {}
+  #5: nothing in the suite pushes, so no test can distinguish a
+  pushed commit from a never-pushed one - the property has no
+  vocabulary, which is the #6 answer rather than `the suite forgot`.
+  #18: the config key is never SET by any test, so both call sites
+  always take the 50 MiB default and the threshold-vs-ceiling
+  divergence the issue is about cannot appear.
+
+########## E. #8 - the guard IS tested, with input it already handles ##########
+  [ok] the known-answer comparison is a bare inequality
+        expected: if check["expected"] != check["observed"]:
+        observed: if check["expected"] != check["observed"]:
+    evidence.py:200
+  [ok]   the only fixture feeds it integers
+        expected: expected: ['4']
+        observed: expected: ['4']
+  [ok]     on both sides
+        expected: observed: ['4 if known_answer_passed else 5']
+        observed: observed: ['4 if known_answer_passed else 5']
+  So both branches ARE covered: 4 == 4 passes, 4 != 5 raises. What is
+  never fed is the input #8 is about - the SAME string on both sides.
+  [ok]   the only [FILL] rejection in evidence.py
+        expected: sites: 1
+        observed: sites: 1
+    evidence.py:235 - and it is in the CLAIMS loop, not the
+    known-answer loop. The known-answer loop has no [FILL] check at all.
+  [ok]   the test that asserts it, and what it asserts about
+        expected: test_evidence.py sites: 1
+        observed: test_evidence.py sites: 1
+    test_evidence.py:89 sets claims[-1]['value'] = 0.7 - a
+    CLAIM, not a known-answer check. So the one test naming [FILL]
+    guards a different loop than the one #8 objects to.
+
+########## F. what this does NOT do ##########
+  * It does not run the Python suite. pytest is not installed in this
+    container; every result above is a static read of the test files
+    and the package at main 5694ab45.
+  * It does not claim the components are UNTESTED. They are driven
+    heavily. The claim is narrower and is the whole point: the four
+    properties named have either no vocabulary or no matching input.
+  * It does not re-confirm #4, #5, #8 or #18. Those were established
+    by executed attacks against pinned refs and are cited in the
+    issues; this is a MAP of what the suite would catch, not a
+    finding.
+  * It does not file an issue. A map is not a defect report.
+  * MEASURED: every occurrence count, every adjudication, the AST call
+    graph, the comparison line, the fixture values. REASONED: that a
+    property with no vocabulary cannot regress detectably - which
+    follows from the absence, not from running anything.
+
+########## 0 unexpected result(s) ##########
+Static reads of tests/ and the package at main 5694ab45. Nothing
+executed against a workspace, no issue filed. Pre-registered
+permissions unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.
