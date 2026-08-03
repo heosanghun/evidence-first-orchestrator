@@ -21,12 +21,12 @@ opposite of the point.
 
 The decidable subset is: **exactly one citation on a line, immediately followed
 by a fenced block.** There the block is unambiguously a quote of that location.
-**30** such pairs exist.
+**31** such pairs exist.
 
 | Disposition | Count |
 |---|---|
 | verbatim-verified against the cited range | 17 |
-| adjudicated non-quotes | 13 |
+| adjudicated non-quotes | 14 |
 
 > **Correction, 2026-08-03.** This section previously read *"Eleven such pairs
 > exist"* with a table of 7 and 5 — which do not sum. The committed raw output
@@ -116,5 +116,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_quote_accuracy.py` | `7881f334c5bd99d28ff2a23444f76ca87f28ae9084e2c39f59051897169861a1` |
-| `raw/raw-quote-accuracy.txt` | `efe319e2101d02a4c5860602ea4185db48dc523b2fd141b4668feb0a5eb309b0` |
+| `raw/probe_quote_accuracy.py` | `e7545bced956fc4c94360aead11ce435f6a32c5d8429b2b59d2fd1c6551c75df` |
+| `raw/raw-quote-accuracy.txt` | `f6a1790975e6b657bb5d9b8a5a2195d461acac17d71bb9ce0e97b789a83db761` |

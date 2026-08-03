@@ -8,9 +8,9 @@
 
 ########## B. citation + fenced block, the decidable subset ##########
   [ok] every decidable pair was examined
-        expected: pairs: 30
-        observed: pairs: 30
-  verbatim-verified: 17   not matched: 13
+        expected: pairs: 31
+        observed: pairs: 31
+  verbatim-verified: 17   not matched: 14
     ADDENDUM-git-replace-regression.md  ->  provenance.py:47
         deliberate before/after - the block quotes the argument list that was REMOVED, which is the whole point of the regression
     NOTE-487-is-too-many-and-the-two-that-survive-are-guarded.md  ->  provenance.py:78
@@ -25,6 +25,8 @@
         PROBE OUTPUT - `helpers.py:87 expected=4 observed=4 if known_answer_passed else 5` is the census line, which renders the dict's two values on one line; the source spells them across four
     NOTE-collector-redaction-holds.md  ->  collector.py:1277
         the block is PROBE OUTPUT, presented as output; it is not a source quote and does not claim to be
+    NOTE-four-modules-with-no-guard-real-in-one-reachable-in-none.md  ->  workspace.py:1355
+        PROBE OUTPUT - the block is this probe's own listing of the three `archive_evidence_bundle` call sites, each rendered as `manifest=<expression>` with its own file:line beside it. It is not a quote of workspace.py at any single cited line; the expressions are ast.unparse output, not source text. Eighth time this check has caught its own author on the round the note was written
     NOTE-implicit-exceptions-package-wide.md  ->  provenance.py:314
         extractor artifact - the citation is INSIDE a fenced listing, so the following PROSE paragraph was captured as the block
     NOTE-proxy-grant-holds.md  ->  workspace.py:1308
@@ -318,14 +320,14 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
   silently is indistinguishable from one that was never measured, so
   the run now fails when prose and output disagree.
   [ok]   the note states this run's pairs
-        expected: pairs: 30
-        observed: pairs: 30
+        expected: pairs: 31
+        observed: pairs: 31
   [ok]   the note states this run's verbatim-verified
         expected: verbatim-verified: 17
         observed: verbatim-verified: 17
   [ok]   the note states this run's adjudicated non-quotes
-        expected: adjudicated non-quotes: 13
-        observed: adjudicated non-quotes: 13
+        expected: adjudicated non-quotes: 14
+        observed: adjudicated non-quotes: 14
   [ok]   the note states this run's inline spans
         expected: inline spans: 285
         observed: inline spans: 285

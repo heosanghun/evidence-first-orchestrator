@@ -195,6 +195,14 @@ ADJUDICATED = {
         "source at any ONE cited line, and the probe asserts each of the three "
         "lines separately in section C. Seventh time this check has caught its "
         "own author on the round the note was written",
+    ("NOTE-four-modules-with-no-guard-real-in-one-reachable-in-none.md",
+     "workspace.py"):
+        "PROBE OUTPUT - the block is this probe's own listing of the three "
+        "`archive_evidence_bundle` call sites, each rendered as "
+        "`manifest=<expression>` with its own file:line beside it. It is not a "
+        "quote of workspace.py at any single cited line; the expressions are "
+        "ast.unparse output, not source text. Eighth time this check has "
+        "caught its own author on the round the note was written",
     ("ADDENDUM-git-replace-regression.md", "provenance.py"):
         "deliberate before/after - the block quotes the argument list that "
         "was REMOVED, which is the whole point of the regression",
