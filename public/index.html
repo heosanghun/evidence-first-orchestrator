@@ -8,8 +8,8 @@
   <meta name="description" content="Evidence First Orchestrator 실시간 운영 현황">
   <title>EFO Operations</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=3.2.0">
-  <script src="/assets/app.js?v=3.2.0" defer></script>
+  <link rel="stylesheet" href="/assets/styles.css?v=3.3.0">
+  <script src="/assets/app.js?v=3.3.0" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -157,36 +157,222 @@
           </div>
           <div class="activity-chart-scroll">
             <div class="activity-histogram" id="activity-histogram" role="img" aria-label="시간대별 작업 이벤트 막대그래프">
-              <!-- Statically embedded 24-hour SVG Histogram -->
-              <svg width="100%" height="160" viewBox="0 0 720 160" preserveAspectRatio="none" style="display: block; width: 100%;">
-                <!-- 24 Hourly stacked bars -->
-                <g class="histogram-bars">
-                  <rect x="10" y="40" width="20" height="100" fill="#10b981" rx="3" />
-                  <rect x="40" y="60" width="20" height="80" fill="#2563eb" rx="3" />
-                  <rect x="70" y="30" width="20" height="110" fill="#8b5cf6" rx="3" />
-                  <rect x="100" y="70" width="20" height="70" fill="#f59e0b" rx="3" />
-                  <rect x="130" y="50" width="20" height="90" fill="#10b981" rx="3" />
-                  <rect x="160" y="20" width="20" height="120" fill="#2563eb" rx="3" />
-                  <rect x="190" y="80" width="20" height="60" fill="#8b5cf6" rx="3" />
-                  <rect x="220" y="40" width="20" height="100" fill="#10b981" rx="3" />
-                  <rect x="250" y="60" width="20" height="80" fill="#f59e0b" rx="3" />
-                  <rect x="280" y="30" width="20" height="110" fill="#2563eb" rx="3" />
-                  <rect x="310" y="50" width="20" height="90" fill="#8b5cf6" rx="3" />
-                  <rect x="340" y="40" width="20" height="100" fill="#10b981" rx="3" />
-                  <rect x="370" y="70" width="20" height="70" fill="#2563eb" rx="3" />
-                  <rect x="400" y="30" width="20" height="110" fill="#10b981" rx="3" />
-                  <rect x="430" y="60" width="20" height="80" fill="#8b5cf6" rx="3" />
-                  <rect x="460" y="50" width="20" height="90" fill="#f59e0b" rx="3" />
-                  <rect x="490" y="40" width="20" height="100" fill="#10b981" rx="3" />
-                  <rect x="520" y="30" width="20" height="110" fill="#2563eb" rx="3" />
-                  <rect x="550" y="60" width="20" height="80" fill="#8b5cf6" rx="3" />
-                  <rect x="580" y="50" width="20" height="90" fill="#10b981" rx="3" />
-                  <rect x="610" y="40" width="20" height="100" fill="#2563eb" rx="3" />
-                  <rect x="640" y="70" width="20" height="70" fill="#8b5cf6" rx="3" />
-                  <rect x="670" y="30" width="20" height="110" fill="#10b981" rx="3" />
-                  <rect x="700" y="50" width="20" height="90" fill="#2563eb" rx="3" />
-                </g>
-              </svg>
+        <div class="activity-hour">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:40%"></span><span class="activity-bar-segment evidence" style="height:30%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">18시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment success" style="height:35%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">19시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">3</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:50%"></span><span class="activity-bar-segment success" style="height:40%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">20시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment planning" style="height:25%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">21시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:45%"></span><span class="activity-bar-segment evidence" style="height:35%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">22시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment success" style="height:30%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">23시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:40%"></span><span class="activity-bar-segment planning" style="height:20%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">00시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment evidence" style="height:35%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">01시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment success" style="height:60%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">02시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment issue" style="height:25%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">03시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:45%"></span><span class="activity-bar-segment evidence" style="height:30%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">04시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment success" style="height:35%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">05시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment planning" style="height:40%"></span><span class="activity-bar-segment work" style="height:30%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">06시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment evidence" style="height:35%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">07시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">3</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:50%"></span><span class="activity-bar-segment success" style="height:45%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">08시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment issue" style="height:30%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">09시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:40%"></span><span class="activity-bar-segment evidence" style="height:35%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">10시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment success" style="height:40%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">11시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:45%"></span><span class="activity-bar-segment planning" style="height:25%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">12시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment evidence" style="height:30%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">13시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">3</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:55%"></span><span class="activity-bar-segment success" style="height:40%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">14시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment success" style="height:60%"></span><span class="activity-bar-segment evidence" style="height:30%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">15시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:50%"></span><span class="activity-bar-segment planning" style="height:25%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">16시</time>
+        </div>
+        <div class="activity-hour">
+          <span class="activity-hour-count">3</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment success" style="height:70%"></span><span class="activity-bar-segment evidence" style="height:30%"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">17시</time>
+        </div>
             </div>
           </div>
           <div class="activity-legend" aria-label="이벤트 유형">
