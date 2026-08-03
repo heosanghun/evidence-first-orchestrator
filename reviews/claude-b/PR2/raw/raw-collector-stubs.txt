@@ -1,0 +1,110 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   and the collector suite is the size the earlier note measured
+        expected: tests: 27
+        observed: tests: 27
+
+########## B. what is stubbed, by target ##########
+    1x  monitor.collector.collect_system
+    1x  monitor.collector.load_history
+    1x  monitor.collector.map_projects_to_gpus
+    7x  monitor.collector.parse_json_command
+    1x  monitor.collector.query_gpus
+    1x  monitor.collector.read_meminfo
+    1x  monitor.collector.read_uptime
+    1x  monitor.collector.run_command
+    1x  monitor.collector.save_history
+    1x  monitor.collector.shutil.disk_usage
+    1x  monitor.collector.time.time
+    1x  monitor.collector.urllib.request.urlopen
+  [ok] distinct stub targets
+        expected: distinct: 12
+        observed: distinct: 12
+  [ok]   over this many call sites
+        expected: sites: 18
+        observed: sites: 18
+  Stubbing `run_command`, `query_gpus`, `read_meminfo`, `read_uptime`
+  and `shutil.disk_usage` is what makes the collector testable without
+  a GPU host. That is not a criticism; it is the boundary.
+
+########## C. the clock - stubbed ONCE, to a constant ##########
+  [ok] time.time is stubbed exactly once in 27 tests
+        expected: clock stubs: 1
+        observed: clock stubs: 1
+    @patch("monitor.collector.time.time", return_value=1000)
+    def test_submit_hmac_covers_timestamp_and_exact_body(
+    self, _time_mock, urlopen_mock
+    ) -> None:
+  [ok]   and it pins the clock to a CONSTANT
+        expected: return_value=1000
+        observed:     @patch("monitor.collector.time.time", return_value=1000)     def test_submit_hmac_covers_timestamp_and_exact_body(         self, _time_mock, urlopen_mock     ) -> None:
+  [ok]   in a test about the HMAC, not about freshness
+        expected: test_submit_hmac_covers_timestamp_and_exact_body
+        observed:     @patch("monitor.collector.time.time", return_value=1000)     def test_submit_hmac_covers_timestamp_and_exact_body(         self, _time_mock, urlopen_mock     ) -> None:
+  So the one place the collector's notion of `now` is controlled is a
+  signature test. No test moves the clock to age anything.
+
+########## D. the staleness vocabulary is ABSENT from the suite ##########
+    stale                              absent
+    staleness                          absent
+    freshness                          absent
+    PORTFOLIO_EXTERNAL_ACTIVE_PHASES   absent
+    age                                absent
+    elapsed                            absent
+    expired                            absent
+    seconds_since                      absent
+  [ok] none of the staleness vocabulary appears as a TOKEN
+        expected: present: []
+        observed: present: []
+  Matched as identifier TOKENS, not substrings: a first pass reported
+  `age` twice, and both were inside `disk_usage_mock`. That is the
+  twelfth hand-rolled filter in this review to be the bug, and it is
+  the exact trap the method names - it caught `worker` inside
+  `worker_identity` two rounds ago and I repeated it here.
+
+########## E. #6's branch has no clock in it at all ##########
+    collector.py:897  verified_count += 1
+    collector.py:898  elif (
+    collector.py:899  state == "pending"
+    collector.py:900  and external_phase in PORTFOLIO_EXTERNAL_ACTIVE_PHASES
+    collector.py:901  ):
+  [ok]   the branch that makes an external phase count as active
+        expected: external_phase in PORTFOLIO_EXTERNAL_ACTIVE_PHASES
+        observed:                 verified_count += 1             elif (                 state == "pending"                 and external_phase in PORTFOLIO_EXTERNAL_ACTIVE_PHASES             ):
+  [ok]   and PORTFOLIO_EXTERNAL_ACTIVE_PHASES is never named in the tests
+        expected: in tests: False
+        observed: in tests: False
+  The branch is a pure set-membership test on `external_phase`. There
+  is no timestamp in it, which IS #6: a `ready` reported a month ago
+  counts exactly as a `ready` reported a second ago. A lease expires;
+  a transport progress report does not.
+  So #6 has no test not because the suite forgot a case, but because
+  the CONCEPT of a transport report ageing does not exist anywhere in
+  the collector or its tests. That is why the token map found nothing.
+
+########## F. what this does NOT establish ##########
+  * It does not re-measure #6. That was driven in the issue and is not
+    re-confirmed here; a re-confirmation is a comment, not a note.
+  * It does not claim the 18 stubs are wrong. They are the only way to
+    test a collector that shells out to nvidia-smi. What is measured is
+    the CONSEQUENCE: 27 tests exercise the collector's logic against
+    inputs the test chooses, and no test supplies an input that is old.
+  * `external_phase` DOES appear in the tests (8 tokens), so the field
+    is exercised - the tests set it and assert the resulting counts.
+    What is absent is any test where the same field is exercised with
+    TIME having passed.
+  * MEASURED: the stub census, the single clock stub and its constant,
+    the vocabulary absence, the branch text. REASONED: that no test
+    ages an input - which follows from the clock being stubbed once, to
+    a constant, in an unrelated test.
+
+########## 0 unexpected result(s) ##########
+Static analysis only; nothing was executed. No issue filed - #6 is
+already open and this is about coverage shape, not a new defect.
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED.

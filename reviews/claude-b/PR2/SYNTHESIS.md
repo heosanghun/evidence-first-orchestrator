@@ -3,8 +3,8 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**719 passing checks across 38 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 103 files: **40 probe scripts, 55 raw outputs, 8
+**730 passing checks across 39 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 105 files: **41 probe scripts, 56 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
@@ -86,6 +86,7 @@ never treated my own re-run as independent confirmation.
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
 | this review's own counts | machine-checked — inventory, 30 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
 | attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
+| `monitor/collector.py` coverage | map — 27 tests, **no test ages an input**; #6 has no vocabulary to be tested by | `NOTE-the-collector-suite-never-ages-an-input.md` |
 | the class-2b pattern | **census: 7 of 7 tests cannot fail on their issue** | `NOTE-class-2b-is-a-census-now-seven-of-seven.md` |
 | this review's own censuses | bounded — **24 of 30 measured, 6 reasoned from reading** | `NOTE-which-of-my-censuses-measured-and-which-read.md` |
 | `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
@@ -171,6 +172,15 @@ seven cannot fail on the defect**
 A statement about coverage **shape**, not test quality: every one of these tests
 asserts something true.
 
+**A second shape, found 2026-08-03.** #6 is not in that table because it has no
+test at all — and the reason is sharper than "absent". `monitor/collector.py:900`
+decides that a `pending` task with an active `external_phase` counts as active
+by **pure set membership, with no timestamp in the branch**. The words `stale`,
+`freshness`, `age`, `elapsed` and `expired` appear **nowhere** in the collector's
+27 tests, and the suite's single `time.time` stub pins the clock to a constant
+inside a signature test. So there is no vocabulary for the property, and nothing
+for a test to be about (`NOTE-the-collector-suite-never-ages-an-input.md`).
+
 ### 3. Two implementations of agent identity, already diverging
 
 `independence.py::resolve_identity_registry` decides who is independent for the
@@ -238,8 +248,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **194 live citations across
-44 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **196 live citations across
+45 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -257,7 +267,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 255 inline spans remain undecidable by position and are named as a
+lenient. 257 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03

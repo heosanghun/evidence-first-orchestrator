@@ -8,9 +8,9 @@
 
 ########## B. citation + fenced block, the decidable subset ##########
   [ok] every decidable pair was examined
-        expected: pairs: 22
-        observed: pairs: 22
-  verbatim-verified: 14   not matched: 8
+        expected: pairs: 23
+        observed: pairs: 23
+  verbatim-verified: 15   not matched: 8
     ADDENDUM-git-replace-regression.md  ->  provenance.py:47
         deliberate before/after - the block quotes the argument list that was REMOVED, which is the whole point of the regression
     NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md  ->  workspace.py:1346
@@ -291,7 +291,7 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 
 ########## D. what stays UNDECIDABLE, with a count ##########
-  inline backticked spans sharing a line with a citation: 255
+  inline backticked spans sharing a line with a citation: 257
   These are NOT checked. A sentence like "`doctor.py:109` interpolates
   `agent_id` into a path" contains a citation and a span that is a
   quote, and a sentence like "`workspace.py:1182` reads it by direct
@@ -308,23 +308,23 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
   silently is indistinguishable from one that was never measured, so
   the run now fails when prose and output disagree.
   [ok]   the note states this run's pairs
-        expected: pairs: 22
-        observed: pairs: 22
+        expected: pairs: 23
+        observed: pairs: 23
   [ok]   the note states this run's verbatim-verified
-        expected: verbatim-verified: 14
-        observed: verbatim-verified: 14
+        expected: verbatim-verified: 15
+        observed: verbatim-verified: 15
   [ok]   the note states this run's adjudicated non-quotes
         expected: adjudicated non-quotes: 8
         observed: adjudicated non-quotes: 8
   [ok]   the note states this run's inline spans
-        expected: inline spans: 255
-        observed: inline spans: 255
+        expected: inline spans: 257
+        observed: inline spans: 257
   [ok]   NOTE-citation-audit-of-this-review.md cross-reference agrees
-        expected: inline: 255
-        observed: inline: 255
+        expected: inline: 257
+        observed: inline: 257
   [ok]   SYNTHESIS.md cross-reference agrees
-        expected: inline: 255
-        observed: inline: 255
+        expected: inline: 257
+        observed: inline: 257
 
 ########## 0 unexpected result(s) ##########
 This audits MY OWN write-ups, not EFO. Static analysis only; nothing
