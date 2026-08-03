@@ -255,10 +255,17 @@ print("\n########## E. SYNTHESIS's prose counts, derived from its own tables ###
 print("  Item 34 named these as the population it did NOT cover. This is that")
 print("  population, and measuring it found three stale numbers - one of them")
 print("  in the very section that describes the pattern.")
+# The map RAN OUT at nineteen. When the clean-row count reached twenty the
+# lookup returned None and the check failed with `clean rows: None` - not a
+# stale document, a checker that had no word for the number. Extended, and the
+# EXHAUSTIVENESS is asserted below so the next overflow fails loudly with a
+# named cause instead of a None.
 WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
          "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
          "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
-         "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19}
+         "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19,
+         "twenty": 20, "twenty-one": 21, "twenty-two": 22,
+         "twenty-three": 23, "twenty-four": 24, "twenty-five": 25}
 lines = synthesis.splitlines()
 
 # 1. "N components were probed and found sound" vs rows whose verdict is clean
@@ -266,6 +273,8 @@ clean_rows = [line for line in lines
               if line.startswith("|") and line.split("|")[2].strip().startswith("clean")]
 stated_clean = next((WORDS.get(line.split()[0].lower()) for line in lines
                      if "components were probed and found sound" in line), None)
+check("  the word map can express the measured count",
+      "expressible: True", f"expressible: {len(clean_rows) in WORDS.values()}")
 check("  components stated sound == rows whose verdict is `clean`",
       f"clean rows: {len(clean_rows)}", f"clean rows: {stated_clean}")
 

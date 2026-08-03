@@ -116,4 +116,4 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 | Artifact | SHA-256 |
 |---|---|
 | `raw/probe_attack4_provenance.py` | `8e8b2b3aa9a7bfc1ca1cfd7f3703df0e42f81acb375eaa3e73543b64e7f28a60` |
-| `raw/raw-attack4-provenance.txt` | `f1705df7aff062a439d10e65b487ab78abd09ab3ca1ebd6282524507845c37e7` |
+| `raw/raw-attack4-provenance.txt` | `3f99bf54f6970d3e971e49cc8434955bfa36950fc683b9e1729793cd8a398024` |

@@ -1,7 +1,7 @@
 # The inventory is machine-checked now — and so is the headline count of every write-up, which nothing had ever verified
 
 Reproduce with `raw/probe_inventory_selfcheck.py`; raw output in
-`raw/raw-inventory-selfcheck.txt`. **24 checks, 0 unexpected.** Audits **my own
+`raw/raw-inventory-selfcheck.txt`. **25 checks, 0 unexpected.** Audits **my own
 write-ups**, not EFO.
 
 Queue item 34. `SYNTHESIS.md`'s inventory had been recounted **by hand five
@@ -15,14 +15,14 @@ the run** when it disagrees.
 Surveying the branch to build the inventory check showed something worse:
 
 > **Every write-up opens with `N checks, M unexpected`, and nothing had
-> ever verified one of them.** There are 43 such claims.
+> ever verified one of them.** There are 44 such claims.
 
 That number is the *headline* of every document here — the first quantitative
 claim a reader meets. It was hand-typed in every case. Each is now compared
 against the raw output the same sentence names, and the run fails on any
 disagreement.
 
-All 43 currently match. That is luck rather than process, exactly as it was for
+All 44 currently match. That is luck rather than process, exactly as it was for
 citations: nothing in the workflow checked them before this probe existed.
 
 ## What the recount found
@@ -34,12 +34,12 @@ kind, and the last one that will go unnoticed.
 
 | Quantity | Measured, 2026-08-03 (this run) |
 |---|---|
-| files in `raw/` | 123 |
-| probe scripts | 50 |
-| raw outputs | 65 |
+| files in `raw/` | 125 |
+| probe scripts | 51 |
+| raw outputs | 66 |
 | provenance-attack scripts | 8 |
-| passing checks | 871 |
-| instrumented outputs | 48 |
+| passing checks | 889 |
+| instrumented outputs | 49 |
 | `UNEXPECTED` lines | 12, in 5 files |
 
 > **Correction, 2026-08-03.** The `UNEXPECTED` row read **13**, and so did every
@@ -76,7 +76,7 @@ moment this very note was added, which is the defect the probe exists to catch,
 reintroduced inside the probe. The strict census is now checked against a
 **loose** one — every `**N checks, M unexpected.**` anywhere must also be
 matched by the pattern that pairs it with a raw filename — so both sides are
-derived and neither can drift. The count is 43 as of this round. A second, smaller bug in the same round: the
+derived and neither can drift. The count is 44 as of this round. A second, smaller bug in the same round: the
 mismatch check printed `len(mismatched)` while comparing against `[]`, so it
 could never have passed. Both fixed before the run reported here.
 
@@ -134,7 +134,7 @@ machine-checked.** It is verified by reading the raw output beside it, the way
 every number here was verified before this probe existed. Saying that is the
 point; a self-check that quietly graded its own report would be worse than none.
 
-The probe reaches a clean fixpoint: two consecutive runs agree at **24 checks,
+The probe reaches a clean fixpoint: two consecutive runs agree at **25 checks,
 0 unexpected**.
 
 ## Scope
@@ -167,5 +167,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_inventory_selfcheck.py` | `83236c0390f40fd6d19c817e2e7ee9a4f00998dc1cbe69f0007bf3a8eea26360` |
-| `raw/raw-inventory-selfcheck.txt` | `934fe0038c5012471f51d5ea3e1afd64104e16002cebfdbab2a3248f1be2cb66` |
+| `raw/probe_inventory_selfcheck.py` | `9abb9ad8b22bed303339d5bdc4a2edea57581e116b9e6c6214992e2b3a9ce9f5` |
+| `raw/raw-inventory-selfcheck.txt` | `751cd9f99d06c1d6e89d5a1b630341e39b1ff6b60ff4de263fc6ecbf875780f6` |

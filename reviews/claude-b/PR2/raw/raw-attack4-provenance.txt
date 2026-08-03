@@ -10,6 +10,9 @@
         observed: exists: True
 
 ########## B. no attack4 script has EVER existed ##########
+    df0ac74 review: what "util.py is clean" rested on, and the input class it never fed
+    reviews/claude-b/PR2/NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md
+    reviews/claude-b/PR2/raw/raw-attack4-provenance.txt
     571461b review: two of REPORT.md's outputs are not unreproducible - they were re-run here
     reviews/claude-b/PR2/NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-wrong.md
     reviews/claude-b/PR2/raw/raw-attack4-provenance.txt
