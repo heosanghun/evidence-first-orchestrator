@@ -14,7 +14,8 @@
         observed: total: 101
     39 probe scripts, 54 raw outputs, 8 provenance-attack scripts
     the attack scripts, named rather than lumped in: ['attack2.sh', 'attack2_cef.sh', 'attack3.sh', 'attack_main.sh', 'attack_main2.sh', 'attack_prov5_main.py', 'attack_prov_main.sh', 'attack_proxy.sh']
-    726 passing checks across 38 instrumented outputs; 13 UNEXPECTED lines
+    711 passing checks across 37 instrumented outputs; 13 UNEXPECTED lines
+    (excluding raw-inventory-selfcheck.txt, this run's own report - see the comment above)
     the UNEXPECTED lines, by file: {'raw-alias-lineage.txt': 2, 'raw-attack-prov5-main.txt': 2, 'raw-evidence-gates.txt': 5, 'raw-ledger-chain.txt': 1, 'raw-lifecycle-gates.txt': 3}
 
 ########## C. SYNTHESIS.md's own inventory, against the files ##########
@@ -22,11 +23,11 @@
         expected: found: True
         observed: found: True
   [ok]   passing checks
-        expected: passing checks: 726
-        observed: passing checks: 726
+        expected: passing checks: 711
+        observed: passing checks: 711
   [ok]   instrumented outputs
-        expected: instrumented outputs: 38
-        observed: instrumented outputs: 38
+        expected: instrumented outputs: 37
+        observed: instrumented outputs: 37
   [ok]   files in raw/
         expected: files in raw/: 101
         observed: files in raw/: 101
@@ -62,11 +63,33 @@
   [ok]   and every headline count matches its raw output
         expected: mismatched: []
         observed: mismatched: []
+  [ok]   with exactly one self-referential claim skipped, and named
+        expected: skipped: 1
+        observed: skipped: 1 ['NOTE-every-count-this-review-states-about-itself.md -> raw-inventory-selfcheck.txt']
   A document whose headline disagrees with its own evidence is the
   exact failure this project exists to prevent, and until this probe
   existed nothing would have caught one.
 
-########## E. what this does NOT cover ##########
+########## E. SYNTHESIS's prose counts, derived from its own tables ##########
+  Item 34 named these as the population it did NOT cover. This is that
+  population, and measuring it found three stale numbers - one of them
+  in the very section that describes the pattern.
+  [ok]   components stated sound == rows whose verdict is `clean`
+        expected: clean rows: 16
+        observed: clean rows: 16
+  [ok]   class 2b's stated instance count == its own table
+        expected: instances: 7
+        observed: instances: 7
+  [ok]   the classes heading names the number of subsections it has
+        expected: subsections: 6
+        observed: subsections: 6
+    heading: '## Six classes that repeat'
+    The b-suffixed sections (2b, 3b) were sub-cases of 2 and 3 when
+    written, which is how the heading came to say `Four`. They have
+    since grown into their own classes - 2b is a seven-instance census -
+    so the heading now counts them.
+
+########## F. what this does NOT cover ##########
   * It checks that a stated number matches the file it names. It does
     NOT check that the raw output was produced by the probe beside it -
     that is what the SHA-256 bindings in each write-up are for, and

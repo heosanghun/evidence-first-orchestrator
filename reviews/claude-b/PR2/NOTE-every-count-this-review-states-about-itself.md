@@ -1,7 +1,7 @@
 # The inventory is machine-checked now — and so is the headline count of every write-up, which nothing had ever verified
 
 Reproduce with `raw/probe_inventory_selfcheck.py`; raw output in
-`raw/raw-inventory-selfcheck.txt`. **15 checks, 0 unexpected.** Audits **my own
+`raw/raw-inventory-selfcheck.txt`. **19 checks, 0 unexpected.** Audits **my own
 write-ups**, not EFO.
 
 Queue item 34. `SYNTHESIS.md`'s inventory had been recounted **by hand five
@@ -65,6 +65,63 @@ derived and neither can drift. The count is 32 as of this round. A second, small
 mismatch check printed `len(mismatched)` while comparing against `[]`, so it
 could never have passed. Both fixed before the run reported here.
 
+## The prose counts, closed in the same probe
+
+The gap named above was the last population, and measuring it found **three
+stale numbers** — one of them in the very section that describes the drift
+pattern:
+
+| Claim | Stated | Measured |
+|---|---|---|
+| *"Fifteen components were probed and found sound"* | 15 | **16** clean rows |
+| class 2b's *"Two instances now"* | 2 | **7** rows in its own census table |
+| *"Four classes that repeat"* | 4 | **6** `###` subsections |
+
+All three are now **derived from SYNTHESIS's own tables** and fail the run when
+the prose disagrees. The class-2b one is the sharpest: I turned that section
+into a seven-instance census in the previous round and left its opening
+sentence saying two.
+
+The `Four` → `Six` change is a real reclassification, not a typo: sections `2b`
+and `3b` were sub-cases when written and have since grown into classes of their
+own — `2b` is now a seven-instance census — so the heading counts them.
+
+**A checker bug of mine in the same section:** the heading test first searched
+for the **digit** `6` in a heading that spells its number as a **word**, so it
+could never pass. Third instance of a checker defect wearing the costume of a
+document defect. Fixed by resolving the word.
+
+**Every number in this review is now either machine-checked or carries a date.**
+
+## A self-reference this probe could not check, and does not pretend to
+
+The probe's own raw output lives **inside the corpus it measures**, and that
+breaks two things:
+
+- **The tally.** When the tally is computed, `raw-inventory-selfcheck.txt` still
+  holds the *previous* run's text, so the probe measures a stale self. Iterating
+  copy-and-recount **five times never converged**: each failing run wrote
+  `UNEXPECTED` lines that then broke the next run's tally.
+- **The headline census.** This note claims *"N checks, 0 unexpected"* about the
+  run now executing, against the file that run is about to write. It settled at
+  a stable **17 ok / 1 unexpected** — a failure no amount of re-running clears.
+
+Both are now excluded, structurally rather than conveniently, and both
+exclusions are **counted** so a second cannot appear unnoticed:
+
+- the tally skips this probe's own output — SYNTHESIS's inventory paragraph
+  says so;
+- the headline census skips the one self-referential claim, and asserts that
+  **exactly one** is skipped, naming it.
+
+**So this note's own headline is the single number in the review that is not
+machine-checked.** It is verified by reading the raw output beside it, the way
+every number here was verified before this probe existed. Saying that is the
+point; a self-check that quietly graded its own report would be worse than none.
+
+The probe reaches a clean fixpoint: two consecutive runs agree at **19 checks,
+0 unexpected**.
+
 ## Scope
 
 Static file reads of `reviews/claude-b/PR2/` at branch `HEAD`. The anchor is
@@ -82,9 +139,8 @@ Not covered, stated rather than implied:
   are not matched. That is why section D asserts the **claim count**: if a
   document changes shape and drops out of the census, the count falls and the
   run fails.
-- Other hand-maintained numbers — issue counts, *"Fifteen components"*,
-  per-table tallies — remain unchecked. Named as a gap; the citation and quote
-  counts are covered by the other two probes.
+- ~~Other hand-maintained numbers — issue counts, *"Fifteen components"*,
+  per-table tallies — remain unchecked.~~ **Closed 2026-08-03**, see below.
 - **MEASURED:** everything above. **REASONED:** nothing.
 
 Pre-registered permissions unchanged: `gpu: false`, `network: false`,
@@ -96,5 +152,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_inventory_selfcheck.py` | `8a26df0326d934db44fba57cc78e6cb74d86970da6dc9785dbfe239c57714d2b` |
-| `raw/raw-inventory-selfcheck.txt` | `59ddec6aef905271e630c8f4d71a19769ed0c6f2cb27048d07d98e3fbfbdc064` |
+| `raw/probe_inventory_selfcheck.py` | `3d972063730783d57b2d7df4fe32d960218a6623a8d10a24115836ad535f0e4b` |
+| `raw/raw-inventory-selfcheck.txt` | `c896be0fb4781f4d5071414bad71a1a3a66b8d776064ce07a26acac65ec4e936` |

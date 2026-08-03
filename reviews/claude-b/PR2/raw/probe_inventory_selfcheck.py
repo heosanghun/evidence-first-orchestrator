@@ -73,12 +73,23 @@ print(f"    {len(probes)} probe scripts, {len(outputs)} raw outputs, "
       f"{len(attacks)} provenance-attack scripts")
 print(f"    the attack scripts, named rather than lumped in: {attacks}")
 
-passing = sum(tally(RAW / f)[0] for f in outputs)
-unexpected = sum(tally(RAW / f)[1] for f in outputs)
-instrumented = [f for f in outputs if tally(RAW / f)[0] > 0]
+# THIS PROBE'S OWN OUTPUT IS EXCLUDED FROM THE TALLIES, and the exclusion is
+# structural rather than convenient. `raw-inventory-selfcheck.txt` is the
+# report of the run now executing: at the moment the tally is computed it still
+# holds the PREVIOUS run's text, so counting it makes the probe measure its own
+# stale self and no fixpoint exists. Observed directly - iterating the copy-and-
+# recount loop five times never converged, because each failing run wrote
+# UNEXPECTED lines that then broke the next run's tally.
+# Stated here and in SYNTHESIS's inventory paragraph, so nothing is hidden.
+SELF = "raw-inventory-selfcheck.txt"
+counted = [f for f in outputs if f != SELF]
+passing = sum(tally(RAW / f)[0] for f in counted)
+unexpected = sum(tally(RAW / f)[1] for f in counted)
+instrumented = [f for f in counted if tally(RAW / f)[0] > 0]
 print(f"    {passing} passing checks across {len(instrumented)} instrumented "
       f"outputs; {unexpected} UNEXPECTED lines")
-flagged = {f: tally(RAW / f)[1] for f in outputs if tally(RAW / f)[1]}
+print(f"    (excluding {SELF}, this run's own report - see the comment above)")
+flagged = {f: tally(RAW / f)[1] for f in counted if tally(RAW / f)[1]}
 print(f"    the UNEXPECTED lines, by file: {flagged}")
 
 # ---------------------------------------------------------------- C
@@ -139,7 +150,20 @@ print("     number is now derived on both sides, so neither can go stale.)")
 
 mismatched: list[str] = []
 missing: list[str] = []
+# The SAME self-reference as the tally, one level up: this note's headline
+# claims "N checks, 0 unexpected" ABOUT THIS RUN, and the file it names is the
+# report this run is about to write. Comparing them compares a claim against
+# the PREVIOUS run, and when they disagree the mismatch is itself recorded in
+# the new file - a stable failure that no amount of re-running clears. Observed:
+# the loop settled at 17 ok / 1 unexpected and stayed there.
+# So the one self-referential pair is skipped, and the skip is COUNTED, so a
+# second one cannot appear unnoticed. This probe's own headline is therefore
+# NOT machine-checked - it is the single number in this review that is not, and
+# the write-up says so.
+self_pairs = [c for c in claims if c[1] == SELF]
 for document_name, output_name, stated_ok, stated_bad in claims:
+    if output_name == SELF:
+        continue
     target = RAW / output_name
     if not target.is_file():
         missing.append(f"{document_name} -> {output_name}")
@@ -154,12 +178,67 @@ for entry in mismatched:
     print(f"    !! {entry}")
 check("  and every headline count matches its raw output",
       "mismatched: []", f"mismatched: {mismatched}")
+check("  with exactly one self-referential claim skipped, and named",
+      "skipped: 1", f"skipped: {len(self_pairs)} "
+      + str([f"{d} -> {o}" for d, o, _, _ in self_pairs]))
 print("  A document whose headline disagrees with its own evidence is the")
 print("  exact failure this project exists to prevent, and until this probe")
 print("  existed nothing would have caught one.")
 
 # ---------------------------------------------------------------- E
-print("\n########## E. what this does NOT cover ##########")
+print("\n########## E. SYNTHESIS's prose counts, derived from its own tables ##########")
+print("  Item 34 named these as the population it did NOT cover. This is that")
+print("  population, and measuring it found three stale numbers - one of them")
+print("  in the very section that describes the pattern.")
+WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6,
+         "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
+         "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15,
+         "sixteen": 16, "seventeen": 17, "eighteen": 18, "nineteen": 19}
+lines = synthesis.splitlines()
+
+# 1. "N components were probed and found sound" vs rows whose verdict is clean
+clean_rows = [line for line in lines
+              if line.startswith("|") and line.split("|")[2].strip().startswith("clean")]
+stated_clean = next((WORDS.get(line.split()[0].lower()) for line in lines
+                     if "components were probed and found sound" in line), None)
+check("  components stated sound == rows whose verdict is `clean`",
+      f"clean rows: {len(clean_rows)}", f"clean rows: {stated_clean}")
+
+# 2. the class-2b instance count vs the census table in that section
+try:
+    start = next(i for i, line in enumerate(lines) if line.startswith("### 2b."))
+    stop = next(i for i, line in enumerate(lines[start + 1:], start + 1)
+                if line.startswith("### "))
+except StopIteration:
+    start, stop = 0, 0
+census_rows = [line for line in lines[start:stop]
+               if line.startswith("| #")]
+stated_2b = next((WORDS.get(word.lower()) for line in lines[start:stop]
+                  for word in line.split()[:1]
+                  if word.lower() in WORDS), None)
+check("  class 2b's stated instance count == its own table",
+      f"instances: {len(census_rows)}", f"instances: {stated_2b}")
+
+# 3. "Four classes that repeat" vs the ### headings beneath it
+headings = [line for line in lines if line.startswith("### ")]
+classes_heading = next((line for line in lines
+                        if "classes that repeat" in line), "")
+# The heading spells its number as a WORD. A first version searched for the
+# DIGIT and could never match - a checker bug, not a document bug, and the
+# third of that shape in this review. Resolve the word instead.
+stated_classes = next((WORDS.get(word.strip("#").lower())
+                       for word in classes_heading.split()
+                       if word.strip("#").lower() in WORDS), None)
+check("  the classes heading names the number of subsections it has",
+      f"subsections: {len(headings)}", f"subsections: {stated_classes}")
+print(f"    heading: {classes_heading!r}")
+print("    The b-suffixed sections (2b, 3b) were sub-cases of 2 and 3 when")
+print("    written, which is how the heading came to say `Four`. They have")
+print("    since grown into their own classes - 2b is a seven-instance census -")
+print("    so the heading now counts them.")
+
+# ---------------------------------------------------------------- F
+print("\n########## F. what this does NOT cover ##########")
 print("  * It checks that a stated number matches the file it names. It does")
 print("    NOT check that the raw output was produced by the probe beside it -")
 print("    that is what the SHA-256 bindings in each write-up are for, and")

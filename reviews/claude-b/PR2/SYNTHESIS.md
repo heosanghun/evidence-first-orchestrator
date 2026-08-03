@@ -3,12 +3,14 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**726 passing checks across 38 instrumented raw outputs** (as of `HEAD`
+**711 passing checks across 37 instrumented raw outputs** (as of `HEAD`
 2026-08-03). `raw/` holds 101 files: **39 probe scripts, 54 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
-paragraph disagrees with it — the same guard the citation and quote counts got.
+paragraph disagrees with it. The counts exclude that probe's **own** output,
+which is the report of the run doing the counting — a self-reference with no
+fixpoint, stated rather than hidden — the same guard the citation and quote counts got.
 It also checks the headline `N checks, M unexpected` of all **32** write-ups
 against the raw output each one names; nothing verified those until 2026-08-03.
 
@@ -87,7 +89,14 @@ never treated my own re-run as independent confirmation.
 | this review's own censuses | bounded — **24 of 30 measured, 6 reasoned from reading** | `NOTE-which-of-my-censuses-measured-and-which-read.md` |
 | `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
 
-Fifteen components were probed and found sound (one with a claim since corrected — see #19).
+Sixteen components were probed and found sound (one with a claim since corrected — see #19).
+
+> **Made self-checking, 2026-08-03.** This number, the class-2b count below and
+> the section heading beneath it were each stale when measured — the first by
+> one, the second by five, the third by two. `probe_inventory_selfcheck.py` §E
+> now derives all three from this document's own tables and **fails the run**
+> when the prose disagrees. Every number in this review is now either
+> machine-checked or carries a date.
 
 **Every Markdown document in the repository has now been read end to end and
 every falsifiable sentence adjudicated** — `README.md`, `docs/ARCHITECTURE.md`,
@@ -97,7 +106,7 @@ pass: it says where *not* to look next.
 
 ---
 
-## Four classes that repeat
+## Six classes that repeat
 
 These are the reason to read this document rather than fifteen issues.
 
@@ -131,8 +140,8 @@ recording *maintenance*. An auditor sees the effect and not the cause.
 
 ### 2b. Tests that encode the decision the issue objects to
 
-Two instances now, and they are the reason "CI is green" and "the property
-holds" come apart:
+Seven instances, and they are the reason "CI is green" and "the property
+holds" come apart. Two are the sharpest — a test that *encodes* the decision:
 
 | Where | What the test does |
 |---|---|
