@@ -46,8 +46,15 @@ PINNED = Path("/tmp/efo-prov")          # the review's anchor, 5694ab45
 REPO = Path("/workspace/evidence-first-orchestrator")
 NODE = "/opt/node22/bin/node"
 GREEN = "5694ab455139f1e72d946bc2fe7e42c7c0c8a43a"
-RED = "0d67750b99d3950e38baf06979e685cc82cabc14"
 FIRST_RED = "b78c63d"
+# `main` is resolved LIVE, not hardcoded. The first version of this probe
+# pinned RED = 0d67750 and started reporting UNEXPECTED the moment main moved -
+# a harness failure dressed as a finding. The anchor stays pinned because the
+# review depends on it; the ref under observation must not be, because the
+# whole point is to watch it move. The head actually measured is printed.
+RED = subprocess.run(["git", "-C", "/workspace/evidence-first-orchestrator",
+                      "rev-parse", "origin/main"],
+                     capture_output=True, text=True).stdout.strip()
 
 
 def check(name: str, expected: str, observed: str) -> None:
@@ -82,7 +89,8 @@ print("  This probe does not re-point it. Every other write-up on this branch")
 print("  is bound to 5694ab45, and moving the anchor would invalidate them.")
 remote = subprocess.run(["git", "-C", str(REPO), "rev-parse", "origin/main"],
                         capture_output=True, text=True).stdout.strip()
-check("  and main has MOVED past it", RED, remote)
+check("  and main has MOVED past it", "moved: True",
+      f"moved: {remote != GREEN}   (main is now {remote[:7]})")
 check("  node is available for an independent run", "v22",
       subprocess.run([NODE, "--version"], capture_output=True,
                      text=True).stdout.strip())
@@ -130,16 +138,25 @@ for path in ("public/assets/app.js", "public/index.html"):
     before = count(at(GREEN, path), INLINE_STYLE)
     after = count(at(RED, path), INLINE_STYLE)
     print(f"    inline `style=` in {path:<26} {before:>4} -> {after:>4}")
-check("  inline styles in app.js, which was zero", "0 -> 32",
-      f"{count(at(GREEN, 'public/assets/app.js'), INLINE_STYLE)}"
-      f" -> {count(at(RED, 'public/assets/app.js'), INLINE_STYLE)}")
+# The COUNT at main is an observation of a moving ref, not an assertion - it
+# was 32 when #20 was filed and is larger now. What is asserted is the
+# direction: zero at the anchor, non-zero at main. Pinning the number would
+# make the probe fail every time someone edits the dashboard, which is a
+# harness failure dressed as a finding - the same mistake the hardcoded RED
+# above already made once.
+anchor_inline = count(at(GREEN, "public/assets/app.js"), INLINE_STYLE)
+main_inline = count(at(RED, "public/assets/app.js"), INLINE_STYLE)
+check("  inline styles: none at the anchor, some at main",
+      "0 -> non-zero", f"{anchor_inline} -> "
+      f"{'non-zero' if main_inline else 'zero'}  (exact count now {main_inline},"
+      f" it was 32 when #20 was filed)")
 
 # ---------------------------------------------------------------- C
 print("\n########## C. an INDEPENDENT run, not a reading of CI's log ##########")
 workspace = Path(tempfile.mkdtemp(prefix="efo-main-"))
 observed: dict[str, tuple[int, int, int]] = {}
 try:
-    for label, ref in (("5694ab45 (anchor)", GREEN), ("0d67750 (main)", RED)):
+    for label, ref in (("5694ab45 (anchor)", GREEN), (f"{RED[:7]} (main)", RED)):
         target = workspace / ref[:7]
         subprocess.run(["git", "-C", str(REPO), "worktree", "add", "-f",
                         "--detach", str(target), ref],
@@ -166,7 +183,7 @@ finally:
 check("the suite is GREEN at the review's anchor",
       "(37, 37, 0)", str(observed["5694ab45 (anchor)"]))
 check("  and RED at current main", "(37, 35, 2)",
-      str(observed["0d67750 (main)"]))
+      str(observed[f"{RED[:7]} (main)"]))
 print("  This is a KNOWN-ANSWER check in the strict sense: CI reported")
 print("  `# tests 37 / # pass 35 / # fail 2` for job 91616795908, and this")
 print("  container reproduces exactly that from the same ref. The anchor")
@@ -178,7 +195,10 @@ print("  the pre-registered permissions are unchanged.")
 # ---------------------------------------------------------------- D
 print("\n########## D. when it broke, per commit ##########")
 TIMELINE = ["5694ab4", "b78c63d", "548b616", "b10b226", "2564f28",
-            "86f2587", "e03baf9", "e754076", "c4d359d", "0d67750"]
+            "86f2587", "e03baf9", "e754076", "c4d359d", "0d67750",
+            # after #20 was filed - including an explicit ROLLBACK that
+            # restored none of the eight properties
+            "05cbb95", "6194c40", "f724211", "c9c4189", "a93e720", RED[:7]]
 print(f"  {'commit':<9} {'CSP':>4} {'badge':>6} {'inline style=':>14}")
 for ref in TIMELINE:
     csp = count(at(ref, "public/_headers"), r"Content-Security-Policy")
@@ -189,10 +209,25 @@ check("  the badge and the inline styles arrive together at b78c63d",
       "badge 0, inline 17",
       f"badge {count(at(FIRST_RED, 'public/assets/app.js'), r'agent-transport-badge')}"
       f", inline {count(at(FIRST_RED, 'public/assets/app.js'), INLINE_STYLE)}")
-check("  and the security headers survive until the CURRENT head",
+check("  and the security headers survive until 0d67750, then go",
       "c4d359d: 1, 0d67750: 0",
       f"c4d359d: {count(at('c4d359d', 'public/_headers'), r'Content-Security-Policy')}"
-      f", 0d67750: {count(at(RED, 'public/_headers'), r'Content-Security-Policy')}")
+      f", 0d67750: {count(at('0d67750', 'public/_headers'), r'Content-Security-Policy')}")
+# I expected the rollback to have restored nothing. It restored the HEADER
+# BLOCK and not the badge - and then the next commit deleted the headers
+# again. Corrected to the measured facts rather than the guess.
+check("  the ROLLBACK at 05cbb95 brought the header block BACK",
+      "csp 1, badge 0",
+      f"csp {count(at('05cbb95', 'public/_headers'), r'Content-Security-Policy')}"
+      f", badge {count(at('05cbb95', 'public/assets/app.js'), r'agent-transport-badge')}")
+check("  and 6194c40 deleted it a SECOND time", "csp 0, lines 7",
+      f"csp {count(at('6194c40', 'public/_headers'), r'Content-Security-Policy')}"
+      f", lines {len(at('6194c40', 'public/_headers').splitlines())}")
+print("  So the header block has been deleted TWICE: at 0d67750, restored by")
+print("  the explicit rollback at 05cbb95 (16 lines -> back to 16), and")
+print("  deleted again at 6194c40 (16 -> 7). The rollback did NOT restore the")
+print("  transport badge at any point. That is a materially different fact")
+print("  from `still broken`, and the only reason to comment on #20 again.")
 print("  Two stages, not one. The rendering regression is 32 minutes older")
 print("  than the header deletion, and only the first has a test.")
 

@@ -1,7 +1,7 @@
 # `main` has been red for nine pushes — and my "same commit" reasoning about CI runs was wrong
 
 Reproduce with `raw/probe_main_regression.py`; raw output in
-`raw/raw-main-regression.txt`. **11 checks, 0 unexpected.** Filed as **issue
+`raw/raw-main-regression.txt`. **13 checks, 0 unexpected.** Filed as **issue
 #20**.
 
 A `web-tests` failure arrived on PR #16 at head `2b0ca5c`. My push was
@@ -63,6 +63,28 @@ reads changed.
 
 And what was added — the thing test 21 forbids: inline `style=` goes **0 → 32**
 in `app.js` and **0 → 22** in `index.html`.
+
+> **Update, 2026-08-03 07:5xZ — the header block has been deleted TWICE, and
+> a rollback restored it in between.** Six commits after #20 was filed
+> (`0d67750` → `14e6461`), `public/_headers` goes **7 lines → 16 → 7**: the
+> explicit *"RESTORE: Rollback to clean working state v2.2.0"* at `05cbb95`
+> brought the whole block back, and `6194c40` — a commit about prompt design —
+> removed it again (`5 insertions(+), 14 deletions(-)` on that file alone).
+> The rollback restored the headers and **not** the transport badge, which has
+> been absent continuously since `b78c63d`. Re-measured at `14e6461`: still
+> `# pass 35 # fail 2`, all eight properties still `0`, and inline `style=` in
+> `app.js` grown from 32 to **84**. Posted as a comment on #20, because "the
+> deletion recurs and a rollback did not fix it" is a different fact from
+> "still broken".
+>
+> **A harness correction of mine in the same round.** This probe pinned `main`
+> to `0d67750` and began reporting `UNEXPECTED` the moment `main` moved — a
+> harness failure dressed as a finding, the same shape as the eight filter bugs
+> already recorded. It now resolves `origin/main` live and prints the head it
+> measured. The **anchor** stays pinned, because the rest of the review depends
+> on it; the ref **under observation** must not be, because the point is to
+> watch it move. The inline-`style=` count is likewise printed as an
+> observation rather than asserted, since it tracks a moving ref.
 
 ### Two stages, 32 minutes apart
 
@@ -127,5 +149,5 @@ runs on `main` are the independent record.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_main_regression.py` | `5380a439125d987ed74cce047d0aa538baaf522cd30ed576e988ecf13f763400` |
-| `raw/raw-main-regression.txt` | `c24fdc3eb3ee45e92f9d0e476e1d7cc0ab42dbbdc9389eee3fb3d9baa74e0ad5` |
+| `raw/probe_main_regression.py` | `bccefcc835b63c0bf771ee1eb42cbd9bc5197c524202b5444691cce8ea0116f2` |
+| `raw/raw-main-regression.txt` | `ba208c3286bbbdb0871b74046498bbcf056c9108867081b121a5bb01110dcdcb` |
