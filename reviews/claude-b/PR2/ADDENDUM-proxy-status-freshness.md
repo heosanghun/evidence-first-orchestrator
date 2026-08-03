@@ -33,8 +33,11 @@ works.
 `monitor/collector.py:893-912` decides the portfolio tallies:
 
 ```python
-elif state == "pending" and external_phase in PORTFOLIO_EXTERNAL_ACTIVE_PHASES:
-    active_count += 1
+            elif (
+                state == "pending"
+                and external_phase in PORTFOLIO_EXTERNAL_ACTIVE_PHASES
+            ):
+                active_count += 1
 elif state in PORTFOLIO_ACTIVE_STATES and (
     state == "submitted" or task.get("lease_active") is True
 ):

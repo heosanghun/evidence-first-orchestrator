@@ -17,10 +17,17 @@ At `cef5623` the git invocation was
 ["git", "--no-replace-objects", "-C", str(repo), *args]
 ```
 
-On `main` it is (`provenance.py:33-42`) — the flag is gone:
+On `main` it is (`provenance.py:33-42`) — the flag is gone. Verbatim:
 
 ```python
-["git", "-c", f"safe.directory={repository}", "-C", str(repository), *arguments]
+        [
+            "git",
+            "-c",
+            f"safe.directory={repository}",
+            "-C",
+            str(repository),
+            *arguments,
+        ],
 ```
 
 `GIT_CONFIG_GLOBAL` / `GIT_CONFIG_SYSTEM` are pinned to `os.devnull`, which

@@ -59,7 +59,7 @@ check("probe source is main 5694ab45",
       "5694ab455139f1e72d946bc2fe7e42c7c0c8a43a", head)
 check("  with no working-tree modification", "dirty: ''", f"dirty: {dirty!r}")
 documents = sorted(REVIEWS.glob("*.md"))
-check("  and the write-ups are present", "documents: 30",
+check("  and the write-ups are present", "documents: 34",
       f"documents: {len(documents)}")
 
 # ---------------------------------------------------------------- B
@@ -97,7 +97,15 @@ for document in documents:
         # the file - but as a retraction, not a claim. Counting it as a live
         # citation would make a correction indistinguishable from the error it
         # corrects, and no document could ever be fixed.
-        if line.lstrip().startswith(">"):
+        # Two exclusions, both stated rather than silent:
+        #  1. a blockquote is a dated CORRECTION banner, quoting the citation
+        #     it retracts - counting it live would make a correction
+        #     indistinguishable from the error it corrects;
+        #  2. an inline `[retracted]` marker, which a document reporting ON
+        #     citations uses so that naming a bad citation is not itself
+        #     scored as making one. The marker is visible to readers and
+        #     mechanical, so no document is exempted by filename.
+        if line.lstrip().startswith(">") or "[retracted" in line:
             quoted_in_corrections += len(CITATION.findall(line))
             continue
         for match in CITATION.finditer(line):

@@ -6,12 +6,12 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   and the write-ups are present
-        expected: documents: 30
-        observed: documents: 30
+        expected: documents: 34
+        observed: documents: 34
 
 ########## B. every FILE:LINE citation in the write-ups ##########
-  126 live citations across 30 documents
-  5 more appear inside correction banners and are
+  141 live citations across 34 documents
+  11 more appear inside correction banners and are
   excluded as retractions rather than claims - see the comment in the
   source for why that exclusion is principled and not self-serving.
   [ok] every cited file exists at main
@@ -23,29 +23,29 @@
   distinct files cited: 25
     docs/MIGRATION.md                              3 citations, 167 lines
     docs/PROXY_SUBMISSION.md                       2 citations, 192 lines
-    README.md                                     19 citations, 452 lines
+    README.md                                     23 citations, 452 lines
     SECURITY.md                                    4 citations, 67 lines
     src/evidence_orchestrator/__main__.py          1 citations, 7 lines
     src/evidence_orchestrator/adapter.py           6 citations, 320 lines
     public/assets/app.js                           3 citations, 1566 lines
     src/evidence_orchestrator/archive.py           2 citations, 163 lines
     functions/api/chat.js                          3 citations, 445 lines
-    src/evidence_orchestrator/cli.py               3 citations, 635 lines
-    monitor/collector.py                           2 citations, 1436 lines
+    src/evidence_orchestrator/cli.py               5 citations, 635 lines
+    monitor/collector.py                           3 citations, 1436 lines
     src/evidence_orchestrator/dashboard.py         1 citations, 228 lines
     docs/ARCHITECTURE.md                           7 citations, 169 lines
-    docs/MIGRATION.md                              2 citations, 167 lines
+    docs/MIGRATION.md                              3 citations, 167 lines
     docs/PROXY_SUBMISSION.md                       1 citations, 192 lines
-    src/evidence_orchestrator/doctor.py            6 citations, 220 lines
+    src/evidence_orchestrator/doctor.py            7 citations, 220 lines
     src/evidence_orchestrator/evidence.py          3 citations, 297 lines
     functions/api/snapshot.js                      1 citations, 714 lines
     src/evidence_orchestrator/independence.py      3 citations, 281 lines
     src/evidence_orchestrator/model.py             4 citations, 143 lines
-    monitor/collector.py                           2 citations, 1436 lines
-    src/evidence_orchestrator/provenance.py       11 citations, 341 lines
+    monitor/collector.py                           3 citations, 1436 lines
+    src/evidence_orchestrator/provenance.py       15 citations, 341 lines
     functions/api/snapshot.js                      1 citations, 714 lines
     tests/test_concurrency.py                      1 citations, 59 lines
-    src/evidence_orchestrator/workspace.py        33 citations, 1562 lines
+    src/evidence_orchestrator/workspace.py        34 citations, 1562 lines
 
 ########## C. the two that did NOT resolve, and what they should be ##########
   [ok] README.md is shorter than one citation claimed

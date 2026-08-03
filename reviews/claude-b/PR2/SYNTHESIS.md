@@ -153,7 +153,7 @@ task stricter than intended.
 `NOTE-citation-audit-of-this-review.md` audits all **126 live citations across
 30 documents**; every one now resolves at `main`. Three did not:
 
-- `README.md:590` was really `cli.py:590` — right line, wrong file, in a file
+- `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
 - `README.md:336-337` was `:335-336` — off by one.
 - `REPORT.md` reviews `codex/meta-orchestration-v2` (`workspace.py` = 2528
@@ -163,6 +163,14 @@ task stricter than intended.
 Nothing in the workflow checked a citation before that probe existed. The nine
 anchors the filed issues rest on were spot-checked and all hold, but that is
 luck rather than process.
+
+A follow-up pass (`NOTE-quote-accuracy.md`) then asked whether a citation that
+resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
+block) pairs, seven are verbatim and four are adjudicated non-quotes — but
+**two blocks had been condensed renderings presented as source**, and are now
+verbatim. The fix was to make the documents literal rather than the checker
+lenient. 194 inline spans remain undecidable by position and are named as a
+gap.
 
 ## A defect in this branch, found and fixed on 2026-08-03
 

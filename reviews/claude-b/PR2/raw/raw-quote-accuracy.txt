@@ -1,0 +1,298 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+
+########## B. citation + fenced block, the decidable subset ##########
+  [ok] every decidable pair was examined
+        expected: pairs: 11
+        observed: pairs: 11
+  verbatim-verified: 7   not matched: 4
+    ADDENDUM-git-replace-regression.md  ->  provenance.py:47
+        deliberate before/after - the block quotes the argument list that was REMOVED, which is the whole point of the regression
+    NOTE-collector-redaction-holds.md  ->  collector.py:1277
+        the block is PROBE OUTPUT, presented as output; it is not a source quote and does not claim to be
+    NOTE-implicit-exceptions-package-wide.md  ->  provenance.py:314
+        extractor artifact - the citation is INSIDE a fenced listing, so the following PROSE paragraph was captured as the block
+    NOTE-proxy-grant-holds.md  ->  workspace.py:1308
+        extractor artifact - same shape, citation inside a fenced listing
+  [ok] every unmatched block is adjudicated
+        expected: uncovered: []
+        observed: uncovered: []
+
+########## C. two blocks WERE condensed, and are now verbatim ##########
+  Before this probe, two fenced blocks read as verbatim source but were
+  reflowed renderings - accurate in substance, not literally present:
+    ADDENDUM-git-replace-regression.md  provenance.py:33-42
+      quoted a 9-line argument list collapsed onto one line, with
+      `repo`/`args` where the source says `repository`/`arguments`
+    ADDENDUM-proxy-status-freshness.md  monitor/collector.py:893-912
+      quoted a parenthesised multi-line `elif` flattened to one line
+  Neither changed what the finding says. Both are now the verbatim
+  source, which is why they no longer appear in section B's unmatched
+  list. That is the fix: make the document literal, not the checker
+  lenient. Whitespace normalisation was tried FIRST and did not resolve
+  them - the difference was tokens, not indentation.
+  [ok]   the git-replace block is now verbatim
+        expected:             "-c",
+        observed: # P2-5 → P1-2 — `git replace` forges byte-exact provenance on `main`
+
+Checked at `main` = `5694ab45`. This closes the gap I named in issue #3 and in
+`ADDENDUM-proxy-submission.md`: *"`provenance.py` here is 341 lines against the
+193 I reviewed, so the six Git provenance attacks were not re-run and their
+earlier 'all rejected' result does not transfer."* It does not transfer. One of
+the six now succeeds.
+
+**Finding: `_run_git` lost `--no-replace-objects`, and a `refs/replace/*` object
+makes `validate_git_provenance` return `byte_exact: True` for content that is
+not in the declared commit.**
+
+At `cef5623` the git invocation was
+(`provenance.py:47`):
+
+```python
+["git", "--no-replace-objects", "-C", str(repo), *args]
+```
+
+On `main` it is (`provenance.py:33-42`) — the flag is gone. Verbatim:
+
+```python
+        [
+            "git",
+            "-c",
+            f"safe.directory={repository}",
+            "-C",
+            str(repository),
+            *arguments,
+        ],
+```
+
+`GIT_CONFIG_GLOBAL` / `GIT_CONFIG_SYSTEM` are pinned to `os.devnull`, which
+neutralises global `insteadOf` and `core.autocrlf`. Replace refs are not
+configuration — they live in the repository as `refs/replace/*`, so that
+hardening does not reach them.
+
+## Reproduction — measured, `raw/attack_prov_main.sh`
+
+| Step | Observed at `5694ab45` |
+|---|---|
+| P1 honest submission, bytes match the commit | **ACCEPTED** (positive control) |
+| P2 tampered bytes, no replace object | **rejected** — `Git blob bytes differ from submitted evidence` |
+| P3 **same** tampered bytes + `git replace C C'` | **ACCEPTED, `byte_exact: True`** |
+
+At P3 the two views of the same commit disagree, in the same working tree:
+
+```
+git cat-file blob C:report.txt      = FORGED: 4 passed, 0 failed
+with --no-replace-objects           = HONEST: 3 passed, 1 failed
+origin.git holds                    = HONEST: 3 passed, 1 failed
+declared commit                     = c9acd5456752b1494d0412379726c53a43e230c4
+```
+
+The returned record also carries `blob_oid = 08b42cd8…`, which is not the blob
+in `c9acd54`'s real tree (`698b6494…`). So the record is not merely permissive:
+it asserts a binding that the repository it names does not contain.
+
+## A/B against `cef5623`, same repository state, same replace ref
+
+| Runner | Verdict |
+|---|---|
+| `cef5623` `verify_git_delivery`, forged + replace | **rejected** — `expected 045aa3ee…` (the honest blob; git ignored the replacement) |
+| `cef5623` `verify_git_delivery`, honest bytes | **ACCEPTED** — control, so the rejection above is the byte check and not a different gate |
+| `main` `validate_git_provenance`, forged + replace | **ACCEPTED**, `byte_exact: True` |
+
+This is a regression, not a pre-existing gap I previously mis-measured.
+
+Two harness bugs of mine were caught before any conclusion was drawn, and only
+the corrected runs are reported:
+
+1. The first `cef5623` call passed `source_ref="main"` and failed on
+   `source_ref must be a full refs/heads/<branch> reference` — a different gate
+   than the one under test. Corrected to `refs/heads/main`, and the honest
+   control was added so a rejection cannot be mistaken for the wrong gate again.
+2. The first suite run used `unittest discover -s tests` without `-t .` and
+   produced `37 tests, 7 errors`, all `ImportError: attempted relative import`.
+   That was my invocation, not the suite.
+
+## Suggested fix
+
+Restore the flag, or set `GIT_NO_REPLACE_OBJECTS=1` in the `_run_git`
+environment alongside the two `GIT_CONFIG_*` pins. A verifier that also wants to
+say so out loud can assert `git for-each-ref refs/replace/` is empty for the
+source repository and refuse otherwise, but the flag alone closes this.
+
+## Scope and boundary
+
+Only the replace attack was re-run against the rewritten file. The other five
+provenance attacks from ③ (wrong remote, local-only commit, partial file
+submission, duplicate binding, CRLF re-stamp) were **not** re-run here and their
+earlier "all rejected" result still does not transfer to `main`. The
+`alias_of` / `alias_chain` / `shared_alias_lineage` machinery remains
+unexamined.
+
+Suite at `5694ab45`: **93 tests, OK, 0 skipped, exit 0** — measured,
+`raw/raw-prov-main-suite.txt`. No test in `tests/` exercises `refs/replace/*`.
+
+Pre-registered permissions were unchanged throughout: `gpu: false`,
+`network: false`, `performance_metrics: false`; gates `allow_skips: false`,
+`require_validation: true`, `require_known_answer_check: true`,
+`require_independent_verification: true`. No performance claim is made here.
+
+**SUBMITTED, not VERIFIED.** `raw/attack_prov_main.sh` is self-contained and
+rerunnable; it creates and destroys `/tmp/prov-attack` and needs only a worktree
+of `main` at `/tmp/efo-prov` and of `cef5623` at `/tmp/efo-cef5623`.
+
+## Evidence
+
+| Artifact | SHA-256 |
+|---|---|
+| `raw/attack_prov_main.sh` | `1f3ca96146e562ef00bf3c109fd89e8b548171072616aa4ff3bbace22e0d8547` |
+| `raw/raw-attack-prov-main.txt` | `36f39bbf1e34f36b73888a299069376f3f48672f6a38961af831efc4625a8cd7` |
+| `raw/raw-prov-main-suite.txt` | `ba9b8b2c3e84d154cf31d14655d1b5d1f5b827fd8a03c7146006a320c076a758` |
+
+  [ok]   and the collector block keeps its parenthesis
+        expected: and external_phase in PORTFOLIO_EXTERNAL_ACTIVE_PHASES
+        observed: # Transport-attested progress at `main` `5694ab45` — the machine holds, the clock does not
+
+Third pass over the surfaces I had listed as unexamined. Most of this code is
+tight and I want to say so before the one gap.
+
+Reproduce with `raw/probe_proxy_status_freshness.py`; raw output in
+`raw/raw-proxy-status-freshness.txt`. **0 unexpected results** — every line below
+is measured, and the stale-lease case is carried as a positive control.
+
+## What holds
+
+| Probe | Observed |
+|---|---|
+| first phase must be `dispatched` | rejected — `The first proxy status phase must be dispatched` |
+| the transport actor needs its own signed identity | rejected — `Transport actor 'antigravity' needs a signed identity attestation` |
+| reference swapped mid-dispatch | rejected — `Proxy status reference cannot change during a dispatch` |
+| `working → ready` skipping `reviewing` | rejected — `reviewing` is mandatory |
+| phase regression `ready → working` | rejected — `Proxy status phase cannot regress` |
+| canonical state after a full dispatch→ready run | still `pending` |
+| the monitor labels the override | `status_source=transport_assertion`, `status_badge=운반자 보고`, `canonical_state=pending` |
+| the monitor ignores the report once the task leaves `pending` | claimed task renders `progress_percent=25`, `status_source=canonical` |
+| `requeue` clears the projection | `external_status=None`, progress back to canonical `10` |
+
+`functions/api/snapshot.js:264-296` also cross-checks a published projection:
+an `external_phase` is only accepted together with `state === "pending"`,
+`status_source === "transport_assertion"`, the badge, `lease_active === false`,
+and the exact progress and next-action string for that phase. A projection
+claiming `ready` on a `verified` task is rejected. That is a real control and it
+works.
+
+## The gap: a transport observation never goes stale, and a lease does
+
+`monitor/collector.py:893-912` decides the portfolio tallies:
+
+```python
+            elif (
+                state == "pending"
+                and external_phase in PORTFOLIO_EXTERNAL_ACTIVE_PHASES
+            ):
+                active_count += 1
+elif state in PORTFOLIO_ACTIVE_STATES and (
+    state == "submitted" or task.get("lease_active") is True
+):
+    active_count += 1
+```
+
+The lease branch is guarded by `lease_active`. The external-phase branch is
+guarded by nothing.
+
+Measured, same probe, side by side:
+
+| Case | `active` count | progress |
+|---|---|---|
+| **positive control** — task `running` on a 30-day-old lease | **0** (`lease_is_active=False`; it falls through to `blocked`) | canonical |
+| task `pending` with a 30-day-old `ready` transport report | **1** | **85** |
+
+`MAX_CLOCK_SKEW_SECONDS = 300` in `snapshot.js` bounds the *upload request*, not
+the age of the observation inside it. The collector re-uploads every cycle, so a
+month-old report keeps being published inside a freshly signed snapshot. The
+only tell is `updated_at`, which carries `reported_at` — a human reading the
+timestamp can see it; the `85` and the active tally cannot.
+
+`4871867 fix: expire proxy status and reject forged projections` is in `main`
+(ancestor of `5694ab45`, confirmed). Its "expire" is the requeue path
+(`workspace.py:1415`, `pending.pop("external_status", None)`) plus the
+`snapshot.js` cross-checks. It is not a time bound, and the naming invites the
+reading that staleness is handled.
+
+**And the clearing path does not reach the stale case.** `requeue` accepts only
+`blocked` or `rejected` (`workspace.py:1403`), while a proxy status requires
+`pending` (`workspace.py:652`). A task left `pending` with a `ready` report —
+exactly the case that goes stale — cannot be requeued at all. Reaching the
+clearing path takes `claim → start → block → requeue`, which is what the probe
+had to do.
+
+### Suggested fix
+
+Give the external phase the same treatment the lease already gets: bound
+`reported_at` and drop the task out of the active tally past that bound, or
+surface `external_status_stale: true` so the badge can say so. Either keeps the
+disclosure honest without changing the phase machine, which is fine as it is.
+
+## Severity, stated plainly
+
+This is not an authentication or evidence bypass. Canonical state is never
+touched, the override is labelled everywhere I could find it, and the published
+projection is cross-validated. What it affects is the operational picture: one
+transport report on a task nobody ever claimed holds that task at 85% and inside
+the active count indefinitely, and the number that would reveal it — the age —
+is the one thing the tally ignores. In a system whose premise is that an
+affirmative signal must not be trusted without evidence, a progress figure that
+cannot expire is worth closing.
+
+## Harness bugs, all caught before any conclusion
+
+Four, and only the corrected run is reported:
+
+1. `importlib` loaded `collector.py` without registering it in `sys.modules`;
+   its frozen dataclasses fail to resolve annotations. Registered first.
+2. The fixture never attested the orchestrator's own identity, so every call
+   rejected with `Transport actor … needs a signed identity attestation` — a
+   different gate than the one under test.
+3. The fixture drove `working → ready`, which the machine refuses; `reviewing`
+   is mandatory. This one is a finding *in the code's favour*.
+4. The fixture called `requeue` on a `pending` and then a `claimed` task, both
+   refused. That mistake is what exposed the unreachable clearing path above.
+
+## Scope
+
+Only proxy status, the monitor's task view, and the portfolio tally. Not
+examined: the rest of `monitor/collector.py` (GPU, Docker, host metrics), the
+`functions/api/chat.js` and `local-health.js` endpoints, and the `workspace.py`
+lifecycle gates beyond what this path touches.
+
+Pre-registered permissions unchanged: `gpu: false`, `network: false`,
+`performance_metrics: false`; gates `allow_skips: false`,
+`require_validation: true`, `require_known_answer_check: true`,
+`require_independent_verification: true`.
+
+**SUBMITTED, not VERIFIED.**
+
+| Artifact | SHA-256 |
+|---|---|
+| `raw/probe_proxy_status_freshness.py` | `715a51d80bdc1e4a80a4a1469860c2d20fdeab68c010b535e5ee680210d160e4` |
+| `raw/raw-proxy-status-freshness.txt` | `15e73aff33e2be2cf5d673867d9e9e60be91cd91af2464810017d2b7690df0c4` |
+
+
+########## D. what stays UNDECIDABLE, with a count ##########
+  inline backticked spans sharing a line with a citation: 194
+  These are NOT checked. A sentence like "`doctor.py:109` interpolates
+  `agent_id` into a path" contains a citation and a span that is a
+  quote, and a sentence like "`workspace.py:1182` reads it by direct
+  index" contains a citation and a span that is not. Position does not
+  distinguish them, and guessing produced a 15-in-19 false-positive
+  rate on the first attempt. Named as a gap rather than papered over.
+
+########## 0 unexpected result(s) ##########
+This audits MY OWN write-ups, not EFO. Static analysis only; nothing
+was executed against a workspace. Pre-registered permissions unchanged
+- gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

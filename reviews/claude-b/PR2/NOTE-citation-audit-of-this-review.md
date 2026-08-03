@@ -10,7 +10,7 @@ in the review.
 
 Queue item 24 was "read `README.md` end to end". Step one was checking the four
 anchors the queue listed. Two did not resolve, and one of them could not
-possibly resolve: `README.md:590`, in a file of 452 lines.
+possibly resolve: `README.md:590` [retracted], in a file of 452 lines.
 
 A citation that does not resolve is the exact failure this project exists to
 prevent — a claim attributed to a source that does not say it. So instead of
@@ -18,11 +18,13 @@ reading one document, I audited every citation on the branch.
 
 ## The audit
 
-**126 live citations across 30 documents, over 25 distinct files.** Every cited
+**141 live citations across 34 documents, over 25 distinct files.**
+(126 across 30 when first written; re-run after every write-up change.) Every cited
 file exists at `main`; every cited line is within its file. The run fails on
 any that is not.
 
-Five more citations appear inside dated correction banners. Those are excluded
+Eleven more citations appear inside dated correction banners or carry an
+inline `[retracted]` marker. Those are excluded
 as *retractions rather than claims* — a banner quotes the citation it is
 retracting, so counting it as live would make a correction indistinguishable
 from the error it corrects, and no document could ever be fixed. The exclusion
@@ -34,7 +36,7 @@ The heaviest-cited files are the ones the findings rest on:
 
 ## The three errors
 
-### 1. `README.md:590` → `cli.py:590` (`NOTE-cli-surface-holds.md`)
+### 1. `README.md:590` [retracted] → `cli.py:590` (`NOTE-cli-surface-holds.md`)
 
 The phrase *"Validate a submission bundle"* appears in **no Markdown file** in
 the repository. It is an argparse `help=` string at `cli.py:590`.
@@ -63,7 +65,7 @@ former base:
 | `dad3f4c4` (former base) | 920 lines |
 | **`origin/codex/meta-orchestration-v2`** | **2528 lines** |
 
-`workspace.py:2366` is real on the third. `docs/META_ORCHESTRATION_V2.md`
+`workspace.py:2366` [retracted against main] is real on the third. `docs/META_ORCHESTRATION_V2.md`
 exists there and nowhere else.
 
 So `REPORT.md` reviewed `codex/meta-orchestration-v2`. **Its citations were
@@ -85,18 +87,30 @@ quoted fragment within a two-line window.
 That is luck, not process. **Nothing in my workflow checked a citation before
 this probe existed.** It does now, and it is cheap to re-run.
 
+## A convention this note introduces
+
+A document that reports on bad citations necessarily *contains* them, and
+`probe_citation_audit.py` would flag its own report. Rather than exempting a
+filename — which would be self-serving and would hide a real error if one
+appeared here later — a retracted or other-ref citation is marked inline with
+**`[retracted]`**, and the probe skips citations on a line carrying that
+marker. The marker is visible to a reader, so nothing is hidden; it is
+mechanical, so nothing is judged by filename; and it fails loudly if I mark a
+citation that is actually live, because the audit then stops checking a claim
+I am still making.
+
 ## Scope
 
-Every `path:line` and `path:a-b` in the 30 Markdown write-ups on this branch,
+Every `path:line` and `path:a-b` in the Markdown write-ups on this branch,
 resolved against `main` `5694ab45` (precondition verified: `HEAD` matches and
 `git status --porcelain` is empty). Bare module names are resolved against the
 package, docs, functions, assets, monitor and tests directories, the way a
 reader would read them.
 
-Not examined: whether a quoted *fragment* matches at every one of the 126 sites
-— only the nine finding-bearing anchors in section D were fragment-checked. A
-citation can resolve to a real line and still quote it inaccurately, and that
-broader check is not done here.
+Fragment accuracy was **not** examined here — only the nine finding-bearing
+anchors in section D. That gap is now closed for the decidable subset by
+`NOTE-quote-accuracy.md`, which found two condensed quotes and made them
+verbatim; 194 inline spans remain undecidable by position.
 
 Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 `performance_metrics: false`; gates `allow_skips: false`,
@@ -107,5 +121,5 @@ Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_citation_audit.py` | `0d88538609282417e9f7de27ca23509cf4295d24fe2bcbae25de93d5fe894259` |
-| `raw/raw-citation-audit.txt` | `d231277738f1a85026c88749171768b87c89b5f10299b4496026a83efda046dd` |
+| `raw/probe_citation_audit.py` | `b65c3ffc19ad6cf6e1b242e04c10d0c46800606bb3119121a167b6db6693984f` |
+| `raw/raw-citation-audit.txt` | `c7591f26f78db8ec1526bdecb0a6d6705a0f55377bcd33f8518cb63dc7ac54e4` |
