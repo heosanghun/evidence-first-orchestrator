@@ -21,7 +21,9 @@ TASK_STATES = {
 }
 
 TRANSITIONS = {
-    "pending": {"claimed"},
+    # pending -> submitted is reserved for Workspace.proxy_submit(), which records
+    # a distinct author and transport actor instead of fabricating a worker lease.
+    "pending": {"claimed", "submitted"},
     "claimed": {"running", "blocked"},
     "running": {"blocked", "submitted"},
     "blocked": {"pending"},

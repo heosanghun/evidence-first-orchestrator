@@ -52,7 +52,21 @@ From the repository:
 python -m pip install -e .
 efo init ./team-workspace \
   --name "Research team" \
+  --control-principal antigravity-control \
+  --model-family antigravity-runtime \
   --preset antigravity-codex-claude
+```
+
+Register a verifier whose control principal and model family differ from the
+worker it will review:
+
+```bash
+efo agent add ./team-workspace \
+  --actor antigravity \
+  --id claude-verifier \
+  --role verifier \
+  --control-principal claude-b-control \
+  --model-family anthropic-claude
 ```
 
 The orchestrator creates a task. GPU, network, performance metrics, skipped
@@ -90,16 +104,16 @@ efo task submit ./team-workspace \
   --evidence ./team-workspace/reports/codex/P1b-2.evidence.json
 ```
 
-The orchestrator reruns the checks and records a separate manifest under its
-own report directory:
+An independently registered verifier reruns the checks and records a separate
+manifest under its own report directory:
 
 ```bash
 efo task verify ./team-workspace \
-  --actor antigravity \
+  --actor claude-verifier \
   --id P1b-2 \
   --decision accept \
   --note "Independent known-answer tests reproduced." \
-  --evidence ./team-workspace/reports/antigravity/P1b-2.verify.evidence.json
+  --evidence ./team-workspace/reports/claude-verifier/P1b-2.verify.evidence.json
 ```
 
 ## Command adapters
@@ -205,6 +219,111 @@ Default rejection conditions include:
 - an unmeasured value that is not exactly `[FILL]`;
 - reuse of the worker's manifest as independent verification.
 
+## Independent identity
+
+Different actor names do not prove independent review. Each agent therefore has
+a signed identity declaration with:
+
+- `control_principal`: the human, service, or session that controls the agent;
+- `model_family`: a stable coarse label shared by runs of the same base model;
+- `alias_of`: an optional signed alias link that inherits both fields.
+
+Submission binds the worker identity snapshot to that attempt. A later identity
+change cannot rewrite authorship. Verification fails closed when the worker or
+verifier identity is unknown, the actor is the same, the control principal is
+the same, the model family is the same, or their alias lineages intersect.
+Once declared, an alias cannot be detached or reparented under the same agent
+ID; register a new agent ID when control genuinely changes.
+
+Existing agents can receive a prospective signed attestation:
+
+```bash
+efo agent attest ./team-workspace \
+  --actor antigravity \
+  --id codex \
+  --control-principal codex-control \
+  --model-family openai-codex
+
+efo agent attest ./team-workspace \
+  --actor antigravity \
+  --id codex-helper \
+  --alias-of codex
+```
+
+Audit historical verification decisions without changing the ledger:
+
+```bash
+efo ledger audit-independence ./team-workspace \
+  --identity-policy ./legacy-identities.json
+```
+
+The optional policy supplies identity declarations only for read-only legacy
+analysis. It does not update agent registrations or make a future verification
+eligible.
+
+## Offline worker delivery
+
+When a worker can publish a Git commit but cannot reach the EFO workspace, use
+the explicit proxy path. It records the task owner as author and the real CLI
+caller as transport actor. It never fabricates a worker claim, lease, start, or
+submit command.
+
+The orchestrator first issues a one-time grant bound to the task, next attempt,
+transport actor, Git remote, branch, workspace, and expiration:
+
+```bash
+efo task proxy-authorize ./team-workspace \
+  --actor antigravity \
+  --id C1 \
+  --transport-actor antigravity \
+  --remote-url https://github.com/example/project.git \
+  --branch claude/C1 \
+  --commit FULL_COMMIT_OBJECT_ID
+```
+
+The transport then supplies a local repository plus a provenance manifest.
+Every claim-bearing artifact and raw output must match raw `git cat-file blob`
+bytes at the full commit ID. Checkout line-ending changes are rejected.
+
+```bash
+efo task proxy-submit ./team-workspace \
+  --actor antigravity \
+  --author claude \
+  --id C1 \
+  --proxy-token ONE_TIME_TOKEN \
+  --report reports/antigravity/C1.md \
+  --evidence reports/antigravity/C1.evidence.json \
+  --provenance reports/antigravity/C1.provenance.json \
+  --source-repository /path/to/local/repository
+```
+
+An orchestrator may publish an explicitly transport-attested progress phase
+while the unreachable worker is still preparing that Git delivery:
+
+```bash
+efo task proxy-status ./team-workspace \
+  --actor antigravity \
+  --author claude \
+  --id C1 \
+  --phase working \
+  --reference external-dispatch-123 \
+  --note "Worker output has been observed; evidence is not submitted yet."
+```
+
+This signed event does **not** claim that the worker accepted the task. It does
+not create a worker claim, lease, start, heartbeat, completion, or verification
+eligibility, and the task's canonical state remains `pending`. The dashboard
+shows a separate `운반자 보고` badge and a visualization-only phase estimate.
+The same reference must progress through `dispatched`, `working`, `reviewing`,
+and `ready` (with a reversible `blocked` phase). A normal proxy authorization,
+byte-exact provenance check, evidence validation, and independent verification
+are still required.
+
+Verification independence is measured against the author. If the transport
+actor also verifies, the overlap is preserved in the signed result rather than
+hidden. See [Transparent Proxy Submission](docs/PROXY_SUBMISSION.md) for the
+trust boundary, provenance schema, and rejected alternatives.
+
 ## Dashboard
 
 Run the read-only operational dashboard:
@@ -223,18 +342,35 @@ The repository also includes a responsive, read-only operations dashboard in
 
 - Codex, Claude A, Claude B, and Antigravity role and task state;
 - EFO task transitions and signed-ledger health;
+- 24-hour, 72-hour, and 7-day hourly activity history projected from the
+  signed ledger;
+- project-level progress for CTS and the System series, separated from
+  individual task and agent progress;
 - physical GPU 0-N utilization, VRAM, temperature, power, and project mapping;
-- host memory, disk, load, uptime, alerts, and rolling charts.
+- host memory, disk, load, uptime, alerts, and rolling charts;
+- an optional privacy-minimized Windows PC load panel with CPU, aggregate
+  memory, system-disk pressure, uptime, and an operational load index;
+- a bottom-of-page operations assistant that answers progress questions from
+  the latest published snapshot and refuses infrastructure mutations.
 
 The SSH collector in `monitor/` only reads `nvidia-smi`, Docker status/logs,
 procfs, and EFO JSON output. It never starts, stops, restarts, or allocates a
 container or GPU. Public snapshots omit passwords, secrets, environment
-variables, command lines, PIDs, and GPU UUIDs.
+variables, command lines, PIDs, GPU UUIDs, ledger signatures, hashes, and event
+payloads. Activity history contains only event time, sequence, actor alias,
+transition label, task ID, and task title.
 
 Cloudflare Pages deployment and collector installation are documented in
 [Operations Dashboard](docs/OPERATIONS_DASHBOARD.md). Until the API is
 configured, the page visibly identifies its bundled sample as `DEMO`; it never
 passes sample data off as live telemetry.
+
+The Windows operational load index is a dashboard heuristic, not a medical
+stress score or a hardware-lifetime diagnosis. Local collection sends no
+hostname, process names, command lines, or file paths. The assistant works in a
+deterministic, snapshot-grounded mode by default. Optional model-backed answers
+require an explicit paid-API opt-in and a protected viewer token; no dashboard
+chat path can claim, start, stop, or verify EFO work.
 
 ## Recovery and audit
 
@@ -291,6 +427,9 @@ See [Migration Guide](docs/MIGRATION.md) for a staged adoption path.
 - It cannot prove that every natural-language claim was declared in the
   manifest. The independent verifier must compare the report against the claim
   list before acceptance.
+- Agent identity declarations are signed policy inputs, not hardware or
+  provider attestations. Unknown identity fails closed, but a dishonest
+  orchestrator can still misdeclare a controller or model family.
 - It never stores SSH passwords or API tokens in task files.
 
 ## Development
@@ -302,7 +441,8 @@ npm run test:web
 
 The suite covers state transitions, evidence gates, concurrent claims, lease
 recovery, command adapters, legacy auditing, ledger tamper detection, the
-read-only server collector, and the signed Cloudflare ingest endpoint.
+independent-identity and proxy-delivery attack cases, read-only server
+collector, and the signed Cloudflare ingest endpoint.
 
 See [Architecture](docs/ARCHITECTURE.md), [Security](SECURITY.md), and
 [Contributing](CONTRIBUTING.md).

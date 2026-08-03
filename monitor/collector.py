@@ -16,14 +16,16 @@ import tempfile
 import time
 import urllib.error
 import urllib.request
+from collections import deque
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Sequence
 
 SCHEMA_VERSION = "1.0"
-COLLECTOR_VERSION = "efo-monitor/1.0"
+COLLECTOR_VERSION = "efo-monitor/1.2"
 HISTORY_LIMIT = 60
+ACTIVITY_LIMIT = 300
 TASK_PROGRESS = {
     "pending": 10,
     "claimed": 25,
@@ -34,6 +36,20 @@ TASK_PROGRESS = {
     "rejected": 65,
     "archived": 100,
     "invalidated": 0,
+}
+EXTERNAL_PROGRESS = {
+    "dispatched": 15,
+    "working": 40,
+    "reviewing": 70,
+    "ready": 85,
+    "blocked": 10,
+}
+EXTERNAL_NEXT = {
+    "dispatched": "외부 작업자 수신 확인",
+    "working": "외부 구현 결과 대기",
+    "reviewing": "독립 검토 결과 대기",
+    "ready": "대리 제출 및 증거 검증",
+    "blocked": "운반자 보고 차단 사유 확인",
 }
 TASK_NEXT = {
     "pending": "작업을 claim하고 시작",
@@ -48,6 +64,30 @@ TASK_NEXT = {
 }
 ACTIVE_STATES = {"claimed", "running"}
 TERMINAL_STATES = {"verified", "archived"}
+BLOCKED_STATES = {"blocked", "rejected", "invalidated"}
+LIVE_CARD_STATES = {"pending", "claimed", "running", "submitted"}
+PORTFOLIO_ACTIVE_STATES = {"claimed", "running", "submitted"}
+PORTFOLIO_EXTERNAL_ACTIVE_PHASES = {"working", "reviewing", "ready"}
+PORTFOLIO_LIMIT = 12
+PORTFOLIO_TASK_LIMIT = 200
+ACTIVITY_ACTIONS = {
+    "workspace.initialized": ("워크스페이스 생성", "system"),
+    "agent.added": ("에이전트 등록", "system"),
+    "task.created": ("작업 생성", "planning"),
+    "task.claimed": ("작업 할당", "work"),
+    "task.started": ("작업 시작", "work"),
+    "task.heartbeat": ("진행 신호", "work"),
+    "task.blocked": ("작업 차단", "issue"),
+    "task.submitted": ("증거 제출", "evidence"),
+    "task.proxy_authorized": ("대리 제출 승인", "planning"),
+    "task.proxy_status_reported": ("외부 진행상태 보고", "work"),
+    "task.proxy_submitted": ("대리 증거 제출", "evidence"),
+    "task.verified": ("검증 통과", "success"),
+    "task.rejected": ("검증 반려", "issue"),
+    "task.requeued": ("작업 재대기", "planning"),
+    "task.archived": ("작업 완료·보관", "success"),
+    "task.lease_expired": ("임대 만료", "issue"),
+}
 SAFE_LABEL_RE = re.compile(r"[^0-9A-Za-z가-힣._:+/@ -]+")
 TQDM_RE = re.compile(
     r"(?P<percent>\d{1,3})%\|[^|]*\|\s*(?P<current>[\d,]+)"
@@ -337,16 +377,21 @@ def map_projects_to_gpus(
 
     for container in containers:
         process_ids = container_process_ids(container["id"])
-        indexes = {
+        active_indexes = {
             uuid_to_index[app["gpu_uuid"]]
             for app in applications
             if app["process_id"] in process_ids and app["gpu_uuid"] in uuid_to_index
         }
+        indexes = set(active_indexes)
         indexes.update(container_device_indices(container["id"], uuid_to_index))
         if not indexes:
             continue
         label = project_name(container["name"], aliases)
-        progress = container_progress(container["id"]) if collect_progress else None
+        progress = (
+            container_progress(container["id"])
+            if collect_progress and active_indexes
+            else None
+        )
         project: dict[str, Any] = {"name": label}
         if progress:
             project["progress_percent"] = round(progress["percent"], 2)
@@ -355,7 +400,9 @@ def map_projects_to_gpus(
         for index in sorted(indexes):
             if index not in gpu_by_index or label in seen[index]:
                 continue
-            gpu_by_index[index]["projects"].append(dict(project))
+            gpu_by_index[index]["projects"].append(
+                {**project, "active": index in active_indexes}
+            )
             seen[index].add(label)
 
     matched_process_ids = {
@@ -369,7 +416,9 @@ def map_projects_to_gpus(
         index = uuid_to_index.get(app["gpu_uuid"])
         if index is None or "호스트 GPU 작업" in seen[index]:
             continue
-        gpu_by_index[index]["projects"].append({"name": "호스트 GPU 작업"})
+        gpu_by_index[index]["projects"].append(
+            {"name": "호스트 GPU 작업", "active": True}
+        )
         seen[index].add("호스트 GPU 작업")
 
 
@@ -413,6 +462,8 @@ def collect_system(config: dict[str, Any]) -> dict[str, Any]:
     gib = 1024**3
     disk_total = usage.total / gib
     disk_used = usage.used / gib
+    disk_available = usage.free / gib
+    usable_capacity = disk_used + disk_available
     try:
         load_1m = os.getloadavg()[0]
     except (AttributeError, OSError):
@@ -425,8 +476,12 @@ def collect_system(config: dict[str, Any]) -> dict[str, Any]:
         "disk": {
             "used_gib": round(disk_used, 2),
             "total_gib": round(disk_total, 2),
-            "free_gib": round(usage.free / gib, 2),
-            "percent": round(disk_used / disk_total * 100, 2) if disk_total else 0.0,
+            "free_gib": round(disk_available, 2),
+            "percent": (
+                round(disk_used / usable_capacity * 100, 2)
+                if usable_capacity
+                else 0.0
+            ),
         },
     }
 
@@ -453,39 +508,272 @@ def task_to_view(task: dict[str, Any]) -> dict[str, Any]:
     """Reduce an EFO task projection to public operational fields."""
 
     state = str(task.get("state") or "pending").lower()
+    lease_active = lease_is_active(task.get("lease"))
+    next_action = TASK_NEXT.get(state, "오케스트레이터 확인")
+    external_phase: str | None = None
+    external_status = task.get("external_status")
+    if state == "pending" and isinstance(external_status, dict):
+        candidate = str(external_status.get("phase") or "").lower()
+        if candidate in EXTERNAL_PROGRESS:
+            external_phase = candidate
+            next_action = EXTERNAL_NEXT[candidate]
+    if state in ACTIVE_STATES and not lease_active:
+        next_action = "임대 만료 상태 확인"
+    progress = (
+        EXTERNAL_PROGRESS[external_phase]
+        if external_phase is not None
+        else TASK_PROGRESS.get(state, 0)
+    )
     return {
         "id": sanitize_label(task.get("id"), "task"),
         "title": sanitize_label(task.get("title"), "Untitled task", 140),
         "owner": sanitize_label(task.get("owner"), "unassigned"),
         "state": state,
-        "progress_percent": TASK_PROGRESS.get(state, 0),
-        "next": TASK_NEXT.get(state, "오케스트레이터 확인"),
-        "updated_at": task.get("updated_at") or task.get("created_at") or utc_now(),
+        "canonical_state": state,
+        "external_phase": external_phase,
+        "status_source": (
+            "transport_assertion" if external_phase is not None else "canonical"
+        ),
+        "status_badge": "운반자 보고" if external_phase is not None else None,
+        "lease_active": lease_active,
+        "progress_percent": progress,
+        "next": next_action,
+        "updated_at": (
+            external_status.get("reported_at")
+            if external_phase is not None
+            else task.get("updated_at")
+        )
+        or task.get("created_at")
+        or utc_now(),
     }
+
+
+def lease_is_active(
+    lease: Any,
+    now: datetime | None = None,
+) -> bool:
+    """Return whether an EFO lease exists and has not expired."""
+
+    if not isinstance(lease, dict):
+        return False
+    expires_at = str(lease.get("expires_at") or "")
+    try:
+        expires = datetime.fromisoformat(expires_at.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    current = now or datetime.now(timezone.utc)
+    if expires.tzinfo is None:
+        expires = expires.replace(tzinfo=timezone.utc)
+    if current.tzinfo is None:
+        current = current.replace(tzinfo=timezone.utc)
+    return expires > current
+
+
+def _resolve_signed_identity_registry(
+    registered_agents: list[dict[str, Any]],
+    *,
+    ledger_valid: bool,
+) -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
+    """Resolve complete signed identities and their declared alias roots."""
+
+    if not ledger_valid:
+        return {}, {}
+    records = {
+        str(agent["id"]): agent
+        for agent in registered_agents
+        if isinstance(agent, dict)
+        and isinstance(agent.get("id"), str)
+        and agent["id"]
+    }
+    expected_keys = {
+        "schema_version",
+        "control_principal",
+        "model_family",
+        "alias_of",
+        "alias_chain",
+    }
+    resolved: dict[str, tuple[dict[str, Any], str]] = {}
+    resolving: set[str] = set()
+    invalid: set[str] = set()
+
+    def reject(agent_id: str) -> None:
+        invalid.add(agent_id)
+        return None
+
+    def resolve(agent_id: str) -> tuple[dict[str, Any], str] | None:
+        if agent_id in resolved:
+            return resolved[agent_id]
+        if agent_id in invalid:
+            return None
+        if agent_id in resolving:
+            return reject(agent_id)
+        record = records.get(agent_id)
+        identity = record.get("identity") if isinstance(record, dict) else None
+        if not isinstance(identity, dict) or set(identity) != expected_keys:
+            return reject(agent_id)
+        if identity.get("schema_version") != 1:
+            return reject(agent_id)
+        principal = identity.get("control_principal")
+        model_family = identity.get("model_family")
+        alias_of = identity.get("alias_of")
+        alias_chain = identity.get("alias_chain")
+        if (
+            not isinstance(principal, str)
+            or not principal.strip()
+            or not isinstance(model_family, str)
+            or not model_family.strip()
+            or (alias_of is not None and not isinstance(alias_of, str))
+            or not isinstance(alias_chain, list)
+            or not all(isinstance(item, str) and item for item in alias_chain)
+            or len(alias_chain) != len(set(alias_chain))
+            or agent_id in alias_chain
+        ):
+            return reject(agent_id)
+
+        resolving.add(agent_id)
+        try:
+            if alias_of is None:
+                if alias_chain:
+                    return reject(agent_id)
+                root_id = agent_id
+            else:
+                if not alias_of or alias_of == agent_id:
+                    return reject(agent_id)
+                target = resolve(alias_of)
+                if target is None:
+                    return reject(agent_id)
+                target_identity, root_id = target
+                expected_chain = (
+                    alias_of,
+                    *tuple(target_identity["alias_chain"]),
+                )
+                if (
+                    tuple(alias_chain) != expected_chain
+                    or principal != target_identity["control_principal"]
+                    or model_family != target_identity["model_family"]
+                ):
+                    return reject(agent_id)
+            snapshot = {
+                "actor": agent_id,
+                "schema_version": 1,
+                "control_principal": principal,
+                "model_family": model_family,
+                "alias_of": alias_of,
+                "alias_chain": list(alias_chain),
+            }
+            resolved[agent_id] = (snapshot, root_id)
+            return resolved[agent_id]
+        finally:
+            resolving.discard(agent_id)
+
+    for agent_id in sorted(records):
+        resolve(agent_id)
+
+    return (
+        {agent_id: snapshot for agent_id, (snapshot, _root) in resolved.items()},
+        {agent_id: root for agent_id, (_snapshot, root) in resolved.items()},
+    )
+
+
+def resolve_signed_identity_groups(
+    registered_agents: list[dict[str, Any]],
+    *,
+    ledger_valid: bool,
+) -> dict[str, frozenset[str]]:
+    """Resolve groups only through an explicit, valid signed alias lineage."""
+
+    _registry, roots = _resolve_signed_identity_registry(
+        registered_agents,
+        ledger_valid=ledger_valid,
+    )
+    grouped: dict[str, set[str]] = {}
+    for agent_id, root_id in roots.items():
+        grouped.setdefault(root_id, set()).add(agent_id)
+    return {
+        agent_id: frozenset(grouped[root_id])
+        for agent_id, root_id in roots.items()
+    }
+
+
+def task_actor_ids(
+    raw_task: dict[str, Any],
+    identity_registry: dict[str, dict[str, Any]],
+    registered_ids: Iterable[str],
+) -> frozenset[str]:
+    """Return signed actors for whom a task is relevant without exposing them."""
+
+    actors: set[str] = set()
+    registered = set(registered_ids)
+    owner = raw_task.get("owner")
+    if isinstance(owner, str) and owner in registered:
+        actors.add(owner)
+
+    verification = raw_task.get("verification")
+    if (
+        isinstance(verification, dict)
+        and isinstance(verification.get("actor"), str)
+        and verification.get("identity")
+        == identity_registry.get(verification["actor"])
+    ):
+        actors.add(verification["actor"])
+
+    external = raw_task.get("external_status")
+    if (
+        isinstance(external, dict)
+        and isinstance(external.get("author"), str)
+        and external.get("author_identity")
+        == identity_registry.get(external["author"])
+    ):
+        actors.add(external["author"])
+    return frozenset(actors)
+
+
+def _task_timestamp(task: dict[str, Any]) -> float:
+    value = str(task.get("updated_at") or "")
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return 0.0
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    return parsed.timestamp()
 
 
 def choose_agent_task(tasks: list[dict[str, Any]]) -> dict[str, Any] | None:
     """Select the task that best describes an agent's current operational state."""
 
-    priority = {
-        "running": 0,
-        "claimed": 1,
-        "blocked": 2,
-        "submitted": 3,
-        "pending": 4,
-        "rejected": 5,
-        "verified": 6,
-        "archived": 7,
-    }
-    return min(tasks, key=lambda task: priority.get(task["state"], 99), default=None)
+    def sort_key(task: dict[str, Any]) -> tuple[int, float, str]:
+        is_live = (
+            task.get("external_phase") is not None
+            or task.get("state") in LIVE_CARD_STATES
+        )
+        return (
+            0 if is_live else 1,
+            -_task_timestamp(task),
+            str(task.get("id") or ""),
+        )
+
+    return min(tasks, key=sort_key, default=None)
 
 
-def agent_state(task_state: str | None) -> str:
+def agent_state(task: dict[str, Any] | None) -> str:
     """Map an EFO task state to a dashboard agent state."""
 
+    task_state = task.get("state") if task else None
+    external_phase = task.get("external_phase") if task else None
+    if task_state == "pending" and external_phase == "blocked":
+        return "blocked"
+    if task_state == "pending" and external_phase in {
+        "working",
+        "reviewing",
+        "ready",
+    }:
+        return "working"
+    if task_state in ACTIVE_STATES and not task.get("lease_active", False):
+        return "blocked"
     if task_state in ACTIVE_STATES:
         return "working"
-    if task_state == "blocked":
+    if task_state in {"blocked", "rejected", "invalidated"}:
         return "blocked"
     return "waiting"
 
@@ -496,15 +784,244 @@ def workflow_progress(tasks: list[dict[str, Any]]) -> float:
     if not tasks:
         return 0.0
     return round(
-        sum(TASK_PROGRESS.get(str(task.get("state")), 0) for task in tasks)
+        sum(
+            float(
+                task.get(
+                    "progress_percent",
+                    TASK_PROGRESS.get(str(task.get("state")), 0),
+                )
+            )
+            for task in tasks
+        )
         / len(tasks),
         2,
     )
 
 
+def canonical_task_progress(task: dict[str, Any] | None) -> float:
+    """Return canonical gate progress, ignoring transport-reported phases."""
+
+    if not isinstance(task, dict):
+        return 0.0
+    state = str(task.get("canonical_state") or task.get("state") or "")
+    return float(TASK_PROGRESS.get(state, 0))
+
+
+def portfolio_task_ids(entry: dict[str, Any]) -> list[str]:
+    """Return the explicitly configured task identifiers of one portfolio."""
+
+    ordered: list[str] = []
+    seen: set[str] = set()
+    configured = entry.get("task_ids")
+    if not isinstance(configured, list):
+        return ordered
+    for candidate in configured:
+        if not isinstance(candidate, str):
+            continue
+        task_id = sanitize_label(candidate, "")
+        if not task_id or task_id in seen:
+            continue
+        seen.add(task_id)
+        ordered.append(task_id)
+        if len(ordered) >= PORTFOLIO_TASK_LIMIT:
+            break
+    return ordered
+
+
+def project_gpu_indexes(name: str, gpus: Iterable[dict[str, Any]]) -> list[int]:
+    """Return GPU indexes whose active public project label matches exactly."""
+
+    indexes: set[int] = set()
+    for gpu in gpus:
+        if not isinstance(gpu, dict):
+            continue
+        try:
+            index = int(gpu.get("index"))
+        except (TypeError, ValueError):
+            continue
+        for project in gpu.get("projects") or []:
+            if not isinstance(project, dict):
+                continue
+            if project.get("active") is not True:
+                continue
+            if sanitize_label(project.get("name"), "") == name:
+                indexes.add(index)
+    return sorted(indexes)
+
+
+def collect_project_portfolios(
+    config: dict[str, Any],
+    tasks: list[dict[str, Any]],
+    gpus: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Project explicitly configured portfolios from canonical EFO gate state."""
+
+    entries = config.get("project_portfolios")
+    if not isinstance(entries, list):
+        return []
+    task_index = {
+        str(task.get("id")): task
+        for task in tasks
+        if isinstance(task, dict) and task.get("id")
+    }
+    portfolios: list[dict[str, Any]] = []
+    used_ids: set[str] = set()
+    for entry in entries:
+        if len(portfolios) >= PORTFOLIO_LIMIT:
+            break
+        if not isinstance(entry, dict) or not isinstance(entry.get("id"), str):
+            continue
+        portfolio_id = sanitize_label(entry.get("id"), "")
+        if not portfolio_id or portfolio_id in used_ids:
+            continue
+        used_ids.add(portfolio_id)
+        name = sanitize_label(entry.get("name"), portfolio_id)
+        task_ids = portfolio_task_ids(entry)
+        # A configured identifier the EFO ledger does not know stays in the
+        # denominator at 0 percent instead of disappearing from the average.
+        matched = [task_index.get(task_id) for task_id in task_ids]
+        progress = (
+            sum(canonical_task_progress(task) for task in matched) / len(matched)
+            if matched
+            else 0.0
+        )
+        verified_count = 0
+        active_count = 0
+        blocked_count = 0
+        for task in matched:
+            if task is None:
+                continue
+            state = str(task.get("canonical_state") or task.get("state") or "")
+            external_phase = str(task.get("external_phase") or "")
+            if state in TERMINAL_STATES:
+                verified_count += 1
+            elif (
+                state == "pending"
+                and external_phase in PORTFOLIO_EXTERNAL_ACTIVE_PHASES
+            ):
+                active_count += 1
+            elif state in PORTFOLIO_ACTIVE_STATES and (
+                state == "submitted" or task.get("lease_active") is True
+            ):
+                active_count += 1
+            elif (
+                state in BLOCKED_STATES
+                or state in {"claimed", "running"}
+                or (state == "pending" and external_phase == "blocked")
+            ):
+                blocked_count += 1
+        portfolios.append(
+            {
+                "id": portfolio_id,
+                "name": name,
+                "objective": sanitize_label(entry.get("objective"), "-", 240),
+                "phase": sanitize_label(entry.get("phase"), "-", 80),
+                "next_milestone": sanitize_label(
+                    entry.get("next_milestone"),
+                    "다음 EFO 검증 게이트",
+                    180,
+                ),
+                "progress_percent": round(min(100.0, max(0.0, progress)), 2),
+                "task_count": len(task_ids),
+                "verified_count": verified_count,
+                "active_task_count": active_count,
+                "blocked_task_count": blocked_count,
+                "active_gpu_indexes": project_gpu_indexes(name, gpus),
+            }
+        )
+    return portfolios
+
+
+def collect_activity(
+    config: dict[str, Any],
+    workspace_path: str,
+    tasks: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Read a bounded, sanitized projection of signed EFO ledger events."""
+
+    ledger_path = Path(
+        config.get("efo_ledger_file")
+        or Path(workspace_path) / "ledger" / "events.jsonl"
+    ).expanduser()
+    task_titles = {
+        str(task.get("id")): str(task.get("title"))
+        for task in tasks
+        if task.get("id") and task.get("title")
+    }
+    actor_aliases = {
+        str(key): sanitize_label(value, str(key), 60)
+        for key, value in (config.get("activity_actor_aliases") or {}).items()
+    }
+    events: deque[dict[str, Any]] = deque(maxlen=ACTIVITY_LIMIT)
+    try:
+        ledger_handle = ledger_path.open("r", encoding="utf-8")
+    except OSError:
+        return []
+
+    with ledger_handle:
+        for line in ledger_handle:
+            if not line.strip():
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if not isinstance(event, dict):
+                continue
+            timestamp = str(event.get("timestamp") or "")
+            try:
+                datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
+            except ValueError:
+                continue
+            action = sanitize_label(event.get("action"), "ledger.event", 60)
+            label, category = ACTIVITY_ACTIONS.get(
+                action,
+                ("원장 이벤트", "system"),
+            )
+            actor = sanitize_label(event.get("actor"), "system", 60)
+            task_id = sanitize_label(event.get("task_id"), "", 80)
+            payload = (
+                event.get("payload") if isinstance(event.get("payload"), dict) else {}
+            )
+            task_snapshot = (
+                payload.get("task") if isinstance(payload.get("task"), dict) else {}
+            )
+            title = sanitize_label(
+                task_snapshot.get("title") or task_titles.get(task_id),
+                "",
+                160,
+            )
+            try:
+                sequence = int(event.get("sequence"))
+            except (TypeError, ValueError):
+                continue
+            if sequence < 1:
+                continue
+            events.append(
+                {
+                    "sequence": sequence,
+                    "at": timestamp,
+                    "actor": actor,
+                    "actor_name": actor_aliases.get(actor, actor),
+                    "action": action,
+                    "label": label,
+                    "category": category,
+                    "task_id": task_id or None,
+                    "title": title or None,
+                }
+            )
+    return list(events)
+
+
 def collect_efo(
     config: dict[str, Any],
-) -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any], list[dict[str, Any]]]:
+) -> tuple[
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+    dict[str, Any],
+    list[dict[str, Any]],
+    list[dict[str, Any]],
+]:
     """Read EFO agents, tasks, and signed ledger state."""
 
     workspace_path = str(config.get("efo_workspace") or "/home/shoon/efo_ws")
@@ -531,11 +1048,28 @@ def collect_efo(
             }
         )
 
-    tasks = [task_to_view(task) for task in raw_tasks if isinstance(task, dict)]
+    task_records = [
+        (task, task_to_view(task))
+        for task in raw_tasks
+        if isinstance(task, dict)
+    ]
+    tasks = [view for _raw, view in task_records]
     registered_ids = {
         str(agent.get("id"))
         for agent in registered_agents
         if isinstance(agent, dict) and agent.get("id")
+    }
+    ledger_valid = ledger.get("valid") is True
+    identity_registry, identity_roots = _resolve_signed_identity_registry(
+        registered_agents,
+        ledger_valid=ledger_valid,
+    )
+    grouped_ids: dict[str, set[str]] = {}
+    for agent_id, root_id in identity_roots.items():
+        grouped_ids.setdefault(root_id, set()).add(agent_id)
+    identity_groups = {
+        agent_id: frozenset(grouped_ids[root_id])
+        for agent_id, root_id in identity_roots.items()
     }
     profiles = config.get("agents") or [
         {
@@ -566,29 +1100,57 @@ def collect_efo(
     agents: list[dict[str, Any]] = []
     for profile in profiles:
         efo_id = str(profile.get("efo_id") or profile.get("id"))
-        owned = [task for task in tasks if task["owner"] == efo_id]
+        profile_id = str(profile.get("id") or efo_id)
+        relevant_actor_ids = {efo_id, profile_id}
+        relevant_actor_ids.update(identity_groups.get(efo_id, ()))
+        relevant_actor_ids.update(identity_groups.get(profile_id, ()))
+        owned = (
+            [
+                view
+                for raw, view in task_records
+                if task_actor_ids(
+                    raw,
+                    identity_registry,
+                    registered_ids,
+                )
+                & relevant_actor_ids
+            ]
+            if ledger_valid
+            else []
+        )
         current = choose_agent_task(owned)
         configured_state = str(profile.get("state") or "").lower()
+        if configured_state not in {"waiting", "offline"}:
+            configured_state = ""
         missing_state = configured_state or (
             "waiting" if profile.get("allow_unregistered", True) else "offline"
         )
         state = (
-            agent_state(current["state"])
+            agent_state(current)
             if current
             else ("waiting" if efo_id in registered_ids else missing_state)
         )
         agents.append(
             {
-                "id": sanitize_label(profile.get("id"), efo_id),
+                "id": sanitize_label(profile_id, efo_id),
                 "name": sanitize_label(profile.get("name"), efo_id),
                 "role": sanitize_label(profile.get("role"), "작업자", 100),
                 "state": state,
                 "current": current["title"] if current else "배정 대기",
+                "current_task_id": current["id"] if current else None,
                 "next": current["next"] if current else "오케스트레이터 지시 대기",
                 "progress_percent": current["progress_percent"] if current else 0,
+                "status_source": current["status_source"] if current else "none",
+                "status_badge": current["status_badge"] if current else None,
+                "updated_at": current["updated_at"] if current else None,
             }
         )
-    return agents, tasks, ledger, alerts
+    activity = (
+        collect_activity(config, workspace_path, tasks)
+        if ledger.get("valid") is True
+        else []
+    )
+    return agents, tasks, ledger, alerts, activity
 
 
 def history_point(gpus: list[dict[str, Any]], at: str) -> dict[str, Any]:
@@ -690,7 +1252,7 @@ def collect_snapshot(config: dict[str, Any]) -> dict[str, Any]:
     gpus, gpu_alerts = query_gpus()
     map_projects_to_gpus(gpus, config)
     system = collect_system(config)
-    agents, tasks, ledger, efo_alerts = collect_efo(config)
+    agents, tasks, ledger, efo_alerts, activity = collect_efo(config)
     history_path = Path(
         config.get("history_file")
         or "~/.local/state/efo-monitor/history.json"
@@ -737,7 +1299,9 @@ def collect_snapshot(config: dict[str, Any]) -> dict[str, Any]:
             "workflow_progress_percent": workflow_progress(tasks),
         },
         "agents": agents,
+        "projects": collect_project_portfolios(config, tasks, safe_gpus),
         "tasks": tasks,
+        "activity": activity,
         "gpus": safe_gpus,
         "system": system,
         "history": history,

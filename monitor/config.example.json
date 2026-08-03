@@ -2,6 +2,7 @@
   "endpoint": "https://evidence-first-orchestrator.pages.dev/api/snapshot",
   "ingest_secret_file": "/home/shoon/.config/efo-monitor/ingest-secret",
   "efo_workspace": "/home/shoon/efo_ws",
+  "efo_ledger_file": "/home/shoon/efo_ws/ledger/events.jsonl",
   "efo_command": [
     "/home/shoon/.local/bin/efo"
   ],
@@ -39,15 +40,28 @@
     },
     {
       "id": "antigravity",
-      "efo_id": "antigravity",
+      "efo_id": "antigravity-worker",
       "name": "Antigravity",
       "role": "연구 운영·기록",
       "allow_unregistered": true
     }
   ],
+  "activity_actor_aliases": {
+    "codex": "Codex",
+    "codex-verifier": "Codex",
+    "claude": "Claude A",
+    "claude-a": "Claude A",
+    "claude-b": "Claude B",
+    "antigravity": "Antigravity",
+    "antigravity-worker": "Antigravity"
+  },
   "project_aliases": [
     {
-      "pattern": "system1|equi|thought|deq",
+      "pattern": "deq_revival|cts",
+      "name": "CTS"
+    },
+    {
+      "pattern": "system1|equi|thought",
       "name": "System 1.5"
     },
     {
@@ -59,8 +73,16 @@
       "name": "System 3"
     },
     {
-      "pattern": "cts",
-      "name": "CTS"
+      "pattern": "system4",
+      "name": "System 4"
+    },
+    {
+      "pattern": "cogniboard",
+      "name": "CogniBoard"
+    },
+    {
+      "pattern": "rotem",
+      "name": "Rotem 2024"
     }
   ]
 }

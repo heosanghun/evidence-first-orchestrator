@@ -88,6 +88,8 @@ class CommandAdapterTests(unittest.TestCase):
                 role="worker",
                 mode="command",
                 command=[sys.executable, str(helper)],
+                control_principal="codex-control",
+                model_family="openai-codex",
             )
             workspace.create_task(
                 actor="antigravity",

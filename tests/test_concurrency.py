@@ -26,6 +26,7 @@ class ConcurrencyTests(unittest.TestCase):
             barrier = threading.Barrier(8)
             successes: list[str] = []
             failures: list[str] = []
+            unexpected: list[str] = []
             result_lock = threading.Lock()
 
             def claimant() -> None:
@@ -35,6 +36,9 @@ class ConcurrencyTests(unittest.TestCase):
                 except TransitionError as exc:
                     with result_lock:
                         failures.append(str(exc))
+                except Exception as exc:  # pragma: no cover - asserted below
+                    with result_lock:
+                        unexpected.append(f"{type(exc).__name__}: {exc}")
                 else:
                     with result_lock:
                         successes.append(result["lease_token"])
@@ -45,6 +49,7 @@ class ConcurrencyTests(unittest.TestCase):
             for thread in threads:
                 thread.join(timeout=10)
             self.assertTrue(all(not thread.is_alive() for thread in threads))
+            self.assertEqual(unexpected, [])
             self.assertEqual(len(successes), 1)
             self.assertEqual(len(failures), 7)
             self.assertEqual(Workspace(root).get_task("RACE")["attempt"], 1)

@@ -18,12 +18,24 @@ from .errors import (
     TransitionError,
 )
 from .evidence import validate_manifest, validate_submission
+from .independence import (
+    audit_verification_events,
+    build_identity,
+    evaluate_independence,
+    identity_snapshot,
+)
 from .ledger import Ledger
 from .lock import FileLock
 from .model import lease_expired, lease_expiry, new_task, transition, validate_task
+from .provenance import (
+    validate_git_commit,
+    validate_git_provenance,
+    validate_git_source_claim,
+)
 from .util import (
     atomic_write_json,
     is_relative_to,
+    parse_utc,
     read_json,
     utc_now,
     validate_agent_id,
@@ -88,6 +100,8 @@ class Workspace:
         *,
         name: str,
         orchestrator: str = "antigravity",
+        orchestrator_control_principal: str | None = None,
+        orchestrator_model_family: str | None = None,
         preset: str | None = None,
     ) -> Workspace:
         """Create a workspace and its initial orchestrator identity."""
@@ -149,16 +163,28 @@ class Workspace:
             task_id=None,
             payload={"config": config},
         )
+        orchestrator_identity = None
+        if orchestrator_control_principal or orchestrator_model_family:
+            if not orchestrator_control_principal or not orchestrator_model_family:
+                raise ConfigurationError(
+                    "Both orchestrator_control_principal and "
+                    "orchestrator_model_family are required together"
+                )
+            orchestrator_identity = build_identity(
+                control_principal=orchestrator_control_principal,
+                model_family=orchestrator_model_family,
+            )
         workspace._commit_agent(
             actor=orchestrator,
             record={
-                "schema_version": 1,
+                "schema_version": 2,
                 "id": orchestrator,
                 "role": "orchestrator",
                 "mode": "manual",
                 "command": None,
                 "created_at": utc_now(),
                 "write_roots": ["tasks", "shared", "archive"],
+                "identity": orchestrator_identity,
             },
         )
         if preset == "antigravity-codex-claude":
@@ -167,12 +193,16 @@ class Workspace:
                 agent_id="codex",
                 role="worker",
                 mode="manual",
+                control_principal="codex",
+                model_family="openai-codex",
             )
             workspace.add_agent(
                 actor=orchestrator,
                 agent_id="claude",
                 role="worker",
                 mode="manual",
+                control_principal="claude",
+                model_family="anthropic-claude",
             )
         elif preset is not None:
             raise ConfigurationError(f"Unknown workspace preset: {preset}")
@@ -204,10 +234,16 @@ class Workspace:
         (self.runs_dir / record["id"]).mkdir(parents=True, exist_ok=True)
         atomic_write_json(path, record)
 
-    def _commit_agent(self, *, actor: str, record: dict[str, Any]) -> dict[str, Any]:
+    def _commit_agent(
+        self,
+        *,
+        actor: str,
+        record: dict[str, Any],
+        action: str = "agent.added",
+    ) -> dict[str, Any]:
         self.ledger.append(
             actor=actor,
-            action="agent.added",
+            action=action,
             task_id=None,
             payload={"agent": record},
         )
@@ -218,7 +254,10 @@ class Workspace:
         self.ledger.verify()
         signed: dict[str, dict[str, Any]] = {}
         for event in self.ledger.read():
-            if event.get("action") != "agent.added":
+            if event.get("action") not in {
+                "agent.added",
+                "agent.identity_attested",
+            }:
                 continue
             record = event.get("payload", {}).get("agent")
             if isinstance(record, dict) and isinstance(record.get("id"), str):
@@ -271,6 +310,9 @@ class Workspace:
         mode: str = "manual",
         command: list[str] | None = None,
         write_roots: list[str] | None = None,
+        control_principal: str | None = None,
+        model_family: str | None = None,
+        alias_of: str | None = None,
     ) -> dict[str, Any]:
         """Register a worker or verifier. Only the orchestrator may do this."""
 
@@ -286,20 +328,133 @@ class Workspace:
             or not all(isinstance(item, str) and item for item in command)
         ):
             raise ConfigurationError("Command-mode agents need a non-empty command list")
+        identity = self._prepare_identity(
+            agent_id=agent_id,
+            control_principal=control_principal,
+            model_family=model_family,
+            alias_of=alias_of,
+        )
         record = {
-            "schema_version": 1,
+            "schema_version": 2,
             "id": agent_id,
             "role": role,
             "mode": mode,
             "command": command,
             "created_at": utc_now(),
             "write_roots": write_roots or [f"reports/{agent_id}", f"runs/{agent_id}"],
+            "identity": identity,
         }
         with self._agent_lock():
             path = self._agent_path(agent_id)
             if path.exists() or agent_id in self._signed_agents():
                 raise ConfigurationError(f"Agent already exists: {agent_id}")
             return self._commit_agent(actor=actor, record=record)
+
+    def _prepare_identity(
+        self,
+        *,
+        agent_id: str,
+        control_principal: str | None,
+        model_family: str | None,
+        alias_of: str | None,
+    ) -> dict[str, Any] | None:
+        if alias_of:
+            if control_principal or model_family:
+                raise ConfigurationError(
+                    "Alias identity inherits control principal and model family"
+                )
+            target_id = validate_agent_id(alias_of)
+            if target_id == agent_id:
+                raise ConfigurationError("Agent cannot alias itself")
+            target = self.get_agent(target_id)
+            target_identity = identity_snapshot(
+                target_id,
+                target.get("identity"),
+            )
+            if target_identity is None:
+                raise ConfigurationError(
+                    f"Alias target {target_id!r} has no attested identity"
+                )
+            alias_chain = [target_id, *target_identity.get("alias_chain", [])]
+            if agent_id in alias_chain:
+                raise ConfigurationError("Agent identity alias chain contains a cycle")
+            return build_identity(
+                control_principal=target_identity["control_principal"],
+                model_family=target_identity["model_family"],
+                alias_of=target_id,
+                alias_chain=alias_chain,
+            )
+        if control_principal is None and model_family is None:
+            return None
+        if not control_principal or not model_family:
+            raise ConfigurationError(
+                "Both control_principal and model_family are required together"
+            )
+        return build_identity(
+            control_principal=control_principal,
+            model_family=model_family,
+        )
+
+    def attest_agent_identity(
+        self,
+        *,
+        actor: str,
+        agent_id: str,
+        control_principal: str | None = None,
+        model_family: str | None = None,
+        alias_of: str | None = None,
+    ) -> dict[str, Any]:
+        """Append a signed, prospective identity declaration for an agent."""
+
+        self._require_orchestrator(actor)
+        agent_id = validate_agent_id(agent_id)
+        with self._agent_lock():
+            current = self.get_agent(agent_id)
+            current_identity = current.get("identity")
+            current_alias = (
+                current_identity.get("alias_of")
+                if isinstance(current_identity, dict)
+                else None
+            )
+            if current_alias and alias_of != current_alias:
+                raise ConfigurationError(
+                    "An attested alias lineage cannot be removed or reparented; "
+                    "register a new agent identity instead"
+                )
+            identity = self._prepare_identity(
+                agent_id=agent_id,
+                control_principal=control_principal,
+                model_family=model_family,
+                alias_of=alias_of,
+            )
+            if identity is None:
+                raise ConfigurationError("Identity attestation cannot be empty")
+            updated = deepcopy(current)
+            updated.update(
+                {
+                    "schema_version": 2,
+                    "identity": identity,
+                    "identity_attested_at": utc_now(),
+                    "identity_attested_by": actor,
+                }
+            )
+            return self._commit_agent(
+                actor=actor,
+                action="agent.identity_attested",
+                record=updated,
+            )
+
+    def _agent_identity(self, actor: str) -> dict[str, Any] | None:
+        agent = self.get_agent(actor)
+        return identity_snapshot(actor, agent.get("identity"))
+
+    def _require_verifier(self, actor: str) -> dict[str, Any]:
+        agent = self.get_agent(actor)
+        if agent["role"] not in {"orchestrator", "verifier"}:
+            raise AuthorizationError(
+                "Only an orchestrator or registered verifier may verify a task"
+            )
+        return agent
 
     def get_task(self, task_id: str) -> dict[str, Any]:
         """Return one task projection after matching it to the signed ledger."""
@@ -439,6 +594,240 @@ class Workspace:
     def _token_hash(token: str) -> str:
         return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
+    def report_proxy_status(
+        self,
+        *,
+        actor: str,
+        author: str,
+        task_id: str,
+        phase: str,
+        reference: str,
+        note: str,
+    ) -> dict[str, Any]:
+        """Record an orchestrator-observed external phase without a worker lease."""
+
+        self._require_orchestrator(actor)
+        author = validate_agent_id(author)
+        normalized_phase = str(phase).strip().lower()
+        phases = {"dispatched", "working", "reviewing", "ready", "blocked"}
+        if normalized_phase not in phases:
+            raise ConfigurationError(
+                "Proxy status phase must be dispatched, working, reviewing, "
+                "ready, or blocked"
+            )
+        if not isinstance(reference, str):
+            raise ConfigurationError("Proxy status reference must be a string")
+        normalized_reference = reference.strip()
+        if not normalized_reference or len(normalized_reference) > 200:
+            raise ConfigurationError(
+                "Proxy status reference must be 1 to 200 characters"
+            )
+        if not isinstance(note, str):
+            raise ConfigurationError("Proxy status note must be a string")
+        normalized_note = note.strip()
+        if not normalized_note or len(normalized_note) > 500:
+            raise ConfigurationError("Proxy status note must be 1 to 500 characters")
+
+        author_identity = self._agent_identity(author)
+        transport_identity = self._agent_identity(actor)
+        if author_identity is None:
+            raise AuthorizationError(
+                f"Proxy author {author!r} needs a signed identity attestation"
+            )
+        if transport_identity is None:
+            raise AuthorizationError(
+                f"Transport actor {actor!r} needs a signed identity attestation"
+            )
+
+        allowed_next = {
+            "dispatched": {"dispatched", "working", "blocked"},
+            "working": {"working", "reviewing", "blocked"},
+            "reviewing": {"reviewing", "ready", "blocked"},
+            "ready": {"ready", "blocked"},
+            "blocked": {"blocked", "working"},
+        }
+        now = utc_now()
+        with self._task_lock(task_id):
+            task = self.get_task(task_id)
+            if task["state"] != "pending":
+                raise TransitionError(
+                    "Proxy status reports require a pending task and never "
+                    f"replace canonical state transitions; observed {task['state']}"
+                )
+            if task["owner"] != author:
+                raise AuthorizationError(
+                    f"Proxy author {author!r} is not task owner {task['owner']!r}"
+                )
+            current = task.get("external_status")
+            if current is None:
+                if normalized_phase != "dispatched":
+                    raise TransitionError(
+                        "The first proxy status phase must be dispatched"
+                    )
+            elif isinstance(current, dict):
+                if current.get("reference") != normalized_reference:
+                    raise AuthorizationError(
+                        "Proxy status reference cannot change during a dispatch"
+                    )
+                current_phase = str(current.get("phase") or "")
+                if normalized_phase not in allowed_next.get(current_phase, set()):
+                    raise TransitionError(
+                        "Proxy status phase cannot regress "
+                        f"{current_phase!r} -> {normalized_phase!r}"
+                    )
+            else:
+                raise IntegrityError("Task external_status projection is malformed")
+
+            status = {
+                "schema_version": 1,
+                "phase": normalized_phase,
+                "reference": normalized_reference,
+                "note": normalized_note,
+                "reported_at": now,
+                "reported_by": actor,
+                "author": author,
+                "transport_identity": transport_identity,
+                "author_identity": author_identity,
+                "assertion": "transport_observation",
+            }
+            updated = deepcopy(task)
+            updated["external_status"] = status
+            updated["revision"] += 1
+            updated["updated_at"] = now
+            return self._commit_task(
+                actor=actor,
+                action="task.proxy_status_reported",
+                task=updated,
+                details={
+                    "author_actor": author,
+                    "transport_actor": actor,
+                    "phase": normalized_phase,
+                    "reference": normalized_reference,
+                    "assertion": "transport_observation",
+                },
+            )
+
+    def authorize_proxy_submission(
+        self,
+        *,
+        actor: str,
+        task_id: str,
+        transport_actor: str,
+        remote_url: str,
+        branch: str,
+        commit: str,
+        duration_seconds: int | None = None,
+    ) -> dict[str, Any]:
+        """Issue a one-time signed grant for an offline worker delivery."""
+
+        self._require_orchestrator(actor)
+        transport_actor = validate_agent_id(transport_actor)
+        self.get_agent(transport_actor)
+        if transport_actor != self.orchestrator:
+            raise AuthorizationError(
+                "Proxy transport must be the workspace orchestrator"
+            )
+        normalized_remote, normalized_branch = validate_git_source_claim(
+            remote_url,
+            branch,
+        )
+        normalized_commit = validate_git_commit(commit)
+        duration = duration_seconds or int(
+            self.config["defaults"]["lease_seconds"]
+        )
+        now = utc_now()
+        token = secrets.token_urlsafe(24)
+        with self._task_lock(task_id):
+            task = self.get_task(task_id)
+            if task["state"] != "pending":
+                raise TransitionError(
+                    "Proxy authorization requires a pending task"
+                )
+            if task["owner"] == transport_actor:
+                raise AuthorizationError(
+                    "The task owner must use the normal submission path"
+                )
+            existing = task.get("proxy_grant")
+            if (
+                isinstance(existing, dict)
+                and existing.get("consumed_at") is None
+                and parse_utc(str(existing["expires_at"])) > parse_utc(now)
+            ):
+                raise TransitionError(
+                    "Task already has an active proxy authorization"
+                )
+            updated = deepcopy(task)
+            updated["proxy_grant"] = {
+                "schema_version": 1,
+                "workspace_id": self.config["workspace_id"],
+                "task_id": task_id,
+                "next_attempt": task["attempt"] + 1,
+                "author": task["owner"],
+                "transport_actor": transport_actor,
+                "remote_url": normalized_remote,
+                "branch": normalized_branch,
+                "commit": normalized_commit,
+                "issued_at": now,
+                "expires_at": lease_expiry(duration, now),
+                "token_hash": self._token_hash(token),
+                "consumed_at": None,
+                "consumed_by": None,
+            }
+            updated["revision"] += 1
+            updated["updated_at"] = now
+            projection = self._commit_task(
+                actor=actor,
+                action="task.proxy_authorized",
+                task=updated,
+                details={
+                    "author_actor": task["owner"],
+                    "transport_actor": transport_actor,
+                    "remote_url": normalized_remote,
+                    "branch": normalized_branch,
+                    "commit": normalized_commit,
+                },
+            )
+            return {"task": projection, "proxy_token": token}
+
+    def _require_proxy_grant(
+        self,
+        task: dict[str, Any],
+        *,
+        actor: str,
+        author: str,
+        proxy_token: str,
+    ) -> dict[str, Any]:
+        grant = task.get("proxy_grant")
+        if not isinstance(grant, dict):
+            raise AuthorizationError(
+                f"Task {task['id']} has no proxy authorization"
+            )
+        expected = {
+            "workspace_id": self.config["workspace_id"],
+            "task_id": task["id"],
+            "next_attempt": task["attempt"] + 1,
+            "author": author,
+            "transport_actor": actor,
+        }
+        mismatches = [
+            key for key, value in expected.items() if grant.get(key) != value
+        ]
+        if mismatches:
+            raise AuthorizationError(
+                "Proxy authorization does not match this submission: "
+                + ", ".join(mismatches)
+            )
+        if grant.get("consumed_at") is not None:
+            raise AuthorizationError("Proxy authorization was already consumed")
+        if parse_utc(str(grant["expires_at"])) <= parse_utc(utc_now()):
+            raise AuthorizationError("Proxy authorization has expired")
+        if not secrets.compare_digest(
+            str(grant.get("token_hash", "")),
+            self._token_hash(proxy_token),
+        ):
+            raise AuthorizationError("Proxy authorization token is invalid")
+        return deepcopy(grant)
+
     def claim(
         self,
         *,
@@ -451,20 +840,26 @@ class Workspace:
         agent = self.get_agent(actor)
         if agent["role"] not in {"worker", "verifier"}:
             raise AuthorizationError("Only worker or verifier agents may claim tasks")
-        candidates = (
-            [self.get_task(task_id)]
+        candidate_ids = (
+            [validate_task_id(task_id)]
             if task_id is not None
-            else self.list_tasks(state="pending", owner=actor)
+            else [
+                validate_task_id(path.stem)
+                for path in sorted(self.tasks_dir.glob("*.json"))
+            ]
         )
-        for candidate in candidates:
-            if candidate["owner"] != actor:
-                if task_id is not None:
-                    raise AuthorizationError(
-                        f"Task {candidate['id']} is owned by {candidate['owner']}"
-                    )
-                continue
-            with self._task_lock(candidate["id"]):
-                task = self.get_task(candidate["id"])
+        for candidate_id in candidate_ids:
+            # Read the ledger-backed projection only after acquiring the task
+            # lock. Otherwise a concurrent commit can expose the new ledger
+            # event before its projection file is atomically replaced.
+            with self._task_lock(candidate_id):
+                task = self.get_task(candidate_id)
+                if task["owner"] != actor:
+                    if task_id is not None:
+                        raise AuthorizationError(
+                            f"Task {task['id']} is owned by {task['owner']}"
+                        )
+                    continue
                 if task["state"] != "pending":
                     if task_id is not None:
                         raise TransitionError(
@@ -615,6 +1010,7 @@ class Workspace:
     ) -> dict[str, Any]:
         """Submit a passing evidence bundle for independent verification."""
 
+        author_identity = self._agent_identity(actor)
         report = Path(report_path).resolve()
         manifest = Path(manifest_path).resolve()
         owned_report_root = self.reports_dir / actor
@@ -633,6 +1029,21 @@ class Workspace:
             permissions=task_for_validation["permissions"],
             gates=task_for_validation["gates"],
         )
+        if (
+            task_for_validation["gates"].get(
+                "require_independent_verification",
+                True,
+            )
+            and author_identity is None
+        ):
+            raise AuthorizationError(
+                f"Agent {actor!r} needs a signed identity attestation before "
+                "submitting work that requires independent verification"
+            )
+        evidence["authorship"] = {
+            "actor": actor,
+            "identity": author_identity,
+        }
         with self._task_lock(task_id):
             task = self.get_task(task_id)
             if task["state"] != "running":
@@ -670,6 +1081,186 @@ class Workspace:
                 },
             )
 
+    def proxy_submit(
+        self,
+        *,
+        actor: str,
+        author: str,
+        task_id: str,
+        proxy_token: str,
+        report_path: str | Path,
+        manifest_path: str | Path,
+        provenance_path: str | Path,
+        source_repository: str | Path,
+    ) -> dict[str, Any]:
+        """Transport an unreachable worker's Git-bound evidence without impersonation."""
+
+        self._require_orchestrator(actor)
+        author = validate_agent_id(author)
+        if actor == author:
+            raise AuthorizationError(
+                "An author must use the normal claim/start/submit path"
+            )
+        author_identity = self._agent_identity(author)
+        transport_identity = self._agent_identity(actor)
+        if author_identity is None:
+            raise AuthorizationError(
+                f"Proxy author {author!r} needs a signed identity attestation"
+            )
+        if transport_identity is None:
+            raise AuthorizationError(
+                f"Transport actor {actor!r} needs a signed identity attestation"
+            )
+
+        report = Path(report_path).resolve()
+        manifest = Path(manifest_path).resolve()
+        transport_root = self.reports_dir / actor
+        if not is_relative_to(report, transport_root):
+            raise AuthorizationError(
+                "Proxy report must be under the transport actor's report "
+                f"directory: {transport_root}"
+            )
+        if not is_relative_to(manifest, transport_root):
+            raise AuthorizationError(
+                "Proxy manifest must be under the transport actor's report "
+                f"directory: {transport_root}"
+            )
+
+        task_for_validation = self.get_task(task_id)
+        if task_for_validation["owner"] != author:
+            raise AuthorizationError(
+                f"Proxy author {author!r} is not task owner "
+                f"{task_for_validation['owner']!r}"
+            )
+        grant = self._require_proxy_grant(
+            task_for_validation,
+            actor=actor,
+            author=author,
+            proxy_token=proxy_token,
+        )
+        evidence = validate_submission(
+            report,
+            manifest,
+            permissions=task_for_validation["permissions"],
+            gates=task_for_validation["gates"],
+        )
+        max_evidence_bytes = int(
+            self.config["defaults"].get(
+                "max_evidence_bytes",
+                50 * 1024 * 1024,
+            )
+        )
+        provenance = validate_git_provenance(
+            provenance_path,
+            source_repository=source_repository,
+            report_root=transport_root,
+            expected_author=author,
+            evidence=evidence,
+            max_blob_bytes=max_evidence_bytes,
+        )
+        if provenance["remote_url"] != grant["remote_url"]:
+            raise AuthorizationError(
+                "Git provenance remote_url differs from the proxy authorization"
+            )
+        if provenance["branch"] != grant["branch"]:
+            raise AuthorizationError(
+                "Git provenance branch differs from the proxy authorization"
+            )
+        if provenance["commit"] != grant["commit"]:
+            raise AuthorizationError(
+                "Git provenance commit differs from the proxy authorization"
+            )
+        evidence["authorship"] = {
+            "actor": author,
+            "identity": author_identity,
+            "method": "proxy",
+        }
+        evidence["transport"] = {
+            "actor": actor,
+            "identity": transport_identity,
+            "envelope_creator": actor,
+            "grant_event_hash": task_for_validation["last_event_hash"],
+        }
+        evidence["transport_independence"] = evaluate_independence(
+            author_identity,
+            transport_identity,
+        )
+        evidence["provenance"] = provenance
+
+        with self._task_lock(task_id):
+            task = self.get_task(task_id)
+            if task["state"] != "pending":
+                raise TransitionError(
+                    f"Proxy submission requires a pending task, observed "
+                    f"{task['state']}"
+                )
+            if task["owner"] != author:
+                raise AuthorizationError(
+                    f"Proxy author {author!r} is not task owner {task['owner']!r}"
+                )
+            grant = self._require_proxy_grant(
+                task,
+                actor=actor,
+                author=author,
+                proxy_token=proxy_token,
+            )
+            if provenance["remote_url"] != grant["remote_url"]:
+                raise AuthorizationError(
+                    "Git provenance remote_url differs from the proxy authorization"
+                )
+            if provenance["branch"] != grant["branch"]:
+                raise AuthorizationError(
+                    "Git provenance branch differs from the proxy authorization"
+                )
+            if provenance["commit"] != grant["commit"]:
+                raise AuthorizationError(
+                    "Git provenance commit differs from the proxy authorization"
+                )
+            attempt = int(grant["next_attempt"])
+            evidence["archive"] = archive_evidence_bundle(
+                submissions_root=self.submissions_dir,
+                task_id=task_id,
+                attempt=attempt,
+                label="proxy-worker",
+                report=evidence["report"],
+                manifest=evidence["manifest"],
+                max_artifact_bytes=max_evidence_bytes,
+                extra_files=[
+                    {
+                        "path": provenance["path"],
+                        "sha256": provenance["sha256"],
+                        "kind": "provenance_manifest",
+                        "force": True,
+                    }
+                ],
+            )
+            submitted = transition(
+                task,
+                "submitted",
+                attempt=attempt,
+                lease=None,
+                proxy_grant={
+                    **grant,
+                    "consumed_at": utc_now(),
+                    "consumed_by": actor,
+                },
+                result=evidence,
+                verification=None,
+            )
+            return self._commit_task(
+                actor=actor,
+                action="task.proxy_submitted",
+                task=submitted,
+                details={
+                    "author_actor": author,
+                    "transport_actor": actor,
+                    "report_sha256": evidence["report"]["sha256"],
+                    "manifest_sha256": evidence["manifest"]["sha256"],
+                    "provenance_sha256": provenance["sha256"],
+                    "source_commit": provenance["commit"],
+                },
+            )
+
     def verify(
         self,
         *,
@@ -681,7 +1272,7 @@ class Workspace:
     ) -> dict[str, Any]:
         """Accept or reject a submitted task after independent verification."""
 
-        self._require_orchestrator(actor)
+        verifier_agent = self._require_verifier(actor)
         if decision not in {"accept", "reject"}:
             raise ConfigurationError("Verification decision must be accept or reject")
         if not note.strip():
@@ -694,10 +1285,45 @@ class Workspace:
                 )
             verification: dict[str, Any] = {
                 "actor": actor,
+                "identity": identity_snapshot(
+                    actor,
+                    verifier_agent.get("identity"),
+                ),
                 "decision": decision,
                 "note": note.strip(),
                 "verified_at": utc_now(),
             }
+            transport = task.get("result", {}).get("transport")
+            if isinstance(transport, dict):
+                transport_identity = transport.get("identity")
+                if not isinstance(transport_identity, dict):
+                    transport_identity = None
+                transport_independence = evaluate_independence(
+                    transport_identity,
+                    verification["identity"],
+                )
+                verification["transport_overlap"] = not transport_independence[
+                    "independent"
+                ]
+                verification["transport_independence"] = transport_independence
+                verification["transport"] = deepcopy(transport)
+            if task["gates"].get("require_independent_verification", True):
+                authorship = task.get("result", {}).get("authorship", {})
+                worker_identity = authorship.get("identity")
+                if not isinstance(worker_identity, dict):
+                    worker_identity = None
+                verifier_identity = verification["identity"]
+                independence = evaluate_independence(
+                    worker_identity,
+                    verifier_identity,
+                )
+                verification["independence"] = independence
+                if not independence["independent"]:
+                    reasons = ", ".join(independence["reasons"])
+                    raise AuthorizationError(
+                        "Independent verification could not be established: "
+                        f"{reasons}"
+                    )
             if decision == "accept":
                 if task["gates"].get("require_independent_verification", True):
                     if verification_manifest is None:
@@ -708,7 +1334,7 @@ class Workspace:
                     verifier_root = self.reports_dir / actor
                     if not is_relative_to(verification_path, verifier_root):
                         raise AuthorizationError(
-                            "Verification manifest must be under the orchestrator's "
+                            "Verification manifest must be under the verifier's "
                             f"report directory: {verifier_root}"
                         )
                     verification["evidence"] = validate_manifest(
@@ -786,6 +1412,7 @@ class Workspace:
                 verification=None,
                 blocked_reason=None,
             )
+            pending.pop("external_status", None)
             return self._commit_task(
                 actor=actor,
                 action="task.requeued",
@@ -850,6 +1477,21 @@ class Workspace:
                 "Projection repair requires repair_projections(actor=...)"
             )
         return self._audit_projections(repair=False)
+
+    def audit_independence(
+        self,
+        *,
+        identity_policy: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Read historical verification events without changing the ledger."""
+
+        self.ledger.verify()
+        agents = {agent["id"]: agent for agent in self.list_agents()}
+        return audit_verification_events(
+            self.ledger.read(),
+            agents,
+            policy=identity_policy,
+        )
 
     def _audit_projections(self, *, repair: bool) -> dict[str, Any]:
         ledger_status = self.ledger.verify()

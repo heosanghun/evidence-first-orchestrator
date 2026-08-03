@@ -17,6 +17,34 @@
     "next_milestone": "실시간 SSH 수집기 연결",
     "workflow_progress_percent": 58
   },
+  "projects": [
+    {
+      "id": "cts",
+      "name": "CTS",
+      "objective": "전용 latent 상태공간에서 반복 깊이의 유효성을 증거 게이트로 검증합니다.",
+      "phase": "연산자·통계 사전등록",
+      "next_milestone": "연산자 학습성 및 디코드 품질 게이트",
+      "progress_percent": 62.5,
+      "task_count": 8,
+      "verified_count": 4,
+      "active_task_count": 1,
+      "blocked_task_count": 1,
+      "active_gpu_indexes": []
+    },
+    {
+      "id": "system-1-5",
+      "name": "System 1.5",
+      "objective": "Thought-Slot DEQ를 단계별 Go/No-Go 게이트로 재구축합니다.",
+      "phase": "Thought-Slot 구현 감사",
+      "next_milestone": "T>1 유효성 소규모 파일럿",
+      "progress_percent": 28.57,
+      "task_count": 7,
+      "verified_count": 1,
+      "active_task_count": 1,
+      "blocked_task_count": 0,
+      "active_gpu_indexes": [0, 3]
+    }
+  ],
   "agents": [
     {
       "id": "codex",
@@ -191,6 +219,140 @@
       "percent": 38.5
     }
   },
+  "activity": [
+    {
+      "sequence": 7,
+      "at": "2026-07-29T08:12:00Z",
+      "actor": "antigravity",
+      "actor_name": "Antigravity",
+      "action": "task.created",
+      "label": "작업 생성",
+      "category": "planning",
+      "task_id": "P1b-3",
+      "title": "통계 프로토콜 사전등록"
+    },
+    {
+      "sequence": 8,
+      "at": "2026-07-29T08:18:00Z",
+      "actor": "claude-a",
+      "actor_name": "Claude A",
+      "action": "task.claimed",
+      "label": "작업 할당",
+      "category": "work",
+      "task_id": "P1b-3",
+      "title": "통계 프로토콜 사전등록"
+    },
+    {
+      "sequence": 9,
+      "at": "2026-07-29T08:21:00Z",
+      "actor": "claude-a",
+      "actor_name": "Claude A",
+      "action": "task.started",
+      "label": "작업 시작",
+      "category": "work",
+      "task_id": "P1b-3",
+      "title": "통계 프로토콜 사전등록"
+    },
+    {
+      "sequence": 10,
+      "at": "2026-07-29T10:05:00Z",
+      "actor": "claude-a",
+      "actor_name": "Claude A",
+      "action": "task.heartbeat",
+      "label": "진행 신호",
+      "category": "work",
+      "task_id": "P1b-3",
+      "title": "통계 프로토콜 사전등록"
+    },
+    {
+      "sequence": 11,
+      "at": "2026-07-29T12:40:00Z",
+      "actor": "claude-a",
+      "actor_name": "Claude A",
+      "action": "task.submitted",
+      "label": "증거 제출",
+      "category": "evidence",
+      "task_id": "P1b-3",
+      "title": "통계 프로토콜 사전등록"
+    },
+    {
+      "sequence": 12,
+      "at": "2026-07-29T13:16:00Z",
+      "actor": "codex",
+      "actor_name": "Codex",
+      "action": "task.verified",
+      "label": "검증 통과",
+      "category": "success",
+      "task_id": "P1b-3",
+      "title": "통계 프로토콜 사전등록"
+    },
+    {
+      "sequence": 13,
+      "at": "2026-07-29T16:04:00Z",
+      "actor": "claude-b",
+      "actor_name": "Claude B",
+      "action": "task.blocked",
+      "label": "작업 차단",
+      "category": "issue",
+      "task_id": "C1",
+      "title": "공통 백본 진입 검증"
+    },
+    {
+      "sequence": 14,
+      "at": "2026-07-29T18:32:00Z",
+      "actor": "antigravity",
+      "actor_name": "Antigravity",
+      "action": "task.requeued",
+      "label": "작업 재대기",
+      "category": "planning",
+      "task_id": "C1",
+      "title": "공통 백본 진입 검증"
+    },
+    {
+      "sequence": 15,
+      "at": "2026-07-30T00:11:00Z",
+      "actor": "codex",
+      "actor_name": "Codex",
+      "action": "task.claimed",
+      "label": "작업 할당",
+      "category": "work",
+      "task_id": "OPS-DASH-1",
+      "title": "실시간 운영 대시보드"
+    },
+    {
+      "sequence": 16,
+      "at": "2026-07-30T00:14:00Z",
+      "actor": "codex",
+      "actor_name": "Codex",
+      "action": "task.started",
+      "label": "작업 시작",
+      "category": "work",
+      "task_id": "OPS-DASH-1",
+      "title": "실시간 운영 대시보드"
+    },
+    {
+      "sequence": 17,
+      "at": "2026-07-30T03:42:00Z",
+      "actor": "codex",
+      "actor_name": "Codex",
+      "action": "task.heartbeat",
+      "label": "진행 신호",
+      "category": "work",
+      "task_id": "OPS-DASH-1",
+      "title": "실시간 운영 대시보드"
+    },
+    {
+      "sequence": 18,
+      "at": "2026-07-30T05:18:00Z",
+      "actor": "codex",
+      "actor_name": "Codex",
+      "action": "task.submitted",
+      "label": "증거 제출",
+      "category": "evidence",
+      "task_id": "OPS-DASH-1",
+      "title": "실시간 운영 대시보드"
+    }
+  ],
   "history": [
     {
       "at": "2026-07-30T03:30:00Z",

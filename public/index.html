@@ -44,13 +44,24 @@
           <span>검증 워크플로 진행률</span>
           <strong id="overall-progress-label">0%</strong>
         </div>
-        <div class="progress-track progress-large" role="progressbar"
-             aria-label="검증 워크플로 진행률" aria-valuemin="0"
-             aria-valuemax="100" aria-valuenow="0">
-          <span id="overall-progress"></span>
-        </div>
+        <progress class="progress-track progress-large" id="overall-progress"
+                  aria-label="검증 워크플로 진행률" max="100" value="0">0%</progress>
         <p id="next-milestone">다음 단계 확인 중</p>
       </div>
+    </section>
+
+    <section class="portfolio-band" aria-labelledby="portfolio-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">연구 포트폴리오</p>
+          <h2 id="portfolio-heading">프로젝트 전체 진행률</h2>
+        </div>
+        <span class="section-meta" id="project-count">프로젝트 확인 중</span>
+      </div>
+      <p class="portfolio-note">
+        아래 비율은 모델 정확도가 아니라, 사전등록된 EFO 검증 게이트의 완료 상태입니다.
+      </p>
+      <div class="project-grid" id="project-grid" aria-live="polite"></div>
     </section>
 
     <section class="kpi-grid" aria-label="운영 핵심 지표">
@@ -95,6 +106,79 @@
         <span class="section-meta" id="ledger-status">원장 확인 중</span>
       </div>
       <div class="agent-grid" id="agent-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="section-band activity-band" aria-labelledby="activity-heading">
+      <div class="section-heading activity-heading">
+        <div>
+          <p class="eyebrow">서명 원장</p>
+          <h2 id="activity-heading">시간별 작업 히스토리</h2>
+        </div>
+        <div class="activity-heading-actions">
+          <span class="section-meta" id="activity-range-label">최근 24시간 · 0건</span>
+          <div class="segmented-control" aria-label="작업 히스토리 조회 기간">
+            <button class="segment-button active" type="button"
+                    data-activity-hours="24" aria-pressed="true">24시간</button>
+            <button class="segment-button" type="button"
+                    data-activity-hours="72" aria-pressed="false">72시간</button>
+            <button class="segment-button" type="button"
+                    data-activity-hours="168" aria-pressed="false">7일</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="activity-summary" aria-label="선택 기간 작업 요약">
+        <div class="activity-stat">
+          <span>원장 이벤트</span>
+          <strong id="activity-total">0</strong>
+        </div>
+        <div class="activity-stat">
+          <span>참여 에이전트</span>
+          <strong id="activity-actors">0</strong>
+        </div>
+        <div class="activity-stat">
+          <span>검증·완료</span>
+          <strong id="activity-completed">0</strong>
+        </div>
+        <div class="activity-stat">
+          <span>차단·반려</span>
+          <strong id="activity-issues">0</strong>
+        </div>
+      </div>
+
+      <div class="activity-layout">
+        <article class="activity-panel">
+          <div class="activity-subheading">
+            <div>
+              <strong>시간대별 활동량</strong>
+              <span>각 막대는 1시간 동안 기록된 이벤트 수입니다. 최근 최대 300건 기준입니다.</span>
+            </div>
+            <span id="activity-peak">최대 0건/시간</span>
+          </div>
+          <div class="activity-chart-scroll">
+            <div class="activity-histogram" id="activity-histogram"
+                 role="img" aria-label="시간대별 작업 이벤트 막대그래프"></div>
+          </div>
+          <div class="activity-legend" aria-label="이벤트 유형">
+            <span><i class="activity-dot work"></i>수행</span>
+            <span><i class="activity-dot evidence"></i>증거</span>
+            <span><i class="activity-dot success"></i>검증·완료</span>
+            <span><i class="activity-dot issue"></i>문제</span>
+            <span><i class="activity-dot planning"></i>계획·시스템</span>
+          </div>
+        </article>
+
+        <article class="activity-panel">
+          <div class="activity-subheading">
+            <div>
+              <strong>시간순 원장 기록</strong>
+              <span>최근 기록부터 시간대별로 묶어 표시합니다.</span>
+            </div>
+            <span id="activity-visible-count">0건 표시</span>
+          </div>
+          <div class="activity-feed" id="activity-feed" aria-live="polite"></div>
+        </article>
+      </div>
     </section>
 
     <section class="section-band" aria-labelledby="gpu-heading">
@@ -180,6 +264,62 @@
       </article>
     </section>
 
+    <section class="section-band local-health-band" aria-labelledby="local-health-heading">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">로컬 워크스테이션</p>
+          <h2 id="local-health-heading">PC 부하와 운영 피로 지수</h2>
+        </div>
+        <span class="section-meta" id="local-health-updated">수집기 연결 대기</span>
+      </div>
+      <p class="local-health-note">
+        CPU·메모리·디스크 압박·연속 가동시간을 합친 운영용 지표입니다.
+        의료적 스트레스나 하드웨어 수명 진단이 아닙니다.
+      </p>
+      <div class="local-health-grid">
+        <article class="local-stress-summary" id="local-stress-card">
+          <div>
+            <span class="local-metric-label">합성 부하 지수</span>
+            <strong id="local-stress-label">연결 대기</strong>
+          </div>
+          <progress class="progress-track progress-large" id="local-stress"
+                    aria-label="로컬 PC 합성 부하 지수" max="100" value="0">0%</progress>
+          <span class="local-stress-status" id="local-stress-status">
+            수집되지 않음
+          </span>
+        </article>
+        <article class="local-metric">
+          <div class="local-metric-head">
+            <span class="local-metric-label">CPU</span>
+            <strong id="local-cpu-label">-</strong>
+          </div>
+          <progress class="progress-track local-progress" id="local-cpu"
+                    aria-label="로컬 PC CPU 사용률" max="100" value="0">0%</progress>
+        </article>
+        <article class="local-metric">
+          <div class="local-metric-head">
+            <span class="local-metric-label">메모리</span>
+            <strong id="local-memory-label">-</strong>
+          </div>
+          <progress class="progress-track local-progress" id="local-memory"
+                    aria-label="로컬 PC 메모리 사용률" max="100" value="0">0%</progress>
+        </article>
+        <article class="local-metric">
+          <div class="local-metric-head">
+            <span class="local-metric-label">C: 저장공간</span>
+            <strong id="local-disk-label">-</strong>
+          </div>
+          <progress class="progress-track local-progress" id="local-disk"
+                    aria-label="로컬 PC C 드라이브 사용률" max="100" value="0">0%</progress>
+        </article>
+      </div>
+      <div class="local-health-details">
+        <span id="local-device">장치: -</span>
+        <span id="local-uptime">가동 시간: -</span>
+        <span id="local-processes">프로세스: -</span>
+      </div>
+    </section>
+
     <section class="section-band" aria-labelledby="tasks-heading">
       <div class="section-heading">
         <div>
@@ -214,6 +354,63 @@
         </div>
       </div>
       <div id="alerts-list" class="alerts-list"></div>
+    </section>
+
+    <section class="chat-band" aria-labelledby="chat-heading">
+      <div class="chat-heading">
+        <div>
+          <p class="eyebrow">운영 대화</p>
+          <h2 id="chat-heading">Codex 오케스트레이션에게 묻기</h2>
+          <p>
+            최신 EFO 원장, 프로젝트, 에이전트, GPU 상태를 근거로 답합니다.
+            이 창은 읽기 전용이며 작업 실행이나 서버 변경은 하지 않습니다.
+          </p>
+        </div>
+        <span class="chat-mode-badge" id="chat-mode">라이브 스냅샷</span>
+      </div>
+
+      <div class="chat-quick-prompts" aria-label="빠른 질문">
+        <button type="button" data-chat-prompt="전체 프로젝트 진행률과 다음 단계를 요약해줘">
+          전체 진행률
+        </button>
+        <button type="button" data-chat-prompt="현재 각 에이전트가 무엇을 하고 있는지 알려줘">
+          에이전트 현황
+        </button>
+        <button type="button" data-chat-prompt="막힌 작업과 해결해야 할 항목을 알려줘">
+          막힌 작업
+        </button>
+        <button type="button" data-chat-prompt="현재 GPU 사용 현황과 실행 중인 프로젝트를 알려줘">
+          GPU 현황
+        </button>
+      </div>
+
+      <div class="chat-log" id="chat-log" role="log" aria-live="polite"
+           aria-label="Codex 운영 대화">
+        <article class="chat-message assistant">
+          <div class="chat-message-meta">
+            <strong>Codex 운영 어시스턴트</strong>
+            <span>준비됨</span>
+          </div>
+          <p>
+            진행률, 현재 담당자, 막힌 작업, 다음 단계, GPU 상태를 물어보세요.
+            답변에는 사용한 스냅샷 시각이 함께 표시됩니다.
+          </p>
+        </article>
+      </div>
+
+      <form class="chat-form" id="chat-form">
+        <label for="chat-input">질문 또는 프롬프트</label>
+        <div class="chat-compose">
+          <textarea id="chat-input" name="message" rows="3" maxlength="1500"
+                    placeholder="예: CTS와 System 1.5의 현재 진행률, 막힌 항목, 다음 단계를 한 번에 알려줘"
+                    required></textarea>
+          <button class="chat-send" id="chat-send" type="submit">전송</button>
+        </div>
+        <div class="chat-form-meta">
+          <span>Enter 전송 · Shift+Enter 줄바꿈</span>
+          <span id="chat-status">최신 스냅샷 대기 중</span>
+        </div>
+      </form>
     </section>
   </main>
 

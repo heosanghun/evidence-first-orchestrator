@@ -1,0 +1,6 @@
+{
+  "endpoint": "https://evidence-first-orchestrator.pages.dev/api/local-health",
+  "device_alias": "Local research workstation",
+  "collection_interval_seconds": 120,
+  "secret_file": "%LOCALAPPDATA%\\EFO Monitor\\ingest-secret"
+}

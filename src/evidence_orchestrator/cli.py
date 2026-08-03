@@ -48,6 +48,8 @@ def _cmd_init(args: argparse.Namespace) -> None:
         args.path,
         name=args.name,
         orchestrator=args.orchestrator,
+        orchestrator_control_principal=args.control_principal,
+        orchestrator_model_family=args.model_family,
         preset=args.preset,
     )
     _emit(workspace.status())
@@ -67,8 +69,24 @@ def _cmd_agent_add(args: argparse.Namespace) -> None:
         mode=args.mode,
         command=_parse_command(args.command_json),
         write_roots=args.write_root,
+        control_principal=args.control_principal,
+        model_family=args.model_family,
+        alias_of=args.alias_of,
     )
     _emit(record)
+
+
+def _cmd_agent_attest(args: argparse.Namespace) -> None:
+    workspace = _workspace(args.path)
+    _emit(
+        workspace.attest_agent_identity(
+            actor=args.actor,
+            agent_id=args.agent_id,
+            control_principal=args.control_principal,
+            model_family=args.model_family,
+            alias_of=args.alias_of,
+        )
+    )
 
 
 def _cmd_agent_list(args: argparse.Namespace) -> None:
@@ -169,6 +187,48 @@ def _cmd_task_submit(args: argparse.Namespace) -> None:
     )
 
 
+def _cmd_task_proxy_authorize(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).authorize_proxy_submission(
+            actor=args.actor,
+            task_id=args.task_id,
+            transport_actor=args.transport_actor,
+            remote_url=args.remote_url,
+            branch=args.branch,
+            commit=args.commit,
+            duration_seconds=args.duration_seconds,
+        )
+    )
+
+
+def _cmd_task_proxy_status(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).report_proxy_status(
+            actor=args.actor,
+            author=args.author,
+            task_id=args.task_id,
+            phase=args.phase,
+            reference=args.reference,
+            note=args.note,
+        )
+    )
+
+
+def _cmd_task_proxy_submit(args: argparse.Namespace) -> None:
+    _emit(
+        _workspace(args.path).proxy_submit(
+            actor=args.actor,
+            author=args.author,
+            task_id=args.task_id,
+            proxy_token=args.proxy_token,
+            report_path=args.report,
+            manifest_path=args.evidence,
+            provenance_path=args.provenance,
+            source_repository=args.source_repository,
+        )
+    )
+
+
 def _cmd_task_verify(args: argparse.Namespace) -> None:
     _emit(
         _workspace(args.path).verify(
@@ -214,6 +274,17 @@ def _cmd_projection_audit(args: argparse.Namespace) -> None:
 
 def _cmd_projection_repair(args: argparse.Namespace) -> None:
     _emit(_workspace(args.path).repair_projections(actor=args.actor))
+
+
+def _cmd_independence_audit(args: argparse.Namespace) -> None:
+    policy = None
+    if args.identity_policy:
+        policy = json.loads(Path(args.identity_policy).read_text(encoding="utf-8"))
+    _emit(
+        _workspace(args.path).audit_independence(
+            identity_policy=policy,
+        )
+    )
 
 
 def _cmd_doctor(args: argparse.Namespace) -> None:
@@ -297,6 +368,8 @@ def build_parser() -> argparse.ArgumentParser:
     init.add_argument("path")
     init.add_argument("--name", required=True)
     init.add_argument("--orchestrator", default="antigravity")
+    init.add_argument("--control-principal")
+    init.add_argument("--model-family")
     init.add_argument(
         "--preset",
         choices=["antigravity-codex-claude"],
@@ -320,7 +393,18 @@ def build_parser() -> argparse.ArgumentParser:
         help='Command argv as JSON, for example ["codex","exec","{prompt}"]',
     )
     agent_add.add_argument("--write-root", action="append", default=[])
+    agent_add.add_argument("--control-principal")
+    agent_add.add_argument("--model-family")
+    agent_add.add_argument("--alias-of")
     agent_add.set_defaults(handler=_cmd_agent_add)
+    agent_attest = agent_sub.add_parser("attest")
+    agent_attest.add_argument("path")
+    agent_attest.add_argument("--actor", required=True)
+    agent_attest.add_argument("--id", dest="agent_id", required=True)
+    agent_attest.add_argument("--control-principal")
+    agent_attest.add_argument("--model-family")
+    agent_attest.add_argument("--alias-of")
+    agent_attest.set_defaults(handler=_cmd_agent_attest)
     agent_list = agent_sub.add_parser("list")
     agent_list.add_argument("path")
     agent_list.set_defaults(handler=_cmd_agent_list)
@@ -395,6 +479,55 @@ def build_parser() -> argparse.ArgumentParser:
     task_submit.add_argument("--evidence", required=True)
     task_submit.set_defaults(handler=_cmd_task_submit)
 
+    task_proxy_authorize = task_sub.add_parser(
+        "proxy-authorize",
+        help="Issue a one-time grant for an offline worker delivery",
+    )
+    task_proxy_authorize.add_argument("path")
+    task_proxy_authorize.add_argument("--actor", required=True)
+    task_proxy_authorize.add_argument("--id", dest="task_id", required=True)
+    task_proxy_authorize.add_argument("--transport-actor", required=True)
+    task_proxy_authorize.add_argument("--remote-url", required=True)
+    task_proxy_authorize.add_argument("--branch", required=True)
+    task_proxy_authorize.add_argument("--commit", required=True)
+    task_proxy_authorize.add_argument("--duration-seconds", type=int)
+    task_proxy_authorize.set_defaults(handler=_cmd_task_proxy_authorize)
+
+    task_proxy_status = task_sub.add_parser(
+        "proxy-status",
+        help=(
+            "Record an orchestrator-observed external phase without creating "
+            "a worker claim or lease"
+        ),
+    )
+    task_proxy_status.add_argument("path")
+    task_proxy_status.add_argument("--actor", required=True)
+    task_proxy_status.add_argument("--author", required=True)
+    task_proxy_status.add_argument("--id", dest="task_id", required=True)
+    task_proxy_status.add_argument(
+        "--phase",
+        choices=["dispatched", "working", "reviewing", "ready", "blocked"],
+        required=True,
+    )
+    task_proxy_status.add_argument("--reference", required=True)
+    task_proxy_status.add_argument("--note", required=True)
+    task_proxy_status.set_defaults(handler=_cmd_task_proxy_status)
+
+    task_proxy_submit = task_sub.add_parser(
+        "proxy-submit",
+        help="Transport a Git-bound submission for an unreachable task owner",
+    )
+    task_proxy_submit.add_argument("path")
+    task_proxy_submit.add_argument("--actor", required=True)
+    task_proxy_submit.add_argument("--author", required=True)
+    task_proxy_submit.add_argument("--id", dest="task_id", required=True)
+    task_proxy_submit.add_argument("--proxy-token", required=True)
+    task_proxy_submit.add_argument("--report", required=True)
+    task_proxy_submit.add_argument("--evidence", required=True)
+    task_proxy_submit.add_argument("--provenance", required=True)
+    task_proxy_submit.add_argument("--source-repository", required=True)
+    task_proxy_submit.set_defaults(handler=_cmd_task_proxy_submit)
+
     task_verify = task_sub.add_parser("verify")
     task_verify.add_argument("path")
     task_verify.add_argument("--actor", required=True)
@@ -434,6 +567,10 @@ def build_parser() -> argparse.ArgumentParser:
     projection_repair.add_argument("path")
     projection_repair.add_argument("--actor", required=True)
     projection_repair.set_defaults(handler=_cmd_projection_repair)
+    independence_audit = ledger_sub.add_parser("audit-independence")
+    independence_audit.add_argument("path")
+    independence_audit.add_argument("--identity-policy")
+    independence_audit.set_defaults(handler=_cmd_independence_audit)
 
     doctor = subparsers.add_parser("doctor", help="Audit a broker workspace")
     doctor.add_argument("path")

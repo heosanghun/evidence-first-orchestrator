@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { webcrypto } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 if (!globalThis.crypto) {
@@ -41,6 +42,21 @@ function validSnapshot() {
       next_milestone: "Independent verification",
       workflow_progress_percent: 50,
     },
+    projects: [
+      {
+        id: "system-1-5",
+        name: "System 1.5",
+        objective: "Thought-Slot DEQ with evidence gates",
+        phase: "Operator audit",
+        next_milestone: "Trainability gate",
+        progress_percent: 25,
+        task_count: 4,
+        verified_count: 1,
+        active_task_count: 0,
+        blocked_task_count: 0,
+        active_gpu_indexes: [],
+      },
+    ],
     agents: [],
     tasks: [],
     gpus: [
@@ -63,7 +79,53 @@ function validSnapshot() {
       disk: { used_gib: 2, total_gib: 10, free_gib: 8, percent: 20 },
     },
     history: [],
+    activity: [
+      {
+        sequence: 18,
+        at: new Date().toISOString(),
+        actor: "codex",
+        actor_name: "Codex",
+        action: "task.verified",
+        label: "검증 통과",
+        category: "success",
+        task_id: "P1b-2",
+        title: "Cluster-aware significance tests",
+      },
+    ],
     alerts: [],
+  };
+}
+
+function transportTask(id = "P1b-8") {
+  return {
+    id,
+    title: "Freeze run identity",
+    owner: "claude",
+    state: "pending",
+    canonical_state: "pending",
+    external_phase: "working",
+    status_source: "transport_assertion",
+    status_badge: "운반자 보고",
+    lease_active: false,
+    progress_percent: 40,
+    next: "외부 구현 결과 대기",
+    updated_at: "2026-07-30T02:00:00Z",
+  };
+}
+
+function projectedAgent(task) {
+  return {
+    id: "claude-a",
+    name: "Claude A",
+    role: "reviewer",
+    state: "working",
+    current: task.title,
+    current_task_id: task.id,
+    next: task.next,
+    progress_percent: task.progress_percent,
+    status_source: task.status_source,
+    status_badge: task.status_badge,
+    updated_at: task.updated_at,
   };
 }
 
@@ -116,6 +178,463 @@ test("signed snapshot is validated, stored, and served", async () => {
   assert.equal(stored.source.mode, "live");
   assert.match(stored.source.received_at, /^\d{4}-\d{2}-\d{2}T/);
   assert.equal(stored.gpus[0].index, 0);
+  assert.equal(stored.activity[0].label, "검증 통과");
+  assert.equal(stored.projects[0].name, "System 1.5");
+});
+
+test("legacy snapshots may omit the optional project portfolio", async () => {
+  const snapshot = validSnapshot();
+  delete snapshot.projects;
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 200);
+  const stored = JSON.parse(await env.EFO_MONITOR_KV.get("snapshot:latest"));
+  assert.equal(stored.projects, undefined);
+});
+
+test("project portfolio rejects forged fields, counts, and GPU indexes", async () => {
+  const mutations = [
+    (project) => {
+      project.color = "url(https://attacker.invalid)";
+    },
+    (project) => {
+      project.verified_count = project.task_count + 1;
+    },
+    (project) => {
+      project.active_gpu_indexes = [0, 0];
+    },
+    (project) => {
+      project.progress_percent = 101;
+    },
+  ];
+  for (const mutate of mutations) {
+    const snapshot = validSnapshot();
+    mutate(snapshot.projects[0]);
+    const response = await onRequestPost({
+      request: await signedRequest(snapshot),
+      env: {
+        EFO_MONITOR_KV: new MemoryKv(),
+        EFO_INGEST_SECRET: "test-secret",
+      },
+    });
+    assert.equal(response.status, 400);
+    assert.match((await response.json()).detail, /project/);
+  }
+});
+
+test("CSP-safe visual fills use native progress and no inline styles", async () => {
+  const [app, html, headers] = await Promise.all([
+    readFile(new URL("../public/assets/app.js", import.meta.url), "utf8"),
+    readFile(new URL("../public/index.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/_headers", import.meta.url), "utf8"),
+  ]);
+  assert.doesNotMatch(app, /\.style\b|style\s*=/);
+  assert.doesNotMatch(html, /style\s*=/);
+  assert.match(app, /<progress class="progress-track/);
+  assert.match(html, /<progress class="progress-track progress-large"/);
+  assert.match(headers, /style-src 'self'/);
+  assert.doesNotMatch(headers, /unsafe-inline/);
+});
+
+test("malformed activity history is rejected", async () => {
+  const snapshot = validSnapshot();
+  snapshot.activity[0].sequence = "18";
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 400);
+  assert.match((await response.json()).detail, /invalid activity event/);
+});
+
+test("transport-attested pending task is accepted without becoming running", async () => {
+  const snapshot = validSnapshot();
+  snapshot.tasks.push({
+    id: "P1b-8",
+    title: "Freeze run identity",
+    owner: "claude",
+    state: "pending",
+    canonical_state: "pending",
+    external_phase: "working",
+    status_source: "transport_assertion",
+    status_badge: "운반자 보고",
+    lease_active: false,
+    progress_percent: 40,
+    next: "외부 구현 결과 대기",
+    updated_at: new Date().toISOString(),
+  });
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 200);
+  const stored = JSON.parse(await env.EFO_MONITOR_KV.get("snapshot:latest"));
+  assert.equal(stored.tasks[0].state, "pending");
+  assert.equal(stored.tasks[0].external_phase, "working");
+  assert.equal(stored.tasks[0].status_source, "transport_assertion");
+});
+
+test("agent card may reference a transport task without changing its row", async () => {
+  const snapshot = validSnapshot();
+  const task = transportTask();
+  snapshot.tasks.push(task);
+  snapshot.agents.push(projectedAgent(task));
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 200);
+  const stored = JSON.parse(await env.EFO_MONITOR_KV.get("snapshot:latest"));
+  assert.equal(stored.tasks[0].state, "pending");
+  assert.equal(stored.tasks[0].external_phase, "working");
+  assert.equal(stored.agents[0].current_task_id, "P1b-8");
+  assert.equal(stored.agents[0].status_badge, "운반자 보고");
+  assert.equal(stored.agents[0].progress_percent, 40);
+});
+
+test("browser renders a distinct transport badge on agent cards", async () => {
+  const source = await readFile(
+    new URL("../public/assets/app.js", import.meta.url),
+    "utf8",
+  );
+  assert.match(source, /agent\.status_source === "transport_assertion"/);
+  assert.match(source, /agent-transport-badge/);
+  assert.match(source, /escapeHtml\(\s*agent\.status_badge/);
+});
+
+test("agent card cannot invent or contradict current work", async () => {
+  const cases = [
+    (snapshot) => {
+      snapshot.agents.push(projectedAgent(transportTask("UNKNOWN")));
+    },
+    (snapshot) => {
+      const task = transportTask();
+      const agent = projectedAgent(task);
+      agent.progress_percent = 99;
+      snapshot.tasks.push(task);
+      snapshot.agents.push(agent);
+    },
+    (snapshot) => {
+      const task = transportTask();
+      const agent = projectedAgent(task);
+      agent.state = "waiting";
+      snapshot.tasks.push(task);
+      snapshot.agents.push(agent);
+    },
+    (snapshot) => {
+      const task = transportTask();
+      const agent = projectedAgent(task);
+      agent.private_report = "/server/private/report.json";
+      snapshot.tasks.push(task);
+      snapshot.agents.push(agent);
+    },
+  ];
+  for (const mutate of cases) {
+    const snapshot = validSnapshot();
+    mutate(snapshot);
+    const response = await onRequestPost({
+      request: await signedRequest(snapshot),
+      env: {
+        EFO_MONITOR_KV: new MemoryKv(),
+        EFO_INGEST_SECRET: "test-secret",
+      },
+    });
+    assert.equal(response.status, 400);
+    assert.match((await response.json()).detail, /agent/);
+  }
+});
+
+test("idle agent projection cannot carry hidden task state", async () => {
+  for (const mutate of [
+    (agent) => {
+      agent.progress_percent = 10;
+    },
+    (agent) => {
+      agent.state = "working";
+    },
+  ]) {
+    const snapshot = validSnapshot();
+    const agent = {
+      id: "antigravity",
+      name: "Antigravity",
+      role: "transport",
+      state: "waiting",
+      current: "배정 대기",
+      current_task_id: null,
+      next: "오케스트레이터 지시 대기",
+      progress_percent: 0,
+      status_source: "none",
+      status_badge: null,
+      updated_at: null,
+    };
+    mutate(agent);
+    snapshot.agents.push(agent);
+    const response = await onRequestPost({
+      request: await signedRequest(snapshot),
+      env: {
+        EFO_MONITOR_KV: new MemoryKv(),
+        EFO_INGEST_SECRET: "test-secret",
+      },
+    });
+    assert.equal(response.status, 400);
+    assert.match((await response.json()).detail, /idle agent projection/);
+  }
+});
+
+test("legacy collector agents are normalized to safe idle cards", async () => {
+  const snapshot = validSnapshot();
+  snapshot.source.collector = "efo-monitor/1.1";
+  snapshot.agents.push({
+    id: "claude-a",
+    name: "Claude A",
+    role: "verifier",
+    state: "working",
+    current: "Unverifiable legacy work",
+    next: "Legacy next action",
+    progress_percent: 75,
+  });
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 200);
+  assert.equal((await response.json()).legacy_agents_normalized, 1);
+  const stored = JSON.parse(await env.EFO_MONITOR_KV.get("snapshot:latest"));
+  assert.deepEqual(stored.agents[0], {
+    id: "claude-a",
+    name: "Claude A",
+    role: "verifier",
+    state: "waiting",
+    current: "배정 대기",
+    current_task_id: null,
+    next: "오케스트레이터 지시 대기",
+    progress_percent: 0,
+    status_source: "none",
+    status_badge: null,
+    updated_at: null,
+  });
+  assert.equal(stored.source.agent_projection_compat, "legacy_idle");
+});
+
+test("current collector cannot downgrade to the legacy agent contract", async () => {
+  const snapshot = validSnapshot();
+  snapshot.source.collector = "efo-monitor/1.2";
+  snapshot.agents.push({
+    id: "claude-a",
+    name: "Claude A",
+    role: "verifier",
+    state: "working",
+    current: "Missing task binding",
+    next: "Missing task binding",
+    progress_percent: 75,
+  });
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env: {
+      EFO_MONITOR_KV: new MemoryKv(),
+      EFO_INGEST_SECRET: "test-secret",
+    },
+  });
+  assert.equal(response.status, 400);
+  assert.match(
+    (await response.json()).detail,
+    /agent has unexpected or missing fields/,
+  );
+});
+
+test("transport assertion cannot contradict canonical task state", async () => {
+  const snapshot = validSnapshot();
+  snapshot.tasks.push({
+    id: "P1b-8",
+    title: "Freeze run identity",
+    owner: "claude",
+    state: "running",
+    canonical_state: "running",
+    external_phase: "working",
+    status_source: "transport_assertion",
+    status_badge: "운반자 보고",
+    lease_active: false,
+    progress_percent: 40,
+    next: "외부 구현 결과 대기",
+    updated_at: new Date().toISOString(),
+  });
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 400);
+  assert.match(
+    (await response.json()).detail,
+    /external status conflicts with canonical state/,
+  );
+});
+
+test("transport assertion rejects forged progress and lease", async () => {
+  const snapshot = validSnapshot();
+  snapshot.tasks.push({
+    id: "P1b-8",
+    title: "Freeze run identity",
+    owner: "claude",
+    state: "pending",
+    canonical_state: "pending",
+    external_phase: "ready",
+    status_source: "transport_assertion",
+    status_badge: "운반자 보고",
+    lease_active: true,
+    progress_percent: 100,
+    next: "대리 제출 및 증거 검증",
+    updated_at: new Date().toISOString(),
+  });
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 400);
+  assert.match(
+    (await response.json()).detail,
+    /external status conflicts with canonical state/,
+  );
+});
+
+test("task projection rejects private transport fields", async () => {
+  const snapshot = validSnapshot();
+  snapshot.tasks.push({
+    id: "P1b-8",
+    title: "Freeze run identity",
+    owner: "claude",
+    state: "pending",
+    canonical_state: "pending",
+    external_phase: "ready",
+    status_source: "transport_assertion",
+    status_badge: "운반자 보고",
+    lease_active: false,
+    progress_percent: 85,
+    next: "대리 제출 및 증거 검증",
+    updated_at: new Date().toISOString(),
+    external_status: {
+      reference: "private-dispatch",
+      note: "private note",
+    },
+  });
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 400);
+  assert.match(
+    (await response.json()).detail,
+    /unexpected or missing fields/,
+  );
+});
+
+test("canonical state mismatch is rejected without an external phase", async () => {
+  const snapshot = validSnapshot();
+  snapshot.tasks.push({
+    id: "P1b-7",
+    title: "Dataset identity gate",
+    owner: "claude",
+    state: "verified",
+    canonical_state: "pending",
+    external_phase: null,
+    status_source: "canonical",
+    status_badge: null,
+    lease_active: false,
+    progress_percent: 100,
+    next: "완료 결과 보존",
+    updated_at: new Date().toISOString(),
+  });
+  const env = {
+    EFO_MONITOR_KV: new MemoryKv(),
+    EFO_INGEST_SECRET: "test-secret",
+  };
+  const response = await onRequestPost({
+    request: await signedRequest(snapshot),
+    env,
+  });
+  assert.equal(response.status, 400);
+  assert.match(
+    (await response.json()).detail,
+    /canonical_state conflicts with state/,
+  );
+});
+
+test("all collector canonical progress projections satisfy the API contract", async () => {
+  const canonicalProgress = new Map([
+    ["pending", 10],
+    ["claimed", 25],
+    ["running", 55],
+    ["blocked", 45],
+    ["submitted", 80],
+    ["rejected", 65],
+    ["verified", 100],
+    ["archived", 100],
+    ["invalidated", 0],
+  ]);
+  for (const [state, progress] of canonicalProgress) {
+    const snapshot = validSnapshot();
+    snapshot.tasks.push({
+      id: `contract-${state}`,
+      title: `Canonical ${state}`,
+      owner: "codex",
+      state,
+      canonical_state: state,
+      external_phase: null,
+      status_source: "canonical",
+      status_badge: null,
+      lease_active: false,
+      progress_percent: progress,
+      next: "오케스트레이터 확인",
+      updated_at: new Date().toISOString(),
+    });
+    const env = {
+      EFO_MONITOR_KV: new MemoryKv(),
+      EFO_INGEST_SECRET: "test-secret",
+    };
+    const response = await onRequestPost({
+      request: await signedRequest(snapshot),
+      env,
+    });
+    assert.equal(response.status, 200, `collector state ${state} was rejected`);
+    assert.notEqual(
+      await env.EFO_MONITOR_KV.get("snapshot:latest"),
+      null,
+      `collector state ${state} was not stored`,
+    );
+  }
 });
 
 test("invalid signature is rejected before parsing", async () => {
