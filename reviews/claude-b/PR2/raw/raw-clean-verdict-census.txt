@@ -9,12 +9,12 @@
         expected: clean rows: 21
         observed: clean rows: 21
   [ok]   distinct notes they cite
-        expected: notes: 22
-        observed: notes: 22
+        expected: notes: 23
+        observed: notes: 23
   [ok]     whose probe can be located
-        expected: probes: 20
-        observed: probes: 20
-  Twenty is more than one round of hand adjudication, which is what
+        expected: probes: 21
+        observed: probes: 21
+  Twenty-one is more than one round of hand adjudication, which is what
   the item anticipated. Section B tries the cheap way; section C shows
   the cheap way does not work.
   [ok]   this note has exactly one row in SYNTHESIS
@@ -34,6 +34,7 @@
     drives   probe_byte_exactness.py                   `provenance.py` byte-e  6 non-string args
     drives   probe_byte_exactness_input_class.py       `provenance.py` byte-e  13 non-string args
     drives   probe_cli_surface.py                      `cli.py`                2 non-string args
+    drives   probe_cli_typed_options.py                `cli.py`                5 non-string args
     drives   probe_collector_redaction.py              `monitor/collector.py`  9 non-string args
     drives   probe_cross_module_hop.py                 cross-module dict-fiel  4 non-string args
     drives   probe_dashboard_and_errors.py             `dashboard.py`, `error  6 non-string args
@@ -49,11 +50,11 @@
         expected: static: 4
         observed: static: 4
   [ok]   probes that drive it
-        expected: driving: 16
-        observed: driving: 16
+        expected: driving: 17
+        observed: driving: 17
   [ok]     of which the proxy says feed a non-string
-        expected: flagged: 16
-        observed: flagged: 16
+        expected: flagged: 17
+        observed: flagged: 17
   For a static census the question does not arise: it reads the AST and
   never calls anything, so it has no input class to feed.
 
@@ -79,7 +80,8 @@
 ########## D. so: the subset with an open issue, named not measured ##########
     `provenance.py` byte-exactness      #4/#5/#18 (done - item 53)probe_byte_exactness.py
     `provenance.py` byte-exactness      #4/#5/#18 (done - item 53)probe_byte_exactness_input_class.py
-    `cli.py`                            #19               probe_cli_surface.py
+    `cli.py`                            #19 (done - item 56)probe_cli_surface.py
+    `cli.py`                            #19 (done - item 56)probe_cli_typed_options.py
     `monitor/collector.py` (redaction)  #6                probe_collector_redaction.py
     `dashboard.py`, `errors.py`         #19               probe_dashboard_and_errors.py
     `workspace.py` implicit exceptions  #19               probe_implicit_exceptions.py
@@ -88,18 +90,18 @@
     `util.py`, `lock.py`                (done - item 47)  probe_util_and_lock.py
     `util.py`, `lock.py`                (done - item 47)  probe_util_uncovered_input.py
   [ok] driving probes whose component carries an open issue
-        expected: with an issue: 10
-        observed: with an issue: 10
-  [ok]   of which already adjudicated by hand - items 47 and 53
-        expected: already done: 4
-        observed: already done: 4
+        expected: with an issue: 11
+        observed: with an issue: 11
+  [ok]   of which already adjudicated by hand - items 47, 53 and 56
+        expected: already done: 6
+        observed: already done: 6
   [ok]     leaving the population for the next round
-        expected: remaining: 6
-        observed: remaining: 6
-  SIX remain. That is the population the next round should take, one
+        expected: remaining: 5
+        observed: remaining: 5
+  FIVE remain. That is the population the next round should take, one
   at a time and BY HAND, which is the only method shown to work here.
-  Updated 2026-08-03: item 53 adjudicated `provenance.py`
-  byte-exactness, so this note's own population moved 7 -> 6 and the
+  Updated 2026-08-03: items 53 and 56 adjudicated `provenance.py`
+  byte-exactness and `cli.py`, so this population moved 7 -> 5 and the
   clean-row set grew by the note that did it. Both are re-derived here
   rather than left at the number this note first published.
 
