@@ -92,7 +92,7 @@ every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
 check("  raw outputs scanned, the marker-printing ones excluded",
-      "outputs: 85", f"outputs: {len(outputs)}")
+      "outputs: 86", f"outputs: {len(outputs)}")
 check("    exactly six are excluded, this probe's own among them",
       "excluded: 6",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
@@ -267,7 +267,7 @@ agree = sum(1 for p in outputs
             if token[p.name] in ("anchor", "divergent")
             and classify(p.read_text(errors="replace"), DA, DD)
             == token[p.name])
-check("  and it AGREES with this many known placements", "agreements: 20",
+check("  and it AGREES with this many known placements", "agreements: 21",
       f"agreements: {agree}")
 check("    the two offenders are gone from the divergent set",
       "removed: True",
@@ -302,7 +302,7 @@ print(f"    UNION of both tests: {dict(Counter(union.values()))}")
 # already placed by one test can pick up the OTHER line's marker from the
 # second, becoming MIXED rather than staying put. Corrected to the measured
 # union, and the mixed class is asserted rather than absorbed.
-check("the union places this many on the anchor's line", "anchor: 37",
+check("the union places this many on the anchor's line", "anchor: 38",
       f"anchor: {sum(1 for v in union.values() if v == 'anchor')}")
 check("  on the divergent line", "divergent: 5",
       f"divergent: {sum(1 for v in union.values() if v == 'divergent')}")

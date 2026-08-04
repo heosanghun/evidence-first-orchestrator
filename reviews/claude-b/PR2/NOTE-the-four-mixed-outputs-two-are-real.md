@@ -147,5 +147,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_the_four_mixed_outputs.py` | `adfa6463da02d24f3d12172fae7125ee76fb93b03efb5f1e4302997659370079` |
-| `raw/raw-the-four-mixed-outputs.txt` | `b30899f3b26c44c365b80a23ac06a6bcedfd6327e2c55a1a0f9ca4a7ef6e30dc` |
+| `raw/probe_the_four_mixed_outputs.py` | `6684039f2df71b07a602f6538185c5d852695e83f914b0ba4b2cfbbd07d021d4` |
+| `raw/raw-the-four-mixed-outputs.txt` | `e8bd1720f5e4a00c25e26f60b2720a36206ef7fa1f33f4edbc34e33791baf222` |

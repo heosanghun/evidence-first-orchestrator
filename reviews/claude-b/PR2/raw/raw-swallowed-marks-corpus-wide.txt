@@ -6,8 +6,8 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   raw outputs scanned, the marker-printing ones excluded
-        expected: outputs: 85
-        observed: outputs: 85
+        expected: outputs: 86
+        observed: outputs: 86
   [ok]     six are excluded now, this probe's own among them
         expected: excluded: 6
         observed: excluded: 6
@@ -87,8 +87,8 @@
   [ok]   and NONE of the six was already in the set - all six are new markers
         expected: added: 6
         observed: added: 6
-    union before : {'undecidable': 39, 'anchor': 37, 'mixed': 4, 'divergent': 5}
-    union after  : {'undecidable': 38, 'anchor': 38, 'mixed': 3, 'divergent': 6}
+    union before : {'undecidable': 39, 'anchor': 38, 'mixed': 4, 'divergent': 5}
+    union after  : {'undecidable': 38, 'anchor': 39, 'mixed': 3, 'divergent': 6}
   [ok] raw-class2b-census.txt recovers, now on a LIVE marker
         expected: anchor
         observed: anchor
@@ -107,8 +107,8 @@
         expected: raw-proxy-mocks.txt
         observed: ['raw-full-final.txt', 'raw-proxy-mocks.txt']
   [ok] the corrected union places this many on the anchor's line
-        expected: anchor: 38
-        observed: anchor: 38
+        expected: anchor: 39
+        observed: anchor: 39
   [ok]   on the divergent line
         expected: divergent: 6
         observed: divergent: 6
@@ -119,8 +119,8 @@
         expected: undecidable: 38
         observed: undecidable: 38
   [ok]     the four classes account for every output
-        expected: total: 85
-        observed: total: 85
+        expected: total: 86
+        observed: total: 86
   `raw-class2b-census.txt` keeps its VERDICT and changes its EVIDENCE.
   A sweep that only reported changed verdicts would have shown
   nothing there - and that is the case this round exists to catch.

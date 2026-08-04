@@ -6,8 +6,8 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   raw outputs scanned, the marker-printing ones excluded
-        expected: outputs: 85
-        observed: outputs: 85
+        expected: outputs: 86
+        observed: outputs: 86
   [ok]     six are excluded now, this probe's own among them
         expected: excluded: 6
         observed: excluded: 6

@@ -155,7 +155,9 @@ assumed.
 > **anchor's** line by the string-literal test: population **83 → 84**,
 > undecidable **50 → 51**, newly placed **9 → 10**, union anchor **36 → 37**.
 > **Item 72's output** is undecidable by every class measured: population
-> **85**, undecidable **52**, union still open **39**.
+> **85**, undecidable **52**, union still open **39**. **Item 74's** is placed
+> on the anchor's line: population **86**, agreements **20 → 21**, union anchor
+> **37 → 38**.
 
 Pre-registered permissions unchanged: `gpu: false`, `network: false`,
 `performance_metrics: false`; gates `allow_skips: false`,
@@ -167,5 +169,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_what_else_places_an_output.py` | `a6f76adde055cfc0467d2a7f95fdd398fb964979f4f44ff7ade62e4b9e5bc60b` |
-| `raw/raw-what-else-places-an-output.txt` | `28f907b525a14949759e59bddb3011726c39beac7ab7f6514bedd2845d460ffd` |
+| `raw/probe_what_else_places_an_output.py` | `cb0326f6fb9afce4ed9f3db294586c83beaa0d6bf5255553ac761bcd6545d683` |
+| `raw/raw-what-else-places-an-output.txt` | `3ba70965d97967eb5e5c485eb7219c083f5117ec6a1bf87d154be396c5820921` |

@@ -6,14 +6,14 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   raw outputs scanned, the marker-printing ones excluded
-        expected: outputs: 85
-        observed: outputs: 85
+        expected: outputs: 86
+        observed: outputs: 86
   [ok]     exactly six are excluded, this probe's own among them
         expected: excluded: 6
         observed: excluded: 6
 
 ########## B. the classification item 61 left ##########
-    Counter({'undecidable': 52, 'anchor': 28, 'divergent': 5})
+    Counter({'undecidable': 52, 'anchor': 29, 'divergent': 5})
   [ok] the module/test-id test leaves this many undecidable
         expected: undecidable: 52
         observed: undecidable: 52
@@ -75,8 +75,8 @@
         expected: contradictions: 0
         observed: contradictions: 0
   [ok]   and it AGREES with this many known placements
-        expected: agreements: 20
-        observed: agreements: 20
+        expected: agreements: 21
+        observed: agreements: 21
   [ok]     the two offenders are gone from the divergent set
         expected: removed: True
         observed: removed: True
@@ -99,10 +99,10 @@
   [ok]   and STILL undecidable
         expected: undecidable: 39
         observed: undecidable: 39
-    UNION of both tests: {'undecidable': 39, 'anchor': 37, 'mixed': 4, 'divergent': 5}
+    UNION of both tests: {'undecidable': 39, 'anchor': 38, 'mixed': 4, 'divergent': 5}
   [ok] the union places this many on the anchor's line
-        expected: anchor: 37
-        observed: anchor: 37
+        expected: anchor: 38
+        observed: anchor: 38
   [ok]   on the divergent line
         expected: divergent: 5
         observed: divergent: 5
@@ -113,8 +113,8 @@
         expected: undecidable: 39
         observed: undecidable: 39
   [ok]     the classes account for every output
-        expected: total: 85
-        observed: total: 85
+        expected: total: 86
+        observed: total: 86
 
 ########## H. what this does NOT establish ##########
   * The headline is a NEGATIVE: 35 of 79 outputs carry no marker of

@@ -160,7 +160,7 @@ outputs = [p for p in every if p.name not in SKIP]
 # output pushed 75 -> 76 and 39 -> 40, and the pin is what said so. Item 61's
 # output is excluded rather than counted, so the population stays 77.
 check("  raw outputs in the corpus, the marker-printing ones excluded",
-      "outputs: 85", f"outputs: {len(outputs)}")
+      "outputs: 86", f"outputs: {len(outputs)}")
 check("    exactly six outputs are excluded", "excluded: 6",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
 print("  This probe's OWN classification is therefore the one number here")
@@ -251,7 +251,7 @@ for path in outputs:
         placed_anchor.append(path.name)
     else:
         undecidable.append(path.name)
-check("outputs positively placed on the ANCHOR's line", "anchor: 28",
+check("outputs positively placed on the ANCHOR's line", "anchor: 29",
       f"anchor: {len(placed_anchor)}")
 check("  outputs carrying a divergent-only token", "other: 5",
       f"other: {len(placed_other)}")

@@ -13,7 +13,9 @@ class found, 5 doubled slots.
 > anchor's line, so the population is **84** at `HEAD` and the corrected union's
 > anchor count **37 → 38**. Everything else below is unchanged, and the pin in
 > the probe is what forced this line. **Item 72's output** is undecidable, so
-> the population is **85** and the open set **37 → 38**.
+> the population is **85** and the open set **37 → 38**. **Item 74's** is
+> placed on the anchor's line, so the population is **86** and the corrected
+> union's anchor count **38 → 39**.
 
 ## What item 67 left open, in its own words
 
@@ -151,5 +153,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_swallowed_marks_corpus_wide.py` | `f204ff7507454f211031d4c7b550eae851e81c88f69b80a42485a349f858f2d0` |
-| `raw/raw-swallowed-marks-corpus-wide.txt` | `e746253e9d49c0342524a6a51206538d197208e1df9824fae22b9369d88db819` |
+| `raw/probe_swallowed_marks_corpus_wide.py` | `cedbe73dd918be28fd4d9cb6e434a9c873f3902c90b674e59c1e962fdcb7cd24` |
+| `raw/raw-swallowed-marks-corpus-wide.txt` | `b7d1bcbcf3e7751f6d7a5859cca2ae61ba9e24e5e65df138e3f04998bff46443` |

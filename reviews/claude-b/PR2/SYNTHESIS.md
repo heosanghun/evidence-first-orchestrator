@@ -3,8 +3,8 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**1487 passing checks across 74 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 175 files: **76 probe scripts, 91 raw outputs, 8
+**1513 passing checks across 75 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 177 files: **77 probe scripts, 92 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
@@ -124,6 +124,7 @@ never treated my own re-run as independent confirmation.
 | the class #19's probe never fed | **finding, reported on #19** — that probe fed 2 of 5 projection classes and **never wrote a projection file**, measured. Two un-fed classes are covered (a non-object hits `read_json`; any other key altered hits the ledger comparison). The third is not: `last_event_hash` is excluded by name from **all four** comparisons (`workspace.py:470`, `:495`, `:517`, `:1511`) and read at one (`:1182`). Forged to `"f"*64` it is written into the **signed** `task.proxy_submitted` event, bound to **no event in the ledger**, with `doctor healthy: True` | `NOTE-the-class-19s-probe-never-fed-and-the-hash-that-can-be-forged.md` |
 | deleting EVERY instance of a kind | map — **#10 widened a second time**: 17 kinds split into **9 multi-instance / 8 singleton**, the singletons serving as a positive control that reproduces item 69's four caught kinds. Of the nine, **0 change verdict or message** between one instance and all — `agents/*.json` reports `One or more signed agent projections are missing` either way, compared **un-truncated** because item 69's 40-character cut would have hidden it. The whole `submissions/T1/attempt-001/` tree (9 files) removes in one operation with `doctor` healthy and the task still `archived` | `NOTE-deleting-every-instance-of-a-kind-and-the-whole-attempt-tree.md` |
 | every published mark tally | map — **corrects a count of mine**: item 70 found the marker tuples count slots, so this re-derives every tally this review published, the table rows **parsed from the note** rather than typed. **One of eight numbers was wrong** — `raw-w4-replay.txt`'s divergent marks are **4**, not 5, because `transfer-orchestrator` is both hand-added and derived and so occupies two slots. Its **verdict does not move**. The two single-token occurrence counts cannot move at all, which is why the sweep finds one | `NOTE-every-published-mark-tally-re-derived-and-one-double-counted.md` |
+| every key excluded from a comparison | map — **negative result**: three exclusion mechanisms enumerated from the AST across **16** modules. Of **5** filtered mapping comprehensions, **4** exclude a key by name and the whole excluded-key set is **`['last_event_hash']`**; the fifth filters by *type* in a policy parser. Both candidate second exemptions are **driven and covered** — an extra or altered grant key trips the projection comparison, agent records are compared whole. **Item 71's finding does not generalise** | `NOTE-last-event-hash-is-the-only-key-excluded-from-a-comparison.md` |
 | `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
 
 Twenty components were probed and found sound (one with a claim since corrected — see #19).
@@ -283,8 +284,8 @@ task stricter than intended.
 
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
-`NOTE-citation-audit-of-this-review.md` audits all **263 live citations across
-80 documents**; every one now resolves at `main`. Three did not:
+`NOTE-citation-audit-of-this-review.md` audits all **266 live citations across
+81 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.
@@ -302,7 +303,7 @@ resolves also *quotes* accurately. Of eleven unambiguous (citation, fenced
 block) pairs, seven are verbatim and four are adjudicated non-quotes — but
 **two blocks had been condensed renderings presented as source**, and are now
 verbatim. The fix was to make the documents literal rather than the checker
-lenient. 343 inline spans remain undecidable by position and are named as a
+lenient. 347 inline spans remain undecidable by position and are named as a
 gap.
 
 ## A misleading number I published, corrected on 2026-08-03
