@@ -9,8 +9,8 @@
         expected: 7a9553b
         observed: 7a9553b
   [ok]   raw outputs in the corpus, the marker-printing ones excluded
-        expected: outputs: 86
-        observed: outputs: 86
+        expected: outputs: 87
+        observed: outputs: 87
   [ok]     exactly six outputs are excluded
         expected: excluded: 6
         observed: excluded: 6
@@ -57,11 +57,11 @@
         expected: mixed: 0
         observed: mixed: 0
   [ok]   outputs the test cannot place
-        expected: undecidable: 52
-        observed: undecidable: 52
+        expected: undecidable: 53
+        observed: undecidable: 53
   [ok]     and the four classes account for every output
-        expected: total: 86
-        observed: total: 86
+        expected: total: 87
+        observed: total: 87
 
 ########## D. the KNOWN ANSWER that shows the test is ONE-WAY ##########
   [ok] raw-attack4.txt is in the UNDECIDABLE set

@@ -100,7 +100,7 @@ every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
 check("  raw outputs scanned, the marker-printing ones excluded",
-      "outputs: 86", f"outputs: {len(outputs)}")
+      "outputs: 87", f"outputs: {len(outputs)}")
 check("    six are excluded now, this probe's own among them", "excluded: 6",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
 
@@ -330,7 +330,7 @@ check("  on the divergent line", "divergent: 6",
       f"divergent: {sum(1 for v in corrected.values() if v == 'divergent')}")
 check("  carrying both", "mixed: 3",
       f"mixed: {sum(1 for v in corrected.values() if v == 'mixed')}")
-check("  and still OPEN", "undecidable: 38",
+check("  and still OPEN", "undecidable: 39",
       f"undecidable: {sum(1 for v in corrected.values() if v == 'undecidable')}")
 check("    the four classes account for every output",
       f"total: {len(outputs)}", f"total: {sum(Counter(corrected.values()).values())}")

@@ -3,15 +3,15 @@
 One document for whoever picks this up next. Every claim below is measured and
 bound to a probe and a raw output on this branch; nothing here is new evidence.
 
-**1513 passing checks across 75 instrumented raw outputs** (as of `HEAD`
-2026-08-03). `raw/` holds 177 files: **77 probe scripts, 92 raw outputs, 8
+**1535 passing checks across 76 instrumented raw outputs** (as of `HEAD`
+2026-08-03). `raw/` holds 179 files: **78 probe scripts, 93 raw outputs, 8
 provenance-attack scripts** that predate the `[ok]` convention. Each is SHA-256
 bound in the write-up that cites it. **These numbers are now machine-checked**:
 `raw/probe_inventory_selfcheck.py` recounts `raw/` and **fails the run** if this
 paragraph disagrees with it. The counts exclude that probe's **own** output,
 which is the report of the run doing the counting — a self-reference with no
 fixpoint, stated rather than hidden — the same guard the citation and quote counts got.
-It also checks the headline `N checks, M unexpected` of all **68** write-ups
+It also checks the headline `N checks, M unexpected` of all **69** write-ups
 against the raw output each one names; nothing verified those until 2026-08-03.
 
 Twelve `UNEXPECTED` lines survive, in five files —
@@ -92,7 +92,7 @@ never treated my own re-run as independent confirmation.
 | `tests/` — 93 tests, 318 assertions | map, not a verdict — **10 of 16 issues cannot be expressed in it by name** | `NOTE-what-the-test-suite-cannot-catch.md` |
 | `web_tests/` — 37 tests, 120 assertions | map — each of #13/#14 has a test that feeds the guard **only the input it already handles** | `NOTE-the-node-tests-exercise-only-the-covered-input.md` |
 | dynamic-key **stores**, whole package | clean — 2 chains, both guarded; one invisible to a name-scoped census | `NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md` |
-| this review's own counts | machine-checked — inventory, 68 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
+| this review's own counts | machine-checked — inventory, 69 headline claims, citations, quotes | `NOTE-every-count-this-review-states-about-itself.md` |
 | attribute accesses reachable from a document | clean — 963 scoped to **24**; a near miss driven and **not** filed, **under the threat model `SECURITY.md:38` declares** | `NOTE-963-attribute-accesses-scoped-to-24-and-a-near-miss.md` |
 | `monitor/collector.py` coverage | map — 27 tests, **no test ages an input**; #6 has no vocabulary to be tested by | `NOTE-the-collector-suite-never-ages-an-input.md` |
 | the 8 provenance-attack scripts | map — all self-document; **2 ran against an unpinned tree that was the stale base**, superseded by the `_main` re-runs | `NOTE-two-attack-scripts-ran-against-the-stale-base.md` |
@@ -125,6 +125,7 @@ never treated my own re-run as independent confirmation.
 | deleting EVERY instance of a kind | map — **#10 widened a second time**: 17 kinds split into **9 multi-instance / 8 singleton**, the singletons serving as a positive control that reproduces item 69's four caught kinds. Of the nine, **0 change verdict or message** between one instance and all — `agents/*.json` reports `One or more signed agent projections are missing` either way, compared **un-truncated** because item 69's 40-character cut would have hidden it. The whole `submissions/T1/attempt-001/` tree (9 files) removes in one operation with `doctor` healthy and the task still `archived` | `NOTE-deleting-every-instance-of-a-kind-and-the-whole-attempt-tree.md` |
 | every published mark tally | map — **corrects a count of mine**: item 70 found the marker tuples count slots, so this re-derives every tally this review published, the table rows **parsed from the note** rather than typed. **One of eight numbers was wrong** — `raw-w4-replay.txt`'s divergent marks are **4**, not 5, because `transfer-orchestrator` is both hand-added and derived and so occupies two slots. Its **verdict does not move**. The two single-token occurrence counts cannot move at all, which is why the sweep finds one | `NOTE-every-published-mark-tally-re-derived-and-one-double-counted.md` |
 | every key excluded from a comparison | map — **negative result**: three exclusion mechanisms enumerated from the AST across **16** modules. Of **5** filtered mapping comprehensions, **4** exclude a key by name and the whole excluded-key set is **`['last_event_hash']`**; the fifth filters by *type* in a policy parser. Both candidate second exemptions are **driven and covered** — an extra or altered grant key trips the projection comparison, agent records are compared whole. **Item 71's finding does not generalise** | `NOTE-last-event-hash-is-the-only-key-excluded-from-a-comparison.md` |
+| deleting across TASKS | map — **#10 widened a third time**: both workspace shapes built in one run, so item 72's **9 multi / 8 singleton** is re-derived and the three-task split is **12 / 5**, with three kinds crossing. `tasks/*.json` — a caught kind — reports a message that **enumerates** at three tasks (`T1: …; T2: …; T3: …`) where one task could not show any movement. Sparing **one file of nineteen** turns a caught deletion invisible, and **54 of 65 files** — every bundle, report, submitted copy and archive record — can go with `doctor` healthy | `NOTE-deleting-across-tasks-54-of-65-files-and-doctor-is-healthy.md` |
 | `public/` at **`origin/main`**, not the anchor | **1 issue** | #20 every security header deleted from `_headers`, transport badge gone from `app.js`; main red for 9 pushes |
 
 Twenty components were probed and found sound (one with a claim since corrected — see #19).
@@ -285,7 +286,7 @@ task stricter than intended.
 ## Three wrong citations in my own write-ups, found and fixed on 2026-08-03
 
 `NOTE-citation-audit-of-this-review.md` audits all **266 live citations across
-81 documents**; every one now resolves at `main`. Three did not:
+82 documents**; every one now resolves at `main`. Three did not:
 
 - `README.md:590` [retracted] was really `cli.py:590` — right line, wrong file, in a file
   of 452 lines. I had cited an argparse `help=` string as documented intent.

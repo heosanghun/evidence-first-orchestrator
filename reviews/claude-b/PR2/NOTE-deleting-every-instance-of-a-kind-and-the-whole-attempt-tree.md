@@ -8,6 +8,15 @@ filed, nothing retracted.
 **Scope, stated first:** 27 files, 17 kinds, 9 multi-instance, 8 singleton, 26
 deletion drives, 1 whole-subtree delete, 1 exhaustiveness assertion.
 
+> **EXTENDED 2026-08-04 by item 75 — nothing here is retracted.** This round
+> said plainly it does not delete across **tasks**. It has now been driven with
+> three archived tasks: the split below moves to **12 multi / 5 singleton**,
+> three kinds cross, and `tasks/*.json` — one of the four caught kinds — turns
+> out to report a message that **enumerates** once there is more than one of it
+> (`T1: …; T2: …; T3: …`), which one task could not show. **54 of 65 files**
+> can then be removed with `doctor` healthy. See
+> `NOTE-deleting-across-tasks-54-of-65-files-and-doctor-is-healthy.md`.
+
 ## What item 69 left open, in its own words
 
 That round drove a delete of each of the 17 file kinds and said plainly:

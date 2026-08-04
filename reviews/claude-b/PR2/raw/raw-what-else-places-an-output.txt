@@ -6,21 +6,21 @@
         expected: dirty: ''
         observed: dirty: ''
   [ok]   raw outputs scanned, the marker-printing ones excluded
-        expected: outputs: 86
-        observed: outputs: 86
+        expected: outputs: 87
+        observed: outputs: 87
   [ok]     exactly six are excluded, this probe's own among them
         expected: excluded: 6
         observed: excluded: 6
 
 ########## B. the classification item 61 left ##########
-    Counter({'undecidable': 52, 'anchor': 29, 'divergent': 5})
+    Counter({'undecidable': 53, 'anchor': 29, 'divergent': 5})
   [ok] the module/test-id test leaves this many undecidable
-        expected: undecidable: 52
-        observed: undecidable: 52
+        expected: undecidable: 53
+        observed: undecidable: 53
 
 ########## C. the two classes already measured, re-measured on the 47 ##########
-    print a suite size   : 5 of 52  ['raw-main-suite.txt', 'raw-main2-suite.txt', 'raw-proxy-suite.txt', 'raw-recheck-cef5623.txt', 'raw-report-reproducibility.txt']
-    print a CLI usage line: 1 of 52  ['raw-wheel-restored.txt']
+    print a suite size   : 5 of 53  ['raw-main-suite.txt', 'raw-main2-suite.txt', 'raw-proxy-suite.txt', 'raw-recheck-cef5623.txt', 'raw-report-reproducibility.txt']
+    print a CLI usage line: 1 of 53  ['raw-wheel-restored.txt']
   [ok] a suite size covers five of the open set
         expected: suite: 5
         observed: suite: 5
@@ -86,7 +86,7 @@
   than a result section.
 
 ########## G. what the corrected class places ##########
-    the 52 previously undecidable: {'undecidable': 39, 'anchor': 10, 'mixed': 1, 'divergent': 2}
+    the 53 previously undecidable: {'undecidable': 40, 'anchor': 10, 'mixed': 1, 'divergent': 2}
   [ok] outputs newly placed on the anchor's line
         expected: anchor: 10
         observed: anchor: 10
@@ -97,9 +97,9 @@
         expected: mixed: 1
         observed: mixed: 1
   [ok]   and STILL undecidable
-        expected: undecidable: 39
-        observed: undecidable: 39
-    UNION of both tests: {'undecidable': 39, 'anchor': 38, 'mixed': 4, 'divergent': 5}
+        expected: undecidable: 40
+        observed: undecidable: 40
+    UNION of both tests: {'undecidable': 40, 'anchor': 38, 'mixed': 4, 'divergent': 5}
   [ok] the union places this many on the anchor's line
         expected: anchor: 38
         observed: anchor: 38
@@ -110,11 +110,11 @@
         expected: mixed: 4
         observed: mixed: 4
   [ok]   and leaves this many OPEN
-        expected: undecidable: 39
-        observed: undecidable: 39
+        expected: undecidable: 40
+        observed: undecidable: 40
   [ok]     the classes account for every output
-        expected: total: 86
-        observed: total: 86
+        expected: total: 87
+        observed: total: 87
 
 ########## H. what this does NOT establish ##########
   * The headline is a NEGATIVE: 35 of 79 outputs carry no marker of
