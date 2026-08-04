@@ -18,6 +18,15 @@ swallowed literal measured occurrence-by-occurrence, 1 subject test.
 > were never matched. With them added the union moves **36/5/4/38 →
 > 37/6/3/37**, so **the mixed class shrinks from 4 to 3** — `raw-full-final.txt`
 > leaves it and no output joins.
+>
+> **CORRECTED 2026-08-03 by item 73 — one number in the table below was
+> wrong.** `raw-w4-replay.txt`'s divergent marks were published as **5**; they
+> are **4**. The marker "set" is a concatenated tuple and
+> `transfer-orchestrator` occupies **two slots** — I hand-added it *and* the
+> literal derivation produces it from the divergent source — so this count,
+> taken over the tuple, counted it twice. The row is amended in place. The
+> **verdict does not move**: four marks is still both lines, and this file
+> names both refs by design. Three of the four rows reproduce exactly.
 
 ## What item 64 left open
 
@@ -28,7 +37,7 @@ them**. Derived here rather than copied:
 | output | anchor marks | divergent marks | verdict |
 |---|---|---|---|
 | `raw-attack-prov-main.txt` | 2 | 2 | **GENUINE** |
-| `raw-w4-replay.txt` | 3 | 5 | **GENUINE** |
+| `raw-w4-replay.txt` | 3 | 4 | **GENUINE** |
 | `raw-full-final.txt` | 1 | 2 | **SPURIOUS** |
 | `raw-quote-accuracy.txt` | 10 | 2 | **not a program run** |
 
@@ -138,5 +147,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_the_four_mixed_outputs.py` | `adfcbe7283bfe17dbf7b9f77af167a10115925fd370055ec7c61da2bf79e8e5f` |
-| `raw/raw-the-four-mixed-outputs.txt` | `cec60b958be7f4fe18b7ee3916bab7785962129b5b5e68d6fe2ede8b6613ceaa` |
+| `raw/probe_the_four_mixed_outputs.py` | `adfa6463da02d24f3d12172fae7125ee76fb93b03efb5f1e4302997659370079` |
+| `raw/raw-the-four-mixed-outputs.txt` | `b30899f3b26c44c365b80a23ac06a6bcedfd6327e2c55a1a0f9ca4a7ef6e30dc` |

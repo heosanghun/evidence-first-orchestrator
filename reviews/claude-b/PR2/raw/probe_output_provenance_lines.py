@@ -148,7 +148,9 @@ ITEM67 = output_of("probe_the_four_mixed_outputs")
 # Item 70's probe prints both marker sets AND every swallowed occurrence -
 # FIFTH, same reason. The count below is what forces each new one to be named.
 ITEM70 = output_of("probe_swallowed_marks_corpus_wide")
-SKIP = (SELF, ITEM61, ITEM64, ITEM67, ITEM70)
+# Item 73's probe prints the doubled tokens themselves - SIXTH, same reason.
+ITEM73 = output_of("probe_published_mark_tallies")
+SKIP = (SELF, ITEM61, ITEM64, ITEM67, ITEM70, ITEM73)
 every = sorted(p for p in RAW.iterdir()
                if p.name.startswith("raw-") and p.suffix == ".txt")
 outputs = [p for p in every if p.name not in SKIP]
@@ -159,7 +161,7 @@ outputs = [p for p in every if p.name not in SKIP]
 # output is excluded rather than counted, so the population stays 77.
 check("  raw outputs in the corpus, the marker-printing ones excluded",
       "outputs: 85", f"outputs: {len(outputs)}")
-check("    exactly five outputs are excluded", "excluded: 5",
+check("    exactly six outputs are excluded", "excluded: 6",
       f"excluded: {len([p for p in every if p.name in SKIP])}")
 print("  This probe's OWN classification is therefore the one number here")
 print("  that is not machine-checked; it is read off the section below.")

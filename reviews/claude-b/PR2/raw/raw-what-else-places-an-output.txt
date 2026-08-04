@@ -8,9 +8,9 @@
   [ok]   raw outputs scanned, the marker-printing ones excluded
         expected: outputs: 85
         observed: outputs: 85
-  [ok]     exactly five are excluded, this probe's own among them
-        expected: excluded: 5
-        observed: excluded: 5
+  [ok]     exactly six are excluded, this probe's own among them
+        expected: excluded: 6
+        observed: excluded: 6
 
 ########## B. the classification item 61 left ##########
     Counter({'undecidable': 52, 'anchor': 28, 'divergent': 5})

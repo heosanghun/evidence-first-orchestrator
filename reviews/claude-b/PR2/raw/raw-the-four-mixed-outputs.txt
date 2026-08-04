@@ -8,9 +8,9 @@
   [ok]   raw outputs scanned, the marker-printing ones excluded
         expected: outputs: 85
         observed: outputs: 85
-  [ok]     five are excluded now, this probe's own among them
-        expected: excluded: 5
-        observed: excluded: 5
+  [ok]     six are excluded now, this probe's own among them
+        expected: excluded: 6
+        observed: excluded: 6
 
 ########## B. the four, DERIVED rather than copied ##########
     raw-attack-prov-main.txt         anchor=2 divergent=2

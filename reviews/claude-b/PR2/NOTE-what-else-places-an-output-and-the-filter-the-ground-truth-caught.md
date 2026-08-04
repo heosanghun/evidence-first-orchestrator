@@ -167,5 +167,5 @@ independent confirmation.
 
 | Artifact | SHA-256 |
 |---|---|
-| `raw/probe_what_else_places_an_output.py` | `fb9bfef96eeca7349a5348d23f707e3d343dfbb4a56d1ca6e59337fbe74a8215` |
-| `raw/raw-what-else-places-an-output.txt` | `c3cb4f052149a34a05e6b70444fa825052c405e804a7377ce279b257f97ff44f` |
+| `raw/probe_what_else_places_an_output.py` | `a6f76adde055cfc0467d2a7f95fdd398fb964979f4f44ff7ade62e4b9e5bc60b` |
+| `raw/raw-what-else-places-an-output.txt` | `28f907b525a14949759e59bddb3011726c39beac7ab7f6514bedd2845d460ffd` |
