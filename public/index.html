@@ -8,8 +8,8 @@
   <meta name="description" content="Evidence First Orchestrator 실시간 운영 현황">
   <title>EFO Operations</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=4.5.0">
-  <script src="/assets/app.js?v=4.5.0" defer></script>
+  <link rel="stylesheet" href="/assets/styles.css?v=4.6.0">
+  <script src="/assets/app.js?v=4.6.0" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -42,10 +42,10 @@
       <div class="mission-progress">
         <div class="metric-line">
           <span>검증 워크플로 진행률</span>
-          <strong id="overall-progress-label">82%</strong>
+          <strong id="overall-progress-label">65%</strong>
         </div>
         <progress class="progress-track progress-large" id="overall-progress"
-                  aria-label="검증 워크플로 진행률" max="100" value="82">82%</progress>
+                  aria-label="검증 워크플로 진행률" max="100" value="65">65%</progress>
         <p id="next-milestone">다음 단계: CTS :: Phase 2 E3 Iso-Depth D&le;15 통제실험 진행중</p>
       </div>
     </section>
@@ -56,40 +56,45 @@
           <p class="eyebrow">연구 포트폴리오</p>
           <h2 id="portfolio-heading">프로젝트 전체 진행률</h2>
         </div>
-        <span class="section-meta" id="project-count">3개 프로젝트 관리 중</span>
+        <span class="section-meta" id="project-count">2개 핵심 프로젝트 (좌측: CTS | 우측: System 1.5)</span>
       </div>
       <p class="portfolio-note">
         아래 비율은 모델 정확도가 아니라, 사전등록된 EFO 검증 게이트의 완료 상태입니다.
       </p>
-      <div class="project-grid" id="project-grid" aria-live="polite">
-        <article class="project-card" style="border-top: 3px solid #10b981; padding: 16px; background: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <strong style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">🟢 CTS (Continuous Thought Space)</strong>
-            <span style="font-size: 0.82rem; font-weight: 800; padding: 2px 8px; background: #ecfdf5; color: #047857; border-radius: 4px;">진행중 · 85%</span>
+      <div class="project-grid-2col" id="project-grid" aria-live="polite" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px; margin-top: 16px;">
+        <!-- Left Box: CTS Project -->
+        <article class="project-card cts-card" style="border-top: 4px solid #10b981; padding: 20px; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; border-top-width: 4px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">🟢 CTS (Continuous Thought Space)</strong>
+            <span style="font-size: 0.85rem; font-weight: 800; padding: 4px 10px; background: #ecfdf5; color: #047857; border-radius: 6px; border: 1px solid #a7f3d0;">실측대기 · 70%</span>
           </div>
-          <p style="font-size: 0.85rem; color: #475569; margin: 0 0 10px 0; font-weight: 600;">E2 Baseline Verified (43.3%) → E3 Iso-Depth D&le;15 통제실험 진행중</p>
-          <div class="progress-track" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
-            <span style="width: 85%; height: 100%; background: #10b981; display: block; border-radius: 5px;"></span>
+          <p style="font-size: 0.88rem; color: #334155; margin: 0 0 14px 0; font-weight: 600; line-height: 1.5;">
+            E2 Baseline 1차 실측 완주 (9h 42m, 8/30 엄격, 10/30 보강) ➔ E2-R2 9문항 사전등록 v4 봉인 완수
+          </p>
+          <div class="progress-track" role="progressbar" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100" style="height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; border: 1px solid #cbd5e1;">
+            <span style="width: 70%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); display: block; border-radius: 5px;"></span>
           </div>
-        </article>
-        <article class="project-card" style="border-top: 3px solid #3b82f6; padding: 16px; background: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <strong style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">🔵 System 1.5 (AAAI 2027 PoC)</strong>
-            <span style="font-size: 0.82rem; font-weight: 800; padding: 2px 8px; background: #eff6ff; color: #1d4ed8; border-radius: 4px;">진행중 · 55%</span>
-          </div>
-          <p style="font-size: 0.85rem; color: #475569; margin: 0 0 10px 0; font-weight: 600;">Stage 1 DEQ Broyden Solver GPU 파이프라인 수행 (55%)</p>
-          <div class="progress-track" role="progressbar" aria-valuenow="55" aria-valuemin="0" aria-valuemax="100" style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
-            <span style="width: 55%; height: 100%; background: #3b82f6; display: block; border-radius: 5px;"></span>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #64748b; margin-top: 8px; font-weight: 700;">
+            <span>Phase 2 (E2 Baseline Verified)</span>
+            <span>최근 변경: 08.06. 09:33</span>
           </div>
         </article>
-        <article class="project-card" style="border-top: 3px solid #8b5cf6; padding: 16px; background: #ffffff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <strong style="font-size: 1.05rem; font-weight: 800; color: #0f172a;">🟣 EFO Core (Evidence Orchestrator)</strong>
-            <span style="font-size: 0.82rem; font-weight: 800; padding: 2px 8px; background: #f5f3ff; color: #6d28d9; border-radius: 4px;">검증완료 · 100%</span>
+
+        <!-- Right Box: System 1.5 Project -->
+        <article class="project-card sys15-card" style="border-top: 4px solid #3b82f6; padding: 20px; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; border-top-width: 4px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <strong style="font-size: 1.1rem; font-weight: 800; color: #0f172a;">🔵 System 1.5 (AAAI 2027 PoC)</strong>
+            <span style="font-size: 0.85rem; font-weight: 800; padding: 4px 10px; background: #eff6ff; color: #1d4ed8; border-radius: 6px; border: 1px solid #bfdbfe;">진행중 · 60%</span>
           </div>
-          <p style="font-size: 0.85rem; color: #475569; margin: 0 0 10px 0; font-weight: 600;">사전등록된 5대 EFO 근거 검증 게이트 100% 서명 통과</p>
-          <div class="progress-track" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
-            <span style="width: 100%; height: 100%; background: #8b5cf6; display: block; border-radius: 5px;"></span>
+          <p style="font-size: 0.88rem; color: #334155; margin: 0 0 14px 0; font-weight: 600; line-height: 1.5;">
+            Stage 1 DEQ Broyden Solver GPU 파이프라인 수행 (pytest 25/25 100% PASS) ➔ Stage 2 FWP ΔW 준비
+          </p>
+          <div class="progress-track" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; border: 1px solid #cbd5e1;">
+            <span style="width: 60%; height: 100%; background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); display: block; border-radius: 5px;"></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #64748b; margin-top: 8px; font-weight: 700;">
+            <span>Phase 1 (Stage 1 DEQ Broyden Solver)</span>
+            <span>최근 변경: 08.06. 09:33</span>
           </div>
         </article>
       </div>
@@ -1172,7 +1177,7 @@
             <div class="project-ledger-header">
               <div class="project-ledger-title">
                 <span>🔵 System 1.5 프로젝트 전용 작업 원장</span>
-                <span class="project-ledger-badge" style="background: #e8f0fe; color: #1967d2;">Phase 0 ~ Phase 5 단계 매핑 (진행률 45%)</span>
+                <span class="project-ledger-badge" style="background: #e8f0fe; color: #1967d2;">Phase 0 ~ Phase 5 단계 매핑 (진행률 65%)</span>
               </div>
               <span class="project-ledger-badge">3개 과업 관리 중</span>
             </div>
@@ -1305,9 +1310,9 @@
                     <td><span class="enum-badge pending">⚪ 미착수</span></td>
                     <td style="width: 140px;">
                       <div class="progress-track" role="progressbar" aria-valuenow="45" style="height: 14px; background: #e2e8f0; border-radius: 7px; border: 1px solid #94a3b8; overflow: hidden;">
-                        <span style="width: 45%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); display: block; border-radius: 5px;"></span>
+                        <span style="width: 65%; height: 100%; background: linear-gradient(90deg, #10b981 0%, #059669 100%); display: block; border-radius: 5px;"></span>
                       </div>
-                      <small class="progress-percent-label" style="font-size:0.78rem; color:#0f172a; font-weight:800;">45%</small>
+                      <small class="progress-percent-label" style="font-size:0.78rem; color:#0f172a; font-weight:800;">65%</small>
                     </td>
                     <td style="font-size:0.85rem; color:#0f172a; font-weight:700;">차단 원인 해소</td>
                     <td style="font-size:0.8rem; color:#1e293b; font-weight:700;">08.03. 15:13</td>

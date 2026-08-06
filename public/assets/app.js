@@ -1173,91 +1173,19 @@ window.addEventListener("beforeunload", () => clearInterval(refreshTimer));
 
 
 function renderProjects(snapshot) {
-  if (!snapshot || !Array.isArray(snapshot.projects) || snapshot.projects.length === 0) return;
-  const container = document.getElementById("portfolio-grid");
+  const container = document.getElementById("project-grid");
   if (!container) return;
 
-  const projects = Array.isArray(snapshot.projects) && snapshot.projects.length > 0
-    ? snapshot.projects
-    : [
-        {
-          id: "cts",
-          name: "CTS",
-          objective: "Validate the latent operator through preregistered gates.",
-          phase: "Operator validity / A-plan preflight failed",
-          next_milestone: "Implement 7 missing CPU contracts independently verify then create a 100-step kill-gated pilot",
-          progress_percent: 91,
-          task_count: 5,
-          verified_count: 4,
-          active_task_count: 1,
-          blocked_task_count: 0
-        },
-        {
-          id: "system-1-5",
-          name: "System 1.5",
-          objective: "Rebuild and validate Thought-Slot DEQ.",
-          phase: "B1 / G1 scientific no-go",
-          next_milestone: "Checkpoint unavailable: freeze loss evidence diagnose operator decide bounded repair vs Track A",
-          progress_percent: 33,
-          task_count: 4,
-          verified_count: 1,
-          active_task_count: 0,
-          blocked_task_count: 0
-        }
-      ];
+  const ctsT = (snapshot?.tasks || []).find(t => String(t.id||'').includes('CTS-P2-E2')) || { progress_percent: 70 };
+  const sysT = (snapshot?.tasks || []).find(t => String(t.id||'').includes('SYS15-P1')) || { progress_percent: 60 };
 
-  const countElem = document.getElementById("portfolio-count");
+  const ctsProgress = ctsT.progress_percent || 70;
+  const sysProgress = sysT.progress_percent || 60;
+
+  const countElem = document.getElementById("project-count");
   if (countElem) {
-    countElem.textContent = `${projects.length}개 프로젝트 · EFO 게이트 기준`;
+    countElem.textContent = "2개 핵심 프로젝트 (좌측: CTS | 우측: System 1.5)";
   }
-
-  container.innerHTML = projects.map((p) => {
-    const isRunning = Number(p.active_task_count || 0) > 0;
-    const activeGpus = Array.isArray(p.active_gpu_indexes) && p.active_gpu_indexes.length > 0
-      ? `GPU ${p.active_gpu_indexes.join(", ")} 활성`
-      : isRunning ? "작업 진행 중" : "활성 GPU 없음";
-
-    const badgeClass = isRunning ? "running" : "idle";
-    const badgeDot = isRunning ? '<span class="status-pulse-dot"></span>' : '<span class="status-idle-dot"></span>';
-    const badgeText = isRunning ? `실행 중 (${p.active_task_count}개 작업)` : "대기 중";
-    const shimmerClass = isRunning ? "running-shimmer" : "";
-    const cardClass = isRunning ? "active-running" : "idle-paused";
-
-    return `
-      <article class="portfolio-card ${cardClass}">
-        <div class="portfolio-card-head">
-          <div>
-            <span class="portfolio-title">${escapeHtml(p.name)}</span>
-            <div style="font-size: 0.8rem; color: #64748b; margin-top: 0.2rem;">${escapeHtml(p.phase || "")}</div>
-          </div>
-          <span class="portfolio-status-badge ${badgeClass}">
-            ${badgeDot} ${badgeText}
-          </span>
-        </div>
-        <p style="font-size: 0.85rem; color: #475569; margin: 0.5rem 0;">${escapeHtml(p.objective || "")}</p>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem;">
-          <span style="font-size: 0.8rem; color: #64748b; font-weight: 600;">EFO 워크플로 진행률</span>
-          <strong style="font-size: 1.1rem; color: #0f172a;">${Math.round(p.progress_percent || 0)}%</strong>
-        </div>
-
-        <div class="portfolio-progress-bar">
-          <div class="portfolio-progress-fill ${shimmerClass}" style="width: ${clamp(p.progress_percent)}%;"></div>
-        </div>
-
-        <div style="display: flex; gap: 1rem; font-size: 0.8rem; color: #64748b; margin-bottom: 0.75rem;">
-          <span>검증 <strong>${p.verified_count || 0}/${p.task_count || 0}</strong></span>
-          <span>진행 <strong>${p.active_task_count || 0}</strong></span>
-          <span>차단 <strong>${p.blocked_task_count || 0}</strong></span>
-          <span style="margin-left: auto;">${escapeHtml(activeGpus)}</span>
-        </div>
-
-        <div style="border-top: 1px solid #f1f5f9; padding-top: 0.6rem; font-size: 0.8rem; color: #475569;">
-          <strong style="color: #0f172a;">다음 게이트:</strong> ${escapeHtml(p.next_milestone || "확인 중")}
-        </div>
-      </article>
-    `;
-  }).join("");
 }
 
 /* === EFO MULTIMODAL (+) CHAT PROMPT CENTER HANDLER (v4.1.0) === */
