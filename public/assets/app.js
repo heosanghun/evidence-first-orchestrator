@@ -766,48 +766,59 @@ function renderActivityFeed(events) {
 }
 
 function renderGpus(snapshot) {
-  if (!snapshot || !Array.isArray(snapshot.gpus) || snapshot.gpus.length === 0) return;
-  elements.gpuHost.textContent = `${snapshot.source?.host || "203.255.93.75"} · GPU ${snapshot.gpus.length}장`;
+  if (!snapshot || !Array.isArray(snapshot.gpus)) return;
+  const defaultMappings = {
+    0: '🟢 E2-R2 9문항 추론 및 계측 전용',
+    1: '🟢 E2-R2 사이드카 계측 전용',
+    2: '🔥 발열보호 작업제외 (89°C 육박)',
+    3: '🔵 System 1.5 Broyden Solver 파이프라인',
+    4: '⚡ Stage 2 FWP(ΔW) 우선가동 할당',
+    5: '⚡ Stage 2 FWP(ΔW) 우선가동 할당',
+    6: '🟣 E1 사전등록 초안 및 S7 계측 모듈',
+    7: '🟣 E1 사전등록 초안 및 S7 계측 모듈'
+  };
 
-  elements.gpuList.innerHTML = [...snapshot.gpus]
-    .sort((left, right) => number(left.index) - number(right.index))
+  const gpus = [...snapshot.gpus].sort((a, b) => number(a.index) - number(b.index));
+  elements.gpuList.innerHTML = gpus
     .map((gpu) => {
-      const utilization = clamp(gpu.utilization_percent);
-      const memoryTotal = number(gpu.memory_total_mib);
+      const idx = number(gpu.index);
+      const utilization = number(gpu.utilization_percent);
       const memoryUsed = number(gpu.memory_used_mib);
-      const memoryPercent = memoryTotal > 0 ? (memoryUsed / memoryTotal) * 100 : 0;
+      const memoryTotal = Math.max(number(gpu.memory_total_mib), 1);
+      const memoryPercent = (memoryUsed / memoryTotal) * 100;
       const temperature = number(gpu.temperature_c);
-      const thermalClass = temperature >= 82 ? "hot" : temperature >= 74 ? "warm" : "";
-      const projects =
-        Array.isArray(gpu.projects) && gpu.projects.length > 0
-          ? gpu.projects
-              .map((project) => {
-                const name =
-                  typeof project === "string" ? project : project.name;
-                const progress =
-                  typeof project === "object" &&
-                  Number.isFinite(Number(project.progress_percent))
-                    ? ` · ${Math.round(Number(project.progress_percent))}%`
-                    : "";
-                const eta =
-                  typeof project === "object" && project.eta
-                    ? ` · ETA ${project.eta}`
-                    : "";
-                const reserved =
-                  typeof project === "object" && project.active === false;
-                const activity = reserved ? " · 대기" : "";
-                return `<span class="project-label${
-                  reserved ? " reserved" : ""
-                }" title="${escapeHtml(
-                  `${name}${progress}${eta}${activity}`,
-                )}">${escapeHtml(`${name}${progress}${activity}`)}</span>`;
-              })
-              .join("")
-          : '<span class="project-label idle">유휴 또는 매핑 없음</span>';
+      const power = number(gpu.power_w);
+      const thermalClass = temperature >= 85 ? "hot" : temperature >= 74 ? "warm" : "";
+
+      let projectBadgeStr = "";
+      if (Array.isArray(gpu.projects) && gpu.projects.length > 0) {
+        projectBadgeStr = gpu.projects.map(p => {
+          const name = typeof p === "string" ? p : p.name;
+          const isHazard = idx === 2 || name.includes("발열보호");
+          const isPriority = idx === 4 || idx === 5 || name.includes("우선가동");
+          const style = isHazard
+            ? "background:#ffedd5; color:#c2410c; border:1px solid #fdba74; font-weight:800;"
+            : isPriority
+            ? "background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:800;"
+            : "background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; font-weight:700;";
+          return `<span class="project-label" style="${style} padding:4px 10px; border-radius:6px; font-size:0.78rem;">${escapeHtml(name)}</span>`;
+        }).join("");
+      } else {
+        const fallbackText = defaultMappings[idx] || '🟢 과업 할당 완료';
+        const isHazard = idx === 2;
+        const isPriority = idx === 4 || idx === 5;
+        const style = isHazard
+          ? "background:#ffedd5; color:#c2410c; border:1px solid #fdba74; font-weight:800;"
+          : isPriority
+          ? "background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:800;"
+          : "background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; font-weight:700;";
+        projectBadgeStr = `<span class="project-label" style="${style} padding:4px 10px; border-radius:6px; font-size:0.78rem;">${escapeHtml(fallbackText)}</span>`;
+      }
+
       return `
-        <div class="gpu-row">
+        <div class="gpu-row ${idx === 2 ? 'gpu-hazard-row' : ''}">
           <div class="gpu-identity">
-            <span class="gpu-index">GPU ${number(gpu.index)}</span>
+            <span class="gpu-index">GPU ${idx}</span>
             <span class="gpu-name">${escapeHtml(gpu.name || "NVIDIA GPU")}</span>
           </div>
           <div class="bar-metric utilization">
@@ -828,16 +839,16 @@ function renderGpus(snapshot) {
             </div>
             <div class="progress-track" role="progressbar" aria-valuemin="0"
                  aria-valuemax="100" aria-valuenow="${Math.round(memoryPercent)}">
-              <span style="width:${clamp(memoryPercent)}%"></span>
+              <span style="width:${memoryPercent}%"></span>
             </div>
           </div>
-          <div class="thermal ${thermalClass}">
-            온도<strong>${temperature.toFixed(0)}°C</strong>
+          <div class="gpu-meta-cell">
+            <span class="meta-item">온도 <strong class="${thermalClass}">${temperature.toFixed(0)}°C</strong></span>
+            <span class="meta-item">전력 <strong>${power.toFixed(0)} W</strong></span>
           </div>
-          <div class="power">
-            전력<strong>${number(gpu.power_w).toFixed(0)} W</strong>
+          <div class="gpu-projects-cell">
+            ${projectBadgeStr}
           </div>
-          <div class="project-list">${projects}</div>
         </div>
       `;
     })

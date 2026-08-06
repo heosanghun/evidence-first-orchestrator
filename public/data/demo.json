@@ -141,7 +141,10 @@
       "memory_used_mib": 18800,
       "memory_total_mib": 49152,
       "temperature_c": 68,
-      "power_w": 285
+      "power_w": 285,
+      "projects": [
+        "🟢 E2-R2 9문항 추론 및 계측 전용"
+      ]
     },
     {
       "index": 1,
@@ -150,7 +153,10 @@
       "memory_used_mib": 16400,
       "memory_total_mib": 49152,
       "temperature_c": 64,
-      "power_w": 260
+      "power_w": 260,
+      "projects": [
+        "🟢 E2-R2 사이드카 계측 전용"
+      ]
     },
     {
       "index": 2,
@@ -159,7 +165,10 @@
       "memory_used_mib": 1200,
       "memory_total_mib": 49152,
       "temperature_c": 89,
-      "power_w": 40
+      "power_w": 40,
+      "projects": [
+        "🔥 발열보호 작업제외 (89°C 육박)"
+      ]
     },
     {
       "index": 3,
@@ -168,7 +177,10 @@
       "memory_used_mib": 12800,
       "memory_total_mib": 49152,
       "temperature_c": 59,
-      "power_w": 210
+      "power_w": 210,
+      "projects": [
+        "🔵 System 1.5 Stage 1 DEQ Broyden Solver 파이프라인"
+      ]
     },
     {
       "index": 4,
@@ -177,7 +189,10 @@
       "memory_used_mib": 17500,
       "memory_total_mib": 49152,
       "temperature_c": 61,
-      "power_w": 245
+      "power_w": 245,
+      "projects": [
+        "⚡ Stage 2 FWP(ΔW) 우선가동 할당 (GPU 2 대체)"
+      ]
     },
     {
       "index": 5,
@@ -186,7 +201,10 @@
       "memory_used_mib": 16200,
       "memory_total_mib": 49152,
       "temperature_c": 60,
-      "power_w": 235
+      "power_w": 235,
+      "projects": [
+        "⚡ Stage 2 FWP(ΔW) 우선가동 할당 (GPU 2 대체)"
+      ]
     },
     {
       "index": 6,
@@ -195,7 +213,10 @@
       "memory_used_mib": 8500,
       "memory_total_mib": 49152,
       "temperature_c": 51,
-      "power_w": 140
+      "power_w": 140,
+      "projects": [
+        "🟣 E1 사전등록 초안 및 S7 계측 모듈"
+      ]
     },
     {
       "index": 7,
@@ -204,7 +225,10 @@
       "memory_used_mib": 7200,
       "memory_total_mib": 49152,
       "temperature_c": 49,
-      "power_w": 125
+      "power_w": 125,
+      "projects": [
+        "🟣 E1 사전등록 초안 및 S7 계측 모듈"
+      ]
     }
   ],
   "system": {
