@@ -285,18 +285,229 @@
         <article class="activity-panel">
           <div class="activity-subheading">
             <div>
-              <strong>시간대별 활동량 (8월 6일 10:25 실측 최신화)</strong>
-              <span>각 막대는 1시간 동안 기록된 이벤트 수입니다. 8월 6일 기준 최신 원장 히스토리 반영됨.</span>
+              <strong>시간대별 활동량 (8월 6일 10:25 실측)</strong>
+              <span>각 막대는 1시간 동안 기록된 이벤트 수입니다. 전체 24시간 풀 그리드 레이아웃.</span>
             </div>
             <span id="activity-peak">최대 5건/시간</span>
           </div>
           <div class="activity-chart-scroll">
-            <div class="activity-histogram" id="activity-histogram" role="img" aria-label="시간대별 작업 이벤트 막대그래프">
-              <svg width="100%" height="160" viewBox="0 0 720 160" preserveAspectRatio="none" style="display: block; width: 100%;">
-                <g class="histogram-bars">
-                  <rect x="10" y="110" width="20" height="40" fill="#10b981" rx="3" /><rect x="40" y="120" width="20" height="30" fill="#2563eb" rx="3" /><rect x="70" y="130" width="20" height="20" fill="#8b5cf6" rx="3" /><rect x="100" y="130" width="20" height="20" fill="#f59e0b" rx="3" /><rect x="130" y="130" width="20" height="20" fill="#10b981" rx="3" /><rect x="160" y="120" width="20" height="30" fill="#2563eb" rx="3" /><rect x="190" y="110" width="20" height="40" fill="#8b5cf6" rx="3" /><rect x="220" y="100" width="20" height="50" fill="#10b981" rx="3" /><rect x="250" y="80" width="20" height="70" fill="#f59e0b" rx="3" /><rect x="280" y="40" width="20" height="110" fill="#2563eb" rx="3" /><rect x="310" y="30" width="20" height="120" fill="#10b981" rx="3" /><rect x="340" y="60" width="20" height="90" fill="#8b5cf6" rx="3" /><rect x="370" y="50" width="20" height="100" fill="#2563eb" rx="3" /><rect x="400" y="40" width="20" height="110" fill="#ef4444" rx="3" /><rect x="430" y="30" width="20" height="120" fill="#10b981" rx="3" /><rect x="460" y="50" width="20" height="100" fill="#2563eb" rx="3" /><rect x="490" y="40" width="20" height="110" fill="#f59e0b" rx="3" /><rect x="520" y="10" width="20" height="140" fill="#8b5cf6" rx="3" /><rect x="550" y="0" width="20" height="150" fill="#10b981" rx="3" /><rect x="580" y="20" width="20" height="130" fill="#2563eb" rx="3" /><rect x="610" y="10" width="20" height="140" fill="#10b981" rx="3" /><rect x="640" y="30" width="20" height="120" fill="#2563eb" rx="3" /><rect x="670" y="20" width="20" height="130" fill="#10b981" rx="3" /><rect x="700" y="10" width="20" height="140" fill="#10b981" rx="3" />
-                </g>
-              </svg>
+            <div class="activity-histogram" id="activity-histogram" role="img" aria-label="시간대별 작업 이벤트 막대그래프" style="--activity-hours: 24;">
+        <div class="activity-hour" title="시간대 00:00 · 1건">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:20%" title="1건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">11시</time>
+        </div>
+        <div class="activity-hour" title="시간대 01:00 · 2건">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment evidence" style="height:40%" title="2건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 02:00 · 1건">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment success" style="height:20%" title="1건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 03:00 · 3건">
+          <span class="activity-hour-count">3</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment issue" style="height:60%" title="3건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">14시</time>
+        </div>
+        <div class="activity-hour" title="시간대 04:00 · 2건">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment planning" style="height:40%" title="2건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 05:00 · 1건">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:20%" title="1건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 06:00 · 2건">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment evidence" style="height:40%" title="2건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">17시</time>
+        </div>
+        <div class="activity-hour" title="시간대 07:00 · 1건">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment success" style="height:20%" title="1건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 08:00 · 2건">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment issue" style="height:40%" title="2건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 09:00 · 1건">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment planning" style="height:20%" title="1건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">20시</time>
+        </div>
+        <div class="activity-hour" title="시간대 10:00 · 3건">
+          <span class="activity-hour-count">3</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:60%" title="3건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 11:00 · 2건">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment evidence" style="height:40%" title="2건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 12:00 · 4건">
+          <span class="activity-hour-count">4</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment success" style="height:80%" title="4건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">23시</time>
+        </div>
+        <div class="activity-hour" title="시간대 13:00 · 3건">
+          <span class="activity-hour-count">3</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment issue" style="height:60%" title="3건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 14:00 · 2건">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment planning" style="height:40%" title="2건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 15:00 · 1건">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:20%" title="1건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">02시</time>
+        </div>
+        <div class="activity-hour" title="시간대 16:00 · 3건">
+          <span class="activity-hour-count">3</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment evidence" style="height:60%" title="3건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 17:00 · 2건">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment success" style="height:40%" title="2건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 18:00 · 1건">
+          <span class="activity-hour-count">1</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment issue" style="height:20%" title="1건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">05시</time>
+        </div>
+        <div class="activity-hour" title="시간대 19:00 · 4건">
+          <span class="activity-hour-count">4</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment planning" style="height:80%" title="4건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 20:00 · 3건">
+          <span class="activity-hour-count">3</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment work" style="height:60%" title="3건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 21:00 · 2건">
+          <span class="activity-hour-count">2</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment evidence" style="height:40%" title="2건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">08시</time>
+        </div>
+        <div class="activity-hour" title="시간대 22:00 · 3건">
+          <span class="activity-hour-count">3</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment success" style="height:60%" title="3건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label"></time>
+        </div>
+        <div class="activity-hour" title="시간대 23:00 · 5건">
+          <span class="activity-hour-count">5</span>
+          <div class="activity-bar-slot">
+            <div class="activity-bar-stack">
+              <span class="activity-bar-segment issue" style="height:100%" title="5건"></span>
+            </div>
+          </div>
+          <time class="activity-hour-label">10시</time>
+        </div>
             </div>
           </div>
           <div class="activity-legend" aria-label="이벤트 유형">
