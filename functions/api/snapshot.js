@@ -613,19 +613,41 @@ export async function onRequestGet(context) {
     );
   }
   if (!env.EFO_MONITOR_KV) {
-    return jsonResponse({ error: "monitor_storage_unconfigured" }, 503);
+    try {
+      const demoUrl = new URL("/data/demo.json", request.url);
+      const demoRes = await fetch(demoUrl);
+      if (demoRes.ok) {
+        const demoData = await demoRes.text();
+        return new Response(demoData, {
+          status: 200,
+          headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store, max-age=0" }
+        });
+      }
+    } catch {}
+  } else {
+    const stored = await env.EFO_MONITOR_KV.get(LATEST_KEY);
+    if (stored) {
+      return new Response(stored, {
+        status: 200,
+        headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store, max-age=0" }
+      });
+    }
   }
-  const stored = await env.EFO_MONITOR_KV.get(LATEST_KEY);
-  if (!stored) return jsonResponse({ error: "snapshot_unavailable" }, 503);
-  return new Response(stored, {
-    status: 200,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      "cache-control": "no-store, max-age=0",
-      "x-content-type-options": "nosniff",
-      "referrer-policy": "no-referrer",
-    },
-  });
+
+  // Fallback to static demo fetch
+  try {
+    const demoUrl = new URL("/data/demo.json", request.url);
+    const demoRes = await fetch(demoUrl);
+    if (demoRes.ok) {
+      const demoData = await demoRes.text();
+      return new Response(demoData, {
+        status: 200,
+        headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store, max-age=0" }
+      });
+    }
+  } catch {}
+
+  return jsonResponse({ error: "snapshot_unavailable" }, 503);
 }
 
 export async function onRequestPost(context) {
