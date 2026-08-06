@@ -1265,8 +1265,144 @@
 
           
       </div>
+    <section class="roadmap-band" id="roadmap-section" style="margin-top: 28px;">
+      <div class="project-ledger-box roadmap-theme" style="padding: 24px; background: #ffffff; border-radius: 16px; border: 1px solid #cbd5e1; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border-top: 4px solid #6366f1;">
+        <div class="project-ledger-header" style="margin-bottom: 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+          <div class="project-ledger-title" style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.25rem; font-weight: 900; color: #1e1b4b;">🗺️ CTS &amp; System 1.5 연구 단계별 로드맵 (현재 위치 불 켜짐 💡)</span>
+            <span class="project-ledger-badge" style="background: #e0e7ff; color: #3730a3; font-weight: 800; padding: 4px 12px; border-radius: 6px; font-size: 0.82rem;">💡 현재 진행 위치 단계 조명 가동 중</span>
+          </div>
+          <span style="font-size: 0.88rem; color: #475569; font-weight: 800;">최종 목표 (AAAI 2027 논문 완수) 한눈에 알아보기</span>
+        </div>
+
+        <!-- Track 1: CTS Project Roadmap Stepper -->
+        <div class="roadmap-track-container" style="margin-bottom: 28px; background: #f8fafc; padding: 20px; border-radius: 14px; border: 1px solid #e2e8f0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <strong style="font-size: 1.08rem; font-weight: 800; color: #047857; display: flex; align-items: center; gap: 8px;">
+              <span>🟢 CTS (Continuous Thought Space) 7단계 로드맵</span>
+              <span style="font-size: 0.8rem; background: #dcfce7; color: #15803d; padding: 3px 10px; border-radius: 6px; border: 1px solid #86efac; font-weight: 800;">현재: Phase 2 불 들어옴 💡</span>
+            </strong>
+            <small style="color: #475569; font-weight: 800; font-size: 0.82rem;">전체 7단계 중 3단계(Phase 2) 진행 중 · 최종 목표 🏁</small>
+          </div>
+          
+          <div class="stepper-wrapper" style="display: flex; align-items: flex-start; justify-content: space-between; position: relative; padding: 0 10px;">
+            <!-- Stepper Connecting Lines -->
+            <div style="position: absolute; top: 18px; left: 40px; right: 40px; height: 4px; background: #cbd5e1; z-index: 1;"></div>
+            <div style="position: absolute; top: 18px; left: 40px; width: 33%; height: 4px; background: linear-gradient(90deg, #10b981 0%, #059669 100%); z-index: 2;"></div>
+
+            <!-- Step 0 (Done) -->
+            <div class="step-item step-completed" style="z-index: 3; text-align: center; flex: 1;">
+              <div class="step-node" style="width: 36px; height: 36px; border-radius: 50%; background: #10b981; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; margin: 0 auto; box-shadow: 0 0 8px rgba(16,185,129,0.5);">✓</div>
+              <strong style="display: block; font-size: 0.83rem; color: #0f172a; margin-top: 8px; font-weight: 800;">Phase 0</strong>
+              <span style="font-size: 0.76rem; color: #047857; font-weight: 700;">강등·출처추적</span>
+            </div>
+
+            <!-- Step 1 (Done) -->
+            <div class="step-item step-completed" style="z-index: 3; text-align: center; flex: 1;">
+              <div class="step-node" style="width: 36px; height: 36px; border-radius: 50%; background: #10b981; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; margin: 0 auto; box-shadow: 0 0 8px rgba(16,185,129,0.5);">✓</div>
+              <strong style="display: block; font-size: 0.83rem; color: #0f172a; margin-top: 8px; font-weight: 800;">Phase 1</strong>
+              <span style="font-size: 0.76rem; color: #047857; font-weight: 700;">Gemma 4 동결</span>
+            </div>
+
+            <!-- Step 2 (ACTIVE LIGHT UP!) -->
+            <div class="step-item step-active" style="z-index: 3; text-align: center; flex: 1;">
+              <div class="step-node active-glow" style="width: 44px; height: 44px; border-radius: 50%; background: #10b981; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.15rem; margin: -4px auto 0 auto; border: 4px solid #dcfce7; box-shadow: 0 0 16px #10b981, 0 0 28px rgba(16,185,129,0.7);">💡</div>
+              <strong style="display: block; font-size: 0.86rem; color: #047857; margin-top: 6px; font-weight: 900; background: #dcfce7; padding: 2px 8px; border-radius: 4px; border: 1px solid #86efac;">Phase 2 (현재!)</strong>
+              <span style="font-size: 0.78rem; color: #065f46; font-weight: 800;">E2 Baseline &amp; R2 사전등록</span>
+            </div>
+
+            <!-- Step 3 (Upcoming) -->
+            <div class="step-item step-upcoming" style="z-index: 3; text-align: center; flex: 1;">
+              <div class="step-node" style="width: 36px; height: 36px; border-radius: 50%; background: #ffffff; color: #64748b; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto;">3</div>
+              <strong style="display: block; font-size: 0.83rem; color: #64748b; margin-top: 8px; font-weight: 700;">Phase 3</strong>
+              <span style="font-size: 0.75rem; color: #94a3b8;">E3 Iso-Depth D&le;15</span>
+            </div>
+
+            <!-- Step 4 (Upcoming) -->
+            <div class="step-item step-upcoming" style="z-index: 3; text-align: center; flex: 1;">
+              <div class="step-node" style="width: 36px; height: 36px; border-radius: 50%; background: #ffffff; color: #64748b; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto;">4</div>
+              <strong style="display: block; font-size: 0.83rem; color: #64748b; margin-top: 8px; font-weight: 700;">Phase 4</strong>
+              <span style="font-size: 0.75rem; color: #94a3b8;">E4 Depth Sweep</span>
+            </div>
+
+            <!-- Step 5 (Upcoming) -->
+            <div class="step-item step-upcoming" style="z-index: 3; text-align: center; flex: 1;">
+              <div class="step-node" style="width: 36px; height: 36px; border-radius: 50%; background: #ffffff; color: #64748b; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto;">5</div>
+              <strong style="display: block; font-size: 0.83rem; color: #64748b; margin-top: 8px; font-weight: 700;">Phase 5</strong>
+              <span style="font-size: 0.75rem; color: #94a3b8;">E5 Overlay Multi-task</span>
+            </div>
+
+            <!-- Step 6 (Final Goal Target) -->
+            <div class="step-item step-target" style="z-index: 3; text-align: center; flex: 1;">
+              <div class="step-node" style="width: 38px; height: 38px; border-radius: 50%; background: #fef3c7; color: #d97706; border: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center; font-weight: 800; margin: 0 auto; box-shadow: 0 0 10px rgba(245,158,11,0.4);">🏁</div>
+              <strong style="display: block; font-size: 0.83rem; color: #b45309; margin-top: 8px; font-weight: 800;">Phase 6 (최종목표)</strong>
+              <span style="font-size: 0.76rem; color: #d97706; font-weight: 700;">AAAI 2027 논문 검증</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Track 2: System 1.5 Project Roadmap Stepper -->
+        <div class="roadmap-track-container" style="background: #f8fafc; padding: 20px; border-radius: 14px; border: 1px solid #e2e8f0;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <strong style="font-size: 1.08rem; font-weight: 800; color: #1d4ed8; display: flex; align-items: center; gap: 8px;">
+              <span>🔵 System 1.5 (AAAI 2027 PoC) 6단계 로드맵</span>
+              <span style="font-size: 0.8rem; background: #eff6ff; color: #1d4ed8; padding: 3px 10px; border-radius: 6px; border: 1px solid #bfdbfe; font-weight: 800;">현재: Phase 1 불 들어옴 💡</span>
+            </strong>
+            <small style="color: #475569; font-weight: 800; font-size: 0.82rem;">전체 6단계 중 2단계(Phase 1) 진행 중 · 최종 목표 🏁</small>
+          </div>
+          
+          <div class="stepper-wrapper" style="display: flex; align-items: flex-start; justify-content: space-between; position: relative; padding: 0 10px;">
+            <!-- Stepper Connecting Lines -->
+            <div style="position: absolute; top: 18px; left: 45px; right: 45px; height: 4px; background: #cbd5e1; z-index: 1;"></div>
+            <div style="position: absolute; top: 18px; left: 45px; width: 20%; height: 4px; background: linear-gradient(90deg, #3b82f6 0%, #1d4ed8 100%); z-index: 2;"></div>
+
+            <!-- Step 0 (Done) -->
+            <div class="step-item step-completed" style="z-index: 3; text-align: center; flex: 1;">
+              <div class="step-node" style="width: 36px; height: 36px; border-radius: 50%; background: #3b82f6; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; margin: 0 auto; box-shadow: 0 0 8px rgba(59,130,246,0.5);">✓</div>
+              <strong style="display: block; font-size: 0.83rem; color: #0f172a; margin-top: 8px; font-weight: 800;">Phase 0</strong>
+              <span style="font-size: 0.76rem; color: #1d4ed8; font-weight: 700;">PoC 설계 &amp; JFB</span>
+            </div>
+
+            <!-- Step 1 (ACTIVE LIGHT UP!) -->
+            <div class="step-item step-active" style="z-index: 3; text-align: center; flex: 1;">
+              <div class="step-node active-glow" style="width: 44px; height: 44px; border-radius: 50%; background: #3b82f6; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.15rem; margin: -4px auto 0 auto; border: 4px solid #eff6ff; box-shadow: 0 0 16px #3b82f6, 0 0 28px rgba(59,130,246,0.7);">💡</div>
+              <strong style="display: block; font-size: 0.86rem; color: #1d4ed8; margin-top: 6px; font-weight: 900; background: #eff6ff; padding: 2px 8px; border-radius: 4px; border: 1px solid #bfdbfe;">Phase 1 (현재!)</strong>
+              <span style="font-size: 0.78rem; color: #1e40af; font-weight: 800;">Stage 1 DEQ Broyden Solver</span>
+            </div>
+
+            <!-- Step 2 (Upcoming) -->
+            <div class="step-item step-upcoming" style="z-index: 3; text-align: center; flex: 1;">
+              <div class="step-node" style="width: 36px; height: 36px; border-radius: 50%; background: #ffffff; color: #64748b; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto;">2</div>
+              <strong style="display: block; font-size: 0.83rem; color: #64748b; margin-top: 8px; font-weight: 700;">Phase 2</strong>
+              <span style="font-size: 0.75rem; color: #94a3b8;">Stage 2 FWP &Delta;W 결합</span>
+            </div>
+
+            <!-- Step 3 (Upcoming) -->
+            <div class="step-item step-upcoming" style="z-index: 3; text-align: center; flex: 1;">
+              <div class="step-node" style="width: 36px; height: 36px; border-radius: 50%; background: #ffffff; color: #64748b; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto;">3</div>
+              <strong style="display: block; font-size: 0.83rem; color: #64748b; margin-top: 8px; font-weight: 700;">Phase 3</strong>
+              <span style="font-size: 0.75rem; color: #94a3b8;">Stage 3 Gated Router</span>
+            </div>
+
+            <!-- Step 4 (Upcoming) -->
+            <div class="step-item step-upcoming" style="z-index: 3; text-align: center; flex: 1;">
+              <div class="step-node" style="width: 36px; height: 36px; border-radius: 50%; background: #ffffff; color: #64748b; border: 2px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto;">4</div>
+              <strong style="display: block; font-size: 0.83rem; color: #64748b; margin-top: 8px; font-weight: 700;">Phase 4</strong>
+              <span style="font-size: 0.75rem; color: #94a3b8;">8대 GPU 풀 벤치마크</span>
+            </div>
+
+            <!-- Step 5 (Final Goal Target) -->
+            <div class="step-item step-target" style="z-index: 3; text-align: center; flex: 1;">
+              <div class="step-node" style="width: 38px; height: 38px; border-radius: 50%; background: #fef3c7; color: #d97706; border: 2px solid #f59e0b; display: flex; align-items: center; justify-content: center; font-weight: 800; margin: 0 auto; box-shadow: 0 0 10px rgba(245,158,11,0.4);">🏁</div>
+              <strong style="display: block; font-size: 0.83rem; color: #b45309; margin-top: 8px; font-weight: 800;">Phase 5 (최종목표)</strong>
+              <span style="font-size: 0.76rem; color: #d97706; font-weight: 700;">Theorem 1 수학적 검증</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
+    </section>
     <section class="section-band alerts-band" id="alerts-section"
              aria-labelledby="alerts-heading">
       <div class="section-heading">
