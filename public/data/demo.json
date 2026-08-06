@@ -93,7 +93,7 @@
       "owner": "claude",
       "state": "archived",
       "progress_percent": 0,
-      "next": "System 1.5 Phase 1 (Stage 1 DEQ) 파이프라인으로 이관 완료",
+      "next": "System 1.5 Phase 1 파이프라인으로 이관 완료",
       "updated_at": "2026-08-06T09:33:00Z"
     },
     {
@@ -111,7 +111,7 @@
       "owner": "claude",
       "state": "working",
       "progress_percent": 60,
-      "next": "Stage 2 Fast Weight Program ΔW 메모리 결합 파이프라인",
+      "next": "Stage 2 Fast Weight Program ΔW 메모리 결합",
       "updated_at": "2026-08-06T09:33:00Z"
     },
     {
@@ -121,15 +121,6 @@
       "state": "pending",
       "progress_percent": 0,
       "next": "Stage 3 Gated Router 및 InfoNCE 손실 함수 착수",
-      "updated_at": "2026-08-06T09:33:00Z"
-    },
-    {
-      "id": "SYS15-P3",
-      "title": "System 1.5 :: Phase 3 (Stage 3 Contrastive Router)",
-      "owner": "antigravity",
-      "state": "pending",
-      "progress_percent": 0,
-      "next": "AAAI 2027 PoC 논문 어블레이션 수치 검증",
       "updated_at": "2026-08-06T09:33:00Z"
     }
   ],

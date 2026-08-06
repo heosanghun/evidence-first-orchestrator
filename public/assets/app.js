@@ -1102,7 +1102,7 @@ function renderTasks(snapshot) {
   ];
 
   const tasksToRender = (Array.isArray(snapshot?.tasks) && snapshot.tasks.length > 0) ? snapshot.tasks : defaultTasks;
-  if (elements.taskCount) elements.taskCount.textContent = `${tasksToRender.length}개 작업`;
+  if (elements.taskCount) elements.taskCount.textContent = `${tasksToRender.length}개 과업 (CTS & System 1.5)`;
 
   const ctsTasks = tasksToRender.filter(t => {
     const id = String(t.id || "").toUpperCase();
