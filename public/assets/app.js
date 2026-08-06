@@ -768,14 +768,14 @@ function renderActivityFeed(events) {
 function renderGpus(snapshot) {
   if (!snapshot || !Array.isArray(snapshot.gpus)) return;
   const defaultMappings = {
-    0: '🟢 E2-R2 9문항 추론 및 계측 전용',
-    1: '🟢 E2-R2 사이드카 계측 전용',
-    2: '🔥 발열보호 작업제외 (89°C 육박)',
-    3: '🔵 System 1.5 Broyden Solver 파이프라인',
-    4: '⚡ Stage 2 FWP(ΔW) 우선가동 할당',
-    5: '⚡ Stage 2 FWP(ΔW) 우선가동 할당',
-    6: '🟣 E1 사전등록 초안 및 S7 계측 모듈',
-    7: '🟣 E1 사전등록 초안 및 S7 계측 모듈'
+    0: '🟢 CTS :: E2-R2 9문항(24k tokens) 확정 물리 추론 및 메인 계측 파이프라인 (NVIDIA RTX A6000 48GB)',
+    1: '🟢 CTS :: E2-R2 사이드카 정밀 계측 및 Broyden Solver 보강 파이프라인 (NVIDIA RTX A6000 48GB)',
+    2: '🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 헤비 작업 대상에서 즉시 제외 및 유휴 대기 상태 전환',
+    3: '🔵 System 1.5 :: Stage 1 DEQ Broyden Solver 파이프라인 및 pytest 25/25 100% 서명 검증 완수',
+    4: '⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 ➔ GPU 2번 과열 대책으로 최우선 가동 장치 할당',
+    5: '⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 ➔ GPU 2번 과열 대책으로 최우선 가동 장치 할당',
+    6: '🟣 CTS :: E1 사전등록 초안 검증 및 S7 계측 모듈 수급 준비 전용 (공식 승인 자원)',
+    7: '🟣 CTS :: E1 사전등록 초안 검증 및 S7 계측 모듈 수급 준비 전용 (공식 승인 자원)'
   };
 
   const gpus = [...snapshot.gpus].sort((a, b) => number(a.index) - number(b.index));
@@ -800,8 +800,8 @@ function renderGpus(snapshot) {
             ? "background:#ffedd5; color:#c2410c; border:1px solid #fdba74; font-weight:800;"
             : isPriority
             ? "background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:800;"
-            : "background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; font-weight:700;";
-          return `<span class="project-label" style="${style} padding:4px 10px; border-radius:6px; font-size:0.78rem;">${escapeHtml(name)}</span>`;
+            : "background:#f8fafc; color:#334155; border:1px solid #cbd5e1; font-weight:700;";
+          return `<span class="project-label" style="${style} padding:6px 12px; border-radius:6px; font-size:0.82rem; white-space:normal; word-break:keep-all;">${escapeHtml(name)}</span>`;
         }).join("");
       } else {
         const fallbackText = defaultMappings[idx] || '🟢 과업 할당 완료';
@@ -811,8 +811,8 @@ function renderGpus(snapshot) {
           ? "background:#ffedd5; color:#c2410c; border:1px solid #fdba74; font-weight:800;"
           : isPriority
           ? "background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:800;"
-          : "background:#f1f5f9; color:#334155; border:1px solid #cbd5e1; font-weight:700;";
-        projectBadgeStr = `<span class="project-label" style="${style} padding:4px 10px; border-radius:6px; font-size:0.78rem;">${escapeHtml(fallbackText)}</span>`;
+          : "background:#f8fafc; color:#334155; border:1px solid #cbd5e1; font-weight:700;";
+        projectBadgeStr = `<span class="project-label" style="${style} padding:6px 12px; border-radius:6px; font-size:0.82rem; white-space:normal; word-break:keep-all;">${escapeHtml(fallbackText)}</span>`;
       }
 
       return `
@@ -846,7 +846,7 @@ function renderGpus(snapshot) {
             <span class="meta-item">온도 <strong class="${thermalClass}">${temperature.toFixed(0)}°C</strong></span>
             <span class="meta-item">전력 <strong>${power.toFixed(0)} W</strong></span>
           </div>
-          <div class="gpu-projects-cell">
+          <div class="gpu-projects-cell" style="flex:1; min-width:300px;">
             ${projectBadgeStr}
           </div>
         </div>
