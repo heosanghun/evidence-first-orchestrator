@@ -15,7 +15,7 @@
     "name": "System 1.5",
     "objective": "검증 가능한 근거를 남기며 System 1.5 연구를 완성합니다.",
     "next_milestone": "실시간 SSH 수집기 연결",
-    "workflow_progress_percent": 22.5
+    "workflow_progress_percent": 45.0
   },
   "agents": [
     {
@@ -60,40 +60,76 @@
   ],
   "tasks": [
     {
-      "id": "OPS-DASH-1",
-      "title": "실시간 운영 대시보드",
-      "owner": "codex",
-      "state": "running",
-      "progress_percent": 72,
-      "next": "Cloudflare API 연결",
-      "updated_at": "2026-07-30T05:28:00Z"
+      "id": "CTS-P0",
+      "title": "CTS :: Phase 0 (강등·출처추적 및 경우A)",
+      "owner": "antigravity",
+      "state": "verified",
+      "progress_percent": 100,
+      "next": "Phase 1 백본확정 및 Gemma 4 E4B-it 키트 동결",
+      "updated_at": "2026-08-06T09:33:00Z"
     },
     {
-      "id": "C1",
-      "title": "공통 백본 진입 검증",
-      "owner": "claude-b",
-      "state": "pending",
-      "progress_percent": 35,
-      "next": "알려진 값 대조",
-      "updated_at": "2026-07-30T05:20:00Z"
+      "id": "CTS-P1",
+      "title": "CTS :: Phase 1 (백본확정 및 Gemma 4)",
+      "owner": "antigravity",
+      "state": "verified",
+      "progress_percent": 100,
+      "next": "Phase 2 E2 Baseline 1차 실측 완주 및 R2 확정",
+      "updated_at": "2026-08-06T09:33:00Z"
     },
     {
-      "id": "P1b-3",
-      "title": "통계 프로토콜 사전등록",
-      "owner": "claude-a",
+      "id": "CTS-P2-E2",
+      "title": "CTS :: Phase 2 (E2 Baseline Verified)",
+      "owner": "claude",
       "state": "submitted",
-      "progress_percent": 90,
-      "next": "오케스트레이터 독립 검증",
-      "updated_at": "2026-07-30T05:15:00Z"
+      "progress_percent": 70,
+      "next": "E2-R2 9문항(24k tokens) 확정 추론 및 v3 합산 채점",
+      "updated_at": "2026-08-06T09:33:00Z"
     },
     {
-      "id": "LEDGER-SYNC",
-      "title": "검증 사실 원장 반영",
+      "id": "CTS-P2-E3",
+      "title": "CTS :: Phase 2 (E3 Iso-Depth D<=15)",
+      "owner": "claude",
+      "state": "archived",
+      "progress_percent": 0,
+      "next": "System 1.5 Phase 1 (Stage 1 DEQ) 파이프라인으로 이관 완료",
+      "updated_at": "2026-08-06T09:33:00Z"
+    },
+    {
+      "id": "SYS15-P0",
+      "title": "System 1.5 :: Phase 0 (PoC 모듈 설계 & JFB)",
+      "owner": "antigravity",
+      "state": "verified",
+      "progress_percent": 100,
+      "next": "Phase 1 Stage 1 DEQ Broyden Solver 물리 훈련",
+      "updated_at": "2026-08-06T09:33:00Z"
+    },
+    {
+      "id": "SYS15-P1",
+      "title": "System 1.5 :: Phase 1 (Stage 1 DEQ Broyden Solver)",
+      "owner": "claude",
+      "state": "working",
+      "progress_percent": 60,
+      "next": "Stage 2 Fast Weight Program ΔW 메모리 결합 파이프라인",
+      "updated_at": "2026-08-06T09:33:00Z"
+    },
+    {
+      "id": "SYS15-P2",
+      "title": "System 1.5 :: Phase 2 (Stage 2 FWP ΔW)",
+      "owner": "claude",
+      "state": "pending",
+      "progress_percent": 0,
+      "next": "Stage 3 Gated Router 및 InfoNCE 손실 함수 착수",
+      "updated_at": "2026-08-06T09:33:00Z"
+    },
+    {
+      "id": "SYS15-P3",
+      "title": "System 1.5 :: Phase 3 (Stage 3 Contrastive Router)",
       "owner": "antigravity",
       "state": "pending",
-      "progress_percent": 20,
-      "next": "검증 결과 대기",
-      "updated_at": "2026-07-30T05:10:00Z"
+      "progress_percent": 0,
+      "next": "AAAI 2027 PoC 논문 어블레이션 수치 검증",
+      "updated_at": "2026-08-06T09:33:00Z"
     }
   ],
   "gpus": [
