@@ -1274,6 +1274,16 @@ function renderProjects(snapshot) {
 
   if (!chatForm || !chatInput || !chatLog) return;
 
+  function autoResizeChatInput() {
+    if (!chatInput) return;
+    chatInput.style.height = "auto";
+    const scrollH = chatInput.scrollHeight;
+    const newHeight = Math.min(Math.max(scrollH, 38), 280);
+    chatInput.style.height = newHeight + "px";
+  }
+
+  chatInput.addEventListener("input", autoResizeChatInput);
+
   const chatHistory = [];
   let attachedFiles = [];
 
@@ -1350,7 +1360,7 @@ function renderProjects(snapshot) {
     const userPrompt = message || "(첨부파일 분석 요청)";
 
     appendMessage("user", userPrompt, currentFiles);
-    if (!promptText) chatInput.value = "";
+    if (!promptText) { chatInput.value = ""; chatInput.style.height = "auto"; }
 
     attachedFiles = [];
     renderFilePreviews();

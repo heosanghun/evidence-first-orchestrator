@@ -3001,19 +3001,19 @@ dialog input:focus {
 /* OpenAI Premium Chat Form Input Bar */
 .chat-input-wrapper {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   gap: 10px;
   background: rgba(30, 41, 59, 0.95);
   border: 1.5px solid rgba(255, 255, 255, 0.15);
-  border-radius: 28px;
-  padding: 6px 10px 6px 14px;
+  border-radius: 20px;
+  padding: 8px 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  transition: border-color 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .chat-input-wrapper:focus-within {
   border-color: #10b981;
-  box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.3);
 }
 
 .btn-attach {
@@ -3029,13 +3029,7 @@ dialog input:focus {
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
-}
-
-.btn-attach:hover {
-  background: #38bdf8;
-  color: #0f172a;
-  border-color: #38bdf8;
-  transform: scale(1.05);
+  margin-bottom: 2px;
 }
 
 .chat-input-wrapper textarea {
@@ -3044,19 +3038,21 @@ dialog input:focus {
   border: none;
   outline: none;
   color: #ffffff;
-  font-size: 0.93rem;
+  font-size: 0.96rem;
   font-family: inherit;
   font-weight: 500;
   resize: none;
-  padding: 8px 4px;
-  max-height: 120px;
-  line-height: 1.4;
+  padding: 6px 4px;
+  min-height: 38px;
+  max-height: 280px;
+  line-height: 1.5;
+  overflow-y: auto;
+  transition: height 0.1s ease;
 }
 
-.chat-input-wrapper textarea::placeholder {
-  color: #64748b;
+.chat-send-btn {
+  margin-bottom: 2px;
 }
-
 .chat-send-btn {
   background: #10b981;
   border: none;
