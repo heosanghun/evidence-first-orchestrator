@@ -1529,7 +1529,7 @@ function renderProjects(snapshot) {
 }
 
 
-/* === EFO LIVE AI CHAT PROMPT CENTER HANDLER (v3.7.0) === */
+/* === EFO MULTIMODAL (+) CHAT PROMPT CENTER HANDLER (v4.0.0) === */
 (function setupEfoChatHandler() {
   const chatForm = document.getElementById("chat-form");
   const chatInput = document.getElementById("chat-input");
@@ -1537,30 +1537,85 @@ function renderProjects(snapshot) {
   const chatSend = document.getElementById("chat-send");
   const chatStatus = document.getElementById("chat-status");
   const chatMode = document.getElementById("chat-mode");
+  const btnAttach = document.getElementById("btn-attach-file");
+  const fileInput = document.getElementById("chat-file-input");
+  const previewsBox = document.getElementById("attachment-previews");
 
   if (!chatForm || !chatInput || !chatLog) return;
 
   const chatHistory = [];
+  let attachedFiles = [];
 
-  function appendMessage(role, text) {
+  // File Upload (+) Click
+  if (btnAttach && fileInput) {
+    btnAttach.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", (e) => {
+      const selected = Array.from(e.target.files);
+      selected.forEach((file) => {
+        attachedFiles.push(file);
+      });
+      fileInput.value = "";
+      renderFilePreviews();
+    });
+  }
+
+  function renderFilePreviews() {
+    if (!previewsBox) return;
+    if (attachedFiles.length === 0) {
+      previewsBox.style.display = "none";
+      previewsBox.innerHTML = "";
+      return;
+    }
+
+    previewsBox.style.display = "flex";
+    previewsBox.innerHTML = attachedFiles.map((file, index) => {
+      const isImg = file.type.startsWith("image/");
+      const icon = isImg ? "🖼️" : "📄";
+      return `
+        <span class="file-preview-pill">
+          ${icon} ${escapeHtml(file.name)} (${(file.size / 1024).toFixed(1)}KB)
+          <button type="button" class="btn-remove-file" data-remove-index="${index}">✕</button>
+        </span>
+      `;
+    }).join("");
+
+    previewsBox.querySelectorAll("[data-remove-index]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.dataset.removeIndex, 10);
+        attachedFiles.splice(idx, 1);
+        renderFilePreviews();
+      });
+    });
+  }
+
+  function appendMessage(role, text, files = []) {
     const isAssistant = role === "assistant";
     const article = document.createElement("article");
     article.className = `chat-message ${role}`;
-    article.style.padding = "14px";
-    article.style.marginBottom = "12px";
-    article.style.borderRadius = "8px";
-    article.style.background = isAssistant ? "#1e293b" : "#0f172a";
-    article.style.border = isAssistant ? "1px solid #334155" : "1px solid #0284c7";
-    article.style.color = "#f8fafc";
 
-    const formattedText = text.replace(/\n/g, "<br/>");
+    const formattedText = escapeHtml(text).replace(/
+/g, "<br/>");
+    let file Badges = "";
+    if (files.length > 0) {
+      fileBadges = `<div style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">` +
+        files.map(f => `<span style="font-size:0.75rem; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:12px;">📄 ${escapeHtml(f.name)}</span>`).join("") +
+        `</div>`;
+    }
 
     article.innerHTML = `
-      <div class="chat-message-meta" style="display:flex; justify-between; font-weight:800; font-size:0.85rem; margin-bottom:6px; color:${isAssistant ? '#38bdf8' : '#34d399'};">
-        <strong>${isAssistant ? "🤖 Gemini AI 어시스턴트" : "👤 연구책임자 (User)"}</strong>
-        <span style="font-size:0.75rem; color:#94a3b8;">${new Date().toLocaleTimeString('ko-KR')}</span>
+      <div class="chat-message-meta">
+        <div class="avatar ${isAssistant ? 'assistant-avatar' : 'user-avatar'}">
+          ${isAssistant ? '🤖' : '👤'}
+        </div>
+        <div class="sender-info">
+          <strong>${isAssistant ? "EFO AI 어시스턴트" : "연구책임자 (User)"}</strong>
+          <span class="timestamp">${new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'})}</span>
+        </div>
       </div>
-      <p style="margin:0; line-height:1.6; font-weight:600; font-size:0.92rem;">${formattedText}</p>
+      <div class="chat-message-body">
+        <p>${formattedText}</p>
+        ${fileBadges}
+      </div>
     `;
 
     chatLog.appendChild(article);
@@ -1569,20 +1624,45 @@ function renderProjects(snapshot) {
 
   async function handleChatSubmit(promptText) {
     const message = promptText || chatInput.value.trim();
-    if (!message) return;
+    if (!message && attachedFiles.length === 0) return;
 
-    appendMessage("user", message);
+    const currentFiles = [...attachedFiles];
+    const userPrompt = message || "(첨부파일 분석 요청)";
+
+    appendMessage("user", userPrompt, currentFiles);
     if (!promptText) chatInput.value = "";
+
+    attachedFiles = [];
+    renderFilePreviews();
+
     if (chatSend) chatSend.disabled = true;
-    if (chatStatus) chatStatus.textContent = "Gemini API 응답 생성 중...";
-    if (chatMode) chatMode.innerHTML = `<span class="status-pulse-dot" style="background:#38bdf8;"></span> AI 대화 분석 중...`;
+    if (chatStatus) chatStatus.textContent = "Gemini 2.0 Flash 분석 중...";
+    if (chatMode) chatMode.innerHTML = `<span class="status-pulse-dot" style="background:#38bdf8;"></span> 멀티모달 분석 중...`;
 
     try {
+      // Process text/file content for prompt
+      let fileContext = "";
+      for (const file of currentFiles) {
+        if (file.type.startsWith("text/") || file.name.endsWith(".json") || file.name.endsWith(".md") || file.name.endsWith(".txt") || file.name.endsWith(".csv")) {
+          const text = await file.text();
+          fileContext += `
+
+[첨부 파일: ${file.name}]
+${text.slice(0, 3000)}`;
+        } else {
+          fileContext += `
+
+[첨부 파일: ${file.name} (유형: ${file.type}, 크기: ${(file.size/1024).toFixed(1)}KB)]`;
+        }
+      }
+
+      const fullMessage = userPrompt + fileContext;
+
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
-          message: message,
+          message: fullMessage,
           history: chatHistory
         })
       });
@@ -1591,15 +1671,15 @@ function renderProjects(snapshot) {
       const reply = data.answer || "응답이 없습니다.";
       appendMessage("assistant", reply);
 
-      chatHistory.push({ role: "user", content: message });
+      chatHistory.push({ role: "user", content: userPrompt });
       chatHistory.push({ role: "assistant", content: reply });
       if (chatHistory.length > 10) chatHistory.splice(0, 2);
 
-      if (chatStatus) chatStatus.textContent = "Gemini 2.0 Flash 실시간 연동 완료";
+      if (chatStatus) chatStatus.textContent = "Gemini 2.0 Flash 분석 완수";
       if (chatMode) chatMode.innerHTML = `<span class="status-pulse-dot" style="background:#10b981;"></span> Gemini Live 대기 중`;
     } catch (err) {
-      appendMessage("assistant", `[오류] API 연동 확인 중: ${err.message}`);
-      if (chatStatus) chatStatus.textContent = "API 연결 대기";
+      appendMessage("assistant", `[오류] 대화 연결 처리 중: ${err.message}`);
+      if (chatStatus) chatStatus.textContent = "API 대기";
     } finally {
       if (chatSend) chatSend.disabled = false;
     }
