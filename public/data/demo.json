@@ -16,7 +16,7 @@
     "objective": "검증 가능한 근거를 남기며 CTS, System 1.5 연구를 완성합니다.",
     "next_milestone": "실시간 SSH 수집기 연결",
     "workflow_progress_percent": 45.0,
-    "gpu_allocation_note": "GPU 0~3, 6~7 (총 6대) E2-R2 및 System 1.5 할당 / GPU 4~5 (2대) Stage 2 유휴 대기"
+    "gpu_allocation_note": "GPU 2번 발열(89°C)보호 작업제외 ➔ GPU 4번, GPU 5번 우선 가동 할당 체계 적용"
   },
   "agents": [
     {
@@ -138,93 +138,73 @@
       "index": 0,
       "name": "NVIDIA RTX A6000",
       "utilization_percent": 94,
-      "memory_used_mib": 38912,
-      "memory_total_mib": 49140,
-      "temperature_c": 72,
-      "power_w": 278,
-      "projects": [
-        {
-          "name": "System1.5 / seed13"
-        }
-      ]
+      "memory_used_mib": 18800,
+      "memory_total_mib": 49152,
+      "temperature_c": 68,
+      "power_w": 285
     },
     {
       "index": 1,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 96,
-      "memory_used_mib": 40218,
-      "memory_total_mib": 49140,
-      "temperature_c": 74,
-      "power_w": 284,
-      "projects": [
-        {
-          "name": "System2.5 / train"
-        }
-      ]
+      "utilization_percent": 88,
+      "memory_used_mib": 16400,
+      "memory_total_mib": 49152,
+      "temperature_c": 64,
+      "power_w": 260
     },
     {
       "index": 2,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 4,
-      "memory_used_mib": 732,
-      "memory_total_mib": 49140,
-      "temperature_c": 43,
-      "power_w": 72,
-      "projects": []
+      "utilization_percent": 0,
+      "memory_used_mib": 1200,
+      "memory_total_mib": 49152,
+      "temperature_c": 89,
+      "power_w": 40
     },
     {
       "index": 3,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 88,
-      "memory_used_mib": 37684,
-      "memory_total_mib": 49140,
-      "temperature_c": 70,
-      "power_w": 265,
-      "projects": [
-        {
-          "name": "System1.5 / G1 gate"
-        }
-      ]
+      "utilization_percent": 65,
+      "memory_used_mib": 12800,
+      "memory_total_mib": 49152,
+      "temperature_c": 59,
+      "power_w": 210
     },
     {
       "index": 4,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 0,
-      "memory_used_mib": 22,
-      "memory_total_mib": 49140,
-      "temperature_c": 35,
-      "power_w": 49,
-      "projects": []
+      "utilization_percent": 85,
+      "memory_used_mib": 17500,
+      "memory_total_mib": 49152,
+      "temperature_c": 61,
+      "power_w": 245
     },
     {
       "index": 5,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 0,
-      "memory_used_mib": 22,
-      "memory_total_mib": 49140,
-      "temperature_c": 36,
-      "power_w": 51,
-      "projects": []
+      "utilization_percent": 80,
+      "memory_used_mib": 16200,
+      "memory_total_mib": 49152,
+      "temperature_c": 60,
+      "power_w": 235
     },
     {
       "index": 6,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 0,
-      "memory_used_mib": 22,
-      "memory_total_mib": 49140,
-      "temperature_c": 34,
-      "power_w": 47,
-      "projects": []
+      "utilization_percent": 40,
+      "memory_used_mib": 8500,
+      "memory_total_mib": 49152,
+      "temperature_c": 51,
+      "power_w": 140
     },
     {
       "index": 7,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 0,
-      "memory_used_mib": 22,
-      "memory_total_mib": 49140,
-      "temperature_c": 35,
-      "power_w": 48,
-      "projects": []
+      "utilization_percent": 35,
+      "memory_used_mib": 7200,
+      "memory_total_mib": 49152,
+      "temperature_c": 49,
+      "power_w": 125
     }
   ],
   "system": {
