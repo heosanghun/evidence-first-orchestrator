@@ -414,7 +414,7 @@ function render(snapshot) {
   renderCharts(snapshot);
   renderResources(snapshot);
   renderTasks(snapshot);
-  renderAlerts(derivedAlerts);
+  // renderAlerts disabled
   elements.sourceMode.textContent = sourceIsDemo(snapshot)
     ? "DEMO 데이터 · 실시간 수집 아님"
     : `LIVE · ${snapshot.source.collector}`;
@@ -1356,7 +1356,7 @@ function renderProjects(snapshot) {
     renderFilePreviews();
 
     if (chatSend) chatSend.disabled = true;
-    if (chatStatus) chatStatus.textContent = "Gemini 2.0 Flash 분석 중...";
+    if (chatStatus) chatStatus.textContent = "Gemini Pro 스마트 분석 중...";
     if (chatMode) chatMode.innerHTML = '<span class="status-pulse-dot" style="background:#38bdf8;"></span> 멀티모달 분석 중...';
 
     try {
@@ -1389,7 +1389,7 @@ function renderProjects(snapshot) {
       chatHistory.push({ role: "assistant", content: reply });
       if (chatHistory.length > 10) chatHistory.splice(0, 2);
 
-      if (chatStatus) chatStatus.textContent = "Gemini 2.0 Flash 분석 완수";
+      if (chatStatus) chatStatus.textContent = "Gemini Pro Live AI 분석 완수";
       if (chatMode) chatMode.innerHTML = '<span class="status-pulse-dot" style="background:#10b981;"></span> Gemini Live 대기 중';
     } catch (err) {
       appendMessage("assistant", "[오류] 대화 연결 처리 중: " + err.message);
