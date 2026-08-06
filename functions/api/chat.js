@@ -50,26 +50,17 @@ function sanitizeSnapshot(snapshot) {
   };
 }
 
+// Dynamic Model Discovery & Execution
 async function requestGeminiModel({ env, message, history, snapshot }) {
   const apiKey = env.GEMINI_API_KEY;
   const grounding = JSON.stringify(sanitizeSnapshot(snapshot));
   
-  const systemPrompt = `[EFO AI 오케스트레이션 어시스턴트 지침]
-당신은 Evidence First Orchestrator (EFO) 시스템의 친절하고 똑똑한 실시간 AI 운영 어시스턴트입니다.
-사용자 질문("안녕", "진행률 알려줘", "반가워" 등)에 친근하고 대화하듯 한국어로 대답해 주세요.
-질문이 인사이거나 일상 대화이면 자연스럽게 인사를 주고받으면서 최신 프로젝트 상태를 함께 안내해 드립니다.
-제공된 최신 EFO 스냅샷(원장 서명 기록, CTS 28%, System 1.5 45% 진행률, 8대 GPU 사용 현황)을 참고하세요.
+  const systemPrompt = `[EFO AI 오케스트레이션 어시스턴트]
+당신은 Evidence First Orchestrator (EFO) 연구 및 운영 AI 어시스턴트입니다.
+사용자의 질문("안녕", "어제 작업내역은?", "진행률 알려줘" 등)에 대해 친근하고 자연스럽게 한국어로 대화해 주세요.
+스냅샷 데이터(원장 서명 기록, CTS 28%, System 1.5 45% 진행률, 8대 GPU 사용 현황)를 근거로 정직하고 상용 서비스 어시스턴트처럼 대답해 주세요.
 
-최신 EFO 스냅샷 데이터: ${grounding}`;
-
-  const modelsToTry = [
-    "gemini-1.5-flash",
-    "gemini-2.0-flash",
-    "gemini-2.0-flash-exp",
-    "gemini-2.5-flash",
-    "gemini-1.5-flash-latest",
-    "gemini-1.5-pro"
-  ];
+최신 EFO 실측 스냅샷: ${grounding}`;
 
   const contents = [];
   for (const item of history) {
@@ -81,15 +72,51 @@ async function requestGeminiModel({ env, message, history, snapshot }) {
 
   contents.push({
     role: "user",
-    parts: [{ text: `${systemPrompt}\n\n[사용자 메시지]: ${message}` }]
+    parts: [{ text: `${systemPrompt}\n\n[사용자 질문]: ${message}` }]
   });
 
-  let lastError = null;
+  // Step 1: Query API Key's exact supported models dynamically
+  let discoveredEndpoints = [];
+  try {
+    const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+    if (listRes.ok) {
+      const listData = await listRes.json();
+      if (Array.isArray(listData.models)) {
+        for (const m of listData.models) {
+          const name = m.name; // e.g. "models/gemini-1.5-flash"
+          const methods = m.supportedGenerationMethods || [];
+          if (methods.includes("generateContent") && name.includes("gemini")) {
+            discoveredEndpoints.push(`https://generativelanguage.googleapis.com/v1beta/${name}:generateContent?key=${apiKey}`);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    // List models fallback
+  }
 
-  for (const model of modelsToTry) {
+  // Fallback candidate URLs if dynamic discovery returned nothing
+  const defaultCandidateUrls = [
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-002:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-002:generateContent`,
+    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`
+  ];
+
+  const endpointsToTry = discoveredEndpoints.length > 0 ? discoveredEndpoints : defaultCandidateUrls;
+
+  let lastErrorMsg = "";
+
+  for (const endpointUrl of endpointsToTry) {
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-      const response = await fetch(url, {
+      const response = await fetch(endpointUrl, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({
@@ -105,18 +132,19 @@ async function requestGeminiModel({ env, message, history, snapshot }) {
         const data = await response.json();
         const replyText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (replyText && replyText.trim()) {
-          return { answer: replyText.trim(), model: model };
+          const modelName = endpointUrl.split("/models/")[1]?.split(":")[0] || "gemini";
+          return { answer: replyText.trim(), model: modelName };
         }
       } else {
         const errPayload = await response.text();
-        lastError = `[${model} HTTP ${response.status}]: ${errPayload.slice(0, 100)}`;
+        lastErrorMsg = `[HTTP ${response.status}]: ${errPayload.slice(0, 150)}`;
       }
     } catch (e) {
-      lastError = e.message;
+      lastErrorMsg = e.message;
     }
   }
 
-  throw new Error(lastError || "모든 Gemini 모델 호출 실패");
+  throw new Error(lastErrorMsg || "All Gemini endpoints failed");
 }
 
 async function requestOpenAIModel({ env, message, history, snapshot }) {
@@ -198,7 +226,7 @@ export async function onRequestPost(context) {
     };
   }
 
-  // 1. Try Gemini API if key exists
+  // 1. Try Gemini API with Dynamic Model Discovery
   if (env.GEMINI_API_KEY) {
     try {
       const result = await requestGeminiModel({ env, message, history, snapshot });
@@ -210,7 +238,6 @@ export async function onRequestPost(context) {
         read_only: true
       });
     } catch (err) {
-      // Gemini failed, try OpenAI if key exists
       if (env.OPENAI_API_KEY) {
         try {
           const oaResult = await requestOpenAIModel({ env, message, history, snapshot });
@@ -224,7 +251,7 @@ export async function onRequestPost(context) {
         } catch {}
       }
       return jsonResponse({
-        answer: `[API 연결 확인 중] 질문: "${message}"\n\n현재 Gemini API 연동을 시도하는 중 오류가 발생했습니다 (${err.message}). 입력하신 GEMINI_API_KEY 권한 및 Google AI Studio 키 활성화 상태를 확인해 주세요!`,
+        answer: `[API 연동 확인]: ${err.message}`,
         mode: "api_error_detail",
         error_detail: err.message,
         read_only: true
@@ -252,9 +279,8 @@ export async function onRequestPost(context) {
     }
   }
 
-  // 3. Fallback if no API keys found in Cloudflare env
   return jsonResponse({
-    answer: `안녕하세요! 현재 Cloudflare Pages 환경 변수(GEMINI_API_KEY)를 읽는 중입니다. 질문("${message}")에 대해 최신 EFO 실측 원장(CTS 28%, System 1.5 45%) 상태를 확인했습니다.`,
+    answer: `안녕하세요! 현재 Cloudflare Pages 환경 변수(GEMINI_API_KEY)를 확인 중입니다. 질문("${message}")에 대해 최신 EFO 실측 원장(CTS 28%, System 1.5 45%) 상태입니다.`,
     mode: "no_api_key",
     read_only: true
   });
