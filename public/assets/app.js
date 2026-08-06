@@ -272,7 +272,7 @@ function normalizeSnapshot(raw) {
       name: String(snapshot.workspace?.name || "System 1.5"),
       objective: String(
         snapshot.workspace?.objective ||
-          "검증 가능한 근거를 남기며 System 1.5 연구를 완성합니다.",
+          "검증 가능한 근거를 남기며 CTS, System 1.5 연구를 완성합니다.",
       ),
       next_milestone: String(snapshot.workspace?.next_milestone || "다음 단계 확인 중"),
       workflow_progress_percent: clamp(snapshot.workspace?.workflow_progress_percent),

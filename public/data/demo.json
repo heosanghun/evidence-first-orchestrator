@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-06T10:25:00Z",
+  "generated_at": "2026-08-06T11:10:00Z",
   "collection_interval_seconds": 120,
   "source": {
     "mode": "demo",
@@ -12,8 +12,8 @@
     }
   },
   "workspace": {
-    "name": "System 1.5",
-    "objective": "검증 가능한 근거를 남기며 System 1.5 연구를 완성합니다.",
+    "name": "CTS & System 1.5",
+    "objective": "검증 가능한 근거를 남기며 CTS, System 1.5 연구를 완성합니다.",
     "next_milestone": "실시간 SSH 수집기 연결",
     "workflow_progress_percent": 45.0
   },
