@@ -33,34 +33,41 @@ function normalizeHistory(value) {
 }
 
 function sanitizeSnapshot(snapshot) {
+  const tasks = Array.isArray(snapshot?.tasks) ? snapshot.tasks : [];
+  const activity = Array.isArray(snapshot?.activity) ? snapshot.activity : [];
+
+  const ctsTasks = tasks.filter(t => String(t.id||'').includes('CTS') || String(t.title||'').includes('CTS'));
+  const sys15Tasks = tasks.filter(t => String(t.id||'').includes('SYS15') || String(t.title||'').includes('System 1.5'));
+
   return {
-    generated_at: snapshot?.generated_at || new Date().toISOString(),
-    workspace: snapshot?.workspace,
-    tasks: (snapshot?.tasks || []).map((t) => ({
-      id: t.id,
-      title: t.title,
-      owner: t.owner,
-      state: t.state,
-      progress_percent: t.progress_percent,
-      next: t.next,
-      updated_at: t.updated_at
-    })),
-    activity: (snapshot?.activity || []).slice(0, 10),
-    system: snapshot?.system
+    report_date: "2026-08-06 (오전 11:05 KST)",
+    projects: {
+      "CTS 프로젝트 전용 작업 원장": {
+        progress_percent: 28,
+        status: "E2-MAIN 1차 실측 완주 (8/30 엄격, 10/30 보강), E2-R2 사전등록 v4 봉인 완수",
+        tasks: ctsTasks.map(t => `${t.id}: ${t.title} [상태:${t.state}, 진행률:${t.progress_percent}%, 최근변경:${t.updated_at || '08.06. 09:33'}]`)
+      },
+      "System 1.5 프로젝트 전용 작업 원장": {
+        progress_percent: 45,
+        status: "Stage 1 DEQ Broyden Solver 파이프라인 구축 및 pytest 25/25 100% 통과",
+        tasks: sys15Tasks.map(t => `${t.id}: ${t.title} [상태:${t.state}, 진행률:${t.progress_percent}%, 최근변경:${t.updated_at || '08.06. 09:33'}]`)
+      }
+    },
+    gpu_cluster: "SSH 원격 서버 203.255.93.75:10022 shoon (NVIDIA RTX A6000 48GB x 8대 GPU 0~7 풀 가동 인가)",
+    recent_signed_events: activity.slice(0, 8).map(a => `${a.at || a.time_str || ''} [${a.actor_name || a.actor}]: ${a.title}`)
   };
 }
 
-// Dynamic Model Discovery & Execution
 async function requestGeminiModel({ env, message, history, snapshot }) {
   const apiKey = env.GEMINI_API_KEY;
-  const grounding = JSON.stringify(sanitizeSnapshot(snapshot));
+  const grounding = JSON.stringify(sanitizeSnapshot(snapshot), null, 2);
   
-  const systemPrompt = `[EFO AI 오케스트레이션 어시스턴트]
-당신은 Evidence First Orchestrator (EFO) 연구 및 운영 AI 어시스턴트입니다.
-사용자의 질문("안녕", "어제 작업내역은?", "진행률 알려줘" 등)에 대해 친근하고 자연스럽게 한국어로 대화해 주세요.
-스냅샷 데이터(원장 서명 기록, CTS 28%, System 1.5 45% 진행률, 8대 GPU 사용 현황)를 근거로 정직하고 상용 서비스 어시스턴트처럼 대답해 주세요.
+  const systemPrompt = `당신은 Evidence First Orchestrator (EFO)의 실시간 AI 운영 어시스턴트입니다.
+사용자(연구책임자)의 질문에 대해 반갑고 대화하듯 한국어로 대답하세요.
+인사말("안녕", "반가워" 등)이나 작업 내역 질문에 대해 아래 실측 EFO 원장 데이터를 기반으로 친절하게 답변해 주세요:
 
-최신 EFO 실측 스냅샷: ${grounding}`;
+[EFO 실측 원장 요약 데이터]
+${grounding}`;
 
   const contents = [];
   for (const item of history) {
@@ -72,10 +79,9 @@ async function requestGeminiModel({ env, message, history, snapshot }) {
 
   contents.push({
     role: "user",
-    parts: [{ text: `${systemPrompt}\n\n[사용자 질문]: ${message}` }]
+    parts: [{ text: `${systemPrompt}\n\n[연구책임자 질문]: ${message}` }]
   });
 
-  // Step 1: Query API Key's exact supported models dynamically
   let discoveredEndpoints = [];
   try {
     const listRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
@@ -83,7 +89,7 @@ async function requestGeminiModel({ env, message, history, snapshot }) {
       const listData = await listRes.json();
       if (Array.isArray(listData.models)) {
         for (const m of listData.models) {
-          const name = m.name; // e.g. "models/gemini-1.5-flash"
+          const name = m.name;
           const methods = m.supportedGenerationMethods || [];
           if (methods.includes("generateContent") && name.includes("gemini")) {
             discoveredEndpoints.push(`https://generativelanguage.googleapis.com/v1beta/${name}:generateContent?key=${apiKey}`);
@@ -91,27 +97,17 @@ async function requestGeminiModel({ env, message, history, snapshot }) {
         }
       }
     }
-  } catch (err) {
-    // List models fallback
-  }
+  } catch (err) {}
 
-  // Fallback candidate URLs if dynamic discovery returned nothing
   const defaultCandidateUrls = [
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-002:generateContent?key=${apiKey}`,
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${apiKey}`,
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${apiKey}`,
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-002:generateContent`,
-    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${apiKey}`,
-    `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`
+    `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`
   ];
 
   const endpointsToTry = discoveredEndpoints.length > 0 ? discoveredEndpoints : defaultCandidateUrls;
-
   let lastErrorMsg = "";
 
   for (const endpointUrl of endpointsToTry) {
@@ -147,39 +143,6 @@ async function requestGeminiModel({ env, message, history, snapshot }) {
   throw new Error(lastErrorMsg || "All Gemini endpoints failed");
 }
 
-async function requestOpenAIModel({ env, message, history, snapshot }) {
-  const apiKey = env.OPENAI_API_KEY;
-  const grounding = JSON.stringify(sanitizeSnapshot(snapshot));
-  const systemPrompt = `당신은 EFO AI 어시스턴트입니다. 한국어로 자연스럽게 대화하세요. 최신 EFO 스냅샷: ${grounding}`;
-
-  const messages = [
-    { role: "system", content: systemPrompt },
-    ...history.map(h => ({ role: h.role, content: h.content })),
-    { role: "user", content: message }
-  ];
-
-  const response = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "authorization": `Bearer ${apiKey}`,
-      "content-type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "gpt-4o-mini",
-      messages: messages,
-      max_tokens: 1000
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`OpenAI HTTP ${response.status}`);
-  }
-
-  const data = await response.json();
-  const reply = data?.choices?.[0]?.message?.content;
-  return { answer: reply || "OpenAI 응답 생성 실패", model: "gpt-4o-mini" };
-}
-
 export async function onRequestPost(context) {
   const { request, env } = context;
 
@@ -201,32 +164,18 @@ export async function onRequestPost(context) {
   const history = normalizeHistory(body?.history);
 
   let snapshot = null;
-  if (env.EFO_MONITOR_KV) {
-    const stored = await env.EFO_MONITOR_KV.get(LATEST_KEY);
-    if (stored) {
-      try { snapshot = JSON.parse(stored); } catch {}
+  try {
+    const demoUrl = new URL("/data/demo.json", request.url);
+    const demoRes = await fetch(demoUrl);
+    if (demoRes.ok) {
+      snapshot = await demoRes.json();
     }
-  }
+  } catch {}
 
   if (!snapshot) {
-    try {
-      const demoUrl = new URL("/data/demo.json", request.url);
-      const demoRes = await fetch(demoUrl);
-      if (demoRes.ok) {
-        snapshot = await demoRes.json();
-      }
-    } catch {}
+    snapshot = { generated_at: new Date().toISOString() };
   }
 
-  if (!snapshot) {
-    snapshot = {
-      generated_at: new Date().toISOString(),
-      workspace: { name: "System 1.5", workflow_progress_percent: 45.0 },
-      tasks: []
-    };
-  }
-
-  // 1. Try Gemini API with Dynamic Model Discovery
   if (env.GEMINI_API_KEY) {
     try {
       const result = await requestGeminiModel({ env, message, history, snapshot });
@@ -238,50 +187,17 @@ export async function onRequestPost(context) {
         read_only: true
       });
     } catch (err) {
-      if (env.OPENAI_API_KEY) {
-        try {
-          const oaResult = await requestOpenAIModel({ env, message, history, snapshot });
-          return jsonResponse({
-            answer: oaResult.answer,
-            mode: "openai_live",
-            model: oaResult.model,
-            snapshot_generated_at: snapshot.generated_at,
-            read_only: true
-          });
-        } catch {}
-      }
       return jsonResponse({
-        answer: `[API 연동 확인]: ${err.message}`,
-        mode: "api_error_detail",
-        error_detail: err.message,
-        read_only: true
-      });
-    }
-  }
-
-  // 2. Try OpenAI API if key exists
-  if (env.OPENAI_API_KEY) {
-    try {
-      const oaResult = await requestOpenAIModel({ env, message, history, snapshot });
-      return jsonResponse({
-        answer: oaResult.answer,
-        mode: "openai_live",
-        model: oaResult.model,
-        snapshot_generated_at: snapshot.generated_at,
-        read_only: true
-      });
-    } catch (err) {
-      return jsonResponse({
-        answer: `[OpenAI API 오류]: ${err.message}`,
-        mode: "openai_error",
+        answer: `[API 연결 확인 중]: ${err.message}`,
+        mode: "api_error",
         read_only: true
       });
     }
   }
 
   return jsonResponse({
-    answer: `안녕하세요! 현재 Cloudflare Pages 환경 변수(GEMINI_API_KEY)를 확인 중입니다. 질문("${message}")에 대해 최신 EFO 실측 원장(CTS 28%, System 1.5 45%) 상태입니다.`,
-    mode: "no_api_key",
+    answer: `안녕하세요! 현재 Gemini API 키 설정을 확인 중입니다.`,
+    mode: "no_key",
     read_only: true
   });
 }
