@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-06T11:10:00Z",
+  "generated_at": "2026-08-06T11:30:00Z",
   "collection_interval_seconds": 120,
   "source": {
     "mode": "demo",
@@ -15,7 +15,8 @@
     "name": "CTS & System 1.5",
     "objective": "검증 가능한 근거를 남기며 CTS, System 1.5 연구를 완성합니다.",
     "next_milestone": "실시간 SSH 수집기 연결",
-    "workflow_progress_percent": 45.0
+    "workflow_progress_percent": 45.0,
+    "gpu_allocation_note": "GPU 0~3, 6~7 (총 6대) E2-R2 및 System 1.5 할당 / GPU 4~5 (2대) Stage 2 유휴 대기"
   },
   "agents": [
     {
