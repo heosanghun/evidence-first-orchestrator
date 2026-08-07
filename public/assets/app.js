@@ -1664,3 +1664,23 @@ document.addEventListener("keydown", function(e) {
     }
   }
 });
+
+
+
+window.openScheduleModal = function() {
+  const modal = document.getElementById("schedule-matrix-modal");
+  if (modal) {
+    modal.style.display = "flex";
+    modal.classList.add("active");
+    if (typeof window.renderScheduleModalBody === "function") {
+      window.renderScheduleModalBody("all");
+    }
+  }
+};
+window.closeScheduleModal = function() {
+  const modal = document.getElementById("schedule-matrix-modal");
+  if (modal) {
+    modal.style.display = "none";
+    modal.classList.remove("active");
+  }
+};

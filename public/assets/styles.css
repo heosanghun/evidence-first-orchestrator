@@ -3367,3 +3367,20 @@ dialog input:focus {
   cursor: pointer !important;
   pointer-events: auto !important;
 }
+
+
+/* GPU Compact Grid Layout Restoration (v7.3.0) */
+.gpu-grid-container, #gpu-grid, .gpu-list, [class*="gpu-grid"] {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 12px !important;
+}
+@media (max-width: 900px) {
+  .gpu-grid-container, #gpu-grid, .gpu-list, [class*="gpu-grid"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+.gpu-card, .gpu-row, .gpu-item {
+  padding: 10px 14px !important;
+  margin-bottom: 0 !important;
+}

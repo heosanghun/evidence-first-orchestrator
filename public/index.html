@@ -8,8 +8,8 @@
   <meta name="description" content="Evidence First Orchestrator 실시간 운영 현황">
   <title>EFO Operations</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=5.5.0">
-  <script src="/assets/app.js?v=5.5.0" defer></script>
+  <link rel="stylesheet" href="/assets/styles.css?v=7.3.0">
+  <script src="/assets/app.js?v=7.3.0" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -290,7 +290,7 @@
         <article class="activity-panel">
           <div class="activity-subheading">
             <div>
-              <strong>시간대별 활동량 (8월 6일 10:25 실측)</strong>
+              <strong>시간대별 활동량 (8월 7일 14:38 실측)</strong>
               <span>각 막대는 1시간 동안 기록된 이벤트 수입니다. 전체 24시간 풀 그리드 레이아웃.</span>
             </div>
             <span id="activity-peak">최대 5건/시간</span>
@@ -527,8 +527,8 @@
         <article class="activity-panel">
           <div class="activity-subheading">
             <div>
-              <strong>시간순 원장 기록 (8월 6일 10:25 최신 원장)</strong>
-              <span>8월 6일 10시 기준 최근 실측 원장 이벤트 목록입니다.</span>
+              <strong>시간순 원장 기록 (8월 7일 14:38 최신 원장)</strong>
+              <span>8월 7일 14시 기준 최근 실측 원장 이벤트 목록입니다.</span>
             </div>
             <span id="activity-visible-count">8건 표시</span>
           </div>
@@ -1272,7 +1272,7 @@
             <span style="font-size: 1.25rem; font-weight: 900; color: #1e1b4b;">🗺️ CTS &amp; System 1.5 연구 단계별 로드맵 (현재 위치 불 켜짐 💡)</span>
             <span class="project-ledger-badge" style="background: #e0e7ff; color: #3730a3; font-weight: 800; padding: 4px 12px; border-radius: 6px; font-size: 0.82rem;">💡 현재 진행 위치 단계 조명 가동 중</span>
           </div>
-          <span style="font-size: 0.88rem; color: #475569; font-weight: 800;"><button id="card-schedule-modal-btn" class="card-schedule-btn">
+          <span style="font-size: 0.88rem; color: #475569; font-weight: 800;"><button id="card-schedule-modal-btn" onclick="openScheduleModal()" class="card-schedule-btn">
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
   <span>📅 전체 단계별·날짜별 일정 한눈에 보기 (ICLR 2027)</span>
 </button></span>
@@ -1526,7 +1526,7 @@
           <h2>📅 8월~9월 프로젝트 전체 단계별·날짜별 일정표</h2>
           <p class="modal-subtitle">실측 완료 [M] 및 추정 진행 [I] 이원화 관리 (Pivot: 2026-08-07)</p>
         </div>
-        <button id="close-schedule-modal-btn" class="modal-close-btn">&times;</button>
+        <button id="close-schedule-modal-btn" class="modal-close-btn" onclick="closeScheduleModal()">&times;</button>
       </div>
 
       <div class="modal-filter-bar">
@@ -1541,6 +1541,27 @@
       </div>
     </div>
   </div>
+
+
+  <script>
+    function openScheduleModal() {
+      var modal = document.getElementById("schedule-matrix-modal");
+      if (modal) {
+        modal.style.display = "flex";
+        modal.classList.add("active");
+        if (typeof window.renderScheduleModalBody === "function") {
+          window.renderScheduleModalBody("all");
+        }
+      }
+    }
+    function closeScheduleModal() {
+      var modal = document.getElementById("schedule-matrix-modal");
+      if (modal) {
+        modal.style.display = "none";
+        modal.classList.remove("active");
+      }
+    }
+  </script>
 
 </body>
 </html>

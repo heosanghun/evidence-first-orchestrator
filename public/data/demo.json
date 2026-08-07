@@ -4,7 +4,7 @@
     "objective": "8월 말 전 실험 완료 → 9월 논문 집필 → ICLR 2027 제출(9월 25일경) 검증 가동",
     "infra_policy": "INFRA-02: CTS[0,1] / S1.5[3,4,5우선] / 공용[6,7] / GPU2[발열보호제외]"
   },
-  "generated_at": "2026-08-07T14:28:00Z",
+  "generated_at": "2026-08-07T14:38:00Z",
   "projects": [
     {
       "id": "CTS",
@@ -185,6 +185,21 @@
     }
   ],
   "activity": [
+    {
+      "at": "2026-08-07T14:28:00Z",
+      "actor_name": "antigravity",
+      "title": "SCHED-01 8월 병렬 실험 및 ICLR 2027 전체 일정표 EFO 모니터링 반영 및 원장 등재"
+    },
+    {
+      "at": "2026-08-07T10:55:00Z",
+      "actor_name": "antigravity",
+      "title": "SEC-01 자격증명 하드코딩 전면 제거 및 SFTP 원격 접속 소멸 배포"
+    },
+    {
+      "at": "2026-08-07T01:52:00Z",
+      "actor_name": "antigravity",
+      "title": "ADVISOR-01 8월말 전실험 완결 ➔ ICLR 2027 제출(9/25경) 일정 확정"
+    },
     {
       "at": "2026-08-07T14:28:00Z",
       "actor_name": "antigravity",
@@ -386,5 +401,6 @@
         }
       ]
     }
-  }
+  },
+  "last_updated_display": "8월 7일 14:38 최신 원장"
 }
