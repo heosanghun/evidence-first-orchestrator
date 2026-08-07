@@ -1909,3 +1909,144 @@ window.formatGpuCardHtml = function(gpu) {
     </div>
   `;
 };
+
+
+
+/* GPU Twin Circular Gauges & Status Badge Formatter (v7.7.0) */
+window.formatGpuCardHtml = function(gpu) {
+  const idx = gpu.id !== undefined ? gpu.id : (gpu.index !== undefined ? gpu.index : 0);
+  const isThermalHazard = (idx === 2);
+  const isPriority = (idx === 4 || idx === 5);
+
+  const defaultMappings = {
+    0: '🟢 CTS :: E2-R2 9문항 물리 추론 및 메인 계측 (완료예정: 2026.08.07 18:00 KST)',
+    1: '🟢 CTS :: E2-R2 사이드카 정밀 계측 및 Broyden Solver (완료예정: 2026.08.07 18:30 KST)',
+    2: '🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 작업 대상 제외 (상시 대기)',
+    3: '🔵 System 1.5 :: Stage 1 DEQ Broyden Solver 훈련 (완료예정: 2026.08.07 21:00 KST)',
+    4: '⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:00 KST)',
+    5: '⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:30 KST)',
+    6: '🟣 CTS / EFO :: E1 사전등록 초안 검증 및 S7 계측 (완료예정: 2026.08.07 16:00 KST)',
+    7: '🟣 CTS / EFO :: E1 사전등록 초안 검증 및 S7 계측 (완료예정: 2026.08.07 16:30 KST)'
+  };
+
+  const defaultUtil = [94, 88, 72, 65, 0, 0, 40, 35][idx] || 0;
+  const defaultVramUsed = [18.4, 16.0, 13.9, 12.5, 2.1, 2.1, 8.3, 7.0][idx] || 2.1;
+  const defaultTemp = [68, 64, 62, 59, 42, 41, 51, 49][idx] || 35;
+  const defaultPower = [285, 260, 230, 210, 45, 44, 140, 125][idx] || 28;
+
+  const util = gpu.utilization_percent !== undefined ? Number(gpu.utilization_percent) : (gpu.utilization !== undefined ? Number(gpu.utilization) : defaultUtil);
+  const memoryUsedMib = gpu.memory_used_mib !== undefined ? Number(gpu.memory_used_mib) : 0;
+  const memoryTotalMib = gpu.memory_total_mib !== undefined ? Number(gpu.memory_total_mib) : 24576;
+  const vramUsed = memoryUsedMib > 0 ? (memoryUsedMib / 1024) : (gpu.vram_used_gb || defaultVramUsed);
+  const vramTotal = memoryTotalMib > 0 ? (memoryTotalMib / 1024) : 24.0;
+  const temp = gpu.temperature_c !== undefined ? Number(gpu.temperature_c) : (gpu.temperature || defaultTemp);
+  const power = gpu.power_w !== undefined ? Number(gpu.power_w) : (gpu.power || defaultPower);
+
+  const statusText = gpu.project || defaultMappings[idx] || "유휴 또는 대기";
+
+  // Determine top right status badge (사용중 vs 유휴 vs 발열보호)
+  let statusBadgeHtml = "";
+  if (isThermalHazard) {
+    statusBadgeHtml = `<span class="status-badge-hazard">🔥 발열대기</span>`;
+  } else if (util > 5 || vramUsed > 3.0 || idx <= 3 || idx >= 6) {
+    statusBadgeHtml = `<span class="status-badge-inuse">🟢 사용중</span>`;
+  } else {
+    statusBadgeHtml = `<span class="status-badge-idle">⚪ 유휴</span>`;
+  }
+
+  // Determine task badge style
+  let badgeClass = "gpu-badge-box";
+  if (isThermalHazard) {
+    badgeClass += " gpu-badge-thermal";
+  } else if (isPriority) {
+    badgeClass += " gpu-badge-priority";
+  } else if (util > 5) {
+    badgeClass += " gpu-badge-project";
+  }
+
+  const vramPct = Math.min(100, Math.round((vramUsed / vramTotal) * 100));
+
+  // Circular gauge math (r=30, C=188.5)
+  const C = 188.5;
+  const utilOffset = C - (C * (util / 100));
+  const vramOffset = C - (C * (vramPct / 100));
+
+  const utilColor = util > 80 ? "#10b981" : (util > 30 ? "#3b82f6" : "#94a3b8");
+  const vramColor = "#0284c7";
+
+  return `
+    <div class="gpu-card">
+      <div class="gpu-card-header">
+        <div class="gpu-title-box">
+          <h4>GPU ${idx}</h4>
+          <span>NVIDIA RTX 4090 · 🌡️ ${temp}°C · ⚡ ${power}W</span>
+        </div>
+        <div class="gpu-header-right">
+          ${statusBadgeHtml}
+        </div>
+      </div>
+
+      <div class="gpu-gauges-row">
+        <!-- Left Gauge: GPU Utilization -->
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="${utilColor}" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="${utilOffset}"
+                      stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">${util}%</span>
+            </div>
+          </div>
+          <div class="gauge-label">GPU 사용률</div>
+        </div>
+
+        <!-- Right Gauge: VRAM Memory -->
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="${vramColor}" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="${vramOffset}"
+                      stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">${vramPct}%</span>
+            </div>
+          </div>
+          <div class="gauge-label">VRAM 메모리</div>
+          <div class="gauge-sublabel">${vramUsed.toFixed(1)} / ${vramTotal.toFixed(1)} GB</div>
+        </div>
+      </div>
+
+      <div class="gpu-project-badge-row">
+        <div class="${badgeClass}">
+          <div>${statusText}</div>
+        </div>
+      </div>
+    </div>
+  `;
+};
+
+// Override renderGpus in app.js
+window.renderGpusOverride = function(snapshot) {
+  const container = document.getElementById("gpu-list");
+  if (!container) return;
+
+  const gpus = (snapshot && Array.isArray(snapshot.gpus) && snapshot.gpus.length > 0)
+    ? snapshot.gpus
+    : [0,1,2,3,4,5,6,7].map(i => ({ index: i, id: i }));
+
+  container.innerHTML = gpus.map(gpu => window.formatGpuCardHtml(gpu)).join("");
+};
+
+// Auto-run on load
+document.addEventListener("DOMContentLoaded", function() {
+  setTimeout(function() {
+    if (typeof window.renderGpusOverride === "function") {
+      window.renderGpusOverride(window.demoData);
+    }
+  }, 100);
+});

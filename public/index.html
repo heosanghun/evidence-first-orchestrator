@@ -8,8 +8,8 @@
   <meta name="description" content="Evidence First Orchestrator 실시간 운영 현황">
   <title>EFO Operations</title>
   <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/assets/styles.css?v=7.6.0">
-  <script src="/assets/app.js?v=7.6.0" defer></script>
+  <link rel="stylesheet" href="/assets/styles.css?v=7.7.0">
+  <script src="/assets/app.js?v=7.7.0" defer></script>
 </head>
 <body>
   <header class="topbar">
@@ -626,240 +626,417 @@
         <span class="section-meta" id="gpu-host">203.255.93.75 · GPU 8장</span>
       </div>
       <div class="gpu-list" id="gpu-list">
-        <div class="gpu-row">
-          <div class="gpu-identity">
-            <span class="gpu-index">GPU 0</span>
-            <span class="gpu-name">NVIDIA RTX 4090</span>
-          </div>
-          <div class="bar-metric utilization">
-            <div class="bar-metric-head">
-              <span>사용률</span><strong>94%</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="94">
-              <span style="width:94%"></span>
-            </div>
-          </div>
-          <div class="bar-metric memory">
-            <div class="bar-metric-head">
-              <span>메모리</span><strong>23.8 / 24.0 GB (99%)</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="99">
-              <span style="width:99%"></span>
-            </div>
-          </div>
-          <div class="metric-pill temperature ">
-            온도<strong>72°C</strong>
-          </div>
-          <div class="metric-pill power">
-            전력<strong>285 W</strong>
-          </div>
-          <div class="project-list"><span class="project-label" title="🟢 CTS · 85% · ETA 45m">🟢 CTS · 85%</span></div>
+
+    <div class="gpu-card">
+      <div class="gpu-card-header">
+        <div class="gpu-title-box">
+          <h4>GPU 0</h4>
+          <span>NVIDIA RTX 4090 · 🌡️ 68°C · ⚡ 285W</span>
         </div>
-        <div class="gpu-row">
-          <div class="gpu-identity">
-            <span class="gpu-index">GPU 1</span>
-            <span class="gpu-name">NVIDIA RTX 4090</span>
-          </div>
-          <div class="bar-metric utilization">
-            <div class="bar-metric-head">
-              <span>사용률</span><strong>96%</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="96">
-              <span style="width:96%"></span>
-            </div>
-          </div>
-          <div class="bar-metric memory">
-            <div class="bar-metric-head">
-              <span>메모리</span><strong>23.9 / 24.0 GB (100%)</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100">
-              <span style="width:100%"></span>
-            </div>
-          </div>
-          <div class="metric-pill temperature warm">
-            온도<strong>74°C</strong>
-          </div>
-          <div class="metric-pill power">
-            전력<strong>290 W</strong>
-          </div>
-          <div class="project-list"><span class="project-label" title="🔵 System 1.5 · 55% · ETA 2h">🔵 System 1.5 · 55%</span></div>
-        </div>
-        <div class="gpu-row">
-          <div class="gpu-identity">
-            <span class="gpu-index">GPU 2</span>
-            <span class="gpu-name">NVIDIA RTX 4090</span>
-          </div>
-          <div class="bar-metric utilization">
-            <div class="bar-metric-head">
-              <span>사용률</span><strong>4%</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="4">
-              <span style="width:4%"></span>
-            </div>
-          </div>
-          <div class="bar-metric memory">
-            <div class="bar-metric-head">
-              <span>메모리</span><strong>3.2 / 24.0 GB (13%)</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="13">
-              <span style="width:13%"></span>
-            </div>
-          </div>
-          <div class="metric-pill temperature ">
-            온도<strong>43°C</strong>
-          </div>
-          <div class="metric-pill power">
-            전력<strong>45 W</strong>
-          </div>
-          <div class="project-list"><span class="project-label" title="🟣 EFO Core · 100% · 검증완료">🟣 EFO Core · 100%</span></div>
-        </div>
-        <div class="gpu-row">
-          <div class="gpu-identity">
-            <span class="gpu-index">GPU 3</span>
-            <span class="gpu-name">NVIDIA RTX 4090</span>
-          </div>
-          <div class="bar-metric utilization">
-            <div class="bar-metric-head">
-              <span>사용률</span><strong>88%</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="88">
-              <span style="width:88%"></span>
-            </div>
-          </div>
-          <div class="bar-metric memory">
-            <div class="bar-metric-head">
-              <span>메모리</span><strong>21.5 / 24.0 GB (90%)</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="90">
-              <span style="width:90%"></span>
-            </div>
-          </div>
-          <div class="metric-pill temperature ">
-            온도<strong>70°C</strong>
-          </div>
-          <div class="metric-pill power">
-            전력<strong>260 W</strong>
-          </div>
-          <div class="project-list"><span class="project-label" title="🟢 CTS · E3 Iso-Depth 10%">🟢 CTS · E3 10%</span></div>
-        </div>
-        <div class="gpu-row">
-          <div class="gpu-identity">
-            <span class="gpu-index">GPU 4</span>
-            <span class="gpu-name">NVIDIA RTX 4090</span>
-          </div>
-          <div class="bar-metric utilization">
-            <div class="bar-metric-head">
-              <span>사용률</span><strong>0%</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-              <span style="width:0%"></span>
-            </div>
-          </div>
-          <div class="bar-metric memory">
-            <div class="bar-metric-head">
-              <span>메모리</span><strong>0.4 / 24.0 GB (2%)</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="2">
-              <span style="width:2%"></span>
-            </div>
-          </div>
-          <div class="metric-pill temperature ">
-            온도<strong>35°C</strong>
-          </div>
-          <div class="metric-pill power">
-            전력<strong>28 W</strong>
-          </div>
-          <div class="project-list"><span class="project-label idle">유휴 또는 대기</span></div>
-        </div>
-        <div class="gpu-row">
-          <div class="gpu-identity">
-            <span class="gpu-index">GPU 5</span>
-            <span class="gpu-name">NVIDIA RTX 4090</span>
-          </div>
-          <div class="bar-metric utilization">
-            <div class="bar-metric-head">
-              <span>사용률</span><strong>0%</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-              <span style="width:0%"></span>
-            </div>
-          </div>
-          <div class="bar-metric memory">
-            <div class="bar-metric-head">
-              <span>메모리</span><strong>0.4 / 24.0 GB (2%)</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="2">
-              <span style="width:2%"></span>
-            </div>
-          </div>
-          <div class="metric-pill temperature ">
-            온도<strong>36°C</strong>
-          </div>
-          <div class="metric-pill power">
-            전력<strong>29 W</strong>
-          </div>
-          <div class="project-list"><span class="project-label idle">유휴 또는 대기</span></div>
-        </div>
-        <div class="gpu-row">
-          <div class="gpu-identity">
-            <span class="gpu-index">GPU 6</span>
-            <span class="gpu-name">NVIDIA RTX 4090</span>
-          </div>
-          <div class="bar-metric utilization">
-            <div class="bar-metric-head">
-              <span>사용률</span><strong>0%</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-              <span style="width:0%"></span>
-            </div>
-          </div>
-          <div class="bar-metric memory">
-            <div class="bar-metric-head">
-              <span>메모리</span><strong>0.4 / 24.0 GB (2%)</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="2">
-              <span style="width:2%"></span>
-            </div>
-          </div>
-          <div class="metric-pill temperature ">
-            온도<strong>34°C</strong>
-          </div>
-          <div class="metric-pill power">
-            전력<strong>27 W</strong>
-          </div>
-          <div class="project-list"><span class="project-label idle">유휴 또는 대기</span></div>
-        </div>
-        <div class="gpu-row">
-          <div class="gpu-identity">
-            <span class="gpu-index">GPU 7</span>
-            <span class="gpu-name">NVIDIA RTX 4090</span>
-          </div>
-          <div class="bar-metric utilization">
-            <div class="bar-metric-head">
-              <span>사용률</span><strong>0%</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-              <span style="width:0%"></span>
-            </div>
-          </div>
-          <div class="bar-metric memory">
-            <div class="bar-metric-head">
-              <span>메모리</span><strong>0.4 / 24.0 GB (2%)</strong>
-            </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="2">
-              <span style="width:2%"></span>
-            </div>
-          </div>
-          <div class="metric-pill temperature ">
-            온도<strong>35°C</strong>
-          </div>
-          <div class="metric-pill power">
-            전력<strong>28 W</strong>
-          </div>
-          <div class="project-list"><span class="project-label idle">유휴 또는 대기</span></div>
+        <div class="gpu-header-right">
+          <span class="status-badge-inuse">🟢 사용중</span>
         </div>
       </div>
-    </section>
+
+      <div class="gpu-gauges-row">
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#10b981" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="11.3"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">94%</span>
+            </div>
+          </div>
+          <div class="gauge-label">GPU 사용률</div>
+        </div>
+
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#0284c7" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="187.1"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">76%</span>
+            </div>
+          </div>
+          <div class="gauge-label">VRAM 메모리</div>
+          <div class="gauge-sublabel">18.4 / 24.0 GB</div>
+        </div>
+      </div>
+
+      <div class="gpu-project-badge-row">
+        <div class="gpu-badge-box gpu-badge-project">
+          <div>🟢 CTS :: E2-R2 9문항 물리 추론 및 메인 계측 (완료예정: 2026.08.07 18:00 KST)</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="gpu-card">
+      <div class="gpu-card-header">
+        <div class="gpu-title-box">
+          <h4>GPU 1</h4>
+          <span>NVIDIA RTX 4090 · 🌡️ 64°C · ⚡ 260W</span>
+        </div>
+        <div class="gpu-header-right">
+          <span class="status-badge-inuse">🟢 사용중</span>
+        </div>
+      </div>
+
+      <div class="gpu-gauges-row">
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#10b981" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="22.6"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">88%</span>
+            </div>
+          </div>
+          <div class="gauge-label">GPU 사용률</div>
+        </div>
+
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#0284c7" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="187.2"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">66%</span>
+            </div>
+          </div>
+          <div class="gauge-label">VRAM 메모리</div>
+          <div class="gauge-sublabel">16.0 / 24.0 GB</div>
+        </div>
+      </div>
+
+      <div class="gpu-project-badge-row">
+        <div class="gpu-badge-box gpu-badge-project">
+          <div>🟢 CTS :: E2-R2 사이드카 정밀 계측 및 Broyden Solver (완료예정: 2026.08.07 18:30 KST)</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="gpu-card">
+      <div class="gpu-card-header">
+        <div class="gpu-title-box">
+          <h4>GPU 2</h4>
+          <span>NVIDIA RTX 4090 · 🌡️ 62°C · ⚡ 230W</span>
+        </div>
+        <div class="gpu-header-right">
+          <span class="status-badge-hazard">🔥 발열대기</span>
+        </div>
+      </div>
+
+      <div class="gpu-gauges-row">
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#3b82f6" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="52.8"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">72%</span>
+            </div>
+          </div>
+          <div class="gauge-label">GPU 사용률</div>
+        </div>
+
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#0284c7" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="187.4"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">57%</span>
+            </div>
+          </div>
+          <div class="gauge-label">VRAM 메모리</div>
+          <div class="gauge-sublabel">13.9 / 24.0 GB</div>
+        </div>
+      </div>
+
+      <div class="gpu-project-badge-row">
+        <div class="gpu-badge-box gpu-badge-thermal">
+          <div>🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 작업 대상 제외 (상시 대기)</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="gpu-card">
+      <div class="gpu-card-header">
+        <div class="gpu-title-box">
+          <h4>GPU 3</h4>
+          <span>NVIDIA RTX 4090 · 🌡️ 59°C · ⚡ 210W</span>
+        </div>
+        <div class="gpu-header-right">
+          <span class="status-badge-inuse">🟢 사용중</span>
+        </div>
+      </div>
+
+      <div class="gpu-gauges-row">
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#3b82f6" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="66.0"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">65%</span>
+            </div>
+          </div>
+          <div class="gauge-label">GPU 사용률</div>
+        </div>
+
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#0284c7" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="187.5"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">52%</span>
+            </div>
+          </div>
+          <div class="gauge-label">VRAM 메모리</div>
+          <div class="gauge-sublabel">12.5 / 24.0 GB</div>
+        </div>
+      </div>
+
+      <div class="gpu-project-badge-row">
+        <div class="gpu-badge-box gpu-badge-project">
+          <div>🔵 System 1.5 :: Stage 1 DEQ Broyden Solver 훈련 (완료예정: 2026.08.07 21:00 KST)</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="gpu-card">
+      <div class="gpu-card-header">
+        <div class="gpu-title-box">
+          <h4>GPU 4</h4>
+          <span>NVIDIA RTX 4090 · 🌡️ 42°C · ⚡ 45W</span>
+        </div>
+        <div class="gpu-header-right">
+          <span class="status-badge-idle">⚪ 유휴</span>
+        </div>
+      </div>
+
+      <div class="gpu-gauges-row">
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#94a3b8" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="188.5"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">0%</span>
+            </div>
+          </div>
+          <div class="gauge-label">GPU 사용률</div>
+        </div>
+
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#0284c7" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="188.3"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">8%</span>
+            </div>
+          </div>
+          <div class="gauge-label">VRAM 메모리</div>
+          <div class="gauge-sublabel">2.1 / 24.0 GB</div>
+        </div>
+      </div>
+
+      <div class="gpu-project-badge-row">
+        <div class="gpu-badge-box gpu-badge-priority">
+          <div>⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:00 KST)</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="gpu-card">
+      <div class="gpu-card-header">
+        <div class="gpu-title-box">
+          <h4>GPU 5</h4>
+          <span>NVIDIA RTX 4090 · 🌡️ 41°C · ⚡ 44W</span>
+        </div>
+        <div class="gpu-header-right">
+          <span class="status-badge-idle">⚪ 유휴</span>
+        </div>
+      </div>
+
+      <div class="gpu-gauges-row">
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#94a3b8" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="188.5"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">0%</span>
+            </div>
+          </div>
+          <div class="gauge-label">GPU 사용률</div>
+        </div>
+
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#0284c7" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="188.3"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">8%</span>
+            </div>
+          </div>
+          <div class="gauge-label">VRAM 메모리</div>
+          <div class="gauge-sublabel">2.1 / 24.0 GB</div>
+        </div>
+      </div>
+
+      <div class="gpu-project-badge-row">
+        <div class="gpu-badge-box gpu-badge-priority">
+          <div>⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:30 KST)</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="gpu-card">
+      <div class="gpu-card-header">
+        <div class="gpu-title-box">
+          <h4>GPU 6</h4>
+          <span>NVIDIA RTX 4090 · 🌡️ 51°C · ⚡ 140W</span>
+        </div>
+        <div class="gpu-header-right">
+          <span class="status-badge-inuse">🟢 사용중</span>
+        </div>
+      </div>
+
+      <div class="gpu-gauges-row">
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#3b82f6" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="113.1"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">40%</span>
+            </div>
+          </div>
+          <div class="gauge-label">GPU 사용률</div>
+        </div>
+
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#0284c7" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="187.8"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">34%</span>
+            </div>
+          </div>
+          <div class="gauge-label">VRAM 메모리</div>
+          <div class="gauge-sublabel">8.3 / 24.0 GB</div>
+        </div>
+      </div>
+
+      <div class="gpu-project-badge-row">
+        <div class="gpu-badge-box gpu-badge-project">
+          <div>🟣 CTS / EFO :: E1 사전등록 초안 검증 및 S7 계측 (완료예정: 2026.08.07 16:00 KST)</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="gpu-card">
+      <div class="gpu-card-header">
+        <div class="gpu-title-box">
+          <h4>GPU 7</h4>
+          <span>NVIDIA RTX 4090 · 🌡️ 49°C · ⚡ 125W</span>
+        </div>
+        <div class="gpu-header-right">
+          <span class="status-badge-inuse">🟢 사용중</span>
+        </div>
+      </div>
+
+      <div class="gpu-gauges-row">
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#3b82f6" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="122.5"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">35%</span>
+            </div>
+          </div>
+          <div class="gauge-label">GPU 사용률</div>
+        </div>
+
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#0284c7" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="188.0"
+                      stroke-linecap="round" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">29%</span>
+            </div>
+          </div>
+          <div class="gauge-label">VRAM 메모리</div>
+          <div class="gauge-sublabel">7.0 / 24.0 GB</div>
+        </div>
+      </div>
+
+      <div class="gpu-project-badge-row">
+        <div class="gpu-badge-box gpu-badge-project">
+          <div>🟣 CTS / EFO :: E1 사전등록 초안 검증 및 S7 계측 (완료예정: 2026.08.07 16:30 KST)</div>
+        </div>
+      </div>
+    </div>
+    
+</div>
+</section>
 
     <section class="chart-band" aria-label="시간 변화 그래프">
       <article class="chart-panel">

@@ -3723,3 +3723,194 @@ dialog input:focus {
 [data-theme="dark"] .gauge-sublabel {
   color: #94a3b8 !important;
 }
+
+
+/* GPU Twin Circular Gauges & In-Use/Idle Badges (v7.7.0) */
+#gpu-list, .gpu-list {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 16px !important;
+  width: 100% !important;
+}
+@media (max-width: 900px) {
+  #gpu-list, .gpu-list {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.gpu-card {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04) !important;
+  border-radius: 14px !important;
+  padding: 16px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+}
+
+[data-theme="dark"] .gpu-card {
+  background: rgba(30, 41, 59, 0.85) !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
+}
+
+.gpu-card-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  padding-bottom: 8px !important;
+}
+[data-theme="dark"] .gpu-card-header {
+  border-bottom-color: rgba(148, 163, 184, 0.15) !important;
+}
+
+.gpu-title-box h4 {
+  margin: 0 !important;
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+}
+[data-theme="dark"] .gpu-title-box h4 {
+  color: #f8fafc !important;
+}
+.gpu-title-box span {
+  font-size: 0.75rem !important;
+  color: #64748b !important;
+  font-weight: 600 !important;
+}
+[data-theme="dark"] .gpu-title-box span {
+  color: #94a3b8 !important;
+}
+
+.gpu-header-right {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* In-Use / Idle Status Badge */
+.status-badge-inuse {
+  background: #ecfdf5 !important;
+  border: 1px solid #a7f3d0 !important;
+  color: #047857 !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  padding: 3px 10px !important;
+  border-radius: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+[data-theme="dark"] .status-badge-inuse {
+  background: rgba(16, 185, 129, 0.2) !important;
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  color: #34d399 !important;
+}
+
+.status-badge-idle {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #64748b !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  padding: 3px 10px !important;
+  border-radius: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+[data-theme="dark"] .status-badge-idle {
+  background: rgba(51, 65, 85, 0.5) !important;
+  border-color: rgba(148, 163, 184, 0.3) !important;
+  color: #94a3b8 !important;
+}
+
+.status-badge-hazard {
+  background: #fffbeb !important;
+  border: 1px solid #fde68a !important;
+  color: #b45309 !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  padding: 3px 10px !important;
+  border-radius: 20px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 5px !important;
+}
+[data-theme="dark"] .status-badge-hazard {
+  background: rgba(245, 158, 11, 0.2) !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  color: #fbbf24 !important;
+}
+
+.gpu-gauges-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-around !important;
+  padding: 8px 0 !important;
+  gap: 16px !important;
+}
+
+.gpu-gauge-item {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  flex: 1 !important;
+}
+
+.gauge-svg-wrap {
+  position: relative !important;
+  width: 80px !important;
+  height: 80px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.gauge-svg-wrap svg {
+  transform: rotate(-90deg) !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.gauge-center-text {
+  position: absolute !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+}
+.gauge-center-text .val {
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  line-height: 1 !important;
+}
+[data-theme="dark"] .gauge-center-text .val {
+  color: #f8fafc !important;
+}
+
+.gauge-label {
+  margin-top: 6px !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+  color: #334155 !important;
+  text-align: center !important;
+}
+[data-theme="dark"] .gauge-label {
+  color: #cbd5e1 !important;
+}
+.gauge-sublabel {
+  font-size: 0.74rem !important;
+  color: #64748b !important;
+  font-weight: 600 !important;
+}
+[data-theme="dark"] .gauge-sublabel {
+  color: #94a3b8 !important;
+}
