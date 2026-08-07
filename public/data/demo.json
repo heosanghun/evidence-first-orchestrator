@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-06T20:32:00Z",
+  "generated_at": "2026-08-07T09:52:00Z",
   "collection_interval_seconds": 120,
   "source": {
     "mode": "demo",
@@ -134,8 +134,10 @@
       "memory_total_mib": 49152,
       "temperature_c": 68,
       "power_w": 285,
+      "project_name": "CTS :: E2-R2 9문항 물리 추론 및 메인 계측",
+      "eta": "2026-08-07 18:00 KST",
       "projects": [
-        "🟢 CTS :: E2-R2 9문항(24k tokens) 확정 물리 추론 및 메인 계측 파이프라인 (NVIDIA RTX A6000 48GB)"
+        "🟢 CTS :: E2-R2 9문항 물리 추론 (완료예정: 08.07 18:00 KST)"
       ]
     },
     {
@@ -146,8 +148,10 @@
       "memory_total_mib": 49152,
       "temperature_c": 64,
       "power_w": 260,
+      "project_name": "CTS :: E2-R2 사이드카 정밀 계측 및 Broyden Solver",
+      "eta": "2026-08-07 18:30 KST",
       "projects": [
-        "🟢 CTS :: E2-R2 사이드카 정밀 계측 및 Broyden Solver 보강 파이프라인 (NVIDIA RTX A6000 48GB)"
+        "🟢 CTS :: E2-R2 사이드카 정밀 계측 (완료예정: 08.07 18:30 KST)"
       ]
     },
     {
@@ -158,8 +162,10 @@
       "memory_total_mib": 49152,
       "temperature_c": 89,
       "power_w": 40,
+      "project_name": "🔥 발열보호 안전 차단 (89°C 육박 작업제외)",
+      "eta": "작업 제외 (상시 대기)",
       "projects": [
-        "🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 헤비 작업 대상에서 즉시 제외 및 유휴 대기 상태 전환"
+        "🔥 발열보호 작업제외 (89°C 육박 ➔ 상시 유휴 대기)"
       ]
     },
     {
@@ -170,8 +176,10 @@
       "memory_total_mib": 49152,
       "temperature_c": 59,
       "power_w": 210,
+      "project_name": "System 1.5 :: Stage 1 DEQ Broyden Solver 훈련",
+      "eta": "2026-08-07 21:00 KST",
       "projects": [
-        "🔵 System 1.5 :: Stage 1 DEQ Broyden Solver 파이프라인 및 pytest 25/25 100% 서명 검증 완수"
+        "🔵 System 1.5 :: Stage 1 DEQ 훈련 (완료예정: 08.07 21:00 KST)"
       ]
     },
     {
@@ -182,8 +190,10 @@
       "memory_total_mib": 49152,
       "temperature_c": 61,
       "power_w": 245,
+      "project_name": "System 1.5 :: Stage 2 FWP(ΔW) 우선가동 결합",
+      "eta": "2026-08-08 02:00 KST",
       "projects": [
-        "⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 ➔ GPU 2번 과열 대책으로 최우선 가동 장치 할당"
+        "⚡ System 1.5 :: Stage 2 FWP 결합 (완료예정: 08.08 02:00 KST)"
       ]
     },
     {
@@ -194,8 +204,10 @@
       "memory_total_mib": 49152,
       "temperature_c": 60,
       "power_w": 235,
+      "project_name": "System 1.5 :: Stage 2 FWP(ΔW) 우선가동 결합",
+      "eta": "2026-08-08 02:30 KST",
       "projects": [
-        "⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 ➔ GPU 2번 과열 대책으로 최우선 가동 장치 할당"
+        "⚡ System 1.5 :: Stage 2 FWP 결합 (완료예정: 08.08 02:30 KST)"
       ]
     },
     {
@@ -206,8 +218,10 @@
       "memory_total_mib": 49152,
       "temperature_c": 51,
       "power_w": 140,
+      "project_name": "CTS / EFO :: E1 사전등록 초안 및 S7 계측",
+      "eta": "2026-08-07 16:00 KST",
       "projects": [
-        "🟣 CTS :: E1 사전등록 초안 검증 및 S7 계측 모듈 수급 준비 전용 (공식 승인 자원)"
+        "🟣 CTS/EFO :: E1 사전등록 검증 (완료예정: 08.07 16:00 KST)"
       ]
     },
     {
@@ -218,8 +232,10 @@
       "memory_total_mib": 49152,
       "temperature_c": 49,
       "power_w": 125,
+      "project_name": "CTS / EFO :: E1 사전등록 초안 및 S7 계측",
+      "eta": "2026-08-07 16:30 KST",
       "projects": [
-        "🟣 CTS :: E1 사전등록 초안 검증 및 S7 계측 모듈 수급 준비 전용 (공식 승인 자원)"
+        "🟣 CTS/EFO :: E1 사전등록 검증 (완료예정: 08.07 16:30 KST)"
       ]
     }
   ],
