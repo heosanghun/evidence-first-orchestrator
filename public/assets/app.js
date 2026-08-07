@@ -1754,3 +1754,65 @@ window.formatGpuCardHtml = function(gpu) {
     </div>
   `;
 };
+
+
+
+/* GPU High Contrast Renderer (v7.5.0) */
+window.formatGpuCardHtml = function(gpu) {
+  const isThermalHazard = (gpu.id === 2 || gpu.index === 2 || gpu.name === "GPU 2");
+  const isPriority = (gpu.id === 4 || gpu.id === 5 || gpu.index === 4 || gpu.index === 5);
+  
+  let badgeClass = "gpu-badge-box";
+  let statusText = gpu.project || gpu.notes || "유휴 또는 대기";
+
+  if (isThermalHazard) {
+    badgeClass += " gpu-badge-thermal";
+    statusText = "🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 작업 대상 제외 (상시 대기)";
+  } else if (isPriority) {
+    badgeClass += " gpu-badge-priority";
+    if (!gpu.project) statusText = "⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:00 KST)";
+  } else if (gpu.project) {
+    badgeClass += " gpu-badge-project";
+  }
+
+  const util = gpu.utilization !== undefined ? gpu.utilization : (gpu.gpu_util || 0);
+  const vramUsed = gpu.vram_used_gb || gpu.vram_used || 0;
+  const vramTotal = gpu.vram_total_gb || 24;
+  const temp = gpu.temperature || gpu.temp || 35;
+  const power = gpu.power_w || gpu.power || 28;
+
+  const utilColor = util > 80 ? "#10b981" : (util > 30 ? "#2563eb" : "#64748b");
+  const vramPct = Math.min(100, Math.round((vramUsed / vramTotal) * 100));
+
+  return `
+    <div class="gpu-card">
+      <div class="gpu-top-row">
+        <div class="gpu-name-group">
+          <h4>GPU ${gpu.id !== undefined ? gpu.id : gpu.index}</h4>
+          <span>NVIDIA RTX 4090</span>
+        </div>
+        <div class="gpu-metrics-group">
+          <div class="gpu-metric-item">
+            <span>사용률 <strong>${util}%</strong></span>
+            <div class="gpu-bar-mini"><div class="gpu-bar-fill" style="width:${util}%; background:${utilColor};"></div></div>
+          </div>
+          <div class="gpu-metric-item">
+            <span>VRAM <strong>${vramUsed.toFixed(1)} / ${vramTotal.toFixed(1)} GB</strong> (${vramPct}%)</span>
+            <div class="gpu-bar-mini"><div class="gpu-bar-fill" style="width:${vramPct}%; background:#0284c7;"></div></div>
+          </div>
+          <div class="gpu-metric-item">
+            <span>온도 <strong>${temp}°C</strong></span>
+          </div>
+          <div class="gpu-metric-item">
+            <span>전력 <strong>${power} W</strong></span>
+          </div>
+        </div>
+      </div>
+      <div class="gpu-project-badge-row">
+        <div class="${badgeClass}">
+          <div>${statusText}</div>
+        </div>
+      </div>
+    </div>
+  `;
+};
