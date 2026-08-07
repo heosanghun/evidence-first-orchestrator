@@ -1816,3 +1816,96 @@ window.formatGpuCardHtml = function(gpu) {
     </div>
   `;
 };
+
+
+
+/* GPU Twin Circular Gauges Renderer (v7.6.0) */
+window.formatGpuCardHtml = function(gpu) {
+  const isThermalHazard = (gpu.id === 2 || gpu.index === 2 || gpu.name === "GPU 2");
+  const isPriority = (gpu.id === 4 || gpu.id === 5 || gpu.index === 4 || gpu.index === 5);
+  
+  let badgeClass = "gpu-badge-box";
+  let statusText = gpu.project || gpu.notes || "유휴 또는 대기";
+
+  if (isThermalHazard) {
+    badgeClass += " gpu-badge-thermal";
+    statusText = "🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 작업 대상 제외 (상시 대기)";
+  } else if (isPriority) {
+    badgeClass += " gpu-badge-priority";
+    if (!gpu.project) statusText = "⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:00 KST)";
+  } else if (gpu.project) {
+    badgeClass += " gpu-badge-project";
+  }
+
+  const util = gpu.utilization !== undefined ? gpu.utilization : (gpu.gpu_util || 0);
+  const vramUsed = gpu.vram_used_gb || gpu.vram_used || 0;
+  const vramTotal = gpu.vram_total_gb || 24;
+  const temp = gpu.temperature || gpu.temp || 35;
+  const power = gpu.power_w || gpu.power || 28;
+
+  const vramPct = Math.min(100, Math.round((vramUsed / vramTotal) * 100));
+
+  // Circular gauge math (r=30, C=188.5)
+  const C = 188.5;
+  const utilOffset = C - (C * (util / 100));
+  const vramOffset = C - (C * (vramPct / 100));
+
+  const utilColor = util > 80 ? "#10b981" : (util > 30 ? "#3b82f6" : "#94a3b8");
+  const vramColor = "#0284c7";
+
+  return `
+    <div class="gpu-card">
+      <div class="gpu-card-header">
+        <div class="gpu-title-box">
+          <h4>GPU ${gpu.id !== undefined ? gpu.id : gpu.index}</h4>
+          <span>NVIDIA RTX 4090</span>
+        </div>
+        <div class="gpu-meta-badges">
+          <div class="gpu-meta-badge">🌡️ ${temp}°C</div>
+          <div class="gpu-meta-badge">⚡ ${power} W</div>
+        </div>
+      </div>
+
+      <div class="gpu-gauges-row">
+        <!-- Left: GPU Utilization Circular Gauge -->
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="${utilColor}" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="${utilOffset}"
+                      stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">${util}%</span>
+            </div>
+          </div>
+          <div class="gauge-label">GPU 사용률</div>
+        </div>
+
+        <!-- Right: VRAM Usage Circular Gauge -->
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="${vramColor}" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="${vramOffset}"
+                      stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">${vramPct}%</span>
+            </div>
+          </div>
+          <div class="gauge-label">VRAM 메모리</div>
+          <div class="gauge-sublabel">${vramUsed.toFixed(1)} / ${vramTotal.toFixed(1)} GB</div>
+        </div>
+      </div>
+
+      <div class="gpu-project-badge-row">
+        <div class="${badgeClass}">
+          <div>${statusText}</div>
+        </div>
+      </div>
+    </div>
+  `;
+};
