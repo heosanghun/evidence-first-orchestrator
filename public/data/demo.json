@@ -1,10 +1,10 @@
 {
   "workspace": {
     "title": "CTS & System 1.5 융합 모니터링 원장",
-    "objective": "검증 가능한 근거를 남기며 CTS, System 1.5 연구를 완성합니다.",
+    "objective": "8월 말 전 실험 완료 → 9월 논문 집필 → ICLR 2027 제출(9월 25일경) 검증 가동",
     "infra_policy": "INFRA-02: CTS[0,1] / S1.5[3,4,5우선] / 공용[6,7] / GPU2[발열보호제외]"
   },
-  "generated_at": "2026-08-07T10:00:00Z",
+  "generated_at": "2026-08-07T10:52:00Z",
   "projects": [
     {
       "id": "CTS",
