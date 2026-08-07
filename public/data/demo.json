@@ -4,7 +4,7 @@
     "objective": "8월 말 전 실험 완료 → 9월 논문 집필 → ICLR 2027 제출(9월 25일경) 검증 가동",
     "infra_policy": "INFRA-02: CTS[0,1] / S1.5[3,4,5우선] / 공용[6,7] / GPU2[발열보호제외]"
   },
-  "generated_at": "2026-08-07T10:52:00Z",
+  "generated_at": "2026-08-07T11:12:00Z",
   "projects": [
     {
       "id": "CTS",
@@ -185,6 +185,11 @@
     }
   ],
   "activity": [
+    {
+      "at": "2026-08-07T11:12:00Z",
+      "actor_name": "antigravity",
+      "title": "I6-CONFIRMED 원장 등재 (Qwen 6/21 사후추가 및 cc4a651 표2 편집 물증 확정)"
+    },
     {
       "at": "2026-08-07T10:00:00Z",
       "actor_name": "antigravity",
