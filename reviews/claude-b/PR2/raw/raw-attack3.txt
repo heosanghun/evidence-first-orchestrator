@@ -1,0 +1,277 @@
+
+########## G0 build origin + work repos ##########
+origin.git=/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/origin.git
+GOOD commit=53f6fc23d9adeb20f6ceefaaee820e9fa56622cf
+53f6fc23d9adeb20f6ceefaaee820e9fa56622cf	refs/heads/main
+proxy task P1 created, exit=0
+
+########## G-BASE honest proxy submission (must SUCCEED, else the harness is wrong) ##########
+$ efo task proxy-submit /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws --actor antigravity --id P1 --author claude-a --report /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/P1.md --evidence /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/P1.evidence.json --source-repo /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/work --source-commit 53f6fc23d9adeb20f6ceefaaee820e9fa56622cf --source-files-json [{"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/a.txt", "repo_path": "a.txt"}, {"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/b.txt", "repo_path": "b.txt"}]
+{
+  "allowed_write_roots": [],
+  "attempt": 1,
+  "blocked_reason": null,
+  "created_at": "2026-07-30T00:54:18Z",
+  "created_by": "antigravity",
+  "delivery_policy": {
+    "allow_proxy": true,
+    "git_ref": "refs/heads/main",
+    "git_remote_name": "origin",
+    "git_remote_url": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/origin.git",
+    "required_repo_paths": [
+      "a.txt",
+      "b.txt"
+    ]
+  },
+  "description": "d",
+  "execution": null,
+  "gates": {
+    "allow_skips": false,
+    "require_independent_verification": true,
+    "require_known_answer_check": true,
+    "require_validation": true
+  },
+  "id": "P1",
+  "idempotency_key": "P1",
+  "last_event_hash": "719da965a1e5c879c7ac05cc568dc5d136f49e8a413ad0edacd0a4003b1390c6",
+  "lease": null,
+  "owner": "claude-a",
+  "permissions": {
+    "gpu": false,
+    "network": false,
+    "outcome_data": false,
+    "performance_metrics": false
+  },
+  "prerequisites": [],
+  "required_capabilities": [],
+  "resource_locks": [],
+  "result": {
+    "archive": {
+      "bundle_id": "proxy-5a44fb73076d5a1b",
+      "external": 0,
+      "files": [
+        {
+          "archive_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/submissions/P1/attempt-001/proxy-5a44fb73076d5a1b/files/38d6ffe101761df363d21bf921e9eca871ad0dff957509083e9988c266739229_P1.md",
+          "kind": "report",
+          "retained": true,
+          "sha256": "38d6ffe101761df363d21bf921e9eca871ad0dff957509083e9988c266739229",
+          "size_bytes": 347,
+          "source": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/P1.md"
+        },
+        {
+          "archive_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/submissions/P1/attempt-001/proxy-5a44fb73076d5a1b/files/5a44fb73076d5a1b0d6c9a80b74893e35515ebef36052f212fef36b71ecb975c_P1.evidence.json",
+          "kind": "manifest",
+          "retained": true,
+          "sha256": "5a44fb73076d5a1b0d6c9a80b74893e35515ebef36052f212fef36b71ecb975c",
+          "size_bytes": 797,
+          "source": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/P1.evidence.json"
+        },
+        {
+          "archive_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/submissions/P1/attempt-001/proxy-5a44fb73076d5a1b/files/b6a98d9ce9a2d9149288fa3df42d377c3e42737afdcdaf714e33c0a100b51060_a.txt",
+          "kind": "artifact",
+          "retained": true,
+          "sha256": "b6a98d9ce9a2d9149288fa3df42d377c3e42737afdcdaf714e33c0a100b51060",
+          "size_bytes": 6,
+          "source": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/a.txt"
+        },
+        {
+          "archive_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/submissions/P1/attempt-001/proxy-5a44fb73076d5a1b/files/f2c82decdd7181cf98945929a62598db7e6b477e11f6e0eb0ae97020eff151ad_b.txt",
+          "kind": "artifact",
+          "retained": true,
+          "sha256": "f2c82decdd7181cf98945929a62598db7e6b477e11f6e0eb0ae97020eff151ad",
+          "size_bytes": 5,
+          "source": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/b.txt"
+        }
+      ],
+      "manifest_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/submissions/P1/attempt-001/proxy-5a44fb73076d5a1b/bundle.json",
+      "manifest_sha256": "83fb4767e01dbd8a2231cbc1c8dd3426fa0feeadd761af5dc32c85ed7df606af",
+      "path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/submissions/P1/attempt-001/proxy-5a44fb73076d5a1b",
+      "retained": 4
+    },
+    "manifest": {
+      "artifacts": [
+        {
+          "path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/a.txt",
+          "sha256": "b6a98d9ce9a2d9149288fa3df42d377c3e42737afdcdaf714e33c0a100b51060"
+        },
+        {
+          "path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/b.txt",
+          "sha256": "f2c82decdd7181cf98945929a62598db7e6b477e11f6e0eb0ae97020eff151ad"
+        }
+      ],
+      "claims": 1,
+      "failed": 0,
+      "known_answer_checks": 1,
+      "measured_performance_claims": 0,
+      "passed": 1,
+      "path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/P1.evidence.json",
+      "sha256": "5a44fb73076d5a1b0d6c9a80b74893e35515ebef36052f212fef36b71ecb975c",
+      "skipped": 0,
+      "unmeasured_claims": 0,
+      "validation_commands": 1,
+      "validations": [
+        {
+          "command": "known-test",
+          "exit_code": 0,
+          "failed": 0,
+          "passed": 1,
+          "raw_output": null,
+          "skipped": 0
+        }
+      ]
+    },
+    "report": {
+      "contains_fill_marker": true,
+      "path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/P1.md",
+      "sections": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ],
+      "sha256": "38d6ffe101761df363d21bf921e9eca871ad0dff957509083e9988c266739229"
+    },
+    "submission": {
+      "author": "claude-a",
+      "author_profile": {
+        "active": true,
+        "capabilities": [
+          "code",
+          "implementation"
+        ],
+        "controller_id": "claude-a",
+        "id": "claude-a",
+        "model_family": "claude-code",
+        "provider": "anthropic",
+        "role": "worker"
+      },
+      "mode": "proxy",
+      "proxy_profile": {
+        "active": true,
+        "capabilities": [
+          "data-audit",
+          "experiment-ops",
+          "gpu-schedule",
+          "orchestrate",
+          "proxy_submit",
+          "verify"
+        ],
+        "controller_id": "antigravity",
+        "id": "antigravity",
+        "model_family": "unknown",
+        "provider": "unknown",
+        "role": "orchestrator"
+      },
+      "source": {
+        "files": [
+          {
+            "git_blob": "4a58007052a65fbc2fc3f910f2855f45a4058e74",
+            "local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/a.txt",
+            "repo_path": "a.txt",
+            "sha256": "b6a98d9ce9a2d9149288fa3df42d377c3e42737afdcdaf714e33c0a100b51060",
+            "size_bytes": 6
+          },
+          {
+            "git_blob": "65b2df87f7df3aeedef04be96703e55ac19c2cfb",
+            "local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/base/b.txt",
+            "repo_path": "b.txt",
+            "sha256": "f2c82decdd7181cf98945929a62598db7e6b477e11f6e0eb0ae97020eff151ad",
+            "size_bytes": 5
+          }
+        ],
+        "remote_name": "origin",
+        "remote_observation": {
+          "advertised_commit": "53f6fc23d9adeb20f6ceefaaee820e9fa56622cf",
+          "advertised_ref": "refs/heads/main",
+          "method": "git-ls-remote",
+          "observed_at": "2026-07-30T00:54:18Z"
+        },
+        "remote_url": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/origin.git",
+        "repo_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/work",
+        "source_commit": "53f6fc23d9adeb20f6ceefaaee820e9fa56622cf",
+        "source_ref": "refs/heads/main",
+        "transport": "git"
+      },
+      "submitted_by": "antigravity"
+    }
+  },
+  "revision": 2,
+  "revocation": null,
+  "risk_tier": "medium",
+  "schema_version": 1,
+  "state": "submitted",
+  "task_type": "general",
+  "title": "p",
+  "updated_at": "2026-07-30T00:54:18Z",
+  "verification": null,
+  "verification_attestations": [],
+  "verification_policy": {
+    "allowed_verifiers": [
+      "claude-b"
+    ],
+    "independence_dimensions": [
+      "actor"
+    ],
+    "required_attestations": 0
+  }
+}
+exit=0
+
+########## G1 WRONG REMOTE: repo's 'origin' repointed at a different bare repo ##########
+$ efo task proxy-submit /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws --actor antigravity --id P1 --author claude-a --report /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g1/P1.md --evidence /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g1/P1.evidence.json --source-repo /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/work --source-commit 53f6fc23d9adeb20f6ceefaaee820e9fa56622cf --source-files-json [{"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g1/a.txt", "repo_path": "a.txt"}, {"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g1/b.txt", "repo_path": "b.txt"}]
+error: Git remote URL mismatch: expected '/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/origin.git', observed '/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/evil.git'
+exit=2
+
+########## G2 LOCAL-ONLY COMMIT: commit exists locally, never pushed to origin ##########
+LOCAL_ONLY=772fe443f6b6fe42c16518ab1534b861eb8b015d
+origin still advertises:
+53f6fc23d9adeb20f6ceefaaee820e9fa56622cf	refs/heads/main
+$ efo task proxy-submit /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws --actor antigravity --id P1 --author claude-a --report /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g2/P1.md --evidence /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g2/P1.evidence.json --source-repo /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/work --source-commit 772fe443f6b6fe42c16518ab1534b861eb8b015d --source-files-json [{"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g2/a.txt", "repo_path": "a.txt"}, {"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g2/b.txt", "repo_path": "b.txt"}]
+error: Remote ref 'refs/heads/main' advertises 53f6fc23d9adeb20f6ceefaaee820e9fa56622cf, not 772fe443f6b6fe42c16518ab1534b861eb8b015d
+exit=2
+
+########## G3 REPLACE-REF: swap the honest commit's content via git replace ##########
+replace refs:
+53f6fc23d9adeb20f6ceefaaee820e9fa56622cf
+with replacement active, GOOD:a.txt reads as:
+alpha-evil
+with --no-replace-objects (what EFO uses):
+alpha
+$ efo task proxy-submit /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws --actor antigravity --id P1 --author claude-a --report /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g3/P1.md --evidence /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g3/P1.evidence.json --source-repo /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/work --source-commit 53f6fc23d9adeb20f6ceefaaee820e9fa56622cf --source-files-json [{"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g3/evil-a.txt", "repo_path": "a.txt"}, {"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g3/b.txt", "repo_path": "b.txt"}]
+error: Delivered artifact bytes differ from the Git blob for a.txt: expected b6a98d9ce9a2d9149288fa3df42d377c3e42737afdcdaf714e33c0a100b51060, observed 3cf569695da1efce2621717a845dd9ae39b3e5389792f800b78ba88798c92a09
+exit=2
+Deleted replace ref '53f6fc23d9adeb20f6ceefaaee820e9fa56622cf'
+
+########## G4 PARTIAL SUBMISSION: bind only a.txt when a.txt+b.txt are preregistered ##########
+$ efo task proxy-submit /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws --actor antigravity --id P1 --author claude-a --report /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g4/P1.md --evidence /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g4/P1.evidence.json --source-repo /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/work --source-commit 53f6fc23d9adeb20f6ceefaaee820e9fa56622cf --source-files-json [{"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g4/a.txt", "repo_path": "a.txt"}]
+error: Proxy delivery must bind exactly the preregistered repository paths
+exit=2
+
+########## G4b DUPLICATE BINDING: bind a.txt twice to fake the count ##########
+$ efo task proxy-submit /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws --actor antigravity --id P1 --author claude-a --report /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g4b/P1.md --evidence /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g4b/P1.evidence.json --source-repo /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/work --source-commit 53f6fc23d9adeb20f6ceefaaee820e9fa56622cf --source-files-json [{"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g4b/a.txt", "repo_path": "a.txt"}, {"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g4b/a.txt", "repo_path": "a.txt"}]
+error: Proxy delivery must bind exactly the preregistered repository paths
+exit=2
+
+########## G5 CRLF TAMPERING: delivered file line-endings differ from the blob ##########
+g5/a.txt bytes now: b'alpha\r\n'
+-- re-stamping the manifest SHA so ONLY the git-blob check can catch it --
+manifest SHAs re-stamped to the CRLF bytes
+$ efo task proxy-submit /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws --actor antigravity --id P1 --author claude-a --report /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g5/P1.md --evidence /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g5/P1.evidence.json --source-repo /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/work --source-commit 53f6fc23d9adeb20f6ceefaaee820e9fa56622cf --source-files-json [{"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g5/a.txt", "repo_path": "a.txt"}, {"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g5/b.txt", "repo_path": "b.txt"}]
+error: Delivered artifact bytes differ from the Git blob for a.txt: expected b6a98d9ce9a2d9149288fa3df42d377c3e42737afdcdaf714e33c0a100b51060, observed 4a31f8a329cdbbab944056fc992eeb5ab5c0b4a78c3bc34e6d7c4a59fd6cf3b6
+exit=2
+
+########## G6 autocrlf checkout: does core.autocrlf make an HONEST delivery fail? ##########
+working-tree a.txt bytes:
+b'alpha\r\n'
+$ efo task proxy-submit /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws --actor antigravity --id P1 --author claude-a --report /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g6/P1.md --evidence /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g6/P1.evidence.json --source-repo /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/work --source-commit 53f6fc23d9adeb20f6ceefaaee820e9fa56622cf --source-files-json [{"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g6/a.txt", "repo_path": "a.txt"}, {"local_path": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/ws/reports/antigravity/g6/b.txt", "repo_path": "b.txt"}]
+error: Delivered artifact bytes differ from the Git blob for a.txt: expected b6a98d9ce9a2d9149288fa3df42d377c3e42737afdcdaf714e33c0a100b51060, observed 4a31f8a329cdbbab944056fc992eeb5ab5c0b4a78c3bc34e6d7c4a59fd6cf3b6
+exit=2
+
+########## G7 task state after all attacks ##########
+state= submitted attempt= 1
+########## G8 insteadOf URL rewrite ##########
+remote get-url origin -> /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/evil.git
+error: Git remote URL mismatch: expected '/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/origin.git', observed '/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/git3/evil.git'
+exit=2

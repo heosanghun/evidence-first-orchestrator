@@ -1,0 +1,142 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   lines across the four modules
+        expected: lines: 693
+        observed: lines: 693
+  [ok]     all four still hold ZERO isinstance - item 51's premise re-derived
+        expected: unguarded: ['archive.py', 'dashboard.py', 'doctor.py', 'lock.py']
+        observed: unguarded: ['archive.py', 'dashboard.py', 'doctor.py', 'lock.py']
+
+########## B. which of the four can even SEE a document ##########
+    archive.py     15 string-key subscripts   5 .get()   0 file reads
+    dashboard.py    0 string-key subscripts   0 .get()   0 file reads
+    doctor.py      23 string-key subscripts   0 .get()   4 file reads
+    lock.py         0 string-key subscripts   0 .get()   0 file reads
+  [ok] archive.py reads a document-shaped dict
+        expected: archive: (15, 5, 0)
+        observed: archive: (15, 5, 0)
+  [ok]   doctor.py reads FILES itself as well
+        expected: doctor: (23, 0, 4)
+        observed: doctor: (23, 0, 4)
+  [ok]     lock.py touches no field at all
+        expected: lock: (0, 0, 0)
+        observed: lock: (0, 0, 0)
+  [ok]       and dashboard.py touches none either
+        expected: dashboard: (0, 0, 0)
+        observed: dashboard: (0, 0, 0)
+  [ok]   but a TEXT search on dashboard.py claims five
+        expected: grep says: 5
+        observed: grep says: 5
+  All five are JavaScript array literals - `["Running", states.running]`
+  - inside the embedded HTML string constant. Parsed, they are not
+  Python subscripts at all. Never match syntax by TEXT when the
+  question is about syntax; the AST is the measurement.
+
+########## C. archive.py - the absence is REAL, driven ##########
+    the well-formed manifest (CONTROL)  ACCEPTED
+    manifest = {} (no sha256)           KeyError
+    manifest = None                     TypeError
+    manifest['sha256'] = 123            TypeError
+    manifest['path'] = None             TypeError
+    manifest['artifacts'] = 'x'         TypeError
+    manifest['artifacts'] = [None]      TypeError
+    manifest['validations'] = [None]    AttributeError
+    report = {} (no path)               KeyError
+  [ok] the control is accepted - the driver is right before the code is
+        expected: ACCEPTED
+        observed: ACCEPTED
+  [ok]   eight malformed manifests driven
+        expected: driven: 8
+        observed: driven: 8
+  [ok]     none is accepted
+        expected: accepted: []
+        observed: accepted: []
+  [ok]       and NONE becomes an EFOError - all eight are raw Python
+        expected: efo errors: []
+        observed: efo errors: []
+  Same answer item 47 got for `util.py`: the absence is real, and the
+  package's own error type never appears.
+
+########## D. but no document reaches it - all three call sites ##########
+    manifest=evidence['manifest']
+    manifest=evidence['manifest']
+    manifest=verification['evidence']
+  [ok] call sites of archive_evidence_bundle in workspace.py
+        expected: call sites: 3
+        observed: call sites: 3
+  [ok]   every one passes a validator's return, not a parsed document
+        expected: outside: []
+        observed: outside: []
+  [ok]     and those two names are assigned only from evidence.py validators
+        expected: validators: ['validate_manifest', 'validate_submission']
+        observed: validators: ['validate_manifest', 'validate_submission']
+  `evidence` comes from `validate_submission` (workspace.py:1026, 1141)
+  and `verification['evidence']` from `validate_manifest` (:1340). Item
+  51 measured that evidence.py rejects with 17 EvidenceError sites, so
+  archive.py is SAFE BY CONSTRUCTION - not by its own guarding.
+
+########## E. doctor.py - the absence is UNREACHABLE, driven ##########
+    an untouched workspace (CONTROL)        healthy
+    task record with no `state`             caught: C1: projection differs from ledger
+    task record with no `id`                caught: C1: projection differs from ledger
+    task `lease` replaced by a string       caught: C1: projection differs from ledger
+    task `state` flipped to claimed         caught: C1: projection differs from ledger
+    a rogue agent file never in the ledger  caught: Agent None registration differs from the signed ledger
+  [ok] the control audits healthy
+        expected: healthy
+        observed: healthy
+  [ok]   five tampered documents driven
+        expected: driven: 5
+        observed: driven: 5
+  [ok]     NONE escapes as a raw Python exception
+        expected: escaped: []
+        observed: escaped: []
+  [ok]       every one is caught and reported as an error
+        expected: uncaught: []
+        observed: uncaught: []
+    doctor.py's exception handlers: ['(OSError, UnicodeDecodeError)', '(EFOError, OSError)', 'OSError', '(OSError, UnicodeDecodeError)', '(FileNotFoundError, OSError)']
+  [ok]   and the handler is NARROW - it would not catch a KeyError
+        expected: '(EFOError, OSError)'
+        observed: ['(OSError, UnicodeDecodeError)', '(EFOError, OSError)', 'OSError', '(OSError, UnicodeDecodeError)', '(FileNotFoundError, OSError)']
+  So the reachability is not the handler's doing. The ledger signature
+  and the projection comparison both run BEFORE any field is read, and
+  a tampered file fails one of them first. Same shape as item 45's
+  near miss: a census over syntax would flag 23 unguarded subscripts,
+  and every one of them is behind a guard the syntax cannot see.
+
+########## F. the answer to item 54 ##########
+  * lock.py and dashboard.py: the question does not arise - ZERO
+    document field reads between them.
+  * archive.py: the absence is REAL (8 driven, 8 raw Python
+    exceptions, 0 EFOError) and UNREACHABLE (3 call sites, all
+    passing a validator's return).
+  * doctor.py: 23 unguarded subscripts, and five tampered documents
+    all stopped by the ledger/projection guard before reaching them.
+  * NOT FILED. A near miss recorded, on the standard items 38, 45, 47
+    and 53 all applied: nothing was accepted that should not have been.
+
+########## G. what this does NOT do ##########
+  * It does not claim the four modules are correct - only that their
+    missing isinstance has no reachable consequence THROUGH A DOCUMENT.
+    Programmatic misuse of archive_evidence_bundle is a different
+    threat model and is not this review's.
+  * It does not enumerate every tamper. Five were driven; a tamper
+    that keeps the ledger signature valid was not constructed, and
+    whether one exists is UNMEASURED.
+  * It does not re-run or retract #10, #12, #17 or #19.
+  * It does not touch `main`, the anchor's tree, or another agent's
+    branch. Every workspace is a tempfile directory, removed above.
+  * MEASURED: the four-module census, the AST-vs-grep gap, all eight
+    archive drives, all five doctor drives, both controls, the three
+    call sites, the handler tuple. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Static reads of the anchor plus thirteen driven inputs against
+temporary workspaces. No network, no issue filed. Pre-registered
+permissions unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

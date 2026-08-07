@@ -1,0 +1,13 @@
+origin.git tip     : a85f6da26734
+declared commit    : 3e8c90171385 (exists only in the work clone)
+
+ACCEPTED record fields an auditor would read:
+   remote_url     = /tmp/prov5b/origin.git
+   branch         = main
+   resolved_ref   = refs/heads/main
+   ref_tip        = 3e8c90171385ab84d6b5aa20c6daa1e89dd0e375
+   commit         = 3e8c90171385ab84d6b5aa20c6daa1e89dd0e375
+   byte_exact     = True
+
+is the declared commit fetchable from the declared remote?
+   git --git-dir origin.git cat-file -e <commit> -> ABSENT (exit 1)

@@ -1,0 +1,11 @@
+########## P2-1 recheck at cef5623 ##########
+transfer exit=0
+config file orchestrator : antigravity
+effective orchestrator   : codex
+########## P2-2 recheck: v0.1 client vs cef5623 workspace ##########
+error: Agent 'antigravity' registration differs from the signed ledger
+########## suite at cef5623 ##########
+----------------------------------------------------------------------
+Ran 77 tests in 13.628s
+
+OK

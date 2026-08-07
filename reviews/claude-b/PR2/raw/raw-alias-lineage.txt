@@ -1,0 +1,45 @@
+########## A. the documented alias guards ##########
+  [ok] self-alias
+        expected: rejected
+        observed: rejected (Agent cannot alias itself)
+  [ok] alias plus explicit identity
+        expected: rejected
+        observed: rejected (Alias identity inherits control principal and model family)
+  [ok] alias inherits the target's identity
+        expected: control_principal=openai model_family=openai-codex alias_chain=['t']
+        observed: control_principal=openai model_family=openai-codex alias_chain=['t']
+  [ok] cycle t->x while x->t
+        expected: rejected
+        observed: rejected (Agent identity alias chain contains a cycle)
+  [ok] reparenting an attested alias away
+        expected: rejected
+        observed: rejected (An attested alias lineage cannot be removed or reparented; register a new agent identity instead)
+
+########## B. does the lineage check actually fire? ##########
+  [ok] target vs its own alias
+        expected: independent=False
+        observed: independent=False, reasons=['same_control_principal', 'same_model_family', 'shared_alias_lineage']
+  [ok]   and the reason is named
+        expected: shared_alias_lineage
+        observed: ['same_control_principal', 'same_model_family', 'shared_alias_lineage']
+  [ok] two aliases of the same target
+        expected: independent=False
+        observed: independent=False, reasons=['same_control_principal', 'same_model_family', 'shared_alias_lineage']
+  [ok]   and the reason is named
+        expected: shared_alias_lineage
+        observed: ['same_control_principal', 'same_model_family', 'shared_alias_lineage']
+
+########## C. the asymmetry: alias_of is never read ##########
+  evaluate_independence unions alias_chain with the actor id and ignores
+  alias_of.  Construct the inconsistent pair directly and see what happens.
+  [!! UNEXPECTED !!] both alias 't' but with empty chains
+        expected: independent=False
+        observed: independent=True, reasons=[]
+
+  reachability: can a stored agent record hold alias_of with an empty chain?
+  [!! UNEXPECTED !!] reachable through a supported write path
+        expected: YES
+        observed: no - add_agent produced alias_chain=['t']
+
+########## 2 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.

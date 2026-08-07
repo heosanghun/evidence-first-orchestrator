@@ -1,0 +1,98 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+    workspace.py  Agent {agent_id!r} registration differs from the signed ledger
+    workspace.py  Agent {agent_id} registration differs from the signed ledger
+    workspace.py  Task {task['id']} projection differs from the signed ledger
+    workspace.py  Task {task_id} projection differs from the signed ledger
+    workspace.py  Workspace configuration differs from the signed ledger
+    workspace.py  {task_id}: no ledger event
+  [ok]   comparison messages the package declares
+        expected: messages: 6
+        observed: messages: 6
+  [ok]     and every one names an Agent, a Task or the Workspace config
+        expected: nouns: ['Agent', 'Task', 'Workspace', 'task_id']
+        observed: nouns: ['Agent', 'Task', 'Workspace', 'task_id']
+  Not one of them names reports/, submissions/ or archive/. Section C
+  drives that rather than reading it off.
+
+########## B. a workspace driven to `archived` ##########
+    directories after archive: ['.efo', 'agents', 'archive', 'ledger', 'reports', 'runs', 'shared', 'submissions', 'tasks']
+  [ok] the lifecycle reaches `archived`
+        expected: state: archived
+        observed: state: archived
+  [ok]   and all three directories now exist
+        expected: present: ['archive', 'reports', 'submissions']
+        observed: present: ['archive', 'reports', 'submissions']
+  [ok]     the untouched workspace audits healthy - CONTROL
+        expected: HEALTHY
+        observed: HEALTHY - unnoticed
+  [ok]   archived evidence files
+        expected: files: 7
+        observed: files: 7
+  [ok]     sha256 values recorded in SIGNED ledger events
+        expected: recorded: 7
+        observed: recorded: 7
+  [ok]       every archived file's hash IS in the ledger
+        expected: matched: 7
+        observed: matched: 7
+  So the data to detect any tamper below already exists, signed.
+
+########## C. DRIVEN - six tampers, one per fresh workspace ##########
+    edit archive/T1.json              HEALTHY - unnoticed
+    edit an ARCHIVED artifact         HEALTHY - unnoticed
+    delete an ARCHIVED artifact       HEALTHY - unnoticed
+    edit submissions bundle.json      HEALTHY - unnoticed
+    delete the whole submissions/T1   HEALTHY - unnoticed
+    edit a report under reports/      HEALTHY - unnoticed
+  [ok] six tampers driven
+        expected: driven: 6
+        observed: driven: 6
+  [ok]   NONE of them is caught
+        expected: caught: []
+        observed: caught: []
+  [ok]     including deleting the entire archived bundle
+        expected: HEALTHY - unnoticed
+        observed: HEALTHY - unnoticed
+  [ok]       and rewriting the archived task record
+        expected: HEALTHY - unnoticed
+        observed: HEALTHY - unnoticed
+
+########## D. what this is, and what it is NOT ##########
+  * It is the measured WIDTH of issue #10, not a new issue. #10 says
+    `archive.py` retention has no verifier; this adds that the gap is
+    not only retention - an archived bundle can be EDITED or DELETED
+    wholesale, and the archived task record REWRITTEN, with `doctor`
+    still reporting healthy: true.
+  * NOT FILED. It quantifies an open issue of mine rather than opening
+    another one.
+  * Every `unnoticed` here is measured UNDER THE THREAT MODEL
+    SECURITY.md:38 declares - item 57 showed a re-signed tamper of the
+    COVERED files is healthy too. The difference is that these six
+    need no key at all.
+  * It does NOT claim the covered set is wrong: config, agents and
+    tasks are compared, and item 57 drove that.
+
+########## E. what this does NOT do ##########
+  * It does not enumerate `shared/`. That directory exists after init
+    and was not driven - stated, not implied.
+  * It does not test the CLI `ledger audit-projections` path
+    separately; `doctor.audit_workspace` calls audit_projections and
+    is the surface an operator is told to run.
+  * It does not propose a fix, and does not retract #10 or narrow it.
+  * No network. Seven workspaces, all tempfile directories, removed
+    above. The anchor's working tree is untouched.
+  * MEASURED: the six comparison messages, the lifecycle reaching
+    archived, the three directories, all seven archived files and
+    their ledger-recorded hashes, all six tampers, the control.
+    REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Seven full lifecycles driven against temporary workspaces. Anchor
+untouched, no `main` write, no issue filed. Pre-registered permissions
+unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

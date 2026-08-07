@@ -1,0 +1,129 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] the review's anchor is unmoved at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  This probe audits the REVIEW, not EFO. The anchor is checked anyway
+  because every count below is a count of work done against it.
+
+########## B. raw/ recounted, and the classification checked ##########
+  [ok] every file in raw/ is classified
+        expected: total: 179
+        observed: total: 179
+    78 probe scripts, 93 raw outputs, 8 provenance-attack scripts
+    the attack scripts, named rather than lumped in: ['attack2.sh', 'attack2_cef.sh', 'attack3.sh', 'attack_main.sh', 'attack_main2.sh', 'attack_prov5_main.py', 'attack_prov_main.sh', 'attack_proxy.sh']
+    1535 passing checks across 76 instrumented outputs; 12 UNEXPECTED lines
+    (excluding raw-inventory-selfcheck.txt, this run's own report - see the comment above)
+    the UNEXPECTED lines, by file: {'raw-alias-lineage.txt': 2, 'raw-attack-prov5-main.txt': 1, 'raw-evidence-gates.txt': 5, 'raw-ledger-chain.txt': 1, 'raw-lifecycle-gates.txt': 3}
+
+########## C. SYNTHESIS.md's own inventory, against the files ##########
+  [ok] SYNTHESIS states a machine-readable inventory
+        expected: found: True
+        observed: found: True
+  [ok]   passing checks
+        expected: passing checks: 1535
+        observed: passing checks: 1535
+  [ok]   instrumented outputs
+        expected: instrumented outputs: 76
+        observed: instrumented outputs: 76
+  [ok]   files in raw/
+        expected: files in raw/: 179
+        observed: files in raw/: 179
+  [ok]   probe scripts
+        expected: probe scripts: 78
+        observed: probe scripts: 78
+  [ok]   raw outputs
+        expected: raw outputs: 93
+        observed: raw outputs: 93
+  [ok]   attack scripts
+        expected: attack scripts: 8
+        observed: attack scripts: 8
+  [ok] SYNTHESIS states an UNEXPECTED tally
+        expected: found: True
+        observed: found: True
+  [ok]   the number of flagged files it names
+        expected: files: 5
+        observed: files: 5
+  [ok]     the total it spells out
+        expected: unexpected: 12
+        observed: unexpected: 12
+  [ok]     and the per-file breakdown, file by file
+        expected: per-file: {'raw-alias-lineage.txt': 2, 'raw-attack-prov5-main.txt': 1, 'raw-evidence-gates.txt': 5, 'raw-ledger-chain.txt': 1, 'raw-lifecycle-gates.txt': 3}
+        observed: per-file: {'raw-alias-lineage.txt': 2, 'raw-attack-prov5-main.txt': 1, 'raw-evidence-gates.txt': 5, 'raw-ledger-chain.txt': 1, 'raw-lifecycle-gates.txt': 3}
+  [ok]       which is also the sum it spells
+        expected: sum: 12
+        observed: sum: 12
+
+########## D. every write-up's OWN headline count ##########
+  Write-ups open with `N checks, M unexpected`. Nothing has ever
+  checked one. Each is now compared against the raw output it names.
+  [ok] every stated check-count is paired with a raw output
+        expected: strict: 69
+        observed: strict: 69
+    69 checkable headline claims across the write-ups
+    (An earlier draft pinned this at 30, from `grep -l` counting FILES
+     rather than occurrences. The census said 29 and was right. The
+     number is now derived on both sides, so neither can go stale.)
+  [ok] SYNTHESIS states the write-up count in its opening paragraph
+        expected: claims: 69
+        observed: claims: 69
+  [ok] SYNTHESIS states   and the one in its own-counts row
+        expected: claims: 69
+        observed: claims: 69
+  [ok]   every named raw output exists
+        expected: missing: []
+        observed: missing: []
+  [ok]   and every headline count matches its raw output
+        expected: mismatched: []
+        observed: mismatched: []
+  [ok]   with exactly one self-referential claim skipped, and named
+        expected: skipped: 1
+        observed: skipped: 1 ['NOTE-every-count-this-review-states-about-itself.md -> raw-inventory-selfcheck.txt']
+  A document whose headline disagrees with its own evidence is the
+  exact failure this project exists to prevent, and until this probe
+  existed nothing would have caught one.
+
+########## E. SYNTHESIS's prose counts, derived from its own tables ##########
+  Item 34 named these as the population it did NOT cover. This is that
+  population, and measuring it found three stale numbers - one of them
+  in the very section that describes the pattern.
+  [ok]   the word map can express the measured count
+        expected: expressible: True
+        observed: expressible: True
+  [ok]   components stated sound == rows whose verdict is `clean`
+        expected: clean rows: 20
+        observed: clean rows: 20
+  [ok]   class 2b's stated instance count == its own table
+        expected: instances: 7
+        observed: instances: 7
+  [ok]   the classes heading names the number of subsections it has
+        expected: subsections: 6
+        observed: subsections: 6
+    heading: '## Six classes that repeat'
+    The b-suffixed sections (2b, 3b) were sub-cases of 2 and 3 when
+    written, which is how the heading came to say `Four`. They have
+    since grown into their own classes - 2b is a seven-instance census -
+    so the heading now counts them.
+
+########## F. what this does NOT cover ##########
+  * It checks that a stated number matches the file it names. It does
+    NOT check that the raw output was produced by the probe beside it -
+    that is what the SHA-256 bindings in each write-up are for, and
+    they are verified by hand at commit time, not here.
+  * Documents that state a count WITHOUT naming a raw output in the
+    same sentence are not matched by the pattern. That is why section D
+    asserts the claim COUNT: if a document changes shape and drops out
+    of the census, the count falls and the run fails.
+  * Counts in prose that are not headline check-counts - issue numbers,
+    'Fifteen components', per-note tallies inside tables - are still
+    hand-maintained. Named as a gap rather than papered over; the
+    citation and quote counts are covered by the other two probes.
+  * MEASURED: everything above. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+This audits MY OWN write-ups, not EFO. Static file reads only; nothing
+was executed against a workspace. Pre-registered permissions unchanged
+- gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

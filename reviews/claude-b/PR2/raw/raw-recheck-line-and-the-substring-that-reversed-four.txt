@@ -1,0 +1,301 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   the cef5623 checkout is at cef5623
+        expected: cef5623
+        observed: cef5623
+  [ok]   the 7a9553b checkout is at 7a9553b
+        expected: 7a9553b
+        observed: 7a9553b
+  [ok]   raw outputs scanned, with the two self-referential ones excluded
+        expected: outputs: 77
+        observed: outputs: 77
+  [ok]     exactly two are excluded, and they are the two that print markers
+        expected: excluded: ['raw-output-provenance-lines.txt', 'raw-recheck-line-and-the-substring-that-reversed-four.txt']
+        observed: excluded: ['raw-output-provenance-lines.txt', 'raw-recheck-line-and-the-substring-that-reversed-four.txt']
+  Item 58's own output is excluded for the same reason as this one:
+  it PRINTS both token sets. Item 58 excluded only itself, so it
+  scanned this file's predecessor - measured in section F.
+
+########## B. where cef5623 SITS in the graph ##########
+  [ok] cef5623 is a DESCENDANT of 7a9553b
+        expected: descendant: True
+        observed: descendant: True
+  [ok]   and is NOT an ancestor of the review's anchor
+        expected: ancestor: False
+        observed: ancestor: False
+  [ok]   neither is 7a9553b
+        expected: ancestor: False
+        observed: ancestor: False
+  Markers derived over the WHOLE of each line, not a two-commit diff:
+    modules only ever on the anchor's line   : ['independence.py']
+    modules only ever on the divergent line  : ['fingerprint.py', 'identity.py', 'job_runner.py']
+    test modules only on the anchor's line   : ['test_independence.py', 'test_monitor_collector.py', 'test_proxy_status.py', 'test_proxy_submission.py']
+    test modules only on the divergent line  : ['test_fingerprint.py', 'test_meta_orchestration.py']
+  [ok] the anchor's line has independence.py and nothing else of its own
+        expected: only anchor: ['independence.py']
+        observed: only anchor: ['independence.py']
+  [ok]   the divergent line adds three modules the anchor never had
+        expected: only divergent: ['fingerprint.py', 'identity.py', 'job_runner.py']
+        observed: only divergent: ['fingerprint.py', 'identity.py', 'job_runner.py']
+  [ok]   four test modules exist only on the anchor's line
+        expected: only anchor: ['test_independence.py', 'test_monitor_collector.py', 'test_proxy_status.py', 'test_proxy_submission.py']
+        observed: only anchor: ['test_independence.py', 'test_monitor_collector.py', 'test_proxy_status.py', 'test_proxy_submission.py']
+  [ok]   and two only on the divergent line
+        expected: only divergent: ['test_fingerprint.py', 'test_meta_orchestration.py']
+        observed: only divergent: ['test_fingerprint.py', 'test_meta_orchestration.py']
+
+########## C. the SUITE SIZE, swept EXHAUSTIVELY over both lines ##########
+    anchor     5694ab4  files=10  tests=93
+    anchor     0828c0b  files=10  tests=87
+    anchor     dac01cd  files=10  tests=85
+    anchor     31705d5  files=10  tests=79
+    anchor     4871867  files=10  tests=79
+    anchor     9b9e0c5  files=10  tests=78
+    anchor     f35d517  files= 9  tests=67
+    anchor     e2cf6b4  files= 9  tests=67
+    anchor     41c4812  files= 8  tests=50
+    anchor     f2cc922  files= 7  tests=37
+    anchor     9a8b02d  files= 7  tests=36
+    anchor     ae816bc  files= 7  tests=34
+    anchor     dad3f4c  files= 7  tests=33
+    anchor     0386d2d  files= 7  tests=33
+    anchor     f827f29  files= 6  tests=27
+    divergent  cef5623  files= 8  tests=77
+    divergent  b83c648  files= 8  tests=76
+    divergent  7b651fe  files= 7  tests=73
+    divergent  4aa47ca  files= 7  tests=70
+    divergent  7a9553b  files= 7  tests=70
+  [ok] commits swept, every one reachable from either line
+        expected: commits: 20
+        observed: commits: 20
+  [ok]   because the two lines share exactly one commit, their root
+        expected: f827f29
+        observed: f827f29
+  [ok]     and it is the ref item 55 found attack4's W1/W2 comparing against
+        expected: f827f29
+        observed: # W4 needs a ref the anchor never took — and both its tracebacks are the driver's  Reproduce with `raw/probe_w4_replay.py`; raw output in `raw/raw-w4-replay.txt`. **21 checks, 0 unexpected.** A **map about a ref this review is not anchored to** — no issue filed, nothing retracted.  **Scope, stated first:** 2 refs, **1 of the 7** remaining sections, 5 driven commands.  ## The correction, first  Item 52 replayed W3 six-for-six at the anchor and wrote that W4–W8's *"blocker is gone"*. **For W4, W5, W6 and W6b that is wrong**, and the reason is not a missing client:  ```     transfer_orchestrator     7 occurrences across 3 files at 7a9553b                               (cli.py, workspace.py, test_meta_orchestration.py)                               0 files at 5694ab45 — not src, not tests, not docs      git merge-base --is-ancestor 7a9553b 5694ab45   →  NO ```  **`7a9553b` is not an ancestor of the anchor.** The anchor's `workspace.py` line begins at `f827f29`; `7a9553b` is a separate branch. Corrected in that note with a dated banner.  So `raw-attack4.txt` **mixes two lines of history**: W1/W2/W2b compare the v0.1 wheel against `git archive f827f29` — the anchor's ancestor — while W4, W5, W6 and W6b drive a v2 that only exists on the other line. W3 reproduced at the anchor because its property (the v0.1 client refusing an attested agent record) is common to both.  The anchor's ledger action list is **derived from its own source**, not typed here, and holds no orchestrator transfer:  ```     agent.added  agent.identity_attested  task.archived  task.blocked     task.claimed  task.created  task.heartbeat  task.lease_expired     task.proxy_authorized  task.proxy_status_reported  task.proxy_submitted     task.rejected  task.requeued  task.started  task.submitted  task.verified     workspace.initialized ```  ## W4 replayed — against `7a9553b`, named rather than assumed  | | committed | fresh run at `7a9553b` | |---|---|---| | `workspace transfer-orchestrator` | `exit=0` | **0** | | payload keys | `event_hash`, `from`, `to`, `reason` | **same four** | | from → to | `antigravity → codex` | **antigravity → codex** | | `event_hash` | `58f129a9…` | **differs — and must** |  The hash is signed and timestamped; a byte-equal one would mean the run had not been redone.  ## Both tracebacks are the original driver's  | | result | |---|---| | driver's path `ws4/workspace.json` | **`FileNotFoundError`** — reproduces exactly | | correct path `.efo/workspace.json` | **`antigravity`** | | driver's key `status_json['orchestrator']` | **`KeyError: 'orchestrator'`** — reproduces exactly | | correct key `['status']['orchestrator']` | **`codex`** |  The CLI's `status` output has keys `['status', 'tasks']`, so indexing `orchestrator` on the **wrapper** raises. **W6b is the same question asked correctly**, and it answers. Neither traceback is EFO's.  > **An expectation of mine, corrected to the measurement.** I first predicted > that `Workspace(...).status()['orchestrator']` would raise the `KeyError`. It > does not — the Python API returns a flat dict and gives `codex` directly. The > `KeyError` comes from the **CLI's JSON**, which is a different shape. Measured > before it was written down.  ## The config/ledger divergence is real, and by design  ```python     def orchestrator(self) -> str:         orchestrator = str(self.config["orchestrator"])         if not self.ledger.path.exists():             return orchestrator         for event in self.ledger.read():             if event.get("action") != "workspace.orchestrator_transferred":                 continue             target = event.get("payload", {}).get("to")             if isinstance(target, str):                 orchestrator = target         return orchestrator ```  At `7a9553b` the property **seeds from the config and then replays the transfer events**. So *"config file orchestrator: antigravity"* and *"effective orchestrator: codex"* are both correct at once — the config is a seed, the ledger is the
+  [ok]   no test count is shared between the two lines
+        expected: shared: set()
+        observed: shared: set()
+  So a SUITE SIZE is a two-way discriminator - and item 58 could not
+  see it, because it scanned only for module-name tokens.
+  [ok]   and exactly one commit anywhere has a 77-test suite
+        expected: carriers: 1
+        observed: carriers: 1
+  [ok]     it is cef5623
+        expected: cef5623
+        observed: cef5623
+
+########## D. the KNOWN ANSWER: run all three suites ##########
+    anchor     Ran 93 tests   OK
+    cef5623    Ran 77 tests   OK
+    7a9553b    Ran 70 tests   FAILED
+  [ok] the anchor runs 93, matching the static sweep
+        expected: anchor: 93
+        observed: anchor: 93
+  [ok]   cef5623 runs 77
+        expected: cef5623: 77
+        observed: cef5623: 77
+  [ok]   7a9553b runs 70
+        expected: 7a9553b: 70
+        observed: 7a9553b: 70
+  The 7a9553b run's verdict is recorded but NOT used as a
+  discriminator: one run does not establish determinism, and whether
+  that failure is stable is UNMEASURED.
+
+########## E. so the file IS decidable, from its own content ##########
+  [ok] raw-recheck-cef5623.txt states its own suite size
+        expected: Ran 77 tests
+        observed: ########## P2-1 recheck at cef5623 ########## transfer exit=0 config file orchestrator : antigravity effective orchestrator   : codex ########## P2-2 recheck: v0.1 client vs cef5623 workspace ########## error: Agent 'antigravity' registration differs from the signed ledger ########## suite at cef5623 ########## ---------------------------------------------------------------------- Ran 77 tests in 13.628s  OK 
+  [ok]   which is cef5623's, on the DIVERGENT line
+        expected: 77
+        observed: 77
+  [ok]   and is NOT the anchor's at any commit
+        expected: 77 on the anchor's line: False
+        observed: 77 on the anchor's line: False
+  Item 46 re-ran this section (77/77, OK, exit 0) without asking
+  which v2 produced it. The answer is: not the one under review.
+
+########## F. THE DEFECT WAS MINE - a bare substring in item 58 ##########
+    commits whose diff carries the bare token: ['78989d7']
+  [ok] item 58's anchor tokens ENDED with a bare substring, per git history
+        expected: commits: 1
+        observed: commits: 1
+  [ok]   and it is the commit that published item 58
+        expected: 78989d7
+        observed: 78989d7 review(CB): item 58 — which line produced which output, and why the test is one-way
+  [ok]   and the corrected working tree no longer has it
+        expected: bare present: False
+        observed: bare present: False
+    independence_dimensions    anchor-line commits=0  divergent-line commits=1
+  [ok]   independence_dimensions belongs to the divergent line, over FULL ancestry
+        expected: on the wrong line: 0
+        observed: on the wrong line: 0
+    transport_independence     anchor-line commits=1  divergent-line commits=0
+  [ok]   transport_independence belongs to the anchor line, over FULL ancestry
+        expected: on the wrong line: 0
+        observed: on the wrong line: 0
+    audit-independence         anchor-line commits=1  divergent-line commits=0
+  [ok]   audit-independence belongs to the anchor line, over FULL ancestry
+        expected: on the wrong line: 0
+        observed: on the wrong line: 0
+  `independence_dimensions` appears in NO commit of the anchor's
+  entire ancestry and is introduced by 7a9553b itself - yet item 58's
+  bare token counted it as ANCHOR evidence.
+  [ok] item 58 placed this many outputs on the anchor
+        expected: anchor: 35
+        observed: anchor: 35
+  [ok]   of which this many rest on the BARE substring alone
+        expected: bare: 11
+        observed: bare: 11
+    ['raw-alias-lineage.txt', 'raw-archive-bundle.txt', 'raw-attack2-cef5623.txt', 'raw-attack2.txt', 'raw-attack3.txt', 'raw-doctor-coverage.txt', 'raw-full-final.txt', 'raw-implicit-exceptions.txt', 'raw-prov-main-suite.txt', 'raw-proxy-grant.txt', 'raw-readme-claims.txt']
+
+########## G. and my FIRST correction repeated the trap ##########
+  [ok] `test_proxy_submission` is an ANCHOR-ONLY test module
+        expected: anchor-only: True
+        observed: anchor-only: True
+  [ok]   yet it appears in raw-full-final.txt as a SUBSTRING
+        expected: substring present: True
+        observed: substring present: True
+    test_proxy_submission_records_author_proxy_and_git_commit (tests.test_meta_orchestration.GitProx
+  [ok]     of a method in test_meta_orchestration, the DIVERGENT module
+        expected: tests.test_meta_orchestration.
+        observed: test_proxy_submission_records_author_proxy_and_git_commit (tests.test_meta_orchestration.GitProxySubmissionTests.test_proxy_submission_records_author_proxy_and_git_commit) ... ok
+  Module names are PREFIXES of method names. A literal scan cannot
+  tell the two apart; PARSING the unittest id can.
+  [ok]   parsed, raw-full-final.txt names seven test modules
+        expected: modules: 7
+        observed: modules: 7
+  [ok]     of which the divergent-only ones are
+        expected: divergent: ['test_meta_orchestration']
+        observed: divergent: ['test_meta_orchestration']
+  [ok]     and it names NO anchor-only test module
+        expected: anchor: []
+        observed: anchor: []
+    vs anchor     in-file-not-in-suite= 43  in-suite-not-in-file= 66
+    vs cef5623    in-file-not-in-suite=  0  in-suite-not-in-file=  7
+    vs 7a9553b    in-file-not-in-suite=  0  in-suite-not-in-file=  0
+  [ok] raw-full-final.txt's ids EXACTLY match 7a9553b's suite, both ways
+        expected: outside: 0 missing: 0
+        observed: outside: 0 missing: 0
+  [ok]   and this many of them do not exist at the anchor AT ALL
+        expected: absent at anchor: 43
+        observed: absent at anchor: 43
+  [ok] REPORT.md's declared subject 4aa47ca has the SAME 70 ids as 7a9553b
+        expected: identical: True
+        observed: identical: True
+  [ok]   so the id match places the FILE on the divergent line but cannot
+        expected: picks a commit: False
+        observed: picks a commit: False
+  pick between them. `4aa47ca` is the commit REPORT.md names as its
+  own subject, which is the reading that needs no extra assumption -
+  but this test does not establish it, and saying otherwise would be
+  claiming more than the measurement carries.
+
+########## H. the CORRECTED classification ##########
+    divergent  raw-attack2-cef5623.txt  ['independence_dimensions']
+    divergent  raw-attack2.txt  ['independence_dimensions']
+    divergent  raw-attack3.txt  ['independence_dimensions']
+    divergent  raw-full-final.txt  ['test_meta_orchestration']
+    divergent  raw-w4-replay.txt  ['transfer_orchestrator', 'transfer-orchestrator', 'orchestrator_transferred']
+  [ok] outputs placed on the ANCHOR's line
+        expected: anchor: 27
+        observed: anchor: 27
+  [ok]   outputs placed on the DIVERGENT line
+        expected: divergent: 5
+        observed: divergent: 5
+  [ok]   outputs carrying tokens from BOTH
+        expected: mixed: 0
+        observed: mixed: 0
+  [ok]   outputs the token test cannot place
+        expected: undecidable: 45
+        observed: undecidable: 45
+  [ok]     and the four classes account for every output
+        expected: total: 77
+        observed: total: 77
+  Item 58 published 35 / 1 / 41. Four outputs move from ANCHOR to
+  DIVERGENT; seven more lose an unfounded anchor placement.
+
+########## I. REPORT.md's six, re-placed ##########
+  [ok] REPORT.md cites raw-attack2.txt
+        expected: cited: True
+        observed: cited: True
+  [ok] REPORT.md cites raw-attack2-cef5623.txt
+        expected: cited: True
+        observed: cited: True
+  [ok] REPORT.md cites raw-attack3.txt
+        expected: cited: True
+        observed: cited: True
+  [ok] REPORT.md cites raw-full-final.txt
+        expected: cited: True
+        observed: cited: True
+  [ok] REPORT.md cites raw-attack4.txt
+        expected: cited: True
+        observed: cited: True
+  [ok] REPORT.md cites raw-recheck-cef5623.txt
+        expected: cited: True
+        observed: cited: True
+    REPORT.md:437-438 - Subject under review @ 4aa47ca602d36c22cbaf2ce63fa442ee398c317e
+  [ok] REPORT.md DECLARES its subject, and it is not the anchor
+        expected: 4aa47ca6
+        observed: 4aa47ca602d36c22cbaf2ce63fa442ee398c317e
+  [ok]   that commit is on the DIVERGENT line
+        expected: on divergent line: True
+        observed: on divergent line: True
+  [ok]   and is NOT an ancestor of the anchor
+        expected: ancestor of anchor: False
+        observed: ancestor of anchor: False
+  So the corrected placement AGREES with what REPORT.md says about
+  itself, and item 58's placement CONTRADICTED it. The known answer
+  needed to catch that bare substring was three lines from the
+  manifest item 46 read, and I did not check my filter against it.
+    raw-attack2.txt              DIVERGENT
+    raw-attack2-cef5623.txt      DIVERGENT
+    raw-attack3.txt              DIVERGENT
+    raw-full-final.txt           DIVERGENT
+    raw-attack4.txt              MIXED (item 55, by absent API + ancestry)
+    raw-recheck-cef5623.txt      DIVERGENT (cef5623, by suite size)
+  [ok] not one of REPORT.md's six is placed on the ANCHOR's line
+        expected: on the anchor: 0
+        observed: on the anchor: 0
+  Item 58 reported FOUR of six on the anchor's line. That is wrong,
+  and the corrected answer is ZERO - which is exactly what REPORT.md
+  says about itself. Its outputs are not anomalous; they are the
+  outputs of the tree it declares. What was anomalous was my scan.
+
+########## J. what this does NOT establish ##########
+  * It does NOT retract any FINDING of PR #2 or of this review. Every
+    probe of mine runs against /tmp/efo-prov, verified clean at the
+    anchor in section A of every round. What moves is the placement
+    of INHERITED outputs, not the code any of my probes measured.
+  * It does NOT decide the 45. A suite size places an output only
+    if the output prints one; 7 of 77 do.
+  * It does NOT claim cef5623 is the ONLY commit with 77 tests in the
+    world - only across the 21 commits reachable from the two refs
+    this repository has. A commit reachable from neither is UNSWEPT.
+  * It does NOT accuse REPORT.md of anything. That report names
+    `4aa47ca6` as its subject in its own manifest; producing its
+    outputs on that line is the report being consistent, not the
+    report being wrong. The error corrected here is MINE.
+  * It does NOT re-open whether REPORT.md's findings apply to the
+    anchor. `NOTE-raw-attack4-is-unreproducible-and-my-manifest-was-
+    wrong.md` already measured that for P2-1/P2-2/P2-3 and this round
+    neither extends nor narrows it.
+  * It does NOT file an issue. Nothing here is a defect in EFO.
+  * No network. No workspace built; two suites run from checkouts and
+    one from the anchor, none of them modified. It does not touch
+    `main` or another agent's branch.
+  * MEASURED: the graph, both marker sets over full ancestry, the
+    21-commit sweep, three suite runs, the id-set match, the token
+    directions, both classifications, REPORT.md's six. REASONED:
+    nothing.
+
+########## 0 unexpected result(s) ##########
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED: re-running my own evidence is a
+re-run, not independent confirmation.

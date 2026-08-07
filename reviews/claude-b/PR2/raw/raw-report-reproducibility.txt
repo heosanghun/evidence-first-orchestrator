@@ -1,0 +1,117 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok] raw outputs REPORT.md cites
+        expected: outputs: 6
+        observed: outputs: 6
+  [ok]   scripts it cites
+        expected: scripts: 4
+        observed: scripts: 4
+  [ok]   `*measured.*` claim lines
+        expected: claims: 6
+        observed: claims: 6
+  [ok]   and refs it names as its subject
+        expected: refs: 2
+        observed: refs: 2
+    ['raw-attack2-cef5623.txt', 'raw-attack2.txt', 'raw-attack3.txt', 'raw-attack4.txt', 'raw-full-final.txt', 'raw-recheck-cef5623.txt']
+  Small enough to adjudicate each, and each is adjudicated below.
+
+########## B. both named refs EXIST - the item implied otherwise ##########
+    4aa47ca6  exists=True  2026-07-29 Make adapter evidence assertion portable
+    cef56234  exists=True  2026-07-30 feat: add source-bound module entrypoint
+  [ok] REPORT.md's subject refs are reachable in this repository
+        expected: missing refs: []
+        observed: missing refs: []
+  Neither is the review's anchor, and no other write-up asserts them -
+  that part of item 46 holds. But `not the anchor` is not `unreachable`,
+  and the difference is the whole result.
+
+########## C. which cited outputs have no producer on the branch ##########
+    raw-attack2-cef5623.txt    producers: ['attack2.sh', 'attack2_cef.sh']
+    raw-attack2.txt            producers: ['attack2.sh', 'attack2_cef.sh']
+    raw-attack3.txt            producers: ['attack3.sh']
+    raw-attack4.txt            producers: NONE
+    raw-full-final.txt         producers: NONE
+    raw-recheck-cef5623.txt    producers: NONE
+  [ok] cited outputs with no producer script in raw/
+        expected: orphans: 3
+        observed: orphans: 3   ['raw-attack4.txt', 'raw-full-final.txt', 'raw-recheck-cef5623.txt']
+  Item 43 covered attack4. The other two are this item's subject, and
+  the next section stops guessing about them.
+
+########## D. EXECUTED - two of the three were RE-RUN here ##########
+  unittest is STDLIB, so `no pytest` never blocked these. Saying they
+  could not be reproduced without trying would have been the error.
+    raw-full-final.txt
+      ref under test   4aa47ca6  (named by REPORT.md)
+      committed output says   Ran 70 tests
+      this run says           Ran 70 tests, exit 0
+  [ok]   raw-full-final.txt: the re-run matches the committed count
+        expected: tests: 70
+        observed: tests: 70
+  [ok]     and the suite passes
+        expected: OK
+        observed: OK
+  [ok]     with exit 0
+        expected: exit: 0
+        observed: exit: 0
+  [ok]     and NO skips - `OK` carries no (skipped=N) suffix
+        expected: skipped: 0
+        observed: skipped: 0
+    raw-recheck-cef5623.txt
+      ref under test   cef56234  (named by REPORT.md)
+      committed output says   Ran 77 tests
+      this run says           Ran 77 tests, exit 0
+  [ok]   raw-recheck-cef5623.txt: the re-run matches the committed count
+        expected: tests: 77
+        observed: tests: 77
+  [ok]     and the suite passes
+        expected: OK
+        observed: OK
+  [ok]     with exit 0
+        expected: exit: 0
+        observed: exit: 0
+  [ok]     and NO skips - `OK` carries no (skipped=N) suffix
+        expected: skipped: 0
+        observed: skipped: 0
+
+########## E. what is still unreproducible, and why ##########
+  [ok] the v0.1 wheel fixture at the anchor
+        expected: present: False
+        observed: present: False
+    raw-recheck-cef5623.txt has 3 sections: ['P2-1 recheck at cef5623', 'P2-2 recheck: v0.1 client vs cef5623 workspace', 'suite at cef5623']
+  [ok]   of which the SUITE section is the one re-run above
+        expected: suite sections: 1
+        observed: suite sections: 1
+  The P2-1 and P2-2 sections drive the v0.1 CLIENT, which comes from
+  the wheel that is absent at the anchor - the same reason item 43 gave
+  for raw-attack4.txt. So `raw-recheck-cef5623.txt` is PARTLY
+  reproducible: its suite section was re-run, its two recheck sections
+  cannot be. That distinction did not exist before this pass.
+  attack2.sh and attack3.sh ship on the branch but declare the
+  branch's own unpinned tree - item 40 - so they run, but not against
+  the ref REPORT.md names.
+
+########## F. what this does NOT do ##########
+  * It does not re-run the attack scripts. Item 40 measured that two of
+    them target an unpinned tree; re-running them now would measure
+    today's branch, not the ref under review.
+  * It does not retract or re-confirm P2-1, P2-2, P2-3 or P2-4. Two
+    SUITE runs were reproduced; the FINDINGS rest on the recheck and
+    attack sections, which is a different question.
+  * It does not touch main or any other agent's branch. The two
+    checkouts are local clones under /tmp and nothing was written to
+    either working tree.
+  * MEASURED: every count, both ref lookups, the producer census, both
+    re-runs and their exit codes, the wheel's absence, the section
+    split. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Static reads plus two unittest runs against local checkouts of refs
+REPORT.md names. No network, no workspace mutation, no issue filed.
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED.

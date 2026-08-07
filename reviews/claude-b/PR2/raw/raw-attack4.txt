@@ -1,0 +1,191 @@
+########## W1 wheel hash vs README claim ##########
+18ed72c3f2ddf38a9a18d435032095cfbc074b2e21b9397d96e4a76b103b2354  /workspace/evidence-first-orchestrator/tests/fixtures/evidence_first_orchestrator-0.1.0-py3-none-any.whl
+README claims: 18ed72c3f2ddf38a9a18d435032095cfbc074b2e21b9397d96e4a76b103b2354
+
+########## W2 does the wheel's code equal git f827f29? ##########
+evidence_orchestrator/__init__.py
+evidence_orchestrator/__main__.py
+evidence_orchestrator/adapter.py
+evidence_orchestrator/archive.py
+evidence_orchestrator/cli.py
+evidence_orchestrator/dashboard.py
+evidence_orchestrator/doctor.py
+evidence_orchestrator/errors.py
+evidence_orchestrator/evidence.py
+evidence_orchestrator/ledger.py
+evidence_orchestrator/lock.py
+evidence_orchestrator/model.py
+evidence_orchestrator/util.py
+evidence_orchestrator/workspace.py
+--- diff wheel sources against git f827f29:src/evidence_orchestrator ---
+diff -r /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/f827/src/evidence_orchestrator/__init__.py /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/wheel/evidence_orchestrator/__init__.py
+6a7
+> 
+diff -r /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/f827/src/evidence_orchestrator/__main__.py /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/wheel/evidence_orchestrator/__main__.py
+7a8
+> 
+diff -r /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/f827/src/evidence_orchestrator/archive.py /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/wheel/evidence_orchestrator/archive.py
+153a154
+> 
+diff -r /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/f827/src/evidence_orchestrator/dashboard.py /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/wheel/evidence_orchestrator/dashboard.py
+228a229
+> 
+diff -r /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/f827/src/evidence_orchestrator/errors.py /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/wheel/evidence_orchestrator/errors.py
+33a34
+> 
+diff -r /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/f827/src/evidence_orchestrator/lock.py /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/wheel/evidence_orchestrator/lock.py
+82a83
+> 
+diff -r /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/f827/src/evidence_orchestrator/model.py /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/wheel/evidence_orchestrator/model.py
+141a142
+> 
+diff -r /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/f827/src/evidence_orchestrator/util.py /tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/wheel/evidence_orchestrator/util.py
+114a115
+> 
+diff exit=1
+########## W2b characterize the 8 diffs ##########
+__init__.py  git_tail=0 " \n wheel_tail=" \n \n  bytes 127 -> 128  stripped_equal=True
+__main__.py  git_tail=) ) \n wheel_tail=) \n \n  bytes 160 -> 161  stripped_equal=True
+archive.py   git_tail=} \n wheel_tail=} \n \n  bytes 4938 -> 4939  stripped_equal=True
+dashboard.py git_tail=( ) \n wheel_tail=) \n \n  bytes 8115 -> 8116  stripped_equal=True
+errors.py    git_tail=" " \n wheel_tail=" \n \n  bytes 816 -> 817  stripped_equal=True
+lock.py      git_tail=( ) \n wheel_tail=) \n \n  bytes 2339 -> 2340  stripped_equal=True
+model.py     git_tail=) \n wheel_tail=) \n \n  bytes 4416 -> 4417  stripped_equal=True
+util.py      git_tail=u e \n wheel_tail=e \n \n  bytes 3434 -> 3435  stripped_equal=True
+
+-- security-relevant files that are byte-identical --
+workspace.py   99056c7657897df5  99056c7657897df5
+ledger.py      941452c663bd7d6f  941452c663bd7d6f
+cli.py         ac9557282aeeb115  ac9557282aeeb115
+evidence.py    4427a64767ca400f  4427a64767ca400f
+adapter.py     844d98b05668ba0d  844d98b05668ba0d
+doctor.py      36f82dc4a5a6c210  36f82dc4a5a6c210
+########## W3 v0.1 client reads a v2-created workspace ##########
+v2 init exit=0
+v2 task add exit=0
+-- v0.1 status --
+error: Agent 'antigravity' registration differs from the signed ledger
+exit=2
+-- v0.1 ledger verify --
+{
+  "events": 7,
+  "head": "f888c7f202517d4f00b5d182d5df175532e304a7dd5dae19536d3f687e772104",
+  "signed": true,
+  "valid": true
+}
+exit=0
+-- v0.1 doctor --
+  "error": "Agent 'antigravity' registration differs from the signed ledger",
+  "healthy": false,
+  "root": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/ws4"
+}
+exit=0
+-- v0.1 task show C1 --
+    ],
+    "required_attestations": 0
+  }
+}
+exit=0
+
+########## W4 v2 signed orchestrator handoff antigravity -> codex ##########
+{
+  "event_hash": "58f129a98618f4f8e438315c54a03b8f119c180f417e373b57255fbd05c8e298",
+  "from": "antigravity",
+  "reason": "claude-b test",
+  "to": "codex"
+}
+exit=0
+-- config on disk still says: --
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/ws4/workspace.json'
+-- v2 resolves orchestrator as: --
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+KeyError: 'orchestrator'
+
+########## W5 POST-HANDOVER: does the v0.1 client fail closed? ##########
+-- v0.1 status (which orchestrator does it believe?) --
+error: Agent 'antigravity' registration differs from the signed ledger
+exit=2
+
+-- v0.1: DEPOSED orchestrator antigravity tries to create a task --
+error: Agent antigravity registration differs from the signed ledger
+exit=2
+
+-- v0.1: NEW orchestrator codex tries to create a task --
+error: Agent codex registration differs from the signed ledger
+exit=2
+
+-- v2: DEPOSED antigravity tries to create a task (control) --
+error: Only orchestrator 'codex' may perform this action
+exit=2
+
+-- v2: NEW orchestrator codex creates a task (control) --
+exit=0
+
+-- v0.1 ledger verify after handoff --
+{
+  "events": 11,
+  "head": "773b616e2c3a5d0be2d222193e72222d0676fb96c293ae76a8972dfbaa29e5eb",
+  "signed": true,
+  "valid": true
+}
+exit=0
+-- v2 ledger verify after handoff --
+{
+  "events": 11,
+  "head": "773b616e2c3a5d0be2d222193e72222d0676fb96c293ae76a8972dfbaa29e5eb",
+  "signed": true,
+  "valid": true
+}
+exit=0
+########## W6 does the handoff update the on-disk config? ##########
+-- .efo/workspace.json orchestrator field: --
+{
+  "orchestrator": "antigravity",
+  "schema_version": 1,
+  "name": "compat"
+}
+-- v2 effective orchestrator (ledger-derived): --
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+KeyError: 'orchestrator'
+
+########## W7 v0.1 on a workspace v0.1 itself created (baseline sanity) ##########
+v0.1 init exit=0
+v0.1 status on own ws exit=0
+-- v2 reading a v0.1-created workspace (backward compat) --
+  },
+  "tasks": []
+}
+exit=0
+  "healthy": true,
+
+########## W8 what exactly makes v0.1 reject a v2 agent record? ##########
+["active", "capabilities", "command", "created_at", "governance_epoch", "id", "identity", "max_concurrency", "mode", "role", "schema_version", "updated_at", "write_roots"]
+identity= {'controller_id': 'antigravity', 'model_family': 'unknown', 'provider': 'unknown'}  governance_epoch= 1
+########## W6b (rerun: correct status key) ##########
+status keys: ['status', 'tasks']
+effective orchestrator: {
+  "status": {
+    "agents": 4,
+    "ledger": {
+      "events": 11,
+      "head": "773b616e2c3a5d0be2d222193e72222d0676fb96c293ae76a8972dfbaa29e5eb",
+      "signed": true,
+      "valid": true
+    },
+    "orchestrator": "codex",
+    "states": {
+      "archived": 0,
+      "blocked": 0,
+      "claimed": 0,
+      "invalidated": 0,
+      "pending": 2,
+      "rejected": 0,
+      "revoking": 0,
+      "r
+-- direct from the API --
+config file orchestrator : antigravity
+effective orchestrator   : codex

@@ -1,0 +1,118 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok] a THREE-task workspace reaches archived on all three
+        expected: archived: 3
+        observed: archived: 3
+  [ok]   and the untouched workspace audits healthy
+        expected: HEALTHY
+        observed: HEALTHY - unnoticed
+
+########## B. the split MOVES, and that is the measurement ##########
+  [ok] one task ships this many files
+        expected: files: 27
+        observed: files: 27
+  [ok]   three tasks ship this many
+        expected: files: 65
+        observed: files: 65
+  [ok]     in the same number of kinds
+        expected: kinds: 17 and 17
+        observed: kinds: 17 and 17
+  [ok] item 72's split, RE-DERIVED in this run
+        expected: multi: 9, single: 8
+        observed: multi: 9, single: 8
+  [ok]   and at three tasks
+        expected: multi: 12, single: 5
+        observed: multi: 12, single: 5
+  [ok]     kinds that CROSS from singleton to multi
+        expected: crossed: 3
+        observed: crossed: 3
+  [ok]       and they are these
+        expected: ['archive/*.json', 'submissions/.../files/*.md', 'tasks/*.json']
+        observed: ['archive/*.json', 'submissions/.../files/*.md', 'tasks/*.json']
+  [ok]         no kind crosses the other way
+        expected: back: []
+        observed: back: []
+  `tasks/*.json` is one of them - and it is one of the four kinds item
+  72 measured as CAUGHT. At one task its message could not move; there
+  was only one of it. Section C is that question, now askable.
+
+########## C. the three crossed kinds, ONE vs ALL ##########
+    one tasks/*.json (the middle one)                removed=1   CAUGHT: T2: projection missing
+    all three tasks/*.json                           removed=3   CAUGHT: T1: projection missing; T2: projection missing; T3: projection missing
+  [ok] deleting one projection is caught, and NAMES it
+        expected: CAUGHT: T2: projection missing
+        observed: CAUGHT: T2: projection missing
+  [ok]   deleting all three is caught and names ALL THREE
+        expected: T1: projection missing; T2: projection missing; T3: projection missing
+        observed: CAUGHT: T1: projection missing; T2: projection missing; T3: projection missing
+  [ok]     so this message DOES move with the count
+        expected: moved: True
+        observed: moved: True
+  Item 72 measured `agents/*.json` reporting identically for one and
+  for all three. This kind does not - it enumerates. The difference is
+  only visible once a kind has more than one instance to lose.
+    one archive/*.json                               removed=1   HEALTHY - unnoticed
+    all three archive/*.json                         removed=3   HEALTHY - unnoticed
+  [ok] archive records are unnoticed either way
+        expected: HEALTHY - unnoticed
+        observed: HEALTHY - unnoticed
+  [ok]   including all of them at once
+        expected: HEALTHY - unnoticed
+        observed: HEALTHY - unnoticed
+
+########## D. whole trees, and the one file that is load-bearing ##########
+    ONE task's submission tree                       removed=9   HEALTHY - unnoticed
+  [ok] removing one task's archived evidence entirely
+        expected: HEALTHY - unnoticed
+        observed: HEALTHY - unnoticed
+    ALL THREE submission trees                       removed=27  HEALTHY - unnoticed
+  [ok]   and all three, 27 files
+        expected: HEALTHY - unnoticed
+        observed: HEALTHY - unnoticed
+    EVERYTHING belonging to task T2                  removed=19  CAUGHT: T2: projection missing
+  [ok] removing a whole task IS caught
+        expected: CAUGHT: T2: projection missing
+        observed: CAUGHT: T2: projection missing
+      the same, but sparing tasks/T2.json            removed=18  HEALTHY - unnoticed
+  [ok]   and sparing ONE file of the nineteen makes it invisible
+        expected: HEALTHY - unnoticed
+        observed: HEALTHY - unnoticed
+    every task's evidence, sparing the 3 projections removed=54  HEALTHY - unnoticed
+  [ok] the whole workspace's evidence can go
+        expected: HEALTHY - unnoticed
+        observed: HEALTHY - unnoticed
+  54 of 65 files - every archived bundle, every report, every submitted
+  copy, every archive record - removed, and the product's own health
+  check reports the workspace healthy. What is load-bearing is the
+  three task PROJECTIONS, which are 3 files and no evidence at all.
+
+########## E. what this does NOT establish ##########
+  * It does NOT file an issue. Item 69 widened #10 from edits to
+    deletes, item 72 from one instance to every instance, this from
+    one task to a whole workspace. Quantifying an open issue is not
+    opening another.
+  * It does NOT retract item 72. Its one-task split is RE-DERIVED here
+    from a workspace built in this run and agrees exactly.
+  * The audit surface is `doctor.audit_workspace`, as in items 63, 66,
+    69 and 72. A human listing the directory sees the files are gone.
+  * Three tasks, one attempt each. Whether a task with SEVERAL
+    attempts behaves differently is UNCHECKED, not shown safe.
+  * The `T*` sweep in the last two drives is a filename match, and it
+    is bounded by the count it prints - 54 of 65 - rather than by my
+    description of it.
+  * No network, no GPU. Twelve tempfile workspaces, removed before the
+    results print. The anchor's working tree is untouched, and it does
+    not touch `main` or another agent's branch.
+  * MEASURED: both censuses, the crossing kinds both directions, six
+    per-kind drives, five whole-tree drives, every verdict and every
+    full message. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED: re-running my own evidence is a
+re-run, not independent confirmation.

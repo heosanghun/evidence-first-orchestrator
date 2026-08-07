@@ -1,0 +1,626 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+
+########## B. what the signature COVERS ##########
+    core fields hashed : ['sequence', 'timestamp', 'actor', 'action', 'task_id', 'payload', 'previous_hash']
+  [ok] the signature covers seven fields, derived from ledger.py
+        expected: fields: ['sequence', 'timestamp', 'actor', 'action', 'task_id', 'payload', 'previous_hash']
+        observed: fields: ['sequence', 'timestamp', 'actor', 'action', 'task_id', 'payload', 'previous_hash']
+  [ok]   the chain is SHA-256 over canonical JSON
+        expected: hashlib.sha256(canonical_json(core)).hexdigest()
+        observed: """Hash-chained, HMAC-signed append-only event ledger."""
+
+from __future__ import annotations
+
+import hashlib
+import hmac
+import json
+import os
+from pathlib import Path
+from typing import Any
+
+from .errors import IntegrityError
+from .lock import FileLock
+from .util import canonical_json, utc_now
+
+GENESIS_HASH = "0" * 64
+
+
+class Ledger:
+    """Append and validate immutable workspace events."""
+
+    def __init__(self, path: Path, lock_path: Path, key_path: Path) -> None:
+        self.path = path
+        self.lock_path = lock_path
+        self.key_path = key_path
+
+    def initialize(self) -> None:
+        """Create an empty ledger and a private local signing key."""
+
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.key_path.parent.mkdir(parents=True, exist_ok=True)
+        if not self.path.exists():
+            self.path.write_text("", encoding="utf-8")
+        if not self.key_path.exists():
+            self.key_path.write_bytes(os.urandom(32))
+            try:
+                self.key_path.chmod(0o600)
+            except OSError:
+                pass
+
+    def _key(self) -> bytes:
+        try:
+            return self.key_path.read_bytes()
+        except FileNotFoundError as exc:
+            raise IntegrityError(f"Ledger signing key is missing: {self.key_path}") from exc
+
+    def read(self) -> list[dict[str, Any]]:
+        """Read all events, failing on malformed lines."""
+
+        if not self.path.exists():
+            return []
+        events: list[dict[str, Any]] = []
+        for line_number, line in enumerate(
+            self.path.read_text(encoding="utf-8").splitlines(), start=1
+        ):
+            if not line.strip():
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise IntegrityError(
+                    f"Malformed ledger JSON at line {line_number}: {exc}"
+                ) from exc
+            if not isinstance(event, dict):
+                raise IntegrityError(f"Ledger line {line_number} is not an object")
+            events.append(event)
+        return events
+
+    def append(
+        self,
+        *,
+        actor: str,
+        action: str,
+        task_id: str | None,
+        payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Append one signed event while holding the ledger lock."""
+
+        with FileLock(self.lock_path):
+            events = self.read()
+            self._verify_events(events)
+            previous_hash = events[-1]["event_hash"] if events else GENESIS_HASH
+            core = {
+                "sequence": len(events) + 1,
+                "timestamp": utc_now(),
+                "actor": actor,
+                "action": action,
+                "task_id": task_id,
+                "payload": payload,
+                "previous_hash": previous_hash,
+            }
+            event_hash = hashlib.sha256(canonical_json(core)).hexdigest()
+            signature = hmac.new(
+                self._key(), event_hash.encode("ascii"), hashlib.sha256
+            ).hexdigest()
+            event = {**core, "event_hash": event_hash, "signature": signature}
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            with self.path.open("a", encoding="utf-8", newline="\n") as handle:
+                handle.write(json.dumps(event, ensure_ascii=False, sort_keys=True))
+                handle.write("\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+            return event
+
+    def _verify_events(self, events: list[dict[str, Any]]) -> dict[str, Any]:
+        previous_hash = GENESIS_HASH
+        key = self._key()
+        for expected_sequence, event in enumerate(events, start=1):
+            if event.get("sequence") != expected_sequence:
+                raise IntegrityError(
+                    f"Ledger sequence mismatch at event {expected_sequence}"
+                )
+            if event.get("previous_hash") != previous_hash:
+                raise IntegrityError(
+                    f"Ledger chain mismatch at event {expected_sequence}"
+                )
+            core = {
+                key_name: event.get(key_name)
+                for key_name in (
+                    "sequence",
+                    "timestamp",
+                    "actor",
+                    "action",
+                    "task_id",
+                    "payload",
+                    "previous_hash",
+                )
+            }
+            calculated_hash = hashlib.sha256(canonical_json(core)).hexdigest()
+            if not hmac.compare_digest(calculated_hash, str(event.get("event_hash", ""))):
+                raise IntegrityError(
+                    f"Ledger event hash mismatch at event {expected_sequence}"
+                )
+            calculated_signature = hmac.new(
+                key, calculated_hash.encode("ascii"), hashlib.sha256
+            ).hexdigest()
+            if not hmac.compare_digest(
+                calculated_signature, str(event.get("signature", ""))
+            ):
+                raise IntegrityError(
+                    f"Ledger signature mismatch at event {expected_sequence}"
+                )
+            previous_hash = calculated_hash
+        return {
+            "valid": True,
+            "events": len(events),
+            "head": previous_hash,
+            "signed": True,
+        }
+
+    def verify(self) -> dict[str, Any]:
+        """Verify sequence, hash links, event hashes, and HMAC signatures."""
+
+        return self._verify_events(self.read())
+
+    def projected_tasks(self) -> dict[str, dict[str, Any]]:
+        """Reconstruct the latest task snapshots from the event stream."""
+
+        tasks: dict[str, dict[str, Any]] = {}
+        for event in self.read():
+            snapshot = event.get("payload", {}).get("task")
+            task_id = event.get("task_id")
+            if task_id and isinstance(snapshot, dict):
+                tasks[task_id] = snapshot
+        return tasks
+
+  [ok]     and the signature is an HMAC over that hash
+        expected: hmac.new(
+                key, calculated_hash.encode("ascii"), hashlib.sha256
+            ).hexdigest()
+        observed: """Hash-chained, HMAC-signed append-only event ledger."""
+
+from __future__ import annotations
+
+import hashlib
+import hmac
+import json
+import os
+from pathlib import Path
+from typing import Any
+
+from .errors import IntegrityError
+from .lock import FileLock
+from .util import canonical_json, utc_now
+
+GENESIS_HASH = "0" * 64
+
+
+class Ledger:
+    """Append and validate immutable workspace events."""
+
+    def __init__(self, path: Path, lock_path: Path, key_path: Path) -> None:
+        self.path = path
+        self.lock_path = lock_path
+        self.key_path = key_path
+
+    def initialize(self) -> None:
+        """Create an empty ledger and a private local signing key."""
+
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.key_path.parent.mkdir(parents=True, exist_ok=True)
+        if not self.path.exists():
+            self.path.write_text("", encoding="utf-8")
+        if not self.key_path.exists():
+            self.key_path.write_bytes(os.urandom(32))
+            try:
+                self.key_path.chmod(0o600)
+            except OSError:
+                pass
+
+    def _key(self) -> bytes:
+        try:
+            return self.key_path.read_bytes()
+        except FileNotFoundError as exc:
+            raise IntegrityError(f"Ledger signing key is missing: {self.key_path}") from exc
+
+    def read(self) -> list[dict[str, Any]]:
+        """Read all events, failing on malformed lines."""
+
+        if not self.path.exists():
+            return []
+        events: list[dict[str, Any]] = []
+        for line_number, line in enumerate(
+            self.path.read_text(encoding="utf-8").splitlines(), start=1
+        ):
+            if not line.strip():
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise IntegrityError(
+                    f"Malformed ledger JSON at line {line_number}: {exc}"
+                ) from exc
+            if not isinstance(event, dict):
+                raise IntegrityError(f"Ledger line {line_number} is not an object")
+            events.append(event)
+        return events
+
+    def append(
+        self,
+        *,
+        actor: str,
+        action: str,
+        task_id: str | None,
+        payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Append one signed event while holding the ledger lock."""
+
+        with FileLock(self.lock_path):
+            events = self.read()
+            self._verify_events(events)
+            previous_hash = events[-1]["event_hash"] if events else GENESIS_HASH
+            core = {
+                "sequence": len(events) + 1,
+                "timestamp": utc_now(),
+                "actor": actor,
+                "action": action,
+                "task_id": task_id,
+                "payload": payload,
+                "previous_hash": previous_hash,
+            }
+            event_hash = hashlib.sha256(canonical_json(core)).hexdigest()
+            signature = hmac.new(
+                self._key(), event_hash.encode("ascii"), hashlib.sha256
+            ).hexdigest()
+            event = {**core, "event_hash": event_hash, "signature": signature}
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            with self.path.open("a", encoding="utf-8", newline="\n") as handle:
+                handle.write(json.dumps(event, ensure_ascii=False, sort_keys=True))
+                handle.write("\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+            return event
+
+    def _verify_events(self, events: list[dict[str, Any]]) -> dict[str, Any]:
+        previous_hash = GENESIS_HASH
+        key = self._key()
+        for expected_sequence, event in enumerate(events, start=1):
+            if event.get("sequence") != expected_sequence:
+                raise IntegrityError(
+                    f"Ledger sequence mismatch at event {expected_sequence}"
+                )
+            if event.get("previous_hash") != previous_hash:
+                raise IntegrityError(
+                    f"Ledger chain mismatch at event {expected_sequence}"
+                )
+            core = {
+                key_name: event.get(key_name)
+                for key_name in (
+                    "sequence",
+                    "timestamp",
+                    "actor",
+                    "action",
+                    "task_id",
+                    "payload",
+                    "previous_hash",
+                )
+            }
+            calculated_hash = hashlib.sha256(canonical_json(core)).hexdigest()
+            if not hmac.compare_digest(calculated_hash, str(event.get("event_hash", ""))):
+                raise IntegrityError(
+                    f"Ledger event hash mismatch at event {expected_sequence}"
+                )
+            calculated_signature = hmac.new(
+                key, calculated_hash.encode("ascii"), hashlib.sha256
+            ).hexdigest()
+            if not hmac.compare_digest(
+                calculated_signature, str(event.get("signature", ""))
+            ):
+                raise IntegrityError(
+                    f"Ledger signature mismatch at event {expected_sequence}"
+                )
+            previous_hash = calculated_hash
+        return {
+            "valid": True,
+            "events": len(events),
+            "head": previous_hash,
+            "signed": True,
+        }
+
+    def verify(self) -> dict[str, Any]:
+        """Verify sequence, hash links, event hashes, and HMAC signatures."""
+
+        return self._verify_events(self.read())
+
+    def projected_tasks(self) -> dict[str, dict[str, Any]]:
+        """Reconstruct the latest task snapshots from the event stream."""
+
+        tasks: dict[str, dict[str, Any]] = {}
+        for event in self.read():
+            snapshot = event.get("payload", {}).get("task")
+            task_id = event.get("task_id")
+            if task_id and isinstance(snapshot, dict):
+                tasks[task_id] = snapshot
+        return tasks
+
+  [ok]   with a key generated locally by os.urandom(32)
+        expected: self.key_path.write_bytes(os.urandom(32))
+        observed: """Hash-chained, HMAC-signed append-only event ledger."""
+
+from __future__ import annotations
+
+import hashlib
+import hmac
+import json
+import os
+from pathlib import Path
+from typing import Any
+
+from .errors import IntegrityError
+from .lock import FileLock
+from .util import canonical_json, utc_now
+
+GENESIS_HASH = "0" * 64
+
+
+class Ledger:
+    """Append and validate immutable workspace events."""
+
+    def __init__(self, path: Path, lock_path: Path, key_path: Path) -> None:
+        self.path = path
+        self.lock_path = lock_path
+        self.key_path = key_path
+
+    def initialize(self) -> None:
+        """Create an empty ledger and a private local signing key."""
+
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.key_path.parent.mkdir(parents=True, exist_ok=True)
+        if not self.path.exists():
+            self.path.write_text("", encoding="utf-8")
+        if not self.key_path.exists():
+            self.key_path.write_bytes(os.urandom(32))
+            try:
+                self.key_path.chmod(0o600)
+            except OSError:
+                pass
+
+    def _key(self) -> bytes:
+        try:
+            return self.key_path.read_bytes()
+        except FileNotFoundError as exc:
+            raise IntegrityError(f"Ledger signing key is missing: {self.key_path}") from exc
+
+    def read(self) -> list[dict[str, Any]]:
+        """Read all events, failing on malformed lines."""
+
+        if not self.path.exists():
+            return []
+        events: list[dict[str, Any]] = []
+        for line_number, line in enumerate(
+            self.path.read_text(encoding="utf-8").splitlines(), start=1
+        ):
+            if not line.strip():
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError as exc:
+                raise IntegrityError(
+                    f"Malformed ledger JSON at line {line_number}: {exc}"
+                ) from exc
+            if not isinstance(event, dict):
+                raise IntegrityError(f"Ledger line {line_number} is not an object")
+            events.append(event)
+        return events
+
+    def append(
+        self,
+        *,
+        actor: str,
+        action: str,
+        task_id: str | None,
+        payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Append one signed event while holding the ledger lock."""
+
+        with FileLock(self.lock_path):
+            events = self.read()
+            self._verify_events(events)
+            previous_hash = events[-1]["event_hash"] if events else GENESIS_HASH
+            core = {
+                "sequence": len(events) + 1,
+                "timestamp": utc_now(),
+                "actor": actor,
+                "action": action,
+                "task_id": task_id,
+                "payload": payload,
+                "previous_hash": previous_hash,
+            }
+            event_hash = hashlib.sha256(canonical_json(core)).hexdigest()
+            signature = hmac.new(
+                self._key(), event_hash.encode("ascii"), hashlib.sha256
+            ).hexdigest()
+            event = {**core, "event_hash": event_hash, "signature": signature}
+            self.path.parent.mkdir(parents=True, exist_ok=True)
+            with self.path.open("a", encoding="utf-8", newline="\n") as handle:
+                handle.write(json.dumps(event, ensure_ascii=False, sort_keys=True))
+                handle.write("\n")
+                handle.flush()
+                os.fsync(handle.fileno())
+            return event
+
+    def _verify_events(self, events: list[dict[str, Any]]) -> dict[str, Any]:
+        previous_hash = GENESIS_HASH
+        key = self._key()
+        for expected_sequence, event in enumerate(events, start=1):
+            if event.get("sequence") != expected_sequence:
+                raise IntegrityError(
+                    f"Ledger sequence mismatch at event {expected_sequence}"
+                )
+            if event.get("previous_hash") != previous_hash:
+                raise IntegrityError(
+                    f"Ledger chain mismatch at event {expected_sequence}"
+                )
+            core = {
+                key_name: event.get(key_name)
+                for key_name in (
+                    "sequence",
+                    "timestamp",
+                    "actor",
+                    "action",
+                    "task_id",
+                    "payload",
+                    "previous_hash",
+                )
+            }
+            calculated_hash = hashlib.sha256(canonical_json(core)).hexdigest()
+            if not hmac.compare_digest(calculated_hash, str(event.get("event_hash", ""))):
+                raise IntegrityError(
+                    f"Ledger event hash mismatch at event {expected_sequence}"
+                )
+            calculated_signature = hmac.new(
+                key, calculated_hash.encode("ascii"), hashlib.sha256
+            ).hexdigest()
+            if not hmac.compare_digest(
+                calculated_signature, str(event.get("signature", ""))
+            ):
+                raise IntegrityError(
+                    f"Ledger signature mismatch at event {expected_sequence}"
+                )
+            previous_hash = calculated_hash
+        return {
+            "valid": True,
+            "events": len(events),
+            "head": previous_hash,
+            "signed": True,
+        }
+
+    def verify(self) -> dict[str, Any]:
+        """Verify sequence, hash links, event hashes, and HMAC signatures."""
+
+        return self._verify_events(self.read())
+
+    def projected_tasks(self) -> dict[str, dict[str, Any]]:
+        """Reconstruct the latest task snapshots from the event stream."""
+
+        tasks: dict[str, dict[str, Any]] = {}
+        for event in self.read():
+            snapshot = event.get("payload", {}).get("task")
+            task_id = event.get("task_id")
+            if task_id and isinstance(snapshot, dict):
+                tasks[task_id] = snapshot
+        return tasks
+
+    key file           : .efo/ledger.key
+    mode               : 0o600
+  [ok]   the key lives INSIDE the workspace it protects
+        expected: inside: True
+        observed: inside: True
+  [ok]     readable by whoever owns the workspace
+        expected: mode: 0o600
+        observed: mode: 0o600
+  [ok]   and an untouched workspace audits healthy - CONTROL
+        expected: HEALTHY
+        observed: HEALTHY - unnoticed
+
+########## C. what is COMPARED against it, driven ##########
+    workspace.py  Agent {agent_id!r} registration differs from the signed ledger
+    workspace.py  Agent {agent_id} registration differs from the signed ledger
+    workspace.py  Task {task['id']} projection differs from the signed ledger
+    workspace.py  Task {task_id} projection differs from the signed ledger
+    workspace.py  Workspace configuration differs from the signed ledger
+    workspace.py  {task_id}: no ledger event
+  [ok] comparison messages the package declares
+        expected: messages: 6
+        observed: messages: 6
+    config: name                      caught: Workspace configuration differs from the signed ledg
+    config: orchestrator              caught: Workspace configuration differs from the signed ledg
+    config: defaults.lease_seconds    caught: Workspace configuration differs from the signed ledg
+    a stray file under tasks/         caught: ZZ: no ledger event
+    a stray file under runs/          HEALTHY - unnoticed
+  [ok] every config field edit is caught
+        expected: unnoticed: []
+        observed: unnoticed: []
+  [ok]   a task file with no ledger event is caught
+        expected: ZZ: no ledger event
+        observed: caught: ZZ: no ledger event
+  [ok]     but runs/ is NOT covered - and is scratch space by design
+        expected: HEALTHY - unnoticed
+        observed: HEALTHY - unnoticed
+
+########## D. THE ANSWER: a tamper that RE-SIGNS ##########
+    naive projection edit             caught: C1: projection differs from ledger
+    same edit + ledger + RE-SIGNED    HEALTHY - unnoticed
+      ledger verify                   valid=True signed=True events=5
+      the task title now reads        'tampered'
+  [ok] the naive edit is caught - CONTROL
+        expected: projection differs from ledger
+        observed: caught: C1: projection differs from ledger
+  [ok]   but the re-signed one is HEALTHY
+        expected: HEALTHY - unnoticed
+        observed: HEALTHY - unnoticed
+  [ok]     and the ledger reports itself valid and signed
+        expected: valid True signed True
+        observed: valid True signed True
+  [ok]       with the tampered value live
+        expected: tampered
+        observed: tampered
+  So "the ledger guard blocks the path" is an ARTIFACT of the tampers
+  chosen, not a property. Every tamper items 45, 53 and 54 drove left
+  the signature stale; re-signing is a dozen lines and the key is in
+  the workspace.
+
+########## E. and SECURITY.md says exactly this ##########
+  [ok] the document states the limit in as many words
+        expected: The local ledger signing key protects against edits by parties that cannot read the key.
+        observed: # Security Policy  ## Reporting  Please report a suspected vulnerability through a private GitHub security advisory when the repository supports it. Do not include live credentials, private research data, or unpublished model artifacts in an issue.  ## Security properties  - External commands are launched with an argument list and `shell=False`. - Task lease tokens are stored only as SHA-256 digests. - Proxy grant tokens are one-time, task-bound, and stored only as SHA-256   digests. - Offline Git evidence is compared against raw blob bytes without checkout   conversion or network fetches. - The event ledger is hash-chained and HMAC-signed with a local key. - The dashboard is read-only and binds to loopback by default. - Cloudflare snapshot and local-health ingestion use independent HMAC secrets;   replay windows, bounded payloads, strict schemas, and constant-time signature   checks are enforced before data is stored. - Local Windows telemetry is aggregate-only: no hostname, user name, process   name, command line, environment variable, or file path is accepted. - The operations assistant receives a bounded, sanitized snapshot and exposes   no mutation tools. Infrastructure-control requests are refused. - Optional model-backed chat is disabled unless both the explicit enable flag   and viewer authentication are configured; deterministic snapshot answers   remain available without an API key. - Worker reports and manifests must remain inside their owned report directory. - Task permissions default to no GPU, no network, and no performance metrics.  ## Limitations  Application-level ownership does not stop a process that directly edits files outside EFO. Use containers, OS accounts, ACLs, and read-only mounts when workers are not equally trusted.  The local ledger signing key protects against edits by parties that cannot read the key. If every worker uses the same OS account, use an external append-only store or a key held only by the orchestrator for stronger guarantees.  The orchestrator is the proxy-submission policy root. A signed proxy event proves what that orchestrator declared and transported; it does not cryptographically prove that a remote model authored the commit. Stronger deployments should require provider attestations or per-agent public-key signatures in addition to EFO's Git provenance checks.  ## Credential handling  Never commit:  - `.efo/ledger.key`; - SSH passwords or private keys; - API tokens; - cloud credentials; - dashboard ingestion or viewer secrets; - model API keys; - private benchmark data; - raw model checkpoints.  New workspaces create nested ignore rules for `.efo/ledger.key`, lock files, and `runs/`. Keep those rules in place when embedding a workspace in another Git repository.  Use environment variables, an SSH agent, or an OS credential store. Rotate a credential immediately if it has appeared in a shared prompt, report, log, or repository. 
+  [ok]   and names the stronger deployment
+        expected: use an external append-only store or a key held only by the orchestrator
+        observed: # Security Policy  ## Reporting  Please report a suspected vulnerability through a private GitHub security advisory when the repository supports it. Do not include live credentials, private research data, or unpublished model artifacts in an issue.  ## Security properties  - External commands are launched with an argument list and `shell=False`. - Task lease tokens are stored only as SHA-256 digests. - Proxy grant tokens are one-time, task-bound, and stored only as SHA-256   digests. - Offline Git evidence is compared against raw blob bytes without checkout   conversion or network fetches. - The event ledger is hash-chained and HMAC-signed with a local key. - The dashboard is read-only and binds to loopback by default. - Cloudflare snapshot and local-health ingestion use independent HMAC secrets;   replay windows, bounded payloads, strict schemas, and constant-time signature   checks are enforced before data is stored. - Local Windows telemetry is aggregate-only: no hostname, user name, process   name, command line, environment variable, or file path is accepted. - The operations assistant receives a bounded, sanitized snapshot and exposes   no mutation tools. Infrastructure-control requests are refused. - Optional model-backed chat is disabled unless both the explicit enable flag   and viewer authentication are configured; deterministic snapshot answers   remain available without an API key. - Worker reports and manifests must remain inside their owned report directory. - Task permissions default to no GPU, no network, and no performance metrics.  ## Limitations  Application-level ownership does not stop a process that directly edits files outside EFO. Use containers, OS accounts, ACLs, and read-only mounts when workers are not equally trusted.  The local ledger signing key protects against edits by parties that cannot read the key. If every worker uses the same OS account, use an external append-only store or a key held only by the orchestrator for stronger guarantees.  The orchestrator is the proxy-submission policy root. A signed proxy event proves what that orchestrator declared and transported; it does not cryptographically prove that a remote model authored the commit. Stronger deployments should require provider attestations or per-agent public-key signatures in addition to EFO's Git provenance checks.  ## Credential handling  Never commit:  - `.efo/ledger.key`; - SSH passwords or private keys; - API tokens; - cloud credentials; - dashboard ingestion or viewer secrets; - model API keys; - private benchmark data; - raw model checkpoints.  New workspaces create nested ignore rules for `.efo/ledger.key`, lock files, and `runs/`. Keep those rules in place when embedding a workspace in another Git repository.  Use environment variables, an SSH agent, or an OS credential store. Rotate a credential immediately if it has appeared in a shared prompt, report, log, or repository. 
+  [ok]     and says application ownership does not stop direct file edits
+        expected: does not stop a process that directly edits files outside EFO
+        observed: # Security Policy  ## Reporting  Please report a suspected vulnerability through a private GitHub security advisory when the repository supports it. Do not include live credentials, private research data, or unpublished model artifacts in an issue.  ## Security properties  - External commands are launched with an argument list and `shell=False`. - Task lease tokens are stored only as SHA-256 digests. - Proxy grant tokens are one-time, task-bound, and stored only as SHA-256   digests. - Offline Git evidence is compared against raw blob bytes without checkout   conversion or network fetches. - The event ledger is hash-chained and HMAC-signed with a local key. - The dashboard is read-only and binds to loopback by default. - Cloudflare snapshot and local-health ingestion use independent HMAC secrets;   replay windows, bounded payloads, strict schemas, and constant-time signature   checks are enforced before data is stored. - Local Windows telemetry is aggregate-only: no hostname, user name, process   name, command line, environment variable, or file path is accepted. - The operations assistant receives a bounded, sanitized snapshot and exposes   no mutation tools. Infrastructure-control requests are refused. - Optional model-backed chat is disabled unless both the explicit enable flag   and viewer authentication are configured; deterministic snapshot answers   remain available without an API key. - Worker reports and manifests must remain inside their owned report directory. - Task permissions default to no GPU, no network, and no performance metrics.  ## Limitations  Application-level ownership does not stop a process that directly edits files outside EFO. Use containers, OS accounts, ACLs, and read-only mounts when workers are not equally trusted.  The local ledger signing key protects against edits by parties that cannot read the key. If every worker uses the same OS account, use an external append-only store or a key held only by the orchestrator for stronger guarantees.  The orchestrator is the proxy-submission policy root. A signed proxy event proves what that orchestrator declared and transported; it does not cryptographically prove that a remote model authored the commit. Stronger deployments should require provider attestations or per-agent public-key signatures in addition to EFO's Git provenance checks.  ## Credential handling  Never commit:  - `.efo/ledger.key`; - SSH passwords or private keys; - API tokens; - cloud credentials; - dashboard ingestion or viewer secrets; - model API keys; - private benchmark data; - raw model checkpoints.  New workspaces create nested ignore rules for `.efo/ledger.key`, lock files, and `runs/`. Keep those rules in place when embedding a workspace in another Git repository.  Use environment variables, an SSH agent, or an OS credential store. Rotate a credential immediately if it has appeared in a shared prompt, report, log, or repository. 
+  DOCUMENTED, DRIVEN IN BOTH DIRECTIONS, and holding: cannot read the
+  key -> caught; can read the key -> passes. Not a defect. The same
+  shape as `functions/api/local-health.js`, which is the strongest
+  this review has measured.
+
+########## F. what it means for THREE of my own notes ##########
+  Items 45, 53 and 54 each concluded a gap was UNREACHABLE because the
+  ledger or projection guard fires first:
+    45  model.lease_expired's raise, blocked by the projection guard
+    53  provenance.py's files-list guards, never fed a malformed record
+    54  doctor.py's 23 unguarded subscripts, all behind the guard
+  Each is correct AS MEASURED, and each holds ONLY against an adversary
+  who cannot read `.efo/ledger.key`. None of the three said so. That
+  precondition is stated here and added to SYNTHESIS rather than left
+  implicit - it is the difference between `unreachable` and
+  `unreachable under the threat model the document declares`.
+
+########## G. what this does NOT do ##########
+  * It does not file an issue. SECURITY.md:38 states the limit, and
+    the drive confirms the document rather than contradicting it.
+  * It does not retract items 45, 53 or 54. It names the precondition
+    each of them relied on without stating.
+  * It does not claim the covered set is complete beyond what was
+    driven: config, agents and tasks are compared, runs/ is not. It
+    did NOT enumerate reports/, submissions/ or archive/, which a
+    fresh workspace does not create - stated, not implied.
+  * It does not attempt a tamper WITHOUT the key. That is the case
+    already covered by items 45 and 54 and by the naive control here.
+  * No network. Every workspace is a tempfile directory, removed above.
+  * MEASURED: the seven covered fields derived from ledger.py, the key
+    location and mode, both comparison messages, all five simple
+    tampers, both controls, the re-signed tamper and its verify, three
+    SECURITY.md sentences. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Seven tampers driven against temporary workspaces. Anchor untouched,
+no `main` write, no issue filed. Pre-registered permissions unchanged -
+gpu/network/performance_metrics all false. SUBMITTED, not VERIFIED.

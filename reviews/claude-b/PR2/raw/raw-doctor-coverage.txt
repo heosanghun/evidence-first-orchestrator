@@ -1,0 +1,105 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] a clean workspace is healthy
+        expected: healthy=True
+        observed: healthy=True
+  [ok] a credential planted in a task description is found
+        expected: healthy=False
+        observed: healthy=False  secrets=['api_key']
+
+########## B. doctor's own checks all fire ##########
+  [ok] a projection edited on disk
+        expected: projection differs from ledger
+        observed: healthy=False  error=T1: projection differs from ledger
+  [ok] a projection deleted
+        expected: projection missing
+        observed: healthy=False  error=T1: projection missing
+  [ok] an expired lease
+        expected: expired=['T1']
+        observed: healthy=False  expired=['T1']
+  [ok] a missing agent report directory
+        expected: healthy=False
+        observed: healthy=False
+
+########## C. the secret scanner: which files, which shapes ##########
+  doctor.py:196-201 points the scanner at the config, agents/*.json and
+  tasks/*.json. Those three are ledger-bound, so the credential has to
+  be planted through the API, not by editing the file.
+        tasks/T1.json    via create_task(description=...)  -> SCANNED
+        .efo/workspace.json  via initialize(name=...)      -> SCANNED
+        agents/claude.json   no free-text field is reachable through
+                             the API; the scanner itself would find it:
+                             _scan_secrets -> ['api_key']
+  the paths the scanner is NOT pointed at, planted directly:
+        shared/FACTS.md            doctor: not scanned scanner alone would match: True
+        reports/claude/notes.md    doctor: not scanned scanner alone would match: True
+        runs/claude/stdout.txt     doctor: not scanned scanner alone would match: True
+        submissions/T1/bundle.json doctor: not scanned scanner alone would match: True
+        archive/T1.json            doctor: not scanned scanner alone would match: True
+  and the shapes it matches, checked against SECRET_RE directly:
+        MATCHED  api_key=AKIA1234567890EXAMPLE
+        MATCHED  password: hunter2
+        MATCHED  token = ghp_0123456789abcdefghij
+        missed   AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMIK7MDENGbPxRfiC...
+        missed   Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdW...
+        missed   ghp_0123456789abcdefghijklmnopqrstuvwxyzAB
+        missed   sk-ant-api03-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA...
+        missed   -----BEGIN OPENSSH PRIVATE KEY-----
+  the underscore cases are the common ones. End to end, through the
+  API, in the one place doctor does scan:
+  [ok]   AWS_SECRET_ACCESS_KEY in a task description is NOT reported
+        expected: healthy=True  secrets=[]
+        observed: healthy=True  secrets=[]
+  [ok]   GITHUB_TOKEN in a task description is NOT reported
+        expected: healthy=True  secrets=[]
+        observed: healthy=True  secrets=[]
+  [ok]   OPENAI_API_KEY in a task description is NOT reported
+        expected: healthy=True  secrets=[]
+        observed: healthy=True  secrets=[]
+  [ok]   DB_PASSWORD in a task description is NOT reported
+        expected: healthy=True  secrets=[]
+        observed: healthy=True  secrets=[]
+
+########## D. the repair path doctor points at ##########
+  A truncated ledger with the projection left alone IS caught (issue #9).
+  dropped event 8 (task.claimed), projection untouched
+  [ok] doctor reports it
+        expected: projection differs from ledger
+        observed: healthy=False  error=T1: projection differs from ledger
+  [ok]   audit-projections raises
+        expected: projection differs from ledger
+        observed: rejected (IntegrityError: T1: projection differs from ledger)
+  the orchestrator now runs the documented remedy:
+  [ok]   repair_projections reports success
+        expected: repaired: ['T1']
+        observed: repaired: ['T1']  mismatches: ['T1: projection differs from ledger']
+  [ok]   doctor afterwards
+        expected: healthy=True
+        observed: healthy=True
+  [ok]   the task now reads back as the pre-claim state
+        expected: state=pending
+        observed: state=pending
+  [ok]   and the dropped event is still gone
+        expected: task.claimed present: False
+        observed: task.claimed present: False -> ['task.created']
+  [ok]   does the repaired projection keep last_event_hash?
+        expected: last_event_hash present: False
+        observed: last_event_hash present: False
+  [ok]   can the task still be read?
+        expected: accepted
+        observed: accepted (pending)
+
+########## E. coverage map for the open findings ##########
+  Measured, not asserted as defects: README.md:381 lists `efo doctor`
+  under Recovery and audit without enumerating a scope.
+        #7  a ten-year lease                       healthy=True
+        #9  truncation + projection rolled back    healthy=True
+        #10 tampered submission bundle             healthy=True
+  the workspace ships an independence auditor; does doctor run it?
+        audit_workspace checks: ['agent_directories', 'expired_leases', 'integrity', 'secret_findings', 'status']
+  [ok]   audit_independence among them
+        expected: independence present: False
+        observed: independence present: False
+        it exists as a separate call: True
+
+########## 0 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.

@@ -1,0 +1,134 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok] clean rows in SYNTHESIS
+        expected: clean rows: 21
+        observed: clean rows: 21
+  [ok]   distinct notes they cite
+        expected: notes: 27
+        observed: notes: 27
+  [ok]     whose probe can be located
+        expected: probes: 25
+        observed: probes: 25
+  Twenty-two is more than one round of hand adjudication, which is what
+  the item anticipated. Section B tries the cheap way; section C shows
+  the cheap way does not work.
+  [ok]   this note has exactly one row in SYNTHESIS
+        expected: own rows: 1
+        observed: own rows: 1
+  [ok]     and it is NOT counted as clean - its verdict is a lead
+        expected: self counted as clean: False
+        observed: self counted as clean: False
+
+########## B. the cheap proxy, built and measured ##########
+    STATIC   probe_dynamic_stores.py                   dynamic-key **stores**, whole 
+    STATIC   probe_dynamic_subscripts.py               dynamic-key subscripts, whole 
+    STATIC   probe_implicit_exceptions_all_modules.py  the rest of the package, impli
+    STATIC   probe_parameter_subset.py                 attribute bases arriving via a
+    drives   probe_alias_lineage.py                    alias / `alias_chain`   3 non-string args
+    drives   probe_attribute_subset.py                 attribute accesses rea  1 non-string args
+    drives   probe_byte_exactness.py                   `provenance.py` byte-e  6 non-string args
+    drives   probe_byte_exactness_input_class.py       `provenance.py` byte-e  13 non-string args
+    drives   probe_cli_surface.py                      `cli.py`                2 non-string args
+    drives   probe_cli_typed_options.py                `cli.py`                5 non-string args
+    drives   probe_collector_malformed_output.py       `monitor/collector.py`  17 non-string args
+    drives   probe_collector_redaction.py              `monitor/collector.py`  9 non-string args
+    drives   probe_cross_module_hop.py                 cross-module dict-fiel  4 non-string args
+    drives   probe_dashboard_allow_remote_class.py     `dashboard.py`, `error  7 non-string args
+    drives   probe_dashboard_and_errors.py             `dashboard.py`, `error  6 non-string args
+    drives   probe_hop_three_closure.py                hop-three closure       7 non-string args
+    drives   probe_identity_two_impls.py               collector identity reg  3 non-string args
+    drives   probe_implicit_exceptions.py              `workspace.py` implici  1 non-string args
+    drives   probe_projected_tasks.py                  `ledger.projected_task  7 non-string args
+    drives   probe_projected_tasks_input_class.py      `ledger.projected_task  5 non-string args
+    drives   probe_proxy_grant.py                      `proxy_submit` + grant  4 non-string args
+    drives   probe_proxy_grant_duration_class.py       `proxy_submit` + grant  4 non-string args
+    drives   probe_remaining_docs.py                   `SECURITY.md` / `CONTR  4 non-string args
+    drives   probe_util_and_lock.py                    `util.py`, `lock.py`    5 non-string args
+    drives   probe_util_uncovered_input.py             `util.py`, `lock.py`    2 non-string args
+  [ok] probes that never execute the component - a static census
+        expected: static: 4
+        observed: static: 4
+  [ok]   probes that drive it
+        expected: driving: 21
+        observed: driving: 21
+  [ok]     of which the proxy says feed a non-string
+        expected: flagged: 21
+        observed: flagged: 21
+  For a static census the question does not arise: it reads the AST and
+  never calls anything, so it has no input class to feed.
+
+########## C. the KNOWN ANSWER that refutes the proxy ##########
+  [ok] the proxy's score for probe_util_and_lock.py
+        expected: proxy: 5
+        observed: proxy: 5
+  [ok]   but item 47 MEASURED, check by check, that it feeds none
+        expected: Not one of the 46 checks fed a non-string
+        observed:  What "`util.py` is clean" rested on — and the input class it never fed Reproduce with `raw/probe_util_uncovered_input.py`; raw output in `raw/raw-util-uncovered-input.txt`. **17 checks, 0 unexpected.** A **map**, not a finding — no issue filed, and `NOTE-util-and-lock-hold.md`'s verdict is **not retracted**, only narrowed. **Scope, stated first:** 9 functions, 1 probe, 1 note, 23 in-package call sites.  The question `util.py` has **nine** top-level functions, the EFO suite names **none** of them (item 44), and it is imported by nine of fifteen modules — the widest fan-in in the package. `NOTE-util-and-lock-hold.md` calls it clean over 46 checks. Item 47 asked what that note actually measured.  1. It rested on *my* probe, not on EFO's tests `probe_util_and_lock.py` names **all nine**. So `util.py is clean` is a claim about **my** evidence — which is what the note is for, but had never been said in as many words.  2. The coverage is uneven, and its own raw output shows it | function | mentions in my probe | in its raw output | |---|---|---| | `is_relative_to` | 9 | **17** | | `canonical_json` | 17 | 3 | | `utc_now` | 5 | 2 | | `parse_utc` | 6 | 1 | | `atomic_write_json`, `sha256_file` | 3 | 1 | | `read_json`, `validate_task_id`, `validate_agent_id` | 2 | **0** | Two of the three silent ones are a **naming artifact, not a gap**: the validators are driven through a `lambda v=value:` inside loops whose check names read *"task id …"* rather than the function name — **14 driven values** between them. > A first version counted **24** by matching every `("label", value, ok)` row > anywhere in the probe. The count now comes only from the two loops that feed > the validators — the substring trap, one level up. **`read_json` is the real one.** It appears inside exactly **one** check, as a *helper* in `atomic_write_json round-trips`, and is the subject of **zero**.  3. Not one of the 46 checks fed a non-string Driven here — the package imports and runs under plain `python3`: | Call | Outcome | |---|---| | `parse_utc(None / 123 / [] / {})` | **`AttributeError`** ×4 | | `validate_task_id(None / 123 / [])` | **`TypeError`** ×3 | | `validate_agent_id(None / 123 / [])` | **`TypeError`** ×3 | | `sha256_file(None / 123)` | **`AttributeError`** ×2 | | `read_json(None / 123)` | **`AttributeError`** ×2 | | `is_relative_to(None / 123, "/tmp")` | **`AttributeError`** ×2 | | `canonical_json(object())` | **`TypeError`** | **17 driven, 17 raw Python exceptions, 0 `EFOError`.** Not one of the nine converts a non-string into the package's own error type. `parse_utc`'s three checks all pass a well-formed string; the validators' 14 values are all strings. The class was simply absent — the same shape as 8, 13 and 14 (*"the guard has a test, fed only the input it already handles"*), found this time in **my own** clean note.  Reachability — why this is a map and not a finding Of **23** in-package validator call sites, **3** read a dict field, and **every one of those coerces**: ```   str() independence.py:122  validate_agent_id(str(agent_id))   str() independence.py:159  target_id = validate_agent_id(str(alias_of))   str() model.py:93      validate_task_id(str(task.get("id", "")))   str() model.py:94      validate_agent_id(str(task.get("owner", "")))   str() provenance.py:156   author = validate_agent_id(str(payload.get("author", ""))) ``` So a **tampered file cannot deliver a non-string**. The **18** bare call sites take an *API argument* — programmatic misuse rather than the threat model this review is about. Not filed, on the standard items 38 and 45 both applied.  What this does not do - It does **not** retract *"`util.py` is clean"*. All 46 checks still pass; what  changes is that the note now states which input class it never fed. - It does **not** cover `lock.py`, the same note's other subject. - It did **not** write to any workspace — the drives pass literal values, and  `read_json` / `sha256_file` raise before touching a filesystem. - **MEASURED:** every count, every coverage number, all 17 driven outcomes, the  caller census. **REASONED:** nothing. Pre-registered permissions unchanged: `gpu: false`, `network: false`, `performance_metrics: false`; gates `allow_skips: false`, `require_validation: true`, `require_known_answer_check: true`, `require_independent_verification: true`. **SUBMITTED, not VERIFIED.** | Artifact | SHA-256 | |---|---| | `raw/probe_util_uncovered_input.py` | `8f878cdc16b1c08f8b1880d20b54e3d81bbeb04cb6c274f90c7b4f4bbda636df` | | `raw/raw-util-uncovered-input.txt` | `33273818813ceae3657b0d196eec128c39d8c6a43b9c9f9e58d4c3f36605711f` | 
+  The None values the proxy counts are `re.search(..., None)` and
+  default arguments - the probe's OWN plumbing, not input handed to a
+  util function. One hand-checked case is enough to refute a filter,
+  and this is the case I had already hand-checked.
+  [ok]   so the proxy is wrong on at least one of the 15
+        expected: refuted: True
+        observed: refuted: True
+  CHECKING A FILTER AGAINST GROUND TRUTH IN BOTH DIRECTIONS is the
+  rule; here ground truth existed because item 47 did the work by hand.
+  Shipping 15 verdicts from a filter refuted on its one checkable case
+  would be exactly the failure this review exists to prevent.
+
+########## D. so: the subset with an open issue, named not measured ##########
+    `provenance.py` byte-exactness      #4/#5/#18 (done - item 53)probe_byte_exactness.py
+    `provenance.py` byte-exactness      #4/#5/#18 (done - item 53)probe_byte_exactness_input_class.py
+    `cli.py`                            #19 (done - item 56)probe_cli_surface.py
+    `cli.py`                            #19 (done - item 56)probe_cli_typed_options.py
+    `monitor/collector.py` (redaction)  #6 (done - item 59)probe_collector_malformed_output.py
+    `monitor/collector.py` (redaction)  #6 (done - item 59)probe_collector_redaction.py
+    `dashboard.py`, `errors.py`         #19 (done - item 68)probe_dashboard_allow_remote_class.py
+    `dashboard.py`, `errors.py`         #19 (done - item 68)probe_dashboard_and_errors.py
+    `workspace.py` implicit exceptions  #19               probe_implicit_exceptions.py
+    `ledger.projected_tasks`            #9 (done - item 62)probe_projected_tasks.py
+    `ledger.projected_tasks`            #9 (done - item 62)probe_projected_tasks_input_class.py
+    `proxy_submit` + grant              #7 (done - item 65)probe_proxy_grant.py
+    `proxy_submit` + grant              #7 (done - item 65)probe_proxy_grant_duration_class.py
+    `util.py`, `lock.py`                (done - item 47)  probe_util_and_lock.py
+    `util.py`, `lock.py`                (done - item 47)  probe_util_uncovered_input.py
+  [ok] driving probes whose component carries an open issue
+        expected: with an issue: 15
+        observed: with an issue: 15
+  [ok]   of which already adjudicated by hand - items 47, 53, 56, 59, 62
+        expected: already done: 14
+        observed: already done: 14
+  [ok]     leaving the population for the next round
+        expected: remaining: 1
+        observed: remaining: 1
+  ONE remains. That is the population the next round should take, one
+  at a time and BY HAND, which is the only method shown to work here.
+  Updated 2026-08-03: items 53, 56, 59 and 62 adjudicated `provenance.py`
+  byte-exactness, `cli.py`, the collector and `projected_tasks`, moving
+  7 -> 3, and the
+  clean-row set grew by the note that did it. Both are re-derived here
+  rather than left at the number this note first published.
+
+########## E. what this does NOT do ##########
+  * It does not retract ANY clean verdict. Nothing here measures a
+    component; it measures which of my probes could be censused
+    cheaply, and the answer is none of them.
+  * It does not claim the 15 fed only well-formed input, nor that they
+    did not. That is the question, and it is left open with the
+    population named.
+  * It does not file an issue.
+  * It did NOT execute any component - static reads of my own probe
+    sources and SYNTHESIS only.
+  * MEASURED: every count, the static/driving split, the proxy's score
+    for the known-answer case. REASONED: nothing - the refutation is
+    item 47's hand measurement, already published.
+
+########## 0 unexpected result(s) ##########
+Static AST reads of my own probes. No component executed, no workspace,
+no issue filed. Pre-registered permissions unchanged -
+gpu/network/performance_metrics all false. SUBMITTED, not VERIFIED.

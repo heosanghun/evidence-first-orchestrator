@@ -1,0 +1,133 @@
+########## A. POSITIVE CONTROL, and the scoping number FIRST ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok] item 45's population, said before any adjudication
+        expected: cross-module args: 91
+        observed: cross-module args: 91
+  [ok]   of which the callee resolves to a sibling module
+        expected: resolved: 22
+        observed: resolved: 22
+  [ok]     the rest do not - stdlib, a method, a builtin
+        expected: unresolved: 69
+        observed: unresolved: 69
+  [ok]       and 22 is bounded, so this does not stop
+        expected: bounded: True
+        observed: bounded: True
+  The 69 are NOT cleared. They are excluded because this analysis
+  cannot resolve their callee, which is a statement about the analysis.
+
+########## B. following the hop: 16 attribute accesses ##########
+    archive.py        :88    manifest.get             in archive_evidence_bundle()
+    archive.py        :97    manifest.get             in archive_evidence_bundle()
+    evidence.py       :124   gates.get                in validate_manifest()
+    evidence.py       :154   gates.get                in validate_manifest()
+    evidence.py       :190   gates.get                in validate_manifest()
+    evidence.py       :257   permissions.get          in validate_manifest()
+    independence.py   :67    identity.get             in identity_snapshot()
+    independence.py   :68    identity.get             in identity_snapshot()
+    independence.py   :69    identity.get             in identity_snapshot()
+    independence.py   :70    identity.get             in identity_snapshot()
+    independence.py   :92    verifier.get             in evaluate_independence()
+    independence.py   :95    verifier.get             in evaluate_independence()
+    independence.py   :97    verifier.get             in evaluate_independence()
+    independence.py   :100   verifier.get             in evaluate_independence()
+    independence.py   :103   verifier.get             in evaluate_independence()
+    util.py           :29    value.replace            in parse_utc()
+  [ok] tainted (module, function, parameter) triples
+        expected: triples: 12
+        observed: triples: 12
+  [ok]   attribute accesses on them
+        expected: accesses: 16
+        observed: accesses: 16
+  [ok]     every one listed, none summarised away
+        expected: listed: 16
+        observed: listed: 16
+  [ok]   of which already covered by an open issue (#15, gates/permissions)
+        expected: covered by #15: 4
+        observed: covered by #15: 4
+  evidence.py's gates.get / permissions.get ARE #15 - `permissions` and
+  `gates` are never type-checked - so they are not a new result, they
+  are #15 reached from a second direction.
+
+########## C. EXECUTED, not reasoned - the package runs here ##########
+  POSITIVE CONTROLS FIRST. The first version of this driver passed the
+  LEASE where a TASK belongs, so task.get('lease') was None and every
+  case returned False - including the control that should be True.
+  The control failing is what said the driver was wrong, not the code.
+  [ok] a lease in the past is expired
+        expected: returned True
+        observed: returned True
+  [ok]   a lease in the future is not
+        expected: returned False
+        observed: returned False
+  [ok]   and no lease at all is not
+        expected: returned False
+        observed: returned False
+  Now the malformed values:
+    expires_at = None               AttributeError: 'NoneType' object has no attribute 'replace'
+    expires_at = 123                AttributeError: 'int' object has no attribute 'replace'
+    expires_at = {'a': 1}           AttributeError: 'dict' object has no attribute 'replace'
+    expires_at = []                 AttributeError: 'list' object has no attribute 'replace'
+    expires_at = 'not-a-timestamp'  ValueError: Invalid isoformat string: 'not-a-timestamp'
+    expires_at = True               AttributeError: 'bool' object has no attribute 'replace'
+    lease without expires_at   KeyError: 'expires_at'
+  [ok] every malformed lease raises rather than returning a bool
+        expected: raised: 6
+        observed: raised: 6
+  [ok]   and a lease missing the key raises too
+        expected: KeyError
+        observed: KeyError: 'expires_at'
+  [ok]   the lease filter matches when a lease IS mentioned
+        expected: control hits: 2
+        observed: control hits: 2
+  [ok]   and validate_task never constrains the lease
+        expected: lease mentions: 0
+        observed: lease mentions: 0
+  [ok]     while lease_expired obviously does
+        expected: lease_expired hits: 5
+        observed: lease_expired hits: 5
+    it names only: ['gates', 'id', 'owner', 'permissions', 'prerequisites', 'revision', 'state', 'title']
+
+########## D. and the API path is GUARDED - a near miss, not a finding ##########
+    workspace.py  if lease_expired(task):
+    workspace.py  if task["state"] not in {"claimed", "running"} or not lease_expire
+  [ok] both readers compare the task against the signed ledger
+        expected: guard sites: 2
+        observed: guard sites: 2
+  [ok]   get_task validates and compares before returning
+        expected: validate_task(task)
+        observed: validate_task(task)
+  [ok]   list_tasks does the same
+        expected: validate_task(task)
+        observed: validate_task(task)
+  The comparison is over the WHOLE task minus last_event_hash, so a
+  tampered `lease` raises IntegrityError before lease_expired is ever
+  called. doctor.py:192 reaches it through list_tasks, so it is behind
+  the same gate.
+  I could not reach the raise through the API. It is therefore a NEAR
+  MISS, written up and NOT filed - the standard item 38 set for its
+  own .get chain. A finding asserted here would be a finding I could
+  not demonstrate.
+
+########## E. what this does NOT do ##########
+  * It does not clear the 69 unresolved arguments. Their callee is a
+    stdlib function, a method on an object, or a builtin, and this
+    analysis does not resolve those.
+  * It does not follow hop THREE. A parameter receiving a bare name
+    that is itself a tainted parameter is not traced.
+  * It does not file an issue, and does not re-confirm or retract #15.
+  * It did NOT write to any workspace. Section C calls two pure
+    functions with literal dicts; nothing touched a filesystem.
+  * MEASURED: every count, every listed access, every driven outcome,
+    the guard lines. REASONED: nothing - the guard was read and the
+    raise was executed.
+
+########## 0 unexpected result(s) ##########
+Static AST reads plus two pure-function drives of the package at main
+5694ab45. No workspace was created, no issue filed. Pre-registered
+permissions unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

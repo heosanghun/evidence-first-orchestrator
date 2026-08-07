@@ -1,0 +1,86 @@
+########## A. POSITIVE CONTROL, and the scoping number FIRST ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   every module in the list exists
+        expected: missing: []
+        observed: missing: []
+    1132 attribute accesses on a bare name inside a function
+    487 of them have a PARAMETER as the base
+    {'workspace.py': 198, 'cli.py': 144, 'ledger.py': 24, 'adapter.py': 21, 'lock.py': 20, 'independence.py': 19, 'dashboard.py': 17, 'evidence.py': 11, 'model.py': 11, 'util.py': 8, 'archive.py': 7, 'provenance.py': 6, 'doctor.py': 1}
+  [ok] item 41's population, said before any adjudication
+        expected: parameter-based: 487
+        observed: parameter-based: 487
+  [ok]   and it is too large to adjudicate by hand
+        expected: too large: True
+        observed: too large: True
+  So the item's literal question is answered NO, and the honest move is
+  to say the number and stop - which is what the method requires and
+  what would have happened here if the next section found nothing.
+
+########## B. one more hop: parameters that RECEIVE a dict field ##########
+    provenance.py:76  branch.strip  in validate_git_source_claim()
+    provenance.py:78  branch.strip  in validate_git_source_claim()
+  [ok] the one-hop subset
+        expected: hop sites: 2
+        observed: hop sites: 2
+  [ok]   and every one is enumerated above, none summarised away
+        expected: listed: 2
+        observed: listed: 2
+  [ok]   they share one base in one function
+        expected: distinct bases: 1
+        observed: distinct bases: 1   [('provenance.py', 'branch', 'validate_git_source_claim')]
+  487 -> 2 is the same shape as 963 -> 24: not type inference, just one
+  concrete propagation step that a syntactic census cannot take.
+
+########## C. adjudicated - both are GUARDED ##########
+    provenance.py:76  if not isinstance(branch, str) or not branch.strip():
+    provenance.py:78  normalized_branch = branch.strip()
+  [ok] the line before the first access is an isinstance guard
+        expected: if not isinstance(branch, str) or not branch.strip():
+        observed: if not isinstance(branch, str) or not branch.strip():
+  [ok]   which SHORT-CIRCUITS, so a non-str never reaches .strip()
+        expected: or: True
+        observed: or: True
+    the tainting call site is provenance.py:165 -
+      payload.get("remote_url"),  /  payload.get("branch"),
+  [ok]   it passes a dict field, which is why the hop caught it
+        expected: payload.get("branch")
+        observed: payload.get("branch"),
+  So `branch` really can be None or a non-string, and the code already
+  refuses it with ConfigurationError before any attribute access.
+  Zero findings. A negative result, published because it is one -
+  item 38's near miss has no sibling in this population.
+
+########## D. what this does NOT cover, with counts ##########
+  [ok] dict-field arguments to a callee defined in ANOTHER module
+        expected: cross-module: 91
+        observed: cross-module: 91
+  [ok]   attribute accesses whose base is `self`
+        expected: self-based: 244
+        observed: self-based: 244
+  * ONE hop only. A parameter receiving a bare NAME that is itself
+    dict-bound is hop two and is not followed. That is where
+    workspace.py:730's `validate_git_source_claim(remote_url, branch)`
+    lives - bare names at the call site, so this analysis does not
+    reach it even though the callee is the same function.
+  * IN-MODULE call sites only: 91 dict-field arguments go to a
+    callee defined elsewhere and are not propagated.
+  * `self` is not a parameter in the interesting sense: 244
+    accesses are attributes of the instance, whose values come from
+    __init__ rather than from a document.
+  * MEASURED: every count above, both sites, the guard line, the call
+    site. REASONED: nothing - the guard is read from the source, not
+    inferred.
+  * It does not clear the other 485. They are excluded because no
+    in-module call site passes them a dict field, which is a statement
+    about THIS analysis, not about their safety.
+
+########## 0 unexpected result(s) ##########
+Static AST reads of the package at main 5694ab45. Nothing executed
+against a workspace, no issue filed - zero findings to file.
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED.

@@ -1,0 +1,177 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] canonical_json is key-order independent
+        expected: {"a":1,"b":2}
+        observed: {"a":1,"b":2}
+  [ok]   and compact, with no whitespace
+        expected: no spaces: True
+        observed: no spaces: True
+  [ok]   and keeps non-ASCII as UTF-8, not escapes
+        expected: 검증
+        observed: {"k":"검증"}
+  [ok] atomic_write_json round-trips
+        expected: {'a': 1, 'b': 2}
+        observed: {'a': 1, 'b': 2}
+  [ok]   no temp file is left behind
+        expected: leftovers: []
+        observed: leftovers: []
+  [ok] sha256_file matches the known digest of 'test'
+        expected: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+        observed: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+
+########## B. canonical_json - what the event hash covers ##########
+  Determinism first: the same value must always give the same bytes.
+  [ok] repeated encodings are byte-identical
+        expected: stable: True
+        observed: stable: True
+  [ok]   nested dicts are sorted too
+        expected: {"a":"x","z":[1,{"a":null,"b":true}]}
+        observed: {"a":"x","z":[1,{"a":null,"b":true}]}
+  Distinctness: values that differ must not collide.
+  [ok]   1 vs 1.0
+        expected: collide: False
+        observed: collide: False
+  [ok]   true vs 1
+        expected: collide: False
+        observed: collide: False
+  [ok]   null vs missing
+        expected: collide: False
+        observed: collide: False
+  [ok]   "1" vs 1
+        expected: collide: False
+        observed: collide: False
+  One collision, and it is a JSON property rather than a bug:
+  [ok] an int key and its string form
+        expected: collide: True
+        observed: collide: True
+        -> JSON has no integer keys. Not reachable: every payload key
+           in this codebase is a literal string.
+  Non-standard tokens: json.dumps emits these by default.
+  [ok] NaN is emitted as a bare token
+        expected: {"v":NaN}
+        observed: {"v":NaN}
+  [ok] Infinity likewise
+        expected: {"v":Infinity}
+        observed: {"v":Infinity}
+        -> neither is valid JSON. A ledger line carrying one parses in
+           Python and fails in any strict reader (jq, JSON.parse).
+        -> allow_nan=False would make canonical_json refuse instead.
+  A hypothesis of mine that turned out WRONG, recorded because it
+  would otherwise have been filed as a finding:
+  [ok]   two separately parsed NaN dicts compare EQUAL
+        expected: equal: True
+        observed: equal: True
+        -> I expected NaN != NaN to make a task projection permanently
+           unequal to its ledger snapshot, i.e. unreadable. CPython's
+           dict comparison checks identity before equality, so it does
+           not. The hypothesis was wrong and nothing is filed.
+
+########## C. is_relative_to - the ownership gate ##########
+  [ok]   a file inside the owned root
+        expected: is_relative_to: True
+        observed: is_relative_to: True
+  [ok]   the owned root itself
+        expected: is_relative_to: True
+        observed: is_relative_to: True
+  [ok]   a sibling sharing a name prefix
+        expected: is_relative_to: False
+        observed: is_relative_to: False
+  [ok]   the parent directory
+        expected: is_relative_to: False
+        observed: is_relative_to: False
+  [ok]   a path that does not exist
+        expected: is_relative_to: True
+        observed: is_relative_to: True
+  [ok]   an unrelated tree
+        expected: is_relative_to: False
+        observed: is_relative_to: False
+  [ok]   a traversal spelled out
+        expected: is_relative_to: False
+        observed: is_relative_to: False
+  [ok]   a symlink inside the owned root pointing outside
+        expected: is_relative_to: False
+        observed: is_relative_to: False
+        -> resolve() follows the link, so the check fails closed. That
+           is the safe direction, and it is why the adapter's snapshot
+           blind spot (#11) does not extend to the ownership gate.
+
+########## D. the id validators ##########
+  [ok]   task id a normal task id
+        expected: accepted
+        observed: accepted ('T1')
+  [ok]   task id dots are allowed
+        expected: accepted
+        observed: accepted ('a.b.c')
+  [ok]   task id a leading dot is not
+        expected: Task id must start with an alphanumeric
+        observed: rejected (ConfigurationError: Task id must start with an alphanumeric character and contain only letters, numbers, dot, underscore, or hyphen (maximum 80 characters))
+  [ok]   task id a bare traversal
+        expected: Task id must start with an alphanumeric
+        observed: rejected (ConfigurationError: Task id must start with an alphanumeric character and contain only letters, numbers, dot, underscore, or hyphen (maximum 80 characters))
+  [ok]   task id a slash
+        expected: Task id must start with an alphanumeric
+        observed: rejected (ConfigurationError: Task id must start with an alphanumeric character and contain only letters, numbers, dot, underscore, or hyphen (maximum 80 characters))
+  [ok]   task id 80 characters
+        expected: accepted
+        observed: accepted ('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+  [ok]   task id 81 characters
+        expected: Task id must start with an alphanumeric
+        observed: rejected (ConfigurationError: Task id must start with an alphanumeric character and contain only letters, numbers, dot, underscore, or hyphen (maximum 80 characters))
+  [ok]   task id a null byte
+        expected: Task id must start with an alphanumeric
+        observed: rejected (ConfigurationError: Task id must start with an alphanumeric character and contain only letters, numbers, dot, underscore, or hyphen (maximum 80 characters))
+  [ok]   task id a newline
+        expected: Task id must start with an alphanumeric
+        observed: rejected (ConfigurationError: Task id must start with an alphanumeric character and contain only letters, numbers, dot, underscore, or hyphen (maximum 80 characters))
+  [ok]   agent id a normal agent id
+        expected: accepted
+        observed: accepted ('claude-b')
+  [ok]   agent id upper case
+        expected: Agent id must start with a lower-case letter
+        observed: rejected (ConfigurationError: Agent id must start with a lower-case letter and contain only lower-case letters, numbers, underscore, or hyphen)
+  [ok]   agent id a leading digit
+        expected: Agent id must start with a lower-case letter
+        observed: rejected (ConfigurationError: Agent id must start with a lower-case letter and contain only lower-case letters, numbers, underscore, or hyphen)
+  [ok]   agent id 40 characters
+        expected: accepted
+        observed: accepted ('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa')
+  [ok]   agent id 41 characters
+        expected: Agent id must start with a lower-case letter
+        observed: rejected (ConfigurationError: Agent id must start with a lower-case letter and contain only lower-case letters, numbers, underscore, or hyphen)
+
+########## E. parse_utc ##########
+  [ok] utc_now round-trips
+        expected: +00:00
+        observed: 2026-08-02 13:57:59+00:00
+  [ok] a timestamp with no zone parses NAIVE
+        expected: accepted
+        observed: accepted (datetime.datetime(2026, 8, 2, 0, 0))
+  [ok]   and comparing it with an aware one raises
+        expected: can't compare offset-naive and offset-aware
+        observed: rejected (TypeError: can't compare offset-naive and offset-aware datetimes)
+        -> not reachable: every timestamp in the workspace comes from
+           utc_now(), which always emits Z.
+
+########## F. FileLock ##########
+  [ok] the lock file exists while held
+        expected: exists: True
+        observed: exists: True
+  [ok]   a second acquirer times out
+        expected: Timed out waiting for lock
+        observed: rejected (LockTimeout: Timed out waiting for lock /tmp/efo-util-ukqjcbfh/lock/l)
+  [ok] and is removed on release
+        expected: exists: False
+        observed: exists: False
+  [ok] a lock older than stale_seconds is recovered
+        expected: acquired: True
+        observed: acquired: True
+  The recovery is stat-then-unlink with nothing in between, so it can
+  remove a lock other than the one it observed. Constructed, NOT raced:
+  [ok]   a freshly written lock survives the stale check
+        expected: still there: True
+        observed: still there: True (observer had seen age 3600s)
+        -> it re-stats before unlinking, so the fresh mtime saves it.
+           The window is between that stat and the unlink, which this
+           probe cannot make deterministic. NOT measured as a race.
+
+########## 0 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.

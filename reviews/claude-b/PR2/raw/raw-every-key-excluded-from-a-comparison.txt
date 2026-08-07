@@ -1,0 +1,133 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   package modules swept
+        expected: modules: 16
+        observed: modules: 16
+
+########## B. M1 - mapping comprehensions with an `if` filter ##########
+    independence.py:121  {validate_agent_id(str(agent_id)): deepcopy(identity) for agent_id, identity in agents.items() i
+    workspace.py:469  {key: value for key, value in task.items() if key != 'last_event_hash'}
+    workspace.py:494  {key: value for key, value in task.items() if key != 'last_event_hash'}
+    workspace.py:516  {key: value for key, value in task.items() if key != 'last_event_hash'}
+    workspace.py:1510  {key: value for key, value in disk_task.items() if key != 'last_event_hash'}
+  [ok] mapping comprehensions that filter
+        expected: sites: 5
+        observed: sites: 5
+  [ok]   of which exclude a key BY NAME
+        expected: by name: 4
+        observed: by name: 4
+  [ok]     and filter by TYPE in a parser instead
+        expected: by type: 1
+        observed: by type: 1
+  [ok]       the split is exhaustive in both directions
+        expected: total: 5
+        observed: total: 5
+  [ok]         and the type filter is independence.py's policy parser
+        expected: independence.py
+        observed: ['independence.py']
+  [ok]   and the set of key names they exclude
+        expected: ['last_event_hash']
+        observed: ['last_event_hash']
+  [ok]     at these lines - item 71's four, re-derived
+        expected: [469, 494, 516, 1510]
+        observed: [469, 494, 516, 1510]
+  [ok]       all in one module
+        expected: {'workspace.py'}
+        observed: {'workspace.py'}
+  So ONE key name is excluded by name anywhere in the package, and
+  every site of it is a task projection. That is the whole of M1.
+
+########## C. M2 and M3 - the other two ways to drop a key ##########
+    workspace.py:812  [key for key, value in expected.items() if grant.get(key) != value]
+    workspace.py:1415  pending.pop('external_status', None)
+  [ok] M2 - comparisons that iterate one side's keys
+        expected: sites: 1
+        observed: sites: 1
+  [ok] M3 - a pop or del of a named key
+        expected: sites: 1
+        observed: sites: 1
+  [ok]   and M3's single site is a WRITE, not a comparison
+        expected: pending.pop('external_status', None)
+        observed: pending.pop('external_status', None)
+  `requeue` clears a field before committing the new state - the value
+  it removes is then SIGNED as absent, so nothing is being hidden from
+  a comparison. Classified and dismissed with the reason.
+
+########## D. M2's one site, DRIVEN ##########
+  `_require_proxy_grant` validates the grant against FIVE named keys
+  and three more by hand. Any other key in the grant is never looked
+  at THERE - so the question is whether anything else looks at it.
+  [ok]   an EXTRA key added to the grant really changed the file
+        expected: changed
+        observed: changed
+  [ok]     and it is
+        expected: CAUGHT IntegrityError
+        observed: CAUGHT IntegrityError: Task T1 projection differs from the signed ledger
+  [ok]   the grant's branch altered really changed the file
+        expected: changed
+        observed: changed
+  [ok]     and it is
+        expected: CAUGHT IntegrityError
+        observed: CAUGHT IntegrityError: Task T1 projection differs from the signed ledger
+  [ok]   consumed_at set to a timestamp really changed the file
+        expected: changed
+        observed: changed
+  [ok]     and it is
+        expected: CAUGHT IntegrityError
+        observed: CAUGHT IntegrityError: Task T1 projection differs from the signed ledger
+  [ok] the grant's consumed_at is ALREADY None at grant time
+        expected: consumed_at: None
+        observed: consumed_at: None
+  [ok]   so writing None back is a NO-OP, not a tamper
+        expected: NO-OP
+        observed: NO-OP - the value did not move
+  That no-op is what made this section read UNCAUGHT on the first
+  run. A driver that does not check the bytes moved will call a
+  guard absent when nothing was ever driven at it.
+
+########## E. and the agent records are compared in FULL ##########
+  [ok]   a non-id field forged really changed the file
+        expected: changed
+        observed: changed
+  [ok]     and it is
+        expected: registration differs from the signed ledger
+        observed: CAUGHT IntegrityError: Agent 'antigravity' registration differs from the signed ledger
+  [ok]   an EXTRA key added really changed the file
+        expected: changed
+        observed: changed
+  [ok]     and it is
+        expected: registration differs from the signed ledger
+        observed: CAUGHT IntegrityError: Agent 'antigravity' registration differs from the signed ledger
+  `list_agents` compares each record against the signed one WHOLE, and
+  then checks the id SET separately - which is why item 72 measured
+  both an edit and deleting all three as caught. Two guards, named.
+
+########## F. what this does NOT establish ##########
+  * The answer is NEGATIVE and that is the result: `last_event_hash`
+    is the ONLY key excluded by name, at four sites, all of them the
+    same task projection. Item 71's finding does not generalise.
+  * The three mechanisms are the ones I could enumerate from the AST.
+    A key dropped by a helper that RETURNS a filtered mapping would
+    not appear as a comprehension at a comparison site, and that is a
+    stated bound rather than a claim that none exists.
+  * It does NOT re-open #19. That issue is about the one key this
+    round confirms is alone.
+  * It does NOT file an issue. Nothing new about EFO's behaviour is
+    claimed - two candidate gaps were driven and both are covered.
+  * No network, no GPU. Tempfile workspaces, removed before the
+    results print. The anchor's working tree is untouched, and it does
+    not touch `main` or another agent's branch.
+  * MEASURED: all three mechanisms enumerated from the AST, every
+    site classified, the excluded-key set, five tamper drives with a
+    bytes-moved assertion on each, one no-op control. REASONED:
+    nothing.
+
+########## 0 unexpected result(s) ##########
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED: re-running my own evidence is a
+re-run, not independent confirmation.

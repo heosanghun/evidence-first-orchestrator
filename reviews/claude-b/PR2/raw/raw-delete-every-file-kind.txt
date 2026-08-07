@@ -1,0 +1,184 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok] the lifecycle reaches `archived` - the CONTROL
+        expected: state: archived
+        observed: state: archived
+  [ok]   and the untouched workspace audits healthy
+        expected: HEALTHY
+        observed: HEALTHY - unnoticed
+
+########## B. every FILE, and the KINDS they collapse to ##########
+  [ok] a full lifecycle ships this many files
+        expected: files: 27
+        observed: files: 27
+    1x  .efo/.gitignore
+    1x  .efo/ledger.key
+    1x  .efo/workspace.json
+    3x  agents/*.json
+    1x  archive/*.json
+    1x  ledger/events.jsonl
+    2x  reports/<agent>/*.artifact.txt
+    2x  reports/<agent>/*.evidence.json
+    2x  reports/<agent>/*.md
+    2x  reports/<agent>/*.raw.txt
+    1x  runs/.gitignore
+    2x  submissions/.../bundle.json
+    2x  submissions/.../files/*.artifact.txt
+    2x  submissions/.../files/*.evidence.json
+    1x  submissions/.../files/*.md
+    2x  submissions/.../files/*.raw.txt
+    1x  tasks/*.json
+  [ok]   which collapse to this many kinds
+        expected: kinds: 17
+        observed: kinds: 17
+  [ok]     and every file maps to one
+        expected: mapped: 27
+        observed: mapped: 27
+
+########## C. every kind, EDITED and DELETED ##########
+  Both operations in ONE run, a fresh workspace each - so the
+  comparison stands on this run, not on item 66's table plus this one.
+    .efo/.gitignore                             
+        edit  : HEALTHY - unnoticed
+        delete: HEALTHY - unnoticed
+    .efo/ledger.key                             
+        edit  : CAUGHT: Ledger signature mismatch at event 1
+        delete: CAUGHT: Ledger signing key is missing: /tmp/efo-
+    .efo/workspace.json                         
+        edit  : CAUGHT: Workspace configuration differs from the
+        delete: CAUGHT: Not an Evidence First Orchestrator works
+    agents/*.json                               
+        edit  : CAUGHT: Agent 'antigravity' registration differs
+        delete: CAUGHT: One or more signed agent projections are
+    archive/*.json                              
+        edit  : HEALTHY - unnoticed
+        delete: HEALTHY - unnoticed
+    ledger/events.jsonl                         
+        edit  : CAUGHT: Malformed ledger JSON at line 13: Expect
+        delete: CAUGHT: T1: no ledger event
+    reports/<agent>/*.artifact.txt              
+        edit  : HEALTHY - unnoticed
+        delete: HEALTHY - unnoticed
+    reports/<agent>/*.evidence.json             
+        edit  : HEALTHY - unnoticed
+        delete: HEALTHY - unnoticed
+    reports/<agent>/*.md                        
+        edit  : HEALTHY - unnoticed
+        delete: HEALTHY - unnoticed
+    reports/<agent>/*.raw.txt                   
+        edit  : HEALTHY - unnoticed
+        delete: HEALTHY - unnoticed
+    runs/.gitignore                             
+        edit  : HEALTHY - unnoticed
+        delete: HEALTHY - unnoticed
+    submissions/.../bundle.json                 
+        edit  : HEALTHY - unnoticed
+        delete: HEALTHY - unnoticed
+    submissions/.../files/*.artifact.txt        
+        edit  : HEALTHY - unnoticed
+        delete: HEALTHY - unnoticed
+    submissions/.../files/*.evidence.json       
+        edit  : HEALTHY - unnoticed
+        delete: HEALTHY - unnoticed
+    submissions/.../files/*.md                  
+        edit  : HEALTHY - unnoticed
+        delete: HEALTHY - unnoticed
+    submissions/.../files/*.raw.txt             
+        edit  : HEALTHY - unnoticed
+        delete: HEALTHY - unnoticed
+    tasks/*.json                                
+        edit  : CAUGHT: T1: projection differs from ledger
+        delete: CAUGHT: T1: projection missing
+  [ok] every kind was driven both ways
+        expected: driven: 17 x2
+        observed: driven: 17 x2
+  [ok]   EDIT reproduces item 66's count
+        expected: edit caught: 5
+        observed: edit caught: 5
+  [ok]     and its complement
+        expected: edit unnoticed: 12
+        observed: edit unnoticed: 12
+
+########## D. what DELETE catches, and where the two DIFFER ##########
+    delete caught   : ['.efo/ledger.key', '.efo/workspace.json', 'agents/*.json', 'ledger/events.jsonl', 'tasks/*.json']
+    edit caught     : ['.efo/ledger.key', '.efo/workspace.json', 'agents/*.json', 'ledger/events.jsonl', 'tasks/*.json']
+    caught ONLY when deleted : []
+    caught ONLY when edited  : []
+  [ok] kinds whose DELETE is caught
+        expected: delete caught: 5
+        observed: delete caught: 5
+  [ok]   the two caught sets are the SAME kinds
+        expected: differs: []
+        observed: differs: []
+  So the SET does not move - but the MESSAGE does, which is a
+  different question and the one section E asks.
+
+########## E. the same kind, a DIFFERENT message ##########
+    .efo/ledger.key              DIFFERENT
+    .efo/workspace.json          DIFFERENT
+    agents/*.json                DIFFERENT
+    ledger/events.jsonl          DIFFERENT
+    tasks/*.json                 DIFFERENT
+  [ok] caught kinds whose message CHANGES between edit and delete
+        expected: moved: 5
+        observed: moved: 5
+  [ok]     which is EVERY caught kind, not some of them
+        expected: all: 5
+        observed: all: 5
+  [ok]   including the signing key - item 63's control, re-derived
+        expected: .efo/ledger.key
+        observed: ['.efo/ledger.key', '.efo/workspace.json', 'agents/*.json', 'ledger/events.jsonl', 'tasks/*.json']
+    .efo/ledger.key
+        edited : CAUGHT: Ledger signature mismatch at event 1
+        deleted: CAUGHT: Ledger signing key is missing: /tmp/efo-
+    .efo/workspace.json
+        edited : CAUGHT: Workspace configuration differs from the
+        deleted: CAUGHT: Not an Evidence First Orchestrator works
+    agents/*.json
+        edited : CAUGHT: Agent 'antigravity' registration differs
+        deleted: CAUGHT: One or more signed agent projections are
+    ledger/events.jsonl
+        edited : CAUGHT: Malformed ledger JSON at line 13: Expect
+        deleted: CAUGHT: T1: no ledger event
+    tasks/*.json
+        edited : CAUGHT: T1: projection differs from ledger
+        deleted: CAUGHT: T1: projection missing
+    .efo/ledger.key edited : CAUGHT: Ledger signature mismatch at event 1
+    .efo/ledger.key deleted: CAUGHT: Ledger signing key is missing: /tmp/efo-
+  [ok]     edited gives a SIGNATURE mismatch
+        expected: signature mismatch
+        observed: caught: ledger signature mismatch at event 1
+  [ok]     deleted gives a MISSING KEY
+        expected: missing
+        observed: caught: ledger signing key is missing: /tmp/efo-
+  A count of `caught` alone would have reported these as identical.
+  The set is the same; what the operator is TOLD is not.
+
+########## F. what this does NOT establish ##########
+  * It does NOT file an issue. This widens the measured width of #10
+    from EDITS to DELETES; quantifying an open issue is not opening
+    another.
+  * It does NOT claim deletion is equivalent to editing. The caught
+    SET is identical and four MESSAGES differ - both measured.
+  * The 12 kinds unnoticed under edit are unnoticed under delete too,
+    which means a whole archived bundle, every report, and every
+    submission copy can be REMOVED with `doctor` still reporting
+    healthy - measured under the threat model SECURITY.md:38 declares.
+  * It deletes ONE instance of each kind, not every instance. Deleting
+    all three `agents/*.json` at once is UNCHECKED, not shown safe.
+  * No network, no GPU. Thirty-five tempfile workspaces, removed
+    before the results print. The anchor's working tree is untouched,
+    and it does not touch `main` or another agent's branch.
+  * MEASURED: the file enumeration, the kind collapse, all 17 edits,
+    all 17 deletes, both caught sets, every differing message, the
+    lifecycle control. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED: re-running my own evidence is a
+re-run, not independent confirmation.

@@ -1,0 +1,153 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   .py files under src/evidence_orchestrator
+        expected: files: 16
+        observed: files: 16
+  [ok]     and errors.py still declares exactly the set used below
+        expected: declared: ['AuthorizationError', 'ConfigurationError', 'EFOError', 'EvidenceError', 'IntegrityError', 'LeaseError', 'LockTimeout', 'TransitionError']
+        observed: declared: ['AuthorizationError', 'ConfigurationError', 'EFOError', 'EvidenceError', 'IntegrityError', 'LeaseError', 'LockTimeout', 'TransitionError']
+  [ok] functions in the package
+        expected: functions: 147
+        observed: functions: 147
+  [ok]   of which contain an isinstance
+        expected: guarding: 24
+        observed: guarding: 24
+  [ok]     isinstance call sites in them
+        expected: call sites: 66
+        observed: call sites: 66
+  [ok]       modules that hold functions but NO isinstance at all
+        expected: no guard: ['archive.py', 'dashboard.py', 'doctor.py', 'lock.py']
+        observed: no guard: ['archive.py', 'dashboard.py', 'doctor.py', 'lock.py']
+  Sixteen per cent of the package type-checks anything. That number on
+  its own says nothing - section B asks what the checks are ON.
+
+########## B. what is being type-checked: ARGUMENT or DATA ##########
+     43  LOCAL
+     11  PARAMETER
+      8  FIELD
+      4  OUTER-NAME
+  [ok]   every call site fell into a named class - the table is exhaustive
+        expected: classified: 66
+        observed: classified: 66
+  [ok]     guards on a LOCAL - data the function read or parsed itself
+        expected: LOCAL: 43
+        observed: LOCAL: 43
+  [ok]     guards on a PARAMETER - the caller's input
+        expected: PARAMETER: 11
+        observed: PARAMETER: 11
+  [ok]     guards on a dict FIELD
+        expected: FIELD: 8
+        observed: FIELD: 8
+  [ok]     names bound in an outer loop or comprehension
+        expected: OUTER-NAME: 4
+        observed: OUTER-NAME: 4
+
+  The ELEVEN that guard an argument, named in full:
+    evidence.py:64    _reject_non_finite(value)
+    evidence.py:66    _reject_non_finite(value)
+    evidence.py:69    _reject_non_finite(value)
+    independence.py:64    identity_snapshot(identity)
+    provenance.py:57    _validate_remote_url(value)
+    provenance.py:76    validate_git_source_claim(branch)
+    provenance.py:98    _validate_source_path(value)
+    provenance.py:170   validate_git_provenance(max_blob_bytes)
+    workspace.py:326   add_agent(command)
+    workspace.py:618   report_proxy_status(reference)
+    workspace.py:625   report_proxy_status(note)
+  [ok]   in how many distinct functions
+        expected: functions: 8
+        observed: functions: 8
+  [ok]     provenance.py holds the largest share
+        expected: provenance: 4
+        observed: provenance: 4
+
+########## C. what happens when the check fails ##########
+     35  rejects with an EFOError
+     12  branches (no rejection path)
+      6  ternary
+      5  comprehension filter
+      5  rejects by skipping or defaulting
+      2  rejects with a builtin exception
+      1  assert
+  [ok]   the outcome table is exhaustive too
+        expected: accounted: 66
+        observed: accounted: 66
+  [ok]     call sites that reject with the package's OWN error type
+        expected: EFOError: 35
+        observed: EFOError: 35
+  [ok]       broken down by which error
+        expected: by error: {'EvidenceError': 17, 'ConfigurationError': 16, 'IntegrityError': 1, 'AuthorizationError': 1}
+        observed: by error: {'EvidenceError': 17, 'ConfigurationError': 16, 'IntegrityError': 1, 'AuthorizationError': 1}
+  [ok]     call sites that reject with a builtin
+        expected: builtin: 2
+        observed: builtin: 2
+  [ok]     and the five that reject WITHOUT raising
+        expected: no-raise: 5
+        observed: no-raise: 5
+    (return None x1, continue x2, set to None x2 - a skipped record,
+     not an accepted one.)
+  So where EFO does guard, it converts almost every raising failure
+  into its own error type - 35 of the 37 that raise. The problem items
+  45, 47 and 48 kept hitting was never the CONVERSION of a bad value.
+  It was the POSITION of the check.
+
+########## D. DRIVEN - the LOCAL/PARAMETER split, not just parsed ##########
+    read_json(a JSON object)      CONTROL     returned {'a': 1}
+    read_json(a file holding [])  LOCAL guard ConfigurationError
+    read_json(None)               no PARAM guardAttributeError
+    _validate_source_path('x')    CONTROL     returned 'x'
+    _validate_source_path(123)    PARAM guard ConfigurationError
+  [ok] the control returns the parsed object
+        expected: returned {'a': 1}
+        observed: returned {'a': 1}
+  [ok]   a JSON ARRAY in the file trips the LOCAL guard
+        expected: ConfigurationError
+        observed: ConfigurationError
+  [ok]     but a non-path ARGUMENT raises a raw Python exception
+        expected: AttributeError
+        observed: AttributeError
+  [ok]   the parameter-guarding control accepts a str
+        expected: returned 'x'
+        observed: returned 'x'
+  [ok]     and converts a non-string ARGUMENT into an EFOError
+        expected: ConfigurationError
+        observed: ConfigurationError
+  Same module pair, same round: one function rejects bad DATA with the
+  package's own error and lets a bad ARGUMENT through to AttributeError;
+  the other rejects the ARGUMENT. That is the 43/11 split, driven.
+
+########## E. what this reframes, and what it does NOT retract ##########
+  [ok] item 48 scoped its `only` to three items, not to the package
+        expected: only** function found across items 45, 47 and 48
+        observed: # Hop three closes: 21 → +4 → 0, and the one unguarded validator is unreachable  Reproduce with `raw/probe_hop_three_closure.py`; raw output in `raw/raw-hop-three-closure.txt`. **18 checks, 0 unexpected.** A **map and a near miss** — no issue filed.  **Scope, stated first:** 15 modules, 25 closure triples, 3 attribute accesses, 10 call sites.  ## The closure terminates  `NOTE-91-to-22-to-one-raise-that-the-ledger-guard-blocks.md` named its own gap: hop **three** — a parameter receiving a bare *name* that is itself a tainted parameter — was unfollowed. Item 48 asked whether that closure is bounded.  ```     21  tainted (module, function, parameter) triples at hop 1+2     +4  added by hop three      0  added by hop four   ← the closure TERMINATES     25  total ```  Bounded, and small enough that all **3** attribute accesses on the four new parameters are adjudicated *and* driven.  | new parameter | tainted at | |---|---| | `independence.validate_identity_value(value)` | `independence.py:49` via `build_identity(model_family)` | | `provenance._validate_remote_url(value)` | `provenance.py:75` via `validate_git_source_claim(remote_url)` | | `util.validate_agent_id(value)` | `workspace.py:216` via `_agent_path(agent_id)` | | `util.validate_task_id(value)` | `workspace.py:219` via `_task_path(task_id)` |  The last two are the very functions item 47 drove — hop three reaches them by a different road.  ## One guarded, one not  Controls first, then the non-string class:  | Call | Outcome | |---|---| | `validate_identity_value("claude-b", field="x")` | `'claude-b'` — **control** | | `_validate_remote_url("https://example.com/r.git")` | accepted — **control** | | `validate_identity_value(None / 123 / [] / {})` | **`AttributeError`** ×4 | | `_validate_remote_url(None / 123 / [] / {})` | **`ConfigurationError`** ×4 |  ```python     if not isinstance(value, str) or not value.strip(): ```  `provenance._validate_remote_url` is the **only** function found across items 45, 47 and 48 that converts a non-string into the package's own `ConfigurationError`. `independence.validate_identity_value`, in another module, calls `value.strip()` with no `isinstance` check at all.  ## But it is unreachable — for a reason syntax cannot see  Of **10** `build_identity` call sites passing `control_principal`:  | category | count | |---|---| | `str()`-coerced dict read | 2 | | **dict subscript, no coercion** | **2** | | bare name or literal | 6 |  A syntactic census flags the two subscripts — `independence.py:165` and `workspace.py:382` — as uncoerced. **They are safe anyway**, and not because of the call site: `target` is the *return* of a prior `build_identity`, and `target_identity` the return of `identity_snapshot`, both of which run every field through `validate_identity_value`, which returns a `str`. The value is a string **by construction**.  That is the same lesson as `ledger.py`'s near miss, inverted: a census over syntax cannot see a *value*, and here the blindness runs in the safe direction.  Recorded, **not filed**, on the standard items 38, 45 and 47 all applied.  ## A harness bug of mine, caught by a positive control  The first driver called `validate_identity_value(bad)` and got a `TypeError` on **every** input — including the good one. The signature is `(value, *, field)`. The **control failing** is what said the driver was wrong rather than the code. Nothing was concluded until both controls passed.  A second slip in the same section: the call-site census first asked only *"does the line contain `str(`?"* and reported 10 sites / 8 bare, lumping literals and bare names in with the dict subscripts that are the actual question. It now **classifies** into three categories, and only the third is what the section is about.  ## What this does not do  - It does **not** file an issue. - It does **not** clear item 45's **69** unresolved cross-module arguments —   they have no resolvable callee, and no number of hops changes that. - It did **not** write to any workspace: four pure functions driven with literal   values. - **MEASURED:** the closure and its termination, all three accesses, all ten   driven outcomes, the guard line, the call-site census. **REASONED:** nothing —   the by-construction argument is read off `build_identity`'s return, which the   drives exercised.  Pre-registered permissions unchanged: `gpu: false`, `network: false`, `performance_metrics: false`; gates `allow_skips: false`, `require_validation: true`, `require_known_answer_check: true`, `require_independent_verification: true`.  **SUBMITTED, not VERIFIED.**  | Artifact | SHA-256 | |---|---| | `raw/probe_hop_three_closure.py` | `d75d3dabb5274d3001d5fcbcb4b1eb196d632cca16d5ec72579bc8bbd889bcf5` | | `raw/raw-hop-three-closure.txt` | `5574b5425593102bb82e57d0cb84b138fdd445477d8c4d592ee9cc75439f70e9` | 
+  That wording is correct as written and is NOT corrected here. But it
+  reads as a statement about EFO, and the package-wide number is 35
+  rejecting sites, 16 of them ConfigurationError. `_validate_remote_url`
+  is one of FOUR parameter guards in provenance.py alone. What made it
+  singular was the POPULATION those three items walked - values
+  reachable from a document - not any scarcity in the package.
+
+########## F. what this does NOT do ##########
+  * It does not file an issue. Nothing here is a defect; the guards
+    sit where this review's threat model needs them.
+  * It does not claim the 43 LOCAL guards are sufficient, nor that the
+    11 are too few. It says which is which.
+  * `isinstance` is not the only way to type-check. A `try/except
+    TypeError`, a `str()` coercion or an annotation check would not be
+    counted. This censuses ONE mechanism and says so.
+  * A census over SYNTAX cannot see a VALUE: a LOCAL assigned from a
+    validated return is already safe, and a PARAMETER may be private.
+    Section D drives the two ends rather than inferring them.
+  * MEASURED: every count, both exhaustiveness assertions, all five
+    driven calls, item 48's wording. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Static AST reads of the anchor plus five driven calls against a
+temporary directory. No workspace, no network, no issue filed.
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED.

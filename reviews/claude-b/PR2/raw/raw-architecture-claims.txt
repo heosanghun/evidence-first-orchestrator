@@ -1,0 +1,224 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] the workspace is live
+        expected: state: claimed
+        observed: state: claimed
+  [ok]   and the doc under test is the one in the tree
+        expected: lines: 169
+        observed: lines: 169
+
+########## B. :55-56 the ledger key must never be committed ##########
+  [ok] the key is where the document says
+        expected: .efo/ledger.key exists: True
+        observed: .efo/ledger.key exists: True
+  [ok]   `.efo/` is gitignored in the shipped repository
+        expected: '.efo/'
+        observed: ['.efo/']
+  [ok]   and no key or control file is tracked
+        expected: tracked: []
+        observed: tracked: []
+  The claim holds at both halves: the path is what the document says,
+  and the shipped .gitignore plus a real `git ls-files` census confirm
+  nothing under .efo/ is committed. Checked against the REPOSITORY, not
+  the fixture - a fixture in /tmp proves nothing about what is tracked.
+
+########## C. :79-80 the lease token is stored only as a digest ##########
+  [ok] the token was returned to the caller
+        expected: len: 32
+        observed: len: 32
+  [ok]   and the RAW token appears nowhere in the ledger
+        expected: raw token in ledger: False
+        observed: raw token in ledger: False
+  [ok]   nor in the projection
+        expected: raw token in projection: False
+        observed: raw token in projection: False
+  [ok]   the stored value is its SHA-256
+        expected: digest in projection: True
+        observed: digest in projection: True
+  Returned once and never persisted in the clear. The near miss that
+  matters: a digest that merely LOOKS stored would still let the token
+  leak through the ledger, so both files are searched, not just one.
+
+########## D. :70-72 event before projection, and :159 task JSON loss ##########
+  [ok] the projection is gone
+        expected: T1.json exists: False
+        observed: T1.json exists: False
+  [ok]   the ledger still carries the COMPLETE snapshot
+        expected: state: claimed, revision: 2
+        observed: state: claimed, revision: 2
+  [ok]   and the ledger snapshot omits exactly one field
+        expected: missing: ['last_event_hash']
+        observed: missing: ['last_event_hash']
+  That omission is deliberate - workspace.py:470/495/517 strip
+  `last_event_hash` before signing, because an event cannot contain its
+  own hash. :529 re-attaches it to the projection afterwards. Section G
+  is about what happens when the rebuild path forgets to.
+  [ok]   and repair rebuilds it from the ledger alone
+        expected: 'T1'
+        observed: ['T1']
+  [ok]   restoring the same state
+        expected: state: claimed
+        observed: state: claimed
+  [ok]   appending nothing
+        expected: events: 7
+        observed: events: 7
+  :70-72 and :159 both hold. Note the boundary: this measures that the
+  LEDGER retains enough to rebuild, which is what the sentence claims.
+  It does NOT measure the write ordering under an actual mid-write
+  crash - that needs a killed process, and no process was killed here.
+  Issue #12 remains the separate problem: the same repair path will
+  happily rebuild from a TRUNCATED ledger and report healthy.
+
+########## E. :143-144 a source hashed again after copying ##########
+  A real race cannot be won deterministically here, so the mutation is
+  presented the way the race would present it: archive is handed the
+  hash validation recorded, and the file on disk no longer matches.
+  [ok]   the honest case archives
+        expected: ACCEPTED
+        observed: ACCEPTED, retained: 3
+  [ok]   a source that changed after validation is REFUSED
+        expected: Evidence changed while being archived
+        observed: EvidenceError: Evidence changed while being archived: /tmp/efo-arch-qmgulqa5/staging/artifact.bin (expected 0056f455bd0f90047c551075fc50f6847d7917c4eb24107df290bc3f66d526c7, observed affa713cb9a7a113983848d43f582d6195dfeba640ce1b835a098ecceec27185)
+  `archive.py:_atomic_copy_verified` hashes the TEMP COPY it just
+  wrote, not a fresh read of the source. That is the stronger choice:
+  a file mutated mid-copy yields a torn copy whose hash cannot match,
+  so the window the sentence describes is closed by construction and
+  not by re-reading a file that could change again.
+  UNMEASURED, and stated as such: I did not win an actual race. What is
+  measured is that the guard exists, fires, and names the condition.
+
+########## G. what section D exposed: repair drops last_event_hash ##########
+  `repair_projections` rebuilds from the SIGNED SNAPSHOT, which by
+  design has no `last_event_hash` - and it never re-attaches it the way
+  workspace.py:529 does on the normal write path. `audit_projections`
+  cannot notice: :1511 explicitly EXCLUDES that key from comparison.
+  So the field is silently absent and every audit reports clean.
+  It is not inert. workspace.py:1182 reads it by direct index:
+      "grant_event_hash": task_for_validation["last_event_hash"]
+  [ok] a live proxy grant exists and the task carries the field
+        expected: last_event_hash present: True
+        observed: last_event_hash present: True
+  [ok]   the operator repairs the projection
+        expected: 'C1'
+        observed: ['C1']
+  [ok]   the audit reports NO mismatch
+        expected: mismatches: []
+        observed: mismatches: []
+  [ok]   but the field is gone
+        expected: last_event_hash present: False
+        observed: last_event_hash present: False
+  [ok]   and an OTHERWISE VALID proxy submission dies
+        expected: UNCAUGHT KeyError: 'last_event_hash'
+        observed: UNCAUGHT KeyError: 'last_event_hash'
+  Driven through the real CLI, the same sequence produces a TRACEBACK:
+  [ok]   cli.main does not catch it
+        expected: ESCAPED THE CLI: KeyError
+        observed: ESCAPED THE CLI: KeyError: 'last_event_hash'
+  THIS CORRECTS MY OWN EARLIER RESULT. NOTE-dashboard-and-errors-hold.md
+  reported `escapes: []` for cli.main's catch tuple
+  (EFOError, OSError, ValueError, json.JSONDecodeError). That census
+  enumerated `raise` STATEMENTS, so it could not see an exception that
+  arrives from a dict index. KeyError is a LookupError and is in none of
+  those four families. The earlier conclusion was too strong and is
+  corrected here rather than left standing.
+  Same command and same fix surface as issue #12, so it is filed with
+  the repair path it belongs to rather than as a fresh unrelated bug.
+
+########## F. every falsifiable claim in ARCHITECTURE.md ##########
+    :15 workers cannot mark their own work verified
+        covered - evidence gates / independence probes
+    :39-40 Workspace enforces roles, transitions, prerequisites, ownership, idempotency, leases
+        covered - raw-lifecycle-gates.txt, 13 gates
+    :44-53 each event carries seq, timestamp, actor, action, task id, snapshot, prev hash, own sha256, HMAC
+        covered - raw-ledger-chain.txt
+  >>:55-56 the ledger key lives at .efo/ledger.key and is never committed
+        PROBED HERE - section B
+    :56 before appending, the existing chain is verified
+        covered - ADDENDUM-ledger-truncation.md / issue #9
+    :58-62 config, agent registrations and attestations are signed events, compared before authorization
+        covered - probe_doctor_coverage.py measured the config binding
+    :66-68 ledger audit-projections detects missing or altered projections
+        covered - NOTE-cli-surface-holds.md and issue #12; section G adds that it is blind to a missing last_event_hash by construction
+  >>:70-72 event written before the projection; snapshot survives a crash
+        PROBED HERE - section D
+    :76-77 a task claim is serialized by its task lock
+        covered - NOTE-util-and-lock-hold.md
+  >>:79-80 the lease token is returned once and stored only as a SHA-256
+        PROBED HERE - section C
+    :80-81 heartbeats extend expiry; expired work becomes blocked
+        covered - raw-lifecycle-gates.txt; ceiling gap is issue #7
+    :85-87 six numbered sections; manifests bind sha256 and exact counts
+        covered - raw-evidence-gates.txt; [FILL] tautology is issue #8
+    :89-90 permissions captured at creation; a worker cannot relax them
+        covered - issue #15 (string 'false' opens them)
+    :94-96 a worker reaches only submitted; reusing the worker manifest is rejected
+        covered - raw-evidence-gates.txt
+    :98-104 identity, not actor name, is the independence boundary; alias lineages immutable
+        covered - NOTE-alias-lineage-holds.md, issue #3
+    :106-110 declarations are policy attestations, not provider-backed proof
+        not falsifiable - a stated limitation, and an honest one
+    :112-115 audit-independence appends no event; policy overrides are audit-only
+        covered - NOTE-cli-surface-holds.md census
+    :119-125 the proxy grant binds workspace, task, next attempt, owner, transport, expiry, remote, branch, commit
+        covered - NOTE-proxy-grant-holds.md
+    :127-130 every claim-supporting artifact matches a raw blob; no fetch occurs
+        covered - NOTE-byte-exactness-holds.md
+    :132-136 transport/verifier overlap allowed only as a signed field
+        covered - NOTE-proxy-grant-holds.md
+    :140-142 reports always copied; larger files remain external
+        covered - issue #18 (true on the direct path, false on proxy)
+  >>:143-144 a source file is hashed again after copying
+        PROBED HERE - section E
+    :150 two simultaneous claims -> one atomic claim succeeds
+        covered - NOTE-util-and-lock-hold.md
+    :151 worker crash -> lease expires to blocked
+        covered - raw-lifecycle-gates.txt
+    :152 test skips rejected unless preregistered
+        covered - raw-evidence-gates.txt
+    :153 same controller or model reviewing itself is rejected
+        covered - issue #3
+    :154 offline worker -> one-time proxy grant
+        covered - NOTE-proxy-grant-holds.md
+    :155 checkout LF->CRLF rejected by blob mismatch
+        covered - NOTE-byte-exactness-holds.md
+    :156 only the orchestrator can authorize and transport
+        covered - NOTE-proxy-grant-holds.md
+    :157 legacy verification without an identity snapshot is flagged
+        covered - NOTE-alias-lineage-holds.md
+    :158 a report lacking evidence is rejected
+        covered - raw-evidence-gates.txt
+  >>:159 task JSON lost -> ledger retains the snapshot
+        PROBED HERE - section D
+    :160 an edited ledger line fails hash or HMAC
+        covered - issue #9 (a TRUNCATED chain does not)
+    :161 an agent writing another workspace area is reported and blocked
+        covered - issue #11 (ledger/events.jsonl is inside the grant)
+    :162 bypassing the broker is detectable in some cases, not preventable
+        not falsifiable - a stated limitation
+    :166-169 hard isolation needs a container or OS account
+        not falsifiable - deployment advice
+  [ok] every section of the document is represented
+        expected: headings: 12
+        observed: headings: 12
+  [ok]   claims probed for the first time here
+        expected: 5
+        observed: 5
+  [ok]   claims already covered by an existing write-up
+        expected: 28
+        observed: 28
+  Five, not four: :70-72 and :159 are separate sentences that section D
+  answers with one experiment. Counting SECTIONS instead of CLAIMS is
+  how a document gets reported as fully covered while a sentence in it
+  was never read.
+  [ok]   sentences that are stated limitations, not testable promises
+        expected: 3
+        observed: 3
+  Nothing in this document is left unadjudicated. Three of its claims
+  are limitations it states about ITSELF - that identity declarations
+  cannot be provider-verified, that broker bypass is not preventable,
+  and that hard isolation needs the OS. Those are the document being
+  honest, and they are counted as such rather than as coverage.
+
+########## 0 unexpected result(s) ##########
+No network call and no process kill. Pre-registered permissions
+unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

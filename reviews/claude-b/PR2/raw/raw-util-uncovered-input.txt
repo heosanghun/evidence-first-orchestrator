@@ -1,0 +1,154 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok] util.py's top-level functions
+        expected: functions: 9
+        observed: functions: 9
+  [ok]   named by the EFO suite
+        expected: named by tests: 0
+        observed: named by tests: 0
+    ['utc_now', 'parse_utc', 'canonical_json', 'read_json', 'atomic_write_json', 'sha256_file', 'validate_task_id', 'validate_agent_id', 'is_relative_to']
+
+########## B. what `clean` rested on: MY probe, not EFO's tests ##########
+  [ok] functions my own probe does NOT name
+        expected: undriven: []
+        observed: undriven: []
+  So the suite names none of the nine and my probe names all nine.
+  `util.py is clean` is a claim about MY evidence. That is not a
+  defect - it is what the note is for - but it had never been said.
+
+########## C. and the coverage is UNEVEN - its own output shows it ##########
+    function                in probe  in output
+    utc_now                        5          2
+    parse_utc                      6          1
+    canonical_json                17          3
+    read_json                      2          0
+    atomic_write_json              3          1
+    sha256_file                    3          1
+    validate_task_id               2          0
+    validate_agent_id              2          0
+    is_relative_to                 9         17
+  [ok] functions with NO appearance in the raw output
+        expected: silent: ['read_json', 'validate_agent_id', 'validate_task_id']
+        observed: silent: ['read_json', 'validate_agent_id', 'validate_task_id']
+  Two of those three are a NAMING artifact, not a gap: the validators
+  are driven through a `lambda v=value:` inside a loop whose check name
+  says `task id ...` rather than the function name. Their values are
+  counted from the two loops that FEED them, not from every table in
+  the file - a first version matched all 24 rows in the probe, which
+  is the substring trap one level up.
+  [ok]   the validators' driven values, from the two loops that feed them
+        expected: driven values: 14
+        observed: driven values: 14
+  `read_json` is the real one: it appears inside exactly ONE check, as
+  a HELPER in `atomic_write_json round-trips`, and never as the subject
+  of one.
+  [ok]     checks that USE read_json
+        expected: using: 1
+        observed: using: 1
+  [ok]       checks ABOUT read_json - named after it
+        expected: about: 0
+        observed: about: 0
+
+########## D. EXECUTED - the input class none of the 46 checks fed ##########
+    parse_utc(None  ) **AttributeError**
+    parse_utc(123   ) **AttributeError**
+    parse_utc([]    ) **AttributeError**
+    parse_utc({}    ) **AttributeError**
+    validate_task_id(None  ) **TypeError**
+    validate_task_id(123   ) **TypeError**
+    validate_task_id([]    ) **TypeError**
+    validate_agent_id(None  ) **TypeError**
+    validate_agent_id(123   ) **TypeError**
+    validate_agent_id([]    ) **TypeError**
+    sha256_file(None  ) **AttributeError**
+    sha256_file(123   ) **AttributeError**
+    read_json(None  ) **AttributeError**
+    read_json(123   ) **AttributeError**
+    is_relative_to(None  ) **AttributeError**
+    is_relative_to(123   ) **AttributeError**
+    canonical_json(object()) **TypeError**
+  [ok] cases driven with a non-string
+        expected: driven: 17
+        observed: driven: 17
+  [ok]   raising the package's OWN error type
+        expected: EFOError: 0
+        observed: EFOError: 0
+  [ok]   raising a RAW Python exception instead
+        expected: raw: 17
+        observed: raw: 17
+  Not one of the nine converts a non-string into an EFOError. That is
+  a uniform structural fact, and none of the 46 checks fed it.
+  parse_utc's three checks all pass a WELL-FORMED string; the
+  validators' 13 values are all strings. The class was simply absent.
+
+########## E. reachability - a MAP, not a finding ##########
+      -   independence.py:37    normalized_alias = validate_agent_id(alias_of) if alias_
+      -   independence.py:39    validate_agent_id(item) for item in (alias_chain or [])
+      -   independence.py:73    "actor": validate_agent_id(actor),
+    str() independence.py:122   validate_agent_id(str(agent_id)): deepcopy(identity)
+    str() independence.py:159   target_id = validate_agent_id(str(alias_of))
+      -   model.py:55    "id": validate_task_id(task_id),
+      -   model.py:58    "owner": validate_agent_id(owner),
+      -   model.py:59    "created_by": validate_agent_id(created_by),
+    str() model.py:93    validate_task_id(str(task.get("id", "")))
+    str() model.py:94    validate_agent_id(str(task.get("owner", "")))
+    str() provenance.py:156   author = validate_agent_id(str(payload.get("author", "")
+      -   provenance.py:157   if author != validate_agent_id(expected_author):
+      -   workspace.py:114   orchestrator = validate_agent_id(orchestrator)
+      -   workspace.py:216   return self.agents_dir / f"{validate_agent_id(agent_id)}
+      -   workspace.py:219   return self.tasks_dir / f"{validate_task_id(task_id)}.js
+      -   workspace.py:320   agent_id = validate_agent_id(agent_id)
+      -   workspace.py:366   target_id = validate_agent_id(alias_of)
+      -   workspace.py:410   agent_id = validate_agent_id(agent_id)
+      -   workspace.py:610   author = validate_agent_id(author)
+      -   workspace.py:724   transport_actor = validate_agent_id(transport_actor)
+      -   workspace.py:844   [validate_task_id(task_id)]
+      -   workspace.py:847   validate_task_id(path.stem)
+      -   workspace.py:1099  author = validate_agent_id(author)
+  [ok] in-package validator call sites
+        expected: call sites: 23
+        observed: call sites: 23
+  [ok]   those that coerce with str() first
+        expected: coerced: 5
+        observed: coerced: 5
+  [ok]     and those that pass the value bare
+        expected: bare: 18
+        observed: bare: 18
+  [ok]   call sites reading a dict field
+        expected: document-driven: 3
+        observed: document-driven: 3
+  [ok]     of which any that does NOT coerce
+        expected: uncoerced: []
+        observed: uncoerced: []
+  The callers that read a value out of a parsed document - model.py:93
+  and :94, provenance.py:156, independence.py:122 and :159 - all wrap
+  it in str() first, so a TAMPERED FILE cannot deliver a non-string.
+  The bare call sites take an API ARGUMENT, which is programmatic
+  misuse rather than the threat model this review is about.
+  So: a MAP. No issue filed, and NOTE-util-and-lock-hold.md's `clean`
+  verdict is not retracted - its scope is narrowed and stated.
+
+########## F. what this does NOT do ##########
+  * It does not retract `util.py is clean`. Every one of the 46 checks
+    still passes; what changes is that the note now says which input
+    class it never fed.
+  * It does not file an issue. The raising class is unreachable from a
+    document, which is the standard items 38 and 45 both applied.
+  * It does not cover lock.py - the same note's other subject - which
+    is a separate population and was not measured here.
+  * It did NOT write to any workspace: the drives call pure functions
+    with literal values, and read_json/sha256_file were handed None and
+    an int, which raise before touching a filesystem.
+  * MEASURED: every count, every coverage number, all 17 driven
+    outcomes, the caller census. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Static reads plus 17 pure-function drives at main 5694ab45. No
+workspace, no network, no issue filed. Pre-registered permissions
+unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

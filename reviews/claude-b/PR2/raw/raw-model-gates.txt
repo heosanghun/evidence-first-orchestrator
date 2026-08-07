@@ -1,0 +1,129 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] new_task denies everything by default
+        expected: {'gpu': False, 'network': False, 'performance_metrics': False}
+        observed: {'gpu': False, 'network': False, 'performance_metrics': False}
+  [ok]   and requires every gate
+        expected: 'allow_skips': False
+        observed: {'allow_skips': False, 'require_independent_verification': True, 'require_known_answer_check': True, 'require_validation': True}
+  [ok] a measured performance claim under the default permissions
+        expected: Measured performance claims are forbidden
+        observed: rejected (EvidenceError: Measured performance claims are forbidden by this task's permissions)
+  [ok]   and an honest manifest still validates
+        expected: accepted
+        observed: accepted (3)
+
+########## B. permissions and gates are never type-checked ##########
+  validate_task checks that permissions/gates ARE objects
+  (model.py:104-107) and nothing about what is in them. Every later
+  reader uses .get(name, default) in a boolean context.
+
+  What a non-boolean does to a permission that GRANTS when truthy:
+  [ok]   performance_metrics = the boolean False
+        expected: refused
+        observed: refused
+  [ok]   performance_metrics = the string "false"
+        expected: ALLOWED
+        observed: ALLOWED
+  [ok]   performance_metrics = the string "no"
+        expected: ALLOWED
+        observed: ALLOWED
+  [ok]   performance_metrics = the string "0"
+        expected: ALLOWED
+        observed: ALLOWED
+  [ok]   performance_metrics = the integer 0
+        expected: refused
+        observed: refused
+  [ok]   performance_metrics = an empty list
+        expected: refused
+        observed: refused
+  [ok]   performance_metrics = the string "true"
+        expected: ALLOWED
+        observed: ALLOWED
+
+  and to the gate that GRANTS when truthy:
+  [ok]   allow_skips = the boolean False
+        expected: skips refused
+        observed: skips refused
+  [ok]   allow_skips = the string "false"
+        expected: skips ALLOWED
+        observed: skips ALLOWED
+  [ok]   allow_skips = the boolean True
+        expected: skips ALLOWED
+        observed: skips ALLOWED
+
+  the require_* gates restrict when truthy, so the same confusion
+  fails SAFE there:
+  [ok]   require_known_answer_check = the string "false"
+        expected: still required
+        observed: still required
+  [ok]   require_known_answer_check = False
+        expected: no known-answer check needed
+        observed: no known-answer check needed
+
+########## C. is a non-boolean reachable? ##########
+  cli.py builds both dicts from argparse store_true flags:
+        workspace = _workspace(args.path)
+        "gpu": args.allow_gpu,
+        "performance_metrics": args.allow_performance_metrics,
+        "network": args.allow_network,
+        "require_validation": not args.no_validation,
+        "allow_skips": args.allow_skips,
+        "require_known_answer_check": not args.no_known_answer_check,
+        "require_independent_verification": not args.no_independent_verification,
+  [ok]   so the CLI can only ever pass real booleans
+        expected: args_ prefixed: True
+        observed: args_ prefixed: True
+  The Python API is the reachable path: Workspace.create_task takes
+  permissions= and gates= straight through to new_task, and this
+  project drives EFO programmatically, not only through the CLI.
+
+########## D. transition's updates can overwrite the target state ##########
+  model.py:117-120 sets state, then applies **updates AFTER it.
+  [ok] transition(task, 'claimed', state='verified') lands on
+        expected: verified
+        observed: verified
+  [ok]   the illegal edge without the override
+        expected: cannot transition pending -> verified
+        observed: Task T1 cannot transition pending -> verified
+  [ok]   call sites that pass state= into transition
+        expected: sites: []
+        observed: sites: []
+        -> unreachable through the broker. Recorded as an API contract
+           gap: the function documents 'a legal state transition' and
+           its own last line can undo the check.
+
+########## E. the full 8x8 transition matrix ##########
+  8x8 = 64 edges
+  [ok] transition agrees with TRANSITIONS on every edge
+        expected: mismatches: []
+        observed: mismatches: []
+  the 11 legal edges: ['blocked->pending', 'claimed->blocked', 'claimed->running', 'pending->claimed', 'pending->submitted', 'rejected->pending', 'running->blocked', 'running->submitted', 'submitted->rejected', 'submitted->verified', 'verified->archived']
+  [ok]   archived is terminal
+        expected: archived targets: set()
+        observed: archived targets: set()
+  [ok]   pending -> submitted exists, reserved for proxy_submit
+        expected: 'submitted' in pending: True
+        observed: 'submitted' in pending: True
+
+########## F. the lease helpers ##########
+  [ok] lease_expiry below the floor
+        expected: at least 10 seconds
+        observed: rejected (ConfigurationError: Lease duration must be at least 10 seconds)
+  [ok] lease_expiry at the floor
+        expected: Z
+        observed: 2026-08-02T00:00:10Z
+  [ok]   and it has no ceiling (issue #7)
+        expected: 2036
+        observed: 2036-07-30T00:00:00Z
+  [ok] a lease expiring exactly now counts as expired
+        expected: expired: True
+        observed: expired: True
+  [ok]   one second earlier does not
+        expected: expired: False
+        observed: expired: False
+  [ok] a task with no lease is never expired
+        expected: expired: False
+        observed: expired: False
+
+########## 0 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.

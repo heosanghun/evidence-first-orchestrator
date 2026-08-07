@@ -1,0 +1,130 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] the workspace is live
+        expected: tasks: 1
+        observed: tasks: 1
+  [ok] serve() checks the host before it constructs a server
+        expected: guard before bind: True
+        observed: guard before bind: True
+
+########## B. the documented bind guard ##########
+  dashboard.py:218 allows exactly {'127.0.0.1', '::1', 'localhost'}.
+  No socket is bound: every refusal below happens before the server
+  object exists, and the three allowed spellings are NOT exercised.
+  [ok]   host='0.0.0.0'
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  [ok]   host=''
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  [ok]   host='::'
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  [ok]   host='192.168.1.10'
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  [ok]   host='example.invalid'
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  [ok]   host='127.0.0.1 '
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  [ok]   host=' 127.0.0.1'
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  [ok]   host='LOCALHOST'
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  [ok]   host='Localhost'
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  [ok]   host='127.1'
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  [ok]   host='127.0.0.2'
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  [ok]   host='0177.0.0.1'
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  [ok]   host='[::1]'
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  [ok]   host='localhost.'
+        expected: refused (Remote dashboard binding requires explicit allow_remote=True)
+        observed: refused (Remote dashboard binding requires explicit allow_remote=True)
+  Every near-miss spelling of loopback fails CLOSED - the guard is a
+  strict allow-list, not a pattern match, so 127.1 and LOCALHOST are
+  refused even though both reach the loopback interface.
+
+########## C. what the dashboard would serve ##########
+  Measured by calling the same methods do_GET calls, not by binding.
+  [ok] every route the handler answers
+        expected: ['/', '/api/status', '/api/ledger']
+        observed: ['/', '/api/status', '/api/ledger']
+  [ok] /api/status carries the task description
+        expected: SECRETDESC present: True
+        observed: SECRETDESC present: True
+  [ok]   and the blocked_reason path
+        expected: SECRETPATH present: True
+        observed: SECRETPATH present: True
+  -> these are RAW task projections. The SSH collector deliberately
+     strips both (NOTE-collector-redaction-holds.md); this server does
+     not, and there is no authentication of any kind.
+  [ok] the handler has no authorization check
+        expected: auth tokens in source: 0
+        observed: auth tokens in source: 0
+  Not filed: nothing claims otherwise. README.md:336-337 promises the
+  bind is local unless opted out of, and that promise holds. What is
+  worth an operator knowing is that `--allow-remote` publishes full
+  task records - descriptions, blocked reasons, whole result bundles -
+  to anyone who can reach the port.
+  [ok] the page is a module constant, not a file read
+        expected: DASHBOARD_HTML: True
+        observed: DASHBOARD_HTML: True
+  [ok]   so no request can name a file
+        expected: open( in handler: 0
+        observed: open( in handler: 0
+
+########## D. errors.py ##########
+  [ok] every exception derives from EFOError
+        expected: non-EFOError: []
+        observed: non-EFOError: []
+  the family: ['AuthorizationError', 'ConfigurationError', 'EFOError', 'EvidenceError', 'IntegrityError', 'LeaseError', 'LockTimeout', 'TransitionError']
+
+########## E. can any failure escape the CLI as a traceback? ##########
+  My first premise here was WRONG and is corrected rather than filed:
+  I assumed cli.py catches only EFOError. It catches four families.
+  [ok] what main() actually catches
+        expected: ['EFOError', 'OSError', 'ValueError', 'json.JSONDecodeError']
+        observed: ['EFOError', 'OSError', 'ValueError', 'json.JSONDecodeError']
+  Every raised exception CALL in the package, enumerated:
+    AuthorizationError    EFOError - caught, exit 2                       provenance.py, workspace.py
+    ConfigurationError    EFOError - caught, exit 2                       adapter.py, dashboard.py, doctor.py, independence.py, model.py, provenance.py, util.py, workspace.py
+    EvidenceError         EFOError - caught, exit 2                       archive.py, evidence.py, provenance.py, workspace.py
+    IntegrityError        EFOError - caught, exit 2                       ledger.py, workspace.py
+    LeaseError            EFOError - caught, exit 2                       workspace.py
+    LockTimeout           EFOError - caught, exit 2                       lock.py
+    SystemExit            __main__.py:7, raise SystemExit(main()) - the exit itself__main__.py
+    TransitionError       EFOError - caught, exit 2                       model.py, workspace.py
+    ValueError            not an EFOError, but IN the catch tuple - exit 2cli.py
+  [ok] every raised exception type is adjudicated
+        expected: uncovered: []
+        observed: uncovered: []
+  [ok]   nothing raised falls outside the catch tuple
+        expected: escapes: []
+        observed: escapes: []
+  and the two ValueError sites, driven through main():
+  [ok]   task add with neither description flag - argparse gets there first
+        expected: exit 2, usage:
+        observed: exit 2, usage: efo task add [-h] --actor ACTOR --id TASK_ID --owner OWNER --ti
+  [ok]   agent add with a malformed --command-json
+        expected: exit 2, error:
+        observed: exit 2, error: --command-json must be a JSON array of non-empty strings
+  -> both exit 2 with a one-line message and no traceback. The first
+     never reaches cli.py:28's `raise ValueError`: argparse enforces the
+     required mutually-exclusive group first, so that raise is a dead
+     branch. Recorded, not filed - it is a belt-and-braces guard.
+
+########## 0 unexpected result(s) ##########
+NO SOCKET WAS BOUND and no request was served.
+SUBMITTED, not VERIFIED.

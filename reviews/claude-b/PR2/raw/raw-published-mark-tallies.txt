@@ -1,0 +1,130 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   and the divergent ref this round also reads is NAMED
+        expected: cef56234a873fefddd51f8cfedb737705a6f0d9a
+        observed: cef56234a873fefddd51f8cfedb737705a6f0d9a
+  [ok] item 70's premise, re-derived: the tuples hold doubled slots
+        expected: slots 162/309, markers 160/306
+        observed: slots 162/309, markers 160/306
+  [ok]   and these are the five doubled tokens
+        expected: ['audit-independence', 'independence_dimensions', 'job_runner.py', 'transfer-orchestrator', 'transport_independence']
+        observed: ['audit-independence', 'independence_dimensions', 'job_runner.py', 'transfer-orchestrator', 'transport_independence']
+
+########## B. the published tallies, PARSED from the note ##########
+    raw-attack-prov-main.txt     published anchor=2 divergent=2  GENUINE
+    raw-w4-replay.txt            published anchor=3 divergent=4  GENUINE
+    raw-full-final.txt           published anchor=1 divergent=2  SPURIOUS
+    raw-quote-accuracy.txt       published anchor=10 divergent=2  not a program run
+  [ok] the mixed-outputs table publishes this many rows
+        expected: rows: 4
+        observed: rows: 4
+  [ok]   which is 8 numbers, not 4
+        expected: numbers: 8
+        observed: numbers: 8
+  [ok]     and every named output still exists
+        expected: missing: []
+        observed: missing: []
+  The rows are READ OUT OF THE DOCUMENT. If I edit the note and forget
+  this probe, the parse moves with it - a tally typed in here would
+  quietly go on agreeing with a number the note no longer states.
+
+########## C. re-derived, slotted and de-duplicated ##########
+    raw-attack-prov-main.txt     published 2/2 | slots 2/2 | markers 2/2
+  [ok]       raw-attack-prov-main.txt as published equals the DE-DUPLICATED tally
+        expected: 2/2
+        observed: 2/2
+    raw-w4-replay.txt            published 3/4 | slots 3/5 | markers 3/4  <-- DOUBLE-COUNTED
+  [ok]       raw-w4-replay.txt as published equals the DE-DUPLICATED tally
+        expected: 3/4
+        observed: 3/4
+    raw-full-final.txt           published 1/2 | slots 1/2 | markers 1/2
+  [ok]       raw-full-final.txt as published equals the DE-DUPLICATED tally
+        expected: 1/2
+        observed: 1/2
+    raw-quote-accuracy.txt       published 10/2 | slots 10/2 | markers 10/2
+  [ok]       raw-quote-accuracy.txt as published equals the DE-DUPLICATED tally
+        expected: 10/2
+        observed: 10/2
+  [ok] published tallies the slotted instrument DOUBLE-COUNTED
+        expected: moved: 1
+        observed: moved: 1 ['raw-w4-replay.txt']
+  [ok]   and it is w4-replay
+        expected: raw-w4-replay.txt
+        observed: ['raw-w4-replay.txt']
+
+########## D. the one that moved, and why ##########
+  [ok] the slotted instrument gave its divergent marks as five
+        expected: divergent: 5
+        observed: divergent: 5
+  [ok]   de-duplicated they are four
+        expected: divergent: 4
+        observed: divergent: 4
+  [ok]     and the CORRECTED note now states four, read from the document
+        expected: 4
+        observed: 4
+  [ok]     because exactly one token occupies two slots
+        expected: twice: 1
+        observed: twice: 1
+  [ok]       and it is transfer-orchestrator
+        expected: ['transfer-orchestrator']
+        observed: ['transfer-orchestrator']
+  [ok]         hand-added AND derived - which is what doubles it
+        expected: hand: True derived: True
+        observed: hand: True derived: True
+  [ok]   the VERDICT does not move - four marks is still both lines
+        expected: GENUINE
+        observed: GENUINE
+  So a published number was wrong and the conclusion it supported was
+  not. That is the whole result: the double-count was real, and it was
+  never load-bearing.
+
+########## E. the tallies that CANNOT move, and why ##########
+  [ok] item 67's `author_identity` occurs twice - a SINGLE marker's count
+        expected: occurrences: 2
+        observed: occurrences: 2
+  [ok]   and that token occupies one slot, so no set can double it
+        expected: slots: 1
+        observed: slots: 1
+  [ok] item 70's two anchor marks on the class-2b census reproduce
+        expected: anchor: 2
+        observed: anchor: 2
+  [ok]   and neither of them is a doubled token
+        expected: doubled here: []
+        observed: doubled here: []
+  [ok]     which is what item 70's note states, read from the document
+        expected: two
+        observed: two
+  A count of ONE named token's occurrences cannot be inflated by a
+  set that lists it twice - the inflation needs a count OVER the set.
+  Both surviving tallies are of that first kind, which is why the
+  sweep finds one mover and not five.
+
+########## F. what this does NOT establish ##########
+  * It does NOT retract item 67. Three of its four rows reproduce
+    exactly, the fourth moves by ONE, and no verdict in it changes.
+  * It does NOT re-open the classification. Item 70 already measured
+    that de-duplication changes 0 of 83 verdicts; this round is about
+    the COUNTS printed beside them.
+  * The population is the tallies this review PUBLISHED in Markdown -
+    parsed from the note for the table, named for the rest. A tally
+    that exists only inside a raw output and was never quoted in a
+    write-up is out of scope, and that is a stated bound, not a claim
+    that none exists.
+  * It does NOT file an issue. Nothing here is about EFO's behaviour.
+  * No network, no GPU, no workspace built. Two refs read and BOTH
+    named. The anchor's working tree is untouched, and it does not
+    touch `main` or another agent's branch.
+  * MEASURED: both marker sets as slots and as markers, the five
+    doubled tokens, all four published rows re-derived twice, the one
+    that moved and its cause, the two single-token tallies that
+    cannot move. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED: re-running my own evidence is a
+re-run, not independent confirmation.
