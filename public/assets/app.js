@@ -1684,3 +1684,73 @@ window.closeScheduleModal = function() {
     modal.classList.remove("active");
   }
 };
+
+
+
+/* GPU Renderer Non-Clipping Formatter (v7.4.0) */
+window.formatGpuCardHtml = function(gpu) {
+  const isThermalHazard = (gpu.id === 2 || gpu.index === 2 || gpu.name === "GPU 2");
+  const isPriority = (gpu.id === 4 || gpu.id === 5 || gpu.index === 4 || gpu.index === 5);
+  
+  let badgeBg = "rgba(51, 65, 85, 0.4)";
+  let badgeBorder = "rgba(148, 163, 184, 0.2)";
+  let badgeColor = "#e2e8f0";
+  let statusText = gpu.project || gpu.notes || "유휴 또는 대기";
+
+  if (isThermalHazard) {
+    badgeBg = "rgba(245, 158, 11, 0.15)";
+    badgeBorder = "rgba(245, 158, 11, 0.4)";
+    badgeColor = "#fbbf24";
+    statusText = "🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 작업 대상 제외 (상시 대기)";
+  } else if (isPriority) {
+    badgeBg = "rgba(16, 185, 129, 0.15)";
+    badgeBorder = "rgba(16, 185, 129, 0.4)";
+    badgeColor = "#34d399";
+    if (!gpu.project) statusText = "⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:00 KST)";
+  } else if (gpu.project) {
+    badgeBg = "rgba(99, 102, 241, 0.15)";
+    badgeBorder = "rgba(99, 102, 241, 0.4)";
+    badgeColor = "#a5b4fc";
+  }
+
+  const util = gpu.utilization !== undefined ? gpu.utilization : (gpu.gpu_util || 0);
+  const vramUsed = gpu.vram_used_gb || gpu.vram_used || 0;
+  const vramTotal = gpu.vram_total_gb || 24;
+  const temp = gpu.temperature || gpu.temp || 35;
+  const power = gpu.power_w || gpu.power || 28;
+
+  const utilColor = util > 80 ? "#34d399" : (util > 30 ? "#60a5fa" : "#94a3b8");
+  const vramPct = Math.min(100, Math.round((vramUsed / vramTotal) * 100));
+
+  return `
+    <div class="gpu-card">
+      <div class="gpu-top-row">
+        <div class="gpu-name-group">
+          <h4>GPU ${gpu.id !== undefined ? gpu.id : gpu.index}</h4>
+          <span>NVIDIA RTX 4090</span>
+        </div>
+        <div class="gpu-metrics-group">
+          <div class="gpu-metric-item">
+            <span>사용률 <strong>${util}%</strong></span>
+            <div class="gpu-bar-mini"><div class="gpu-bar-fill" style="width:${util}%; background:${utilColor};"></div></div>
+          </div>
+          <div class="gpu-metric-item">
+            <span>VRAM <strong>${vramUsed.toFixed(1)} / ${vramTotal.toFixed(1)} GB</strong> (${vramPct}%)</span>
+            <div class="gpu-bar-mini"><div class="gpu-bar-fill" style="width:${vramPct}%; background:#38bdf8;"></div></div>
+          </div>
+          <div class="gpu-metric-item">
+            <span>온도 <strong>${temp}°C</strong></span>
+          </div>
+          <div class="gpu-metric-item">
+            <span>전력 <strong>${power} W</strong></span>
+          </div>
+        </div>
+      </div>
+      <div class="gpu-project-badge-row">
+        <div class="gpu-badge-box" style="background:${badgeBg}; border:1px solid ${badgeBorder}; color:${badgeColor};">
+          <div>${statusText}</div>
+        </div>
+      </div>
+    </div>
+  `;
+};

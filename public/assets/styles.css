@@ -3384,3 +3384,89 @@ dialog input:focus {
   padding: 10px 14px !important;
   margin-bottom: 0 !important;
 }
+
+
+/* GPU Card Non-Clipping Layout Fix (v7.4.0) */
+.gpu-card, .gpu-row, .gpu-item {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  background: rgba(30, 41, 59, 0.6) !important;
+  border: 1px solid rgba(148, 163, 184, 0.2) !important;
+  border-radius: 10px !important;
+  padding: 12px 14px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  width: 100% !important;
+}
+
+.gpu-top-row {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  width: 100% !important;
+}
+
+.gpu-name-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.gpu-name-group h4 {
+  margin: 0 !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+  color: #f8fafc !important;
+}
+.gpu-name-group span {
+  font-size: 0.75rem !important;
+  color: #94a3b8 !important;
+}
+
+.gpu-metrics-group {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  font-size: 0.8rem !important;
+  color: #cbd5e1 !important;
+}
+.gpu-metric-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+.gpu-bar-mini {
+  width: 60px !important;
+  height: 6px !important;
+  background: rgba(51, 65, 85, 0.8) !important;
+  border-radius: 3px !important;
+  overflow: hidden !important;
+}
+.gpu-bar-fill {
+  height: 100% !important;
+  border-radius: 3px !important;
+  transition: width 0.3s ease !important;
+}
+
+.gpu-project-badge-row {
+  width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.gpu-badge-box {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  font-size: 0.82rem !important;
+  line-height: 1.4 !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  word-break: break-word !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+}
