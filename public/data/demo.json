@@ -4,7 +4,7 @@
     "objective": "8월 말 전 실험 완료 → 9월 논문 집필 → ICLR 2027 제출(9월 25일경) 검증 가동",
     "infra_policy": "INFRA-02: CTS[0,1] / S1.5[3,4,5우선] / 공용[6,7] / GPU2[발열보호제외]"
   },
-  "generated_at": "2026-08-07T14:38:00Z",
+  "generated_at": "2026-08-07T20:49:00Z",
   "projects": [
     {
       "id": "CTS",
@@ -186,6 +186,11 @@
   ],
   "activity": [
     {
+      "at": "2026-08-07T20:49:00Z",
+      "actor_name": "antigravity",
+      "title": "E1 트랙 A 봉인 검증 3중 통과: greedy 2/30 (6.7%) & native_think 8/30 (26.7%) 원장 등재 및 커밋"
+    },
+    {
       "at": "2026-08-07T14:28:00Z",
       "actor_name": "antigravity",
       "title": "SCHED-01 8월 병렬 실험 및 ICLR 2027 전체 일정표 EFO 모니터링 반영 및 원장 등재"
@@ -241,6 +246,12 @@
     "pivot_date": "2026-08-07",
     "cts": {
       "completed": [
+        {
+          "stage": "E1 트랙 A 봉인 재채점·검증 3중 통과",
+          "date": "8/7 20:49",
+          "grade": "M",
+          "note": "greedy 2/30 (6.7%) [0.0, 16.7] & native_think 8/30 (26.7%) [13.3, 43.3] 확정"
+        },
         {
           "stage": "E2 기준점 확정 (1차+R2)",
           "date": "8/6 17:19",
@@ -402,5 +413,5 @@
       ]
     }
   },
-  "last_updated_display": "8월 7일 14:38 최신 원장"
+  "last_updated_display": "8월 7일 20:49 최신 원장 (E1 트랙 A 확정)"
 }
