@@ -3311,3 +3311,32 @@ dialog input:focus {
   color: #a855f7;
   font-weight: 700;
 }
+
+
+/* Roadmap Card Header Schedule Button (v7.1.0) */
+.card-schedule-btn {
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 14px rgba(168, 85, 247, 0.4);
+  transition: all 0.25s ease;
+  animation: pulseGlow 2.5s infinite;
+}
+.card-schedule-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6);
+  background: linear-gradient(135deg, #4f46e5, #9333ea);
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 4px 14px rgba(168, 85, 247, 0.4); }
+  50% { box-shadow: 0 4px 22px rgba(168, 85, 247, 0.7); }
+}

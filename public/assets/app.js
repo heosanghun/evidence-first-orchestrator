@@ -1448,16 +1448,19 @@ function renderProjects(snapshot) {
 (function setupScheduleMatrixModal() {
   function initModal() {
     const openBtn = document.getElementById("open-schedule-modal-btn");
+    const cardBtn = document.getElementById("card-schedule-modal-btn");
     const closeBtn = document.getElementById("close-schedule-modal-btn");
     const modal = document.getElementById("schedule-matrix-modal");
     const modalBody = document.getElementById("schedule-matrix-body");
     const filterBtns = document.querySelectorAll(".sched-filter-btn");
 
-    if (!modal || !openBtn) return;
+    if (!modal) return;
 
     let currentFilter = "all";
 
-    openBtn.addEventListener("click", () => {
+    if (openBtn) openBtn.addEventListener("click", () => { modal.style.display = "flex"; renderModalBody(currentFilter); });
+    if (cardBtn) cardBtn.addEventListener("click", () => { modal.style.display = "flex"; renderModalBody(currentFilter); });
+    const dummyFn = () => {
       modal.style.display = "flex";
       renderModalBody(currentFilter);
     });
