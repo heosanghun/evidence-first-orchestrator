@@ -4,7 +4,7 @@
     "objective": "8월 말 전 실험 완료 → 9월 논문 집필 → ICLR 2027 제출(9월 25일경) 검증 가동",
     "infra_policy": "INFRA-02: CTS[0,1] / S1.5[3,4,5우선] / 공용[6,7] / GPU2[발열보호제외]"
   },
-  "generated_at": "2026-08-07T12:00:00Z",
+  "generated_at": "2026-08-07T14:28:00Z",
   "projects": [
     {
       "id": "CTS",
@@ -186,6 +186,11 @@
   ],
   "activity": [
     {
+      "at": "2026-08-07T14:28:00Z",
+      "actor_name": "antigravity",
+      "title": "SCHED-01 8월 병렬 실험 및 ICLR 2027 일정표 EFO 모니터링 반영"
+    },
+    {
       "at": "2026-08-07T12:00:00Z",
       "actor_name": "antigravity",
       "title": "DATA-01 봉인 데이터셋 (AIME 2025 30문항 I/II) 검증 PASS & 원장 등재"
@@ -215,5 +220,171 @@
       "actor_name": "claude",
       "title": "E2 Baseline 30문항 실측 보강 40.0%(12/30) 동결 및 E2-R2 v4 봉인 서명"
     }
-  ]
+  ],
+  "schedule_matrix": {
+    "updated_at": "2026-08-07T14:28:00Z",
+    "pivot_date": "2026-08-07",
+    "cts": {
+      "completed": [
+        {
+          "stage": "E2 기준점 확정 (1차+R2)",
+          "date": "8/6 17:19",
+          "grade": "M",
+          "note": "엄격 10/30 · 보강 12/30 (40.0%) 확정"
+        },
+        {
+          "stage": "평가 파이프라인 정직성 감사",
+          "date": "8/7 오전",
+          "grade": "M",
+          "note": "cc4a651 수치 정렬 정황 확인 및 외부 검수 통과"
+        },
+        {
+          "stage": "봉인 데이터셋 구축·30문항 전수 대조 PASS",
+          "date": "8/7 ~12:00",
+          "grade": "M",
+          "note": "aime_2025_sealed.jsonl (D9D8EF63...) 전수 대조 일치"
+        },
+        {
+          "stage": "E1 스모크 (greedy 완주 + fail-closed 실증)",
+          "date": "8/7 ~12:40",
+          "grade": "M",
+          "note": "INTEG-01 스모크 124.4s 완주 (iters 3)"
+        },
+        {
+          "stage": "E1 본실험 개시",
+          "date": "8/7 12:47",
+          "grade": "M",
+          "note": "E1 본실험 30문항 5시드 세션 시작"
+        },
+        {
+          "stage": "greedy 5시드 완주",
+          "date": "8/7 ~14:15",
+          "grade": "M",
+          "note": "seed=4 종료, 결정론 정상 지문 입증"
+        }
+      ],
+      "estimated": [
+        {
+          "stage": "native_think 5시드 (진행 중, seed=0)",
+          "date": "오늘 19:00~21:00",
+          "grade": "I",
+          "note": "문항당 1~2분 (2048토큰 캡) × 150문항 캐시 워밍 효과"
+        },
+        {
+          "stage": "E1 트랙 A 봉인 재채점·판정",
+          "date": "8/8 오전",
+          "grade": "I",
+          "note": "결과 파일 수신 후 외부 감사 봉인 재채점"
+        },
+        {
+          "stage": "트랙 B: Stage-1·2 재훈련 (서버 0·1 권장)",
+          "date": "8/10~16 (8월 2~3주)",
+          "grade": "I",
+          "note": "서버 GPU 0·1 활용 재훈련 계획 수립"
+        },
+        {
+          "stage": "CTS 계열 E1 + E3·E4 병렬 실행",
+          "date": "8월 3주",
+          "grade": "I",
+          "note": "iso-depth(E3) + 깊이 스윕(E4) 병렬 진행"
+        },
+        {
+          "stage": "E5·E6 + 통계 재계산",
+          "date": "8월 4주",
+          "grade": "I",
+          "note": "패턴 대조(E5) + 디코드 20건(E6) + B-1 해소"
+        },
+        {
+          "stage": "E7 + 취합 → 실험 전체 완료",
+          "date": "8/31",
+          "grade": "I",
+          "note": "ADVISOR-01 8월 말 전 실험 완결 목표"
+        },
+        {
+          "stage": "원고 개정 → ICLR 2027 제출",
+          "date": "9/25경",
+          "grade": "I",
+          "note": "ICLR 2027 정식 원고 제출"
+        }
+      ]
+    },
+    "sys15": {
+      "completed": [
+        {
+          "stage": "서버 세션 기동·1조 (환경+백본 SHA)",
+          "date": "8/7 오전",
+          "grade": "M",
+          "note": "서버 SSH 세션 환경 구축 및 백본 SHA 검증"
+        },
+        {
+          "stage": "2조b·2조c (가드 음성 3/3, S7 배선+음성 3종)",
+          "date": "8/7 오전~정오",
+          "grade": "M",
+          "note": "회귀 가드 검증 3/3 통과"
+        },
+        {
+          "stage": "S15-13 검출 (훈련 전 차단)",
+          "date": "8/7 ~13:00",
+          "grade": "M",
+          "note": "훈련 전 결함 사전 검출 및 안전 차단"
+        },
+        {
+          "stage": "수정안 1번 적용 + 회귀테스트 5건",
+          "date": "8/7 ~14:00",
+          "grade": "M",
+          "note": "전 실패 → 수정 후 전과 (5/5 PASS)"
+        },
+        {
+          "stage": "2조a 재측정 1차 계측 통과 선언",
+          "date": "8/7 ~14:10",
+          "grade": "M",
+          "note": "1차 계측 통과 및 v22 준비"
+        }
+      ],
+      "estimated": [
+        {
+          "stage": "2조a 교차 계측 + v22 수신·해시 보고",
+          "date": "오늘 15시 전후",
+          "grade": "I",
+          "note": "현재 실행 중 + 큐 대기"
+        },
+        {
+          "stage": "run_evidence 배선 + 음성 3종 (결정 2)",
+          "date": "오늘 오후",
+          "grade": "I",
+          "note": "유사 배선(S7) 반나절 소요 반영"
+        },
+        {
+          "stage": "3조 사전등록 봉인 → 정지 → 감사 검수·승인",
+          "date": "오늘 저녁",
+          "grade": "I",
+          "note": "v22 3-2 사전등록 봉인 및 검수"
+        },
+        {
+          "stage": "Stage 1 훈련 개시 + 첫 100스텝 보고",
+          "date": "오늘 밤~8/8",
+          "grade": "I",
+          "note": "GPU 2~5 유휴 대기 중, 첫 100스텝 훈련 진입"
+        },
+        {
+          "stage": "Stage 1 완료",
+          "date": "~8/17",
+          "grade": "I",
+          "note": "첫 100스텝 속도로 완료 일정 재추정"
+        },
+        {
+          "stage": "Stage 2·3 → 종합 벤치마크",
+          "date": "~8/24 → ~8/31",
+          "grade": "I",
+          "note": "Stage 2/3 연속 수행 및 벤치마크 완결"
+        },
+        {
+          "stage": "논문화 착수 (ICLR 2027)",
+          "date": "~9/7",
+          "grade": "I",
+          "note": "System 1.5 신규 논문 작성 진입"
+        }
+      ]
+    }
+  }
 }

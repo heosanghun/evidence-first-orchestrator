@@ -1513,5 +1513,31 @@
   </dialog>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Schedule Matrix Modal (v7.0.0) -->
+  <div id="schedule-matrix-modal" class="modal-overlay" style="display:none;">
+    <div class="modal-container schedule-modal-container">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-badge">ADVISOR-01 APPROVED</span>
+          <h2>📅 8월~9월 프로젝트 전체 단계별·날짜별 일정표</h2>
+          <p class="modal-subtitle">실측 완료 [M] 및 추정 진행 [I] 이원화 관리 (Pivot: 2026-08-07)</p>
+        </div>
+        <button id="close-schedule-modal-btn" class="modal-close-btn">&times;</button>
+      </div>
+
+      <div class="modal-filter-bar">
+        <button class="sched-filter-btn active" data-filter="all">전체 단계 보기</button>
+        <button class="sched-filter-btn" data-filter="cts">CTS (GPU 0·1)</button>
+        <button class="sched-filter-btn" data-filter="sys15">System 1.5 (GPU 2~5)</button>
+        <button class="sched-filter-btn" data-filter="timeline">8월~9월 타임라인 (Gantt)</button>
+      </div>
+
+      <div class="modal-body" id="schedule-matrix-body">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>

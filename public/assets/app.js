@@ -1442,3 +1442,231 @@ function renderProjects(snapshot) {
     });
   });
 })();
+
+
+/* Schedule Matrix Modal Controller (v7.0.0) */
+(function setupScheduleMatrixModal() {
+  function initModal() {
+    const openBtn = document.getElementById("open-schedule-modal-btn");
+    const closeBtn = document.getElementById("close-schedule-modal-btn");
+    const modal = document.getElementById("schedule-matrix-modal");
+    const modalBody = document.getElementById("schedule-matrix-body");
+    const filterBtns = document.querySelectorAll(".sched-filter-btn");
+
+    if (!modal || !openBtn) return;
+
+    let currentFilter = "all";
+
+    openBtn.addEventListener("click", () => {
+      modal.style.display = "flex";
+      renderModalBody(currentFilter);
+    });
+
+    if (closeBtn) {
+      closeBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+      });
+    }
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && modal.style.display === "flex") {
+        modal.style.display = "none";
+      }
+    });
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener("click", () => {
+        filterBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        currentFilter = btn.dataset.filter;
+        renderModalBody(currentFilter);
+      });
+    });
+  }
+
+  function renderModalBody(filter) {
+    const modalBody = document.getElementById("schedule-matrix-body");
+    if (!modalBody) return;
+
+    const data = window.demoData || {};
+    const sm = data.schedule_matrix || {};
+    const cts = sm.cts || { completed: [], estimated: [] };
+    const sys = sm.sys15 || { completed: [], estimated: [] };
+
+    if (filter === "timeline") {
+      modalBody.innerHTML = renderTimelineGantt(cts, sys);
+      return;
+    }
+
+    let html = `<div class="sched-grid">`;
+
+    if (filter === "all" || filter === "cts") {
+      html += `
+        <div class="sched-card">
+          <div class="sched-card-title">
+            <span class="tag-cts">🚀 CTS (GPU 0·1 전용)</span>
+            <span style="font-size:0.8rem; color:#94a3b8;">E1 ~ E7 완결 경로</span>
+          </div>
+
+          <div class="sched-section-title">✅ 완료 실적 [<span style="color:#34d399;">M - 실측</span>]</div>
+          <table class="sched-table">
+            <thead>
+              <tr><th>단계</th><th>완료일시</th><th>등급</th><th>비고</th></tr>
+            </thead>
+            <tbody>
+              ${cts.completed.map(row => `
+                <tr>
+                  <td><strong>${row.stage}</strong></td>
+                  <td style="color:#38bdf8; white-space:nowrap;">${row.date}</td>
+                  <td><span class="badge-m">M</span></td>
+                  <td style="color:#cbd5e1;">${row.note}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+
+          <div class="sched-section-title" style="margin-top:16px;">⏳ 향후 예상 [<span style="color:#fbbf24;">I - 추정</span>]</div>
+          <table class="sched-table">
+            <thead>
+              <tr><th>단계</th><th>예상완료</th><th>등급</th><th>비고</th></tr>
+            </thead>
+            <tbody>
+              ${cts.estimated.map(row => `
+                <tr>
+                  <td><strong>${row.stage}</strong></td>
+                  <td style="color:#fbbf24; white-space:nowrap;">${row.date}</td>
+                  <td><span class="badge-i">I</span></td>
+                  <td style="color:#cbd5e1;">${row.note}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    if (filter === "all" || filter === "sys15") {
+      html += `
+        <div class="sched-card">
+          <div class="sched-card-title">
+            <span class="tag-sys">⚙️ System 1.5 (GPU 2~5 훈련/검증)</span>
+            <span style="font-size:0.8rem; color:#94a3b8;">Stage 1 ~ 3 경로</span>
+          </div>
+
+          <div class="sched-section-title">✅ 완료 실적 [<span style="color:#34d399;">M - 실측</span>]</div>
+          <table class="sched-table">
+            <thead>
+              <tr><th>단계</th><th>완료일시</th><th>등급</th><th>비고</th></tr>
+            </thead>
+            <tbody>
+              ${sys.completed.map(row => `
+                <tr>
+                  <td><strong>${row.stage}</strong></td>
+                  <td style="color:#c084fc; white-space:nowrap;">${row.date}</td>
+                  <td><span class="badge-m">M</span></td>
+                  <td style="color:#cbd5e1;">${row.note}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+
+          <div class="sched-section-title" style="margin-top:16px;">⏳ 향후 예상 [<span style="color:#fbbf24;">I - 추정</span>]</div>
+          <table class="sched-table">
+            <thead>
+              <tr><th>단계</th><th>예상완료</th><th>등급</th><th>비고</th></tr>
+            </thead>
+            <tbody>
+              ${sys.estimated.map(row => `
+                <tr>
+                  <td><strong>${row.stage}</strong></td>
+                  <td style="color:#fbbf24; white-space:nowrap;">${row.date}</td>
+                  <td><span class="badge-i">I</span></td>
+                  <td style="color:#cbd5e1;">${row.note}</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    html += `</div>`;
+    modalBody.innerHTML = html;
+  }
+
+  function renderTimelineGantt(cts, sys) {
+    return `
+      <div class="sched-timeline-view">
+        <div class="timeline-banner">
+          <div class="timeline-banner-text">
+            📌 <strong>ADVISOR-01 마일스톤</strong>: <span class="timeline-banner-highlight">8월 31일 전 실험 완결</span> ➔ 9월 논문 집필 ➔ <span class="timeline-banner-highlight">9월 25일경 ICLR 2027 제출</span>
+          </div>
+          <div style="font-size:0.82rem; color:#94a3b8;">오늘(8/7)은 두 프로젝트의 핵심 변곡점입니다</div>
+        </div>
+
+        <div class="sched-card">
+          <h3 style="margin-top:0; color:#38bdf8;">📅 8월~9월 전체 병렬 일정 타임라인 (Gantt View)</h3>
+          <table class="sched-table" style="margin-top:10px;">
+            <thead>
+              <tr>
+                <th style="width:22%;">기간 / 일시</th>
+                <th style="width:38%;">CTS (GPU 0·1)</th>
+                <th style="width:40%;">System 1.5 (GPU 2~5)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color:#34d399; font-weight:700;">8/6 ~ 8/7 <span class="badge-m">M</span></td>
+                <td>E2 기준점 확정 ➔ E1 스모크 통과 ➔ E1 본실험 greedy 5시드 완주</td>
+                <td>서버 세션 기동 ➔ S15-13 사전 차단 ➔ 회귀테스트 5건 전승 ➔ 2조a 통과</td>
+              </tr>
+              <tr>
+                <td style="color:#fbbf24; font-weight:700;">8/7 오늘 저녁~밤 <span class="badge-i">I</span></td>
+                <td>native_think 5시드 완주 (19:00~21:00) ➔ E1 데이터 수신</td>
+                <td>2조a v22 수신 ➔ run_evidence 배선 ➔ Stage 1 훈련 개시 (첫 100스텝 보고)</td>
+              </tr>
+              <tr>
+                <td style="color:#fbbf24; font-weight:700;">8/8 ~ 8/10 <span class="badge-i">I</span></td>
+                <td>E1 트랙 A 봉인 재채점 ➔ 본실험 delta 최종 판정</td>
+                <td>Stage 1 훈련 진행 (GPU 2~5) ➔ 100스텝 속도 기반 완주 속도 재산출</td>
+              </tr>
+              <tr>
+                <td style="color:#fbbf24; font-weight:700;">8/11 ~ 8/17 <span class="badge-i">I</span></td>
+                <td>E3(iso-depth) + E4(깊이 스윕) 병렬 진행 (트랙 B)</td>
+                <td>Stage 1 훈련 완료 및 검증 (~8/17)</td>
+              </tr>
+              <tr>
+                <td style="color:#fbbf24; font-weight:700;">8/18 ~ 8/24 <span class="badge-i">I</span></td>
+                <td>E5(패턴대조) + E6(디코드 20건) + B-1 해소</td>
+                <td>Stage 2 (FWP) 및 Stage 3 (Router) 훈련 진입</td>
+              </tr>
+              <tr>
+                <td style="color:#fbbf24; font-weight:700;">8/25 ~ 8/31 <span class="badge-i">I</span></td>
+                <td>E7(조건부) + 결과 최종 취합 ➔ <strong>실험 완결 (8/31)</strong></td>
+                <td>종합 벤치마크 평가 ➔ <strong>실험 완결 (8/31)</strong></td>
+              </tr>
+              <tr style="background:rgba(168, 85, 247, 0.1);">
+                <td style="color:#c084fc; font-weight:700;">9/1 ~ 9/25 <span class="badge-i">I</span></td>
+                <td colspan="2" style="text-align:center; font-weight:700; color:#e0e7ff;">
+                  ✍️ 논문 집필 (CTS 재제출본 + System 1.5 신규) ➔ <strong>ICLR 2027 정식 제출 (9월 25일경)</strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    `;
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initModal);
+  } else {
+    initModal();
+  }
+})();
