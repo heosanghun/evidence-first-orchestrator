@@ -1444,167 +1444,18 @@ function renderProjects(snapshot) {
 })();
 
 
-/* Schedule Matrix Modal Controller (v7.0.0) */
-(function setupScheduleMatrixModal() {
-  function initModal() {
-    const openBtn = document.getElementById("open-schedule-modal-btn");
-    const cardBtn = document.getElementById("card-schedule-modal-btn");
-    const closeBtn = document.getElementById("close-schedule-modal-btn");
-    const modal = document.getElementById("schedule-matrix-modal");
-    const modalBody = document.getElementById("schedule-matrix-body");
-    const filterBtns = document.querySelectorAll(".sched-filter-btn");
+/* Schedule Matrix Modal Global Controller (v7.2.0) */
+window.renderScheduleModalBody = function(filter) {
+  const modalBody = document.getElementById("schedule-matrix-body");
+  if (!modalBody) return;
 
-    if (!modal) return;
+  const data = window.demoData || {};
+  const sm = data.schedule_matrix || {};
+  const cts = sm.cts || { completed: [], estimated: [] };
+  const sys = sm.sys15 || { completed: [], estimated: [] };
 
-    let currentFilter = "all";
-
-    if (openBtn) openBtn.addEventListener("click", () => { modal.style.display = "flex"; renderModalBody(currentFilter); });
-    if (cardBtn) cardBtn.addEventListener("click", () => { modal.style.display = "flex"; renderModalBody(currentFilter); });
-    const dummyFn = () => {
-      modal.style.display = "flex";
-      renderModalBody(currentFilter);
-    });
-
-    if (closeBtn) {
-      closeBtn.addEventListener("click", () => {
-        modal.style.display = "none";
-      });
-    }
-
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.style.display = "none";
-      }
-    });
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && modal.style.display === "flex") {
-        modal.style.display = "none";
-      }
-    });
-
-    filterBtns.forEach(btn => {
-      btn.addEventListener("click", () => {
-        filterBtns.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-        currentFilter = btn.dataset.filter;
-        renderModalBody(currentFilter);
-      });
-    });
-  }
-
-  function renderModalBody(filter) {
-    const modalBody = document.getElementById("schedule-matrix-body");
-    if (!modalBody) return;
-
-    const data = window.demoData || {};
-    const sm = data.schedule_matrix || {};
-    const cts = sm.cts || { completed: [], estimated: [] };
-    const sys = sm.sys15 || { completed: [], estimated: [] };
-
-    if (filter === "timeline") {
-      modalBody.innerHTML = renderTimelineGantt(cts, sys);
-      return;
-    }
-
-    let html = `<div class="sched-grid">`;
-
-    if (filter === "all" || filter === "cts") {
-      html += `
-        <div class="sched-card">
-          <div class="sched-card-title">
-            <span class="tag-cts">🚀 CTS (GPU 0·1 전용)</span>
-            <span style="font-size:0.8rem; color:#94a3b8;">E1 ~ E7 완결 경로</span>
-          </div>
-
-          <div class="sched-section-title">✅ 완료 실적 [<span style="color:#34d399;">M - 실측</span>]</div>
-          <table class="sched-table">
-            <thead>
-              <tr><th>단계</th><th>완료일시</th><th>등급</th><th>비고</th></tr>
-            </thead>
-            <tbody>
-              ${cts.completed.map(row => `
-                <tr>
-                  <td><strong>${row.stage}</strong></td>
-                  <td style="color:#38bdf8; white-space:nowrap;">${row.date}</td>
-                  <td><span class="badge-m">M</span></td>
-                  <td style="color:#cbd5e1;">${row.note}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-
-          <div class="sched-section-title" style="margin-top:16px;">⏳ 향후 예상 [<span style="color:#fbbf24;">I - 추정</span>]</div>
-          <table class="sched-table">
-            <thead>
-              <tr><th>단계</th><th>예상완료</th><th>등급</th><th>비고</th></tr>
-            </thead>
-            <tbody>
-              ${cts.estimated.map(row => `
-                <tr>
-                  <td><strong>${row.stage}</strong></td>
-                  <td style="color:#fbbf24; white-space:nowrap;">${row.date}</td>
-                  <td><span class="badge-i">I</span></td>
-                  <td style="color:#cbd5e1;">${row.note}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
-      `;
-    }
-
-    if (filter === "all" || filter === "sys15") {
-      html += `
-        <div class="sched-card">
-          <div class="sched-card-title">
-            <span class="tag-sys">⚙️ System 1.5 (GPU 2~5 훈련/검증)</span>
-            <span style="font-size:0.8rem; color:#94a3b8;">Stage 1 ~ 3 경로</span>
-          </div>
-
-          <div class="sched-section-title">✅ 완료 실적 [<span style="color:#34d399;">M - 실측</span>]</div>
-          <table class="sched-table">
-            <thead>
-              <tr><th>단계</th><th>완료일시</th><th>등급</th><th>비고</th></tr>
-            </thead>
-            <tbody>
-              ${sys.completed.map(row => `
-                <tr>
-                  <td><strong>${row.stage}</strong></td>
-                  <td style="color:#c084fc; white-space:nowrap;">${row.date}</td>
-                  <td><span class="badge-m">M</span></td>
-                  <td style="color:#cbd5e1;">${row.note}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-
-          <div class="sched-section-title" style="margin-top:16px;">⏳ 향후 예상 [<span style="color:#fbbf24;">I - 추정</span>]</div>
-          <table class="sched-table">
-            <thead>
-              <tr><th>단계</th><th>예상완료</th><th>등급</th><th>비고</th></tr>
-            </thead>
-            <tbody>
-              ${sys.estimated.map(row => `
-                <tr>
-                  <td><strong>${row.stage}</strong></td>
-                  <td style="color:#fbbf24; white-space:nowrap;">${row.date}</td>
-                  <td><span class="badge-i">I</span></td>
-                  <td style="color:#cbd5e1;">${row.note}</td>
-                </tr>
-              `).join("")}
-            </tbody>
-          </table>
-        </div>
-      `;
-    }
-
-    html += `</div>`;
-    modalBody.innerHTML = html;
-  }
-
-  function renderTimelineGantt(cts, sys) {
-    return `
+  if (filter === "timeline") {
+    modalBody.innerHTML = `
       <div class="sched-timeline-view">
         <div class="timeline-banner">
           <div class="timeline-banner-text">
@@ -1665,11 +1516,151 @@ function renderProjects(snapshot) {
         </div>
       </div>
     `;
+    return;
   }
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initModal);
-  } else {
-    initModal();
+  let html = `<div class="sched-grid">`;
+
+  if (filter === "all" || filter === "cts") {
+    html += `
+      <div class="sched-card">
+        <div class="sched-card-title">
+          <span class="tag-cts">🚀 CTS (GPU 0·1 전용)</span>
+          <span style="font-size:0.8rem; color:#94a3b8;">E1 ~ E7 완결 경로</span>
+        </div>
+
+        <div class="sched-section-title">✅ 완료 실적 [<span style="color:#34d399;">M - 실측</span>]</div>
+        <table class="sched-table">
+          <thead>
+            <tr><th>단계</th><th>완료일시</th><th>등급</th><th>비고</th></tr>
+          </thead>
+          <tbody>
+            ${(cts.completed || []).map(row => `
+              <tr>
+                <td><strong>${row.stage}</strong></td>
+                <td style="color:#38bdf8; white-space:nowrap;">${row.date}</td>
+                <td><span class="badge-m">M</span></td>
+                <td style="color:#cbd5e1;">${row.note}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+
+        <div class="sched-section-title" style="margin-top:16px;">⏳ 향후 예상 [<span style="color:#fbbf24;">I - 추정</span>]</div>
+        <table class="sched-table">
+          <thead>
+            <tr><th>단계</th><th>예상완료</th><th>등급</th><th>비고</th></tr>
+          </thead>
+          <tbody>
+            ${(cts.estimated || []).map(row => `
+              <tr>
+                <td><strong>${row.stage}</strong></td>
+                <td style="color:#fbbf24; white-space:nowrap;">${row.date}</td>
+                <td><span class="badge-i">I</span></td>
+                <td style="color:#cbd5e1;">${row.note}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
   }
-})();
+
+  if (filter === "all" || filter === "sys15") {
+    html += `
+      <div class="sched-card">
+        <div class="sched-card-title">
+          <span class="tag-sys">⚙️ System 1.5 (GPU 2~5 훈련/검증)</span>
+          <span style="font-size:0.8rem; color:#94a3b8;">Stage 1 ~ 3 경로</span>
+        </div>
+
+        <div class="sched-section-title">✅ 완료 실적 [<span style="color:#34d399;">M - 실측</span>]</div>
+        <table class="sched-table">
+          <thead>
+            <tr><th>단계</th><th>완료일시</th><th>등급</th><th>비고</th></tr>
+          </thead>
+          <tbody>
+            ${(sys.completed || []).map(row => `
+              <tr>
+                <td><strong>${row.stage}</strong></td>
+                <td style="color:#c084fc; white-space:nowrap;">${row.date}</td>
+                <td><span class="badge-m">M</span></td>
+                <td style="color:#cbd5e1;">${row.note}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+
+        <div class="sched-section-title" style="margin-top:16px;">⏳ 향후 예상 [<span style="color:#fbbf24;">I - 추정</span>]</div>
+        <table class="sched-table">
+          <thead>
+            <tr><th>단계</th><th>예상완료</th><th>등급</th><th>비고</th></tr>
+          </thead>
+          <tbody>
+            ${(sys.estimated || []).map(row => `
+              <tr>
+                <td><strong>${row.stage}</strong></td>
+                <td style="color:#fbbf24; white-space:nowrap;">${row.date}</td>
+                <td><span class="badge-i">I</span></td>
+                <td style="color:#cbd5e1;">${row.note}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  html += `</div>`;
+  modalBody.innerHTML = html;
+};
+
+// Global Event Delegation for Schedule Modal
+document.addEventListener("click", function(e) {
+  const triggerBtn = e.target.closest("#open-schedule-modal-btn, #card-schedule-modal-btn, .schedule-modal-btn, .card-schedule-btn");
+  if (triggerBtn) {
+    e.preventDefault();
+    e.stopPropagation();
+    const modal = document.getElementById("schedule-matrix-modal");
+    if (modal) {
+      modal.style.display = "flex";
+      modal.classList.add("active");
+      window.renderScheduleModalBody("all");
+    }
+    return;
+  }
+
+  const closeBtn = e.target.closest("#close-schedule-modal-btn, .modal-close-btn");
+  if (closeBtn) {
+    const modal = document.getElementById("schedule-matrix-modal");
+    if (modal) {
+      modal.style.display = "none";
+      modal.classList.remove("active");
+    }
+    return;
+  }
+
+  const filterBtn = e.target.closest(".sched-filter-btn");
+  if (filterBtn) {
+    document.querySelectorAll(".sched-filter-btn").forEach(b => b.classList.remove("active"));
+    filterBtn.classList.add("active");
+    window.renderScheduleModalBody(filterBtn.dataset.filter || "all");
+    return;
+  }
+
+  const modalOverlay = document.getElementById("schedule-matrix-modal");
+  if (modalOverlay && e.target === modalOverlay) {
+    modalOverlay.style.display = "none";
+    modalOverlay.classList.remove("active");
+  }
+});
+
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Escape") {
+    const modalOverlay = document.getElementById("schedule-matrix-modal");
+    if (modalOverlay) {
+      modalOverlay.style.display = "none";
+      modalOverlay.classList.remove("active");
+    }
+  }
+});

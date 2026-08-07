@@ -3340,3 +3340,30 @@ dialog input:focus {
   0%, 100% { box-shadow: 0 4px 14px rgba(168, 85, 247, 0.4); }
   50% { box-shadow: 0 4px 22px rgba(168, 85, 247, 0.7); }
 }
+
+
+/* Schedule Matrix Modal CSS Fix (v7.2.0) */
+#schedule-matrix-modal.modal-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 999999 !important;
+  background: rgba(15, 23, 42, 0.88) !important;
+  backdrop-filter: blur(12px) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
+}
+
+#schedule-matrix-modal.modal-overlay.active,
+#schedule-matrix-modal.modal-overlay[style*="display: flex"] {
+  display: flex !important;
+}
+
+.card-schedule-btn, #card-schedule-modal-btn, #open-schedule-modal-btn {
+  cursor: pointer !important;
+  pointer-events: auto !important;
+}
