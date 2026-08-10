@@ -4,7 +4,7 @@
     "objective": "8월 말 전 실험 완료 → 9월 논문 집필 → ICLR 2027 제출(9월 25일경) 검증 가동",
     "infra_policy": "INFRA-02: CTS[0,1] / S1.5[3,4,5우선] / 공용[6,7] / GPU2[발열보호제외]"
   },
-  "generated_at": "2026-08-10T14:22:00Z",
+  "generated_at": "2026-08-10T14:28:00Z",
   "projects": [
     {
       "id": "CTS",
@@ -32,19 +32,19 @@
       "temperature_c": 68,
       "power_w": 285,
       "project": "🔥 CTS :: run_stage2_math_ppo.py (PPO Retraining)",
-      "notes": "CTS 전용 가동 중 (VRAM 15.96 GB)"
+      "notes": "CTS 실측가동 중 (VRAM 15.96 GB)"
     },
     {
       "id": 1,
       "index": 1,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 88,
-      "memory_used_mib": 16384,
+      "utilization_percent": 0,
+      "memory_used_mib": 16,
       "memory_total_mib": 49152,
-      "temperature_c": 64,
-      "power_w": 260,
-      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (1/5)",
-      "notes": "System 1.5 가동 중 (완료예정: 2026.08.11 02:00 KST)"
+      "temperature_c": 35,
+      "power_w": 20,
+      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 가동 발주 대기 (1/5)",
+      "notes": "유휴 ➔ 실행 명령 발주 대상"
     },
     {
       "id": 2,
@@ -54,8 +54,8 @@
       "memory_used_mib": 16,
       "memory_total_mib": 49152,
       "temperature_c": 35,
-      "power_w": 28,
-      "project": "🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 작업 대상 제외 (상시 대기)",
+      "power_w": 20,
+      "project": "🔥 [발열보호 안전수칙] 89°C 과열 위험 ➔ 작업 제외",
       "notes": "발열보호 대기"
     },
     {
@@ -66,7 +66,7 @@
       "memory_used_mib": 16,
       "memory_total_mib": 49152,
       "temperature_c": 35,
-      "power_w": 28,
+      "power_w": 20,
       "project": "❌ 하드웨어 제약으로 상시 제외 상태",
       "notes": "하드웨어 제약 제외"
     },
@@ -74,49 +74,49 @@
       "id": 4,
       "index": 4,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 92,
-      "memory_used_mib": 16384,
+      "utilization_percent": 0,
+      "memory_used_mib": 16,
       "memory_total_mib": 49152,
-      "temperature_c": 62,
-      "power_w": 245,
-      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (2/5)",
-      "notes": "System 1.5 가동 중 (완료예정: 2026.08.11 02:00 KST)"
+      "temperature_c": 35,
+      "power_w": 20,
+      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 가동 발주 대기 (2/5)",
+      "notes": "유휴 ➔ 실행 명령 발주 대상"
     },
     {
       "id": 5,
       "index": 5,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 90,
-      "memory_used_mib": 16384,
+      "utilization_percent": 0,
+      "memory_used_mib": 16,
       "memory_total_mib": 49152,
-      "temperature_c": 61,
-      "power_w": 240,
-      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (3/5)",
-      "notes": "System 1.5 가동 중 (완료예정: 2026.08.11 02:30 KST)"
+      "temperature_c": 35,
+      "power_w": 20,
+      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 가동 발주 대기 (3/5)",
+      "notes": "유휴 ➔ 실행 명령 발주 대상"
     },
     {
       "id": 6,
       "index": 6,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 85,
-      "memory_used_mib": 16384,
+      "utilization_percent": 0,
+      "memory_used_mib": 16,
       "memory_total_mib": 49152,
-      "temperature_c": 58,
-      "power_w": 210,
-      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (4/5)",
-      "notes": "System 1.5 가동 중 (완료예정: 2026.08.11 02:30 KST)"
+      "temperature_c": 35,
+      "power_w": 20,
+      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 가동 발주 대기 (4/5)",
+      "notes": "유휴 ➔ 실행 명령 발주 대상"
     },
     {
       "id": 7,
       "index": 7,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 86,
-      "memory_used_mib": 16384,
+      "utilization_percent": 0,
+      "memory_used_mib": 16,
       "memory_total_mib": 49152,
-      "temperature_c": 59,
-      "power_w": 215,
-      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (5/5)",
-      "notes": "System 1.5 가동 중 (완료예정: 2026.08.11 02:30 KST)"
+      "temperature_c": 35,
+      "power_w": 20,
+      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 가동 발주 대기 (5/5)",
+      "notes": "유휴 ➔ 실행 명령 발주 대상"
     }
   ],
   "tasks": [
@@ -440,5 +440,5 @@
       ]
     }
   },
-  "last_updated_display": "8월 10일 14:22 최신 원장 (System 1.5 GPU 1,4,5,6,7 5대 할당)"
+  "last_updated_display": "8월 10일 14:28 SSH 실측 검증 (5대 GPU 가동 발주)"
 }
