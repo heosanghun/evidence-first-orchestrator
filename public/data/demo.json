@@ -4,7 +4,7 @@
     "objective": "8월 말 전 실험 완료 → 9월 논문 집필 → ICLR 2027 제출(9월 25일경) 검증 가동",
     "infra_policy": "INFRA-02: CTS[0,1] / S1.5[3,4,5우선] / 공용[6,7] / GPU2[발열보호제외]"
   },
-  "generated_at": "2026-08-10T14:28:00Z",
+  "generated_at": "2026-08-10T14:37:00Z",
   "projects": [
     {
       "id": "CTS",
@@ -26,25 +26,25 @@
       "id": 0,
       "index": 0,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 94,
-      "memory_used_mib": 16343,
-      "memory_total_mib": 49152,
-      "temperature_c": 68,
-      "power_w": 285,
+      "utilization_percent": 98,
+      "memory_used_mib": 16382,
+      "memory_total_mib": 49140,
+      "temperature_c": 46,
+      "power_w": 118,
       "project": "🔥 CTS :: run_stage2_math_ppo.py (PPO Retraining)",
-      "notes": "CTS 실측가동 중 (VRAM 15.96 GB)"
+      "notes": "CTS 실측가동 중 (VRAM 16.38 GB)"
     },
     {
       "id": 1,
       "index": 1,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 0,
-      "memory_used_mib": 16,
-      "memory_total_mib": 49152,
-      "temperature_c": 35,
-      "power_w": 20,
-      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 가동 발주 대기 (1/5)",
-      "notes": "유휴 ➔ 실행 명령 발주 대상"
+      "utilization_percent": 100,
+      "memory_used_mib": 47384,
+      "memory_total_mib": 49140,
+      "temperature_c": 48,
+      "power_w": 129,
+      "project": "⚡ System 1.5 :: DDP 5개 워커 병렬 800스텝 훈련 (PID 3515925~3515929)",
+      "notes": "System 1.5 DDP 5배 가속 중 (VRAM 47.38 GB / 100%)"
     },
     {
       "id": 2,
@@ -52,9 +52,9 @@
       "name": "NVIDIA RTX A6000",
       "utilization_percent": 0,
       "memory_used_mib": 16,
-      "memory_total_mib": 49152,
-      "temperature_c": 35,
-      "power_w": 20,
+      "memory_total_mib": 49140,
+      "temperature_c": 31,
+      "power_w": 26,
       "project": "🔥 [발열보호 안전수칙] 89°C 과열 위험 ➔ 작업 제외",
       "notes": "발열보호 대기"
     },
@@ -64,9 +64,9 @@
       "name": "NVIDIA RTX A6000",
       "utilization_percent": 0,
       "memory_used_mib": 16,
-      "memory_total_mib": 49152,
-      "temperature_c": 35,
-      "power_w": 20,
+      "memory_total_mib": 49140,
+      "temperature_c": 33,
+      "power_w": 21,
       "project": "❌ 하드웨어 제약으로 상시 제외 상태",
       "notes": "하드웨어 제약 제외"
     },
@@ -74,49 +74,49 @@
       "id": 4,
       "index": 4,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 0,
+      "utilization_percent": 100,
       "memory_used_mib": 16,
-      "memory_total_mib": 49152,
-      "temperature_c": 35,
-      "power_w": 20,
-      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 가동 발주 대기 (2/5)",
-      "notes": "유휴 ➔ 실행 명령 발주 대상"
+      "memory_total_mib": 49140,
+      "temperature_c": 30,
+      "power_w": 27,
+      "project": "⚡ System 1.5 :: DDP 분산 병렬 연동 워커 (2/5)",
+      "notes": "DDP 워커 병렬 연산 가속 중"
     },
     {
       "id": 5,
       "index": 5,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 0,
+      "utilization_percent": 100,
       "memory_used_mib": 16,
-      "memory_total_mib": 49152,
-      "temperature_c": 35,
-      "power_w": 20,
-      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 가동 발주 대기 (3/5)",
-      "notes": "유휴 ➔ 실행 명령 발주 대상"
+      "memory_total_mib": 49140,
+      "temperature_c": 31,
+      "power_w": 21,
+      "project": "⚡ System 1.5 :: DDP 분산 병렬 연동 워커 (3/5)",
+      "notes": "DDP 워커 병렬 연산 가속 중"
     },
     {
       "id": 6,
       "index": 6,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 0,
+      "utilization_percent": 100,
       "memory_used_mib": 16,
-      "memory_total_mib": 49152,
-      "temperature_c": 35,
+      "memory_total_mib": 49140,
+      "temperature_c": 32,
       "power_w": 20,
-      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 가동 발주 대기 (4/5)",
-      "notes": "유휴 ➔ 실행 명령 발주 대상"
+      "project": "⚡ System 1.5 :: DDP 분산 병렬 연동 워커 (4/5)",
+      "notes": "DDP 워커 병렬 연산 가속 중"
     },
     {
       "id": 7,
       "index": 7,
       "name": "NVIDIA RTX A6000",
-      "utilization_percent": 0,
+      "utilization_percent": 100,
       "memory_used_mib": 16,
-      "memory_total_mib": 49152,
-      "temperature_c": 35,
-      "power_w": 20,
-      "project": "⚡ System 1.5 :: 5대 병렬 800스텝 가동 발주 대기 (5/5)",
-      "notes": "유휴 ➔ 실행 명령 발주 대상"
+      "memory_total_mib": 49140,
+      "temperature_c": 32,
+      "power_w": 25,
+      "project": "⚡ System 1.5 :: DDP 분산 병렬 연동 워커 (5/5)",
+      "notes": "DDP 워커 병렬 연산 가속 중"
     }
   ],
   "tasks": [
@@ -440,5 +440,5 @@
       ]
     }
   },
-  "last_updated_display": "8월 10일 14:28 SSH 실측 검증 (5대 GPU 가동 발주)"
+  "last_updated_display": "8월 10일 14:37 DDP 5배 가속 실측 가동 원장"
 }
