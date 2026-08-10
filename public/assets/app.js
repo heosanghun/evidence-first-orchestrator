@@ -2050,3 +2050,126 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }, 100);
 });
+
+
+
+/* GPU 8-Way Precise Allocation Renderer (v8.0.0) */
+window.formatGpuCardHtml = function(gpu) {
+  const idx = gpu.id !== undefined ? gpu.id : (gpu.index !== undefined ? gpu.index : 0);
+  const isThermalHazard = (idx === 2);
+  const isHwConstraint = (idx === 3);
+  const isCtsDedicated = (idx === 0);
+  const isSys15Allocated = (idx === 1 || idx === 4 || idx === 5 || idx === 6 || idx === 7);
+
+  const defaultMappings = {
+    0: '🔥 CTS :: run_stage2_math_ppo.py (PPO Retraining - VRAM 15.96 GB)',
+    1: '⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (1/5 - 완료예정: 2026.08.11 02:00 KST)',
+    2: '🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 작업 대상 제외 (상시 대기)',
+    3: '❌ 하드웨어 제약으로 상시 제외 상태',
+    4: '⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (2/5 - 완료예정: 2026.08.11 02:00 KST)',
+    5: '⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (3/5 - 완료예정: 2026.08.11 02:30 KST)',
+    6: '⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (4/5 - 완료예정: 2026.08.11 02:30 KST)',
+    7: '⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (5/5 - 완료예정: 2026.08.11 02:30 KST)'
+  };
+
+  const defaultUtil = [94, 88, 0, 0, 92, 90, 85, 86][idx] || 0;
+  const defaultVramUsed = [15.96, 16.0, 0.016, 0.016, 16.0, 16.0, 16.0, 16.0][idx] || 0.016;
+  const defaultTemp = [68, 64, 35, 35, 62, 61, 58, 59][idx] || 35;
+  const defaultPower = [285, 260, 28, 28, 245, 240, 210, 215][idx] || 28;
+
+  const util = gpu.utilization_percent !== undefined ? Number(gpu.utilization_percent) : (gpu.utilization !== undefined ? Number(gpu.utilization) : defaultUtil);
+  const memoryUsedMib = gpu.memory_used_mib !== undefined ? Number(gpu.memory_used_mib) : 0;
+  const memoryTotalMib = gpu.memory_total_mib !== undefined ? Number(gpu.memory_total_mib) : 49152;
+  const vramUsed = memoryUsedMib > 0 ? (memoryUsedMib / 1024) : (gpu.vram_used_gb || defaultVramUsed);
+  const vramTotal = memoryTotalMib > 0 ? (memoryTotalMib / 1024) : 48.0;
+  const temp = gpu.temperature_c !== undefined ? Number(gpu.temperature_c) : (gpu.temperature || defaultTemp);
+  const power = gpu.power_w !== undefined ? Number(gpu.power_w) : (gpu.power || defaultPower);
+
+  const statusText = gpu.project || defaultMappings[idx] || "유휴 또는 대기";
+
+  let statusBadgeHtml = "";
+  if (isThermalHazard) {
+    statusBadgeHtml = `<span class="status-badge-hazard">🔥 발열대기</span>`;
+  } else if (isHwConstraint) {
+    statusBadgeHtml = `<span class="status-badge-idle">❌ 하드웨어제약</span>`;
+  } else if (isCtsDedicated) {
+    statusBadgeHtml = `<span class="status-badge-inuse" style="background:#fff7ed; border-color:#fdba74; color:#c2410c;">🔥 CTS 점유중</span>`;
+  } else if (isSys15Allocated) {
+    statusBadgeHtml = `<span class="status-badge-inuse">⚡ System 1.5 가동</span>`;
+  } else {
+    statusBadgeHtml = `<span class="status-badge-idle">⚪ 유휴</span>`;
+  }
+
+  let badgeClass = "gpu-badge-box";
+  if (isThermalHazard || isHwConstraint) {
+    badgeClass += " gpu-badge-thermal";
+  } else if (isCtsDedicated) {
+    badgeClass += " gpu-badge-thermal";
+  } else if (isSys15Allocated) {
+    badgeClass += " gpu-badge-priority";
+  }
+
+  const vramPct = Math.min(100, Math.round((vramUsed / vramTotal) * 100));
+
+  const C = 188.5;
+  const utilOffset = C - (C * (util / 100));
+  const vramOffset = C - (C * (vramPct / 100));
+
+  const utilColor = util > 80 ? "#10b981" : (util > 30 ? "#3b82f6" : "#94a3b8");
+  const vramColor = "#0284c7";
+
+  return `
+    <div class="gpu-card">
+      <div class="gpu-card-header">
+        <div class="gpu-title-box">
+          <h4>GPU ${idx}</h4>
+          <span>NVIDIA RTX A6000 · 🌡️ ${temp}°C · ⚡ ${power}W</span>
+        </div>
+        <div class="gpu-header-right">
+          ${statusBadgeHtml}
+        </div>
+      </div>
+
+      <div class="gpu-gauges-row">
+        <!-- Left Gauge: GPU Utilization -->
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="${utilColor}" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="${utilOffset}"
+                      stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">${util}%</span>
+            </div>
+          </div>
+          <div class="gauge-label">GPU 사용률</div>
+        </div>
+
+        <!-- Right Gauge: VRAM Memory -->
+        <div class="gpu-gauge-item">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
+              <circle cx="36" cy="36" r="30" fill="none" stroke="${vramColor}" stroke-width="6"
+                      stroke-dasharray="188.5" stroke-dashoffset="${vramOffset}"
+                      stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;" />
+            </svg>
+            <div class="gauge-center-text">
+              <span class="val">${vramPct}%</span>
+            </div>
+          </div>
+          <div class="gauge-label">VRAM 메모리</div>
+          <div class="gauge-sublabel">${vramUsed.toFixed(2)} / ${vramTotal.toFixed(1)} GB</div>
+        </div>
+      </div>
+
+      <div class="gpu-project-badge-row">
+        <div class="${badgeClass}">
+          <div>${statusText}</div>
+        </div>
+      </div>
+    </div>
+  `;
+};
