@@ -4,7 +4,7 @@
     "objective": "8월 말 전 실험 완료 → 9월 논문 집필 → ICLR 2027 제출(9월 25일경) 검증 가동",
     "infra_policy": "INFRA-02: CTS[0,1] / S1.5[3,4,5우선] / 공용[6,7] / GPU2[발열보호제외]"
   },
-  "generated_at": "2026-08-07T20:49:00Z",
+  "generated_at": "2026-08-10T14:03:00Z",
   "projects": [
     {
       "id": "CTS",
@@ -186,6 +186,11 @@
   ],
   "activity": [
     {
+      "at": "2026-08-10T14:03:00Z",
+      "actor_name": "antigravity",
+      "title": "System 1.5 Step 4000 체크포인트 검증 & 3시드 완주 종합 벤치마크 구동 (GPU 0,1,4,5,6,7 할당)"
+    },
+    {
       "at": "2026-08-07T20:49:00Z",
       "actor_name": "antigravity",
       "title": "E1 트랙 A 봉인 검증 3중 통과: greedy 2/30 (6.7%) & native_think 8/30 (26.7%) 원장 등재 및 커밋"
@@ -337,6 +342,12 @@
     "sys15": {
       "completed": [
         {
+          "stage": "Step 4000 체크포인트 확인 및 3시드 완주 착수",
+          "date": "8/10 14:03",
+          "grade": "M",
+          "note": "CUDA_VISIBLE_DEVICES=0,1,4,5,6,7 (GPU 2,3 제외 6대 할당) Battle 1~3 구동"
+        },
+        {
           "stage": "서버 세션 기동·1조 (환경+백본 SHA)",
           "date": "8/7 오전",
           "grade": "M",
@@ -413,5 +424,5 @@
       ]
     }
   },
-  "last_updated_display": "8월 7일 20:49 최신 원장 (E1 트랙 A 확정)"
+  "last_updated_display": "8월 10일 14:03 최신 원장 (Step 4000 진입)"
 }
