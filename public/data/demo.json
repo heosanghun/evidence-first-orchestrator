@@ -4,7 +4,7 @@
     "objective": "8월 말 전 실험 완료 → 9월 논문 집필 → ICLR 2027 제출(9월 25일경) 검증 가동",
     "infra_policy": "INFRA-02: CTS[0,1] / S1.5[3,4,5우선] / 공용[6,7] / GPU2[발열보호제외]"
   },
-  "generated_at": "2026-08-10T14:03:00Z",
+  "generated_at": "2026-08-10T14:11:00Z",
   "projects": [
     {
       "id": "CTS",
@@ -186,6 +186,11 @@
   ],
   "activity": [
     {
+      "at": "2026-08-10T14:11:00Z",
+      "actor_name": "antigravity",
+      "title": "GPU 5대 병렬 800스텝(32,000샘플 완주) 정밀 훈련 및 3시드 벤치마크 평가 즉시 구동"
+    },
+    {
       "at": "2026-08-10T14:03:00Z",
       "actor_name": "antigravity",
       "title": "System 1.5 Step 4000 체크포인트 검증 & 3시드 완주 종합 벤치마크 구동 (GPU 0,1,4,5,6,7 할당)"
@@ -342,6 +347,12 @@
     "sys15": {
       "completed": [
         {
+          "stage": "GPU 5대 병렬 800스텝 (32,000 샘플 완주) 훈련 구동",
+          "date": "8/10 14:11",
+          "grade": "M",
+          "note": "CUDA_VISIBLE_DEVICES=0,1,4,5,6 (GPU 5대, 글로벌 배치 40) 800스텝 + 3시드 평가"
+        },
+        {
           "stage": "Step 4000 체크포인트 확인 및 3시드 완주 착수",
           "date": "8/10 14:03",
           "grade": "M",
@@ -424,5 +435,5 @@
       ]
     }
   },
-  "last_updated_display": "8월 10일 14:03 최신 원장 (Step 4000 진입)"
+  "last_updated_display": "8월 10일 14:11 최신 원장 (5대 GPU 800스텝 구동)"
 }
