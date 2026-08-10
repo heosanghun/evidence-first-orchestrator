@@ -1,51 +1,11 @@
-const EMERGENCY_STATIC_SNAPSHOT = {
-  generated_at: "2026-08-06T11:15:00Z",
-  workspace: {
-    name: "CTS & System 1.5",
-    objective: "검증 가능한 근거를 남기며 CTS, System 1.5 연구를 완성합니다.",
-    workflow_progress_percent: 65.0
-  },
-  agents: [
-    { id: "antigravity", name: "antigravity (수석에이전트)", role: "원장기록·문서작성·E2-R2사전등록", state: "verified", current: "E2-R2 v4 사전등록 봉인 완수", progress_percent: 100 },
-    { id: "claude-a", name: "claude-a (주실행자)", role: "E2-R2 9문항 물리 추론 및 채점", state: "running", current: "GPU 0~1 9문항(24k tokens) 실측 추론 중", progress_percent: 70 },
-    { id: "claude-b", name: "claude-b (보조실행자)", role: "System 1.5 Stage 1 DEQ 파이프라인", state: "running", current: "Stage 1 Broyden Solver 물리 훈련", progress_percent: 60 },
-    { id: "worker", name: "antigravity-worker", role: "사전등록 검증 게이트 감시", state: "verified", current: "사전등록 5대 검증 게이트 100% 통과", progress_percent: 100 }
-  ],
-  gpus: [
-    { index: 0, name: "NVIDIA RTX A6000", utilization_percent: 94, memory_used_mib: 18800, memory_total_mib: 49152, temperature_c: 68, power_w: 285 },
-    { index: 1, name: "NVIDIA RTX A6000", utilization_percent: 88, memory_used_mib: 16400, memory_total_mib: 49152, temperature_c: 64, power_w: 260 },
-    { index: 2, name: "NVIDIA RTX A6000", utilization_percent: 72, memory_used_mib: 14200, memory_total_mib: 49152, temperature_c: 62, power_w: 230 },
-    { index: 3, name: "NVIDIA RTX A6000", utilization_percent: 65, memory_used_mib: 12800, memory_total_mib: 49152, temperature_c: 59, power_w: 210 },
-    { index: 4, name: "NVIDIA RTX A6000", utilization_percent: 0, memory_used_mib: 2100, memory_total_mib: 49152, temperature_c: 42, power_w: 45 },
-    { index: 5, name: "NVIDIA RTX A6000", utilization_percent: 0, memory_used_mib: 2100, memory_total_mib: 49152, temperature_c: 41, power_w: 44 },
-    { index: 6, name: "NVIDIA RTX A6000", utilization_percent: 40, memory_used_mib: 8500, memory_total_mib: 49152, temperature_c: 51, power_w: 140 },
-    { index: 7, name: "NVIDIA RTX A6000", utilization_percent: 35, memory_used_mib: 7200, memory_total_mib: 49152, temperature_c: 49, power_w: 125 }
-  ],
-  tasks: [
-    { id: "CTS-P0", title: "CTS :: Phase 0 (강등·출처추적 및 경우A)", owner: "antigravity", state: "verified", progress_percent: 100, next: "Phase 1 백본확정 및 Gemma 4 키트 동결", updated_at: "2026-08-06T09:33:00Z" },
-    { id: "CTS-P1", title: "CTS :: Phase 1 (백본확정 및 Gemma 4)", owner: "antigravity", state: "verified", progress_percent: 100, next: "Phase 2 E2 Baseline 1차 실측 완주", updated_at: "2026-08-06T09:33:00Z" },
-    { id: "CTS-P2-E2", title: "CTS :: Phase 2 (E2 Baseline Verified)", owner: "claude", state: "submitted", progress_percent: 70, next: "E2-R2 9문항(24k tokens) 사전등록 v4 봉인 완수", updated_at: "2026-08-06T09:33:00Z" },
-    { id: "SYS15-P0", title: "System 1.5 :: Phase 0 (PoC 모듈 설계 & JFB)", owner: "antigravity", state: "verified", progress_percent: 100, next: "Phase 1 Stage 1 DEQ Broyden Solver 물리 훈련", updated_at: "2026-08-06T09:33:00Z" },
-    { id: "SYS15-P1", title: "System 1.5 :: Phase 1 (Stage 1 DEQ Broyden Solver)", owner: "claude", state: "working", progress_percent: 60, next: "Stage 2 Fast Weight Program ΔW 메모리 결합", updated_at: "2026-08-06T09:33:00Z" }
-  ],
-  activity: [
-    { sequence: 1, at: "2026-08-06T09:33:00Z", actor: "antigravity", actor_name: "antigravity", title: "E2-R2 사전등록 preregistration/E2_R2_v4.yaml 9문항 봉인 완료", label: "사전등록 봉인", category: "proof" },
-    { sequence: 2, at: "2026-08-06T01:58:00Z", actor: "claude-a", actor_name: "claude-a", title: "E2 Baseline 1차 30문항 실측 완주 (8/30 엄격, 10/30 보강)", label: "실측 완주", category: "proof" },
-    { sequence: 3, at: "2026-08-05T16:16:00Z", actor: "claude-a", actor_name: "claude-a", title: "E2-MAIN 30문항 물리실측 9시간 42분 완주 달성", label: "물리실측 완주", category: "execution" },
-    { sequence: 4, at: "2026-08-04T13:12:00Z", actor: "antigravity", actor_name: "antigravity", title: "E2-SMOKE 3-proof 검증 완료 및 원장 서명 완료", label: "원장서명 완료", category: "proof" }
-  ],
-  system: {
-    memory: { used_gib: 24.5, total_gib: 128.0, percent: 19.1 },
-    disk: { used_gib: 65.0, total_gib: 500.0, percent: 13.0 },
-    load_1m: 1.45,
-    uptime_seconds: 864000
-  }
-};
-
 const API_URL = "/api/snapshot";
+const CHAT_API_URL = "/api/chat";
+const LOCAL_HEALTH_API_URL = "/api/local-health";
 const DEMO_URL = "/data/demo.json";
 const REFRESH_INTERVAL_MS = 15_000;
 const TOKEN_KEY = "efo-view-token";
+const CHAT_HISTORY_KEY = "efo-chat-history";
+const CHAT_HISTORY_LIMIT = 20;
 const SVG_NS = "http://www.w3.org/2000/svg";
 const HOUR_MS = 60 * 60 * 1000;
 const ACTIVITY_RANGE_LABELS = {
@@ -85,6 +45,8 @@ const elements = Object.fromEntries(
     "overall-progress-label",
     "overall-progress",
     "next-milestone",
+    "project-count",
+    "project-grid",
     "kpi-agents",
     "kpi-agents-note",
     "kpi-tasks",
@@ -125,10 +87,30 @@ const elements = Object.fromEntries(
     "system-load",
     "system-uptime",
     "collection-interval",
+    "local-health-updated",
+    "local-stress-card",
+    "local-stress-label",
+    "local-stress",
+    "local-stress-status",
+    "local-cpu-label",
+    "local-cpu",
+    "local-memory-label",
+    "local-memory",
+    "local-disk-label",
+    "local-disk",
+    "local-device",
+    "local-uptime",
+    "local-processes",
     "task-count",
     "task-table",
     "alerts-section",
     "alerts-list",
+    "chat-mode",
+    "chat-log",
+    "chat-form",
+    "chat-input",
+    "chat-send",
+    "chat-status",
     "source-mode",
     "schema-version",
     "access-dialog",
@@ -146,6 +128,7 @@ let lastSnapshot = null;
 let refreshTimer = null;
 let toastTimer = null;
 let activityRangeHours = 24;
+let chatHistory = loadChatHistory();
 
 function clamp(value, minimum = 0, maximum = 100) {
   const number = Number(value);
@@ -172,8 +155,7 @@ function formatPercent(value, digits = 0) {
 }
 
 function formatGiB(value, digits = 1) {
-  const gbVal = number(value) * 1.073741824;
-  return `${gbVal.toFixed(digits)} GB`;
+  return `${number(value).toFixed(digits)} GiB`;
 }
 
 function formatClock(value) {
@@ -264,7 +246,7 @@ function stateLabel(state) {
 
 function normalizeAgentState(state) {
   const normalized = String(state || "").toLowerCase();
-  if (["working", "running", "claimed", "active"].includes(normalized)) return "working";
+  if (["working", "running", "claimed"].includes(normalized)) return "working";
   if (["waiting", "pending", "idle", "submitted", "verified"].includes(normalized)) {
     return "waiting";
   }
@@ -282,11 +264,90 @@ function showToast(message, tone = "default") {
   toastTimer = setTimeout(() => elements.toast.classList.remove("visible"), 3200);
 }
 
+function loadChatHistory() {
+  try {
+    const stored = JSON.parse(sessionStorage.getItem(CHAT_HISTORY_KEY) || "[]");
+    if (!Array.isArray(stored)) return [];
+    return stored
+      .slice(-CHAT_HISTORY_LIMIT)
+      .filter(
+        (item) =>
+          ["user", "assistant"].includes(item?.role) &&
+          typeof item?.content === "string",
+      )
+      .map((item) => ({
+        role: item.role,
+        content: item.content.slice(0, 6000),
+        at: item.at || new Date().toISOString(),
+        mode: item.mode || "",
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function saveChatHistory() {
+  try {
+    sessionStorage.setItem(
+      CHAT_HISTORY_KEY,
+      JSON.stringify(chatHistory.slice(-CHAT_HISTORY_LIMIT)),
+    );
+  } catch {
+    // Session storage can be unavailable in hardened browsers.
+  }
+}
+
+function appendChatMessage(role, content, { at, mode } = {}) {
+  const article = document.createElement("article");
+  article.className = `chat-message ${role === "user" ? "user" : "assistant"}`;
+
+  const meta = document.createElement("div");
+  meta.className = "chat-message-meta";
+  const speaker = document.createElement("strong");
+  speaker.textContent =
+    role === "user" ? "사용자" : "Codex 운영 어시스턴트";
+  const detail = document.createElement("span");
+  const labels = {
+    openai: "OpenAI + EFO",
+    snapshot: "EFO 스냅샷",
+    error: "연결 오류",
+  };
+  detail.textContent =
+    labels[mode] || (at ? formatClock(at) : role === "user" ? "질문" : "답변");
+  meta.append(speaker, detail);
+
+  const paragraph = document.createElement("p");
+  paragraph.textContent = content;
+  article.append(meta, paragraph);
+  elements.chatLog.append(article);
+  elements.chatLog.scrollTop = elements.chatLog.scrollHeight;
+}
+
+function renderStoredChat() {
+  if (chatHistory.length === 0) return;
+  elements.chatLog.replaceChildren();
+  for (const item of chatHistory) {
+    appendChatMessage(item.role, item.content, item);
+  }
+}
+
+function recordChatMessage(role, content, mode = "") {
+  const item = {
+    role,
+    content,
+    at: new Date().toISOString(),
+    mode,
+  };
+  chatHistory = [...chatHistory, item].slice(-CHAT_HISTORY_LIMIT);
+  saveChatHistory();
+  appendChatMessage(role, content, item);
+}
+
 function setProgress(element, value) {
   const progress = clamp(value);
-  element.style.width = `${progress}%`;
-  const container = element.closest('[role="progressbar"]');
-  if (container) container.setAttribute("aria-valuenow", String(Math.round(progress)));
+  element.value = progress;
+  element.textContent = formatPercent(progress);
+  element.setAttribute("aria-valuenow", String(Math.round(progress)));
 }
 
 function sourceIsDemo(snapshot) {
@@ -298,6 +359,7 @@ function normalizeSnapshot(raw) {
   const gpus = Array.isArray(snapshot.gpus) ? snapshot.gpus : [];
   const agents = Array.isArray(snapshot.agents) ? snapshot.agents : [];
   const tasks = Array.isArray(snapshot.tasks) ? snapshot.tasks : [];
+  const projects = Array.isArray(snapshot.projects) ? snapshot.projects : [];
   const history = Array.isArray(snapshot.history) ? snapshot.history : [];
   const activity = Array.isArray(snapshot.activity) ? snapshot.activity : [];
   const alerts = Array.isArray(snapshot.alerts) ? snapshot.alerts : [];
@@ -316,13 +378,14 @@ function normalizeSnapshot(raw) {
       name: String(snapshot.workspace?.name || "System 1.5"),
       objective: String(
         snapshot.workspace?.objective ||
-          "검증 가능한 근거를 남기며 CTS, System 1.5 연구를 완성합니다.",
+          "검증 가능한 근거를 남기며 System 1.5 연구를 완성합니다.",
       ),
       next_milestone: String(snapshot.workspace?.next_milestone || "다음 단계 확인 중"),
       workflow_progress_percent: clamp(snapshot.workspace?.workflow_progress_percent),
     },
     agents,
     tasks,
+    projects,
     gpus,
     system: snapshot.system || {},
     history,
@@ -356,6 +419,134 @@ async function requestDemo() {
   return response.json();
 }
 
+async function requestLocalHealth() {
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const response = await fetch(LOCAL_HEALTH_API_URL, {
+    headers,
+    cache: "no-store",
+  });
+  if (response.status === 401) {
+    const error = new Error("access-required");
+    error.code = 401;
+    throw error;
+  }
+  if (!response.ok) throw new Error(`local-health-${response.status}`);
+  return response.json();
+}
+
+function localPressureClass(value) {
+  const pressure = number(value);
+  if (pressure >= 90) return "pressure-critical";
+  if (pressure >= 75) return "pressure-high";
+  if (pressure >= 50) return "pressure-moderate";
+  return "pressure-low";
+}
+
+function renderLocalHealthUnavailable(message = "수집기 연결 대기") {
+  elements.localHealthUpdated.textContent = message;
+  elements.localStressCard.className = "local-stress-summary stress-unavailable";
+  elements.localStressLabel.textContent = "연결 대기";
+  setProgress(elements.localStress, 0);
+  elements.localStressStatus.textContent = "수집되지 않음";
+  for (const [label, progress] of [
+    [elements.localCpuLabel, elements.localCpu],
+    [elements.localMemoryLabel, elements.localMemory],
+    [elements.localDiskLabel, elements.localDisk],
+  ]) {
+    label.textContent = "-";
+    progress.className = "progress-track local-progress";
+    setProgress(progress, 0);
+  }
+  elements.localDevice.textContent = "장치: -";
+  elements.localUptime.textContent = "가동 시간: -";
+  elements.localProcesses.textContent = "프로세스: -";
+}
+
+function renderLocalHealth(health) {
+  const stress = clamp(health.stress_index);
+  const stressLabels = {
+    low: "낮음",
+    moderate: "보통",
+    high: "높음",
+    critical: "매우 높음",
+  };
+  const status = ["low", "moderate", "high", "critical"].includes(
+    health.stress_status,
+  )
+    ? health.stress_status
+    : "moderate";
+  const generatedAt = new Date(health.generated_at);
+  const ageSeconds = Math.max(0, (Date.now() - generatedAt.getTime()) / 1000);
+  const staleAfter = Math.max(
+    number(health.collection_interval_seconds, 120) * 2.5,
+    300,
+  );
+  const stale = !Number.isFinite(ageSeconds) || ageSeconds > staleAfter;
+
+  elements.localHealthUpdated.textContent = stale
+    ? `수집 지연 · ${formatClock(health.generated_at)}`
+    : `실시간 · ${formatClock(health.generated_at)}`;
+  elements.localStressCard.className = `local-stress-summary stress-${status}${
+    stale ? " stress-stale" : ""
+  }`;
+  elements.localStressLabel.textContent = formatPercent(stress, 1);
+  setProgress(elements.localStress, stress);
+  elements.localStressStatus.textContent = stale
+    ? `수집 지연 · ${stressLabels[status]}`
+    : stressLabels[status];
+
+  const metrics = [
+    {
+      value: health.cpu_percent,
+      label: elements.localCpuLabel,
+      progress: elements.localCpu,
+      text: formatPercent(health.cpu_percent, 1),
+    },
+    {
+      value: health.memory?.percent,
+      label: elements.localMemoryLabel,
+      progress: elements.localMemory,
+      text: `${formatPercent(health.memory?.percent, 1)} · ${formatGiB(
+        health.memory?.used_gib,
+      )} / ${formatGiB(health.memory?.total_gib)}`,
+    },
+    {
+      value: health.disk?.percent,
+      label: elements.localDiskLabel,
+      progress: elements.localDisk,
+      text: `${formatPercent(health.disk?.percent, 1)} · ${formatGiB(
+        health.disk?.free_gib,
+      )} 여유`,
+    },
+  ];
+  for (const metric of metrics) {
+    const value = clamp(metric.value);
+    metric.label.textContent = metric.text;
+    metric.progress.className = `progress-track local-progress ${localPressureClass(
+      value,
+    )}`;
+    setProgress(metric.progress, value);
+  }
+  elements.localDevice.textContent = `장치: ${health.device_alias || "로컬 PC"}`;
+  elements.localUptime.textContent = `가동 시간: ${formatDuration(
+    health.uptime_seconds,
+  )}`;
+  elements.localProcesses.textContent = `프로세스: ${number(
+    health.process_count,
+  ).toFixed(0)}개`;
+}
+
+async function refreshLocalHealth() {
+  try {
+    renderLocalHealth(await requestLocalHealth());
+  } catch (error) {
+    renderLocalHealthUnavailable(
+      error.code === 401 ? "접근 키 필요" : "로컬 수집기 연결 대기",
+    );
+  }
+}
+
 async function refresh({ announce = false } = {}) {
   elements.refreshButton.classList.add("loading");
   elements.refreshButton.disabled = true;
@@ -383,6 +574,7 @@ async function refresh({ announce = false } = {}) {
       renderUnavailable(error.message);
     }
   } finally {
+    await refreshLocalHealth();
     elements.refreshButton.classList.remove("loading");
     elements.refreshButton.disabled = false;
   }
@@ -394,12 +586,19 @@ function openAccessDialog() {
 }
 
 function renderUnavailable(reason) {
-  const fallback = normalizeSnapshot(EMERGENCY_STATIC_SNAPSHOT);
-  lastSnapshot = fallback;
-  render(fallback);
-  elements.liveDot.className = "status-dot live status-pulse-dot";
-  elements.liveLabel.textContent = "실시간 백업 연동중";
-  elements.sourceMode.textContent = "원장 서명 실측 데이터 모드";
+  elements.liveDot.className = "status-dot error";
+  elements.liveLabel.textContent = "연결 실패";
+  elements.lastUpdated.textContent = "-";
+  elements.agentGrid.innerHTML =
+    '<div class="empty-state">모니터링 데이터를 불러오지 못했습니다.</div>';
+  elements.gpuList.innerHTML =
+    '<div class="empty-state">SSH 서버 상태를 확인할 수 없습니다.</div>';
+  elements.activityHistogram.innerHTML =
+    '<div class="empty-state">작업 히스토리를 불러오지 못했습니다.</div>';
+  elements.activityFeed.innerHTML =
+    '<div class="empty-state">원장 기록을 확인할 수 없습니다.</div>';
+  elements.chatStatus.textContent = "최신 스냅샷 연결 실패";
+  elements.sourceMode.textContent = `연결 오류: ${reason}`;
 }
 
 function render(snapshot) {
@@ -414,7 +613,8 @@ function render(snapshot) {
   renderCharts(snapshot);
   renderResources(snapshot);
   renderTasks(snapshot);
-  // renderAlerts disabled
+  renderAlerts(derivedAlerts);
+  elements.chatStatus.textContent = `스냅샷 ${formatClock(snapshot.generated_at)}`;
   elements.sourceMode.textContent = sourceIsDemo(snapshot)
     ? "DEMO 데이터 · 실시간 수집 아님"
     : `LIVE · ${snapshot.source.collector}`;
@@ -448,21 +648,88 @@ function renderFreshness(snapshot) {
 function renderMission(snapshot) {
   elements.workspaceName.textContent = snapshot.workspace.name;
   elements.objective.textContent = snapshot.workspace.objective;
-  
-  // Overall workflow progress calculated as average of project portfolios
-  let progress = 0;
-  if (snapshot.projects && snapshot.projects.length > 0) {
-    const total = snapshot.projects.reduce((acc, p) => {
-      return acc + (p.progress_percent || 0);
-    }, 0);
-    progress = Math.round(total / snapshot.projects.length);
-  } else if (snapshot.workspace && snapshot.workspace.workflow_progress_percent !== undefined) {
-    progress = snapshot.workspace.workflow_progress_percent;
-  }
-  
+  const progress = snapshot.workspace.workflow_progress_percent;
   elements.overallProgressLabel.textContent = formatPercent(progress);
   setProgress(elements.overallProgress, progress);
   elements.nextMilestone.textContent = `다음 단계: ${snapshot.workspace.next_milestone}`;
+}
+
+function projectPortfolio(snapshot) {
+  if (snapshot.projects.length > 0) return snapshot.projects;
+  return [
+    {
+      id: "workspace",
+      name: snapshot.workspace.name,
+      objective: snapshot.workspace.objective,
+      phase: "EFO 검증 워크플로",
+      next_milestone: snapshot.workspace.next_milestone,
+      progress_percent: snapshot.workspace.workflow_progress_percent,
+      task_count: snapshot.tasks.length,
+      verified_count: snapshot.tasks.filter((task) =>
+        ["verified", "archived"].includes(String(task.state).toLowerCase()),
+      ).length,
+      active_task_count: snapshot.tasks.filter((task) =>
+        ["claimed", "running", "submitted"].includes(String(task.state).toLowerCase()),
+      ).length,
+      blocked_task_count: snapshot.tasks.filter((task) =>
+        ["blocked", "rejected", "invalidated"].includes(
+          String(task.state).toLowerCase(),
+        ),
+      ).length,
+      active_gpu_indexes: [],
+    },
+  ];
+}
+
+function renderProjects(snapshot) {
+  const projects = projectPortfolio(snapshot);
+  elements.projectCount.textContent = `${projects.length}개 프로젝트 · EFO 게이트 기준`;
+  elements.projectGrid.innerHTML = projects
+    .map((project, index) => {
+      const progress = clamp(project.progress_percent);
+      const taskCount = Math.max(0, Math.round(number(project.task_count)));
+      const verified = Math.max(0, Math.round(number(project.verified_count)));
+      const active = Math.max(0, Math.round(number(project.active_task_count)));
+      const blocked = Math.max(0, Math.round(number(project.blocked_task_count)));
+      const gpuIndexes = Array.isArray(project.active_gpu_indexes)
+        ? project.active_gpu_indexes
+            .map((value) => Math.round(number(value, -1)))
+            .filter((value) => value >= 0)
+        : [];
+      const gpuLabel =
+        gpuIndexes.length > 0
+          ? `활성 GPU ${gpuIndexes.join(", ")}`
+          : "활성 GPU 없음";
+      return `
+        <article class="project-card project-tone-${index % 4}">
+          <div class="project-card-head">
+            <div>
+              <strong class="project-name">${escapeHtml(project.name || project.id)}</strong>
+              <span class="project-phase">${escapeHtml(project.phase || "단계 확인 중")}</span>
+            </div>
+            <span class="project-gpu">${escapeHtml(gpuLabel)}</span>
+          </div>
+          <p class="project-objective">${escapeHtml(project.objective || "목표 확인 중")}</p>
+          <div class="project-progress-line">
+            <span>EFO 워크플로 진행률</span>
+            <strong>${formatPercent(progress)}</strong>
+          </div>
+          <progress class="progress-track progress-large"
+                    aria-label="${escapeHtml(project.name || project.id)} EFO 워크플로 진행률"
+                    max="100" value="${progress}">${formatPercent(progress)}</progress>
+          <div class="project-stats">
+            <span>검증 ${verified} / ${taskCount}</span>
+            <span>진행 ${active}</span>
+            <span>차단 ${blocked}</span>
+          </div>
+          <div class="project-next">
+            <strong>다음 게이트</strong>
+            <span>${escapeHtml(project.next_milestone || "다음 단계 확인 중")}</span>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
 }
 
 function renderKpis(snapshot, alerts) {
@@ -513,23 +780,22 @@ function renderKpis(snapshot, alerts) {
   elements.kpiVram.textContent = formatPercent(vramPercent);
   elements.kpiVramNote.textContent = `${(vramUsedMib / 1024).toFixed(1)} / ${(
     vramTotalMib / 1024
-  ).toFixed(1)} GB`;
+  ).toFixed(1)} GiB`;
   elements.kpiDisk.textContent = formatPercent(disk.percent);
-  elements.kpiDiskNote.textContent = `${number(disk.free_gib).toFixed(1)} GB 사용 가능`;
+  elements.kpiDiskNote.textContent = `${number(disk.free_gib).toFixed(1)} GiB 사용 가능`;
   elements.kpiAlerts.textContent = String(alerts.length);
   elements.kpiAlertsNote.textContent =
     alerts.length === 0 ? "정상" : "확인 필요";
 }
 
 function renderAgents(snapshot) {
-  if (!snapshot || !Array.isArray(snapshot.agents) || snapshot.agents.length === 0) return;
   const ledger = snapshot.source.ledger || {};
   elements.ledgerStatus.textContent =
     ledger.valid === true
       ? `원장 서명 유효 · ${number(ledger.event_count)} events`
       : ledger.valid === false
         ? "원장 검증 실패"
-        : "원장 미확인";
+        : "원장 상태 미수집";
 
   if (snapshot.agents.length === 0) {
     elements.agentGrid.innerHTML =
@@ -538,46 +804,41 @@ function renderAgents(snapshot) {
   }
 
   elements.agentGrid.innerHTML = snapshot.agents
-    .map((rawAgent, index) => {
-      const agent = { ...rawAgent };
+    .map((agent, index) => {
       const state = normalizeAgentState(agent.state);
-      const isWorking = state === "working";
-      const progress = clamp(agent.progress_percent || 0);
-
-      const statusDot = isWorking ? '<span class="status-pulse-dot"></span>' : '<span class="status-idle-dot"></span>';
-      const statusText = isWorking ? "작업 중" : "대기";
-      const cardClass = isWorking ? "agent-card working" : "agent-card";
-
-      // 100% Bulletproof Green Fill Gauge Bar HTML
-      const fillStyle = progress > 0 ? `width: ${progress}%; background-color: #10b981; background-image: linear-gradient(90deg, #10b981 0%, #059669 100%);` : `width: 0%;`;
-
+      const progress = clamp(agent.progress_percent);
+      const transportBadge =
+        agent.status_source === "transport_assertion" && agent.status_badge
+          ? `<span class="transport-badge agent-transport-badge"
+              title="정식 claim이나 heartbeat가 아닌 오케스트레이터 관찰 보고">${escapeHtml(
+                agent.status_badge,
+              )}</span>`
+          : "";
       return `
-        <article class="${cardClass}" style="--agent-color: ${AGENT_COLORS[index % AGENT_COLORS.length]}">
+        <article class="agent-card agent-color-${index % AGENT_COLORS.length}">
           <div class="agent-card-head">
             <div>
-              <strong class="agent-name" style="color: #0f172a !important; font-weight: 800 !important; font-size: 1.05rem !important;">${escapeHtml(agent.name || agent.id)}</strong>
-              <span class="agent-role" style="color: #475569 !important; font-weight: 700 !important;">${escapeHtml(agent.role || "작업자")}</span>
+              <strong class="agent-name">${escapeHtml(agent.name || agent.id)}</strong>
+              <span class="agent-role">${escapeHtml(agent.role || "작업자")}</span>
             </div>
-            <span class="agent-state ${state}" style="font-weight: 800 !important;">
-              ${statusDot} ${statusText}
-            </span>
+            <span class="agent-state ${state}">${escapeHtml(
+              stateLabel(agent.state),
+            )}</span>
           </div>
           <div class="agent-current">
-            <span style="color: #64748b !important; font-weight: 700 !important;">현재 수행</span>
-            <strong style="color: #0f172a !important; font-weight: 800 !important; font-size: 0.9rem !important;">${escapeHtml(agent.current || "배정 대기")}</strong>
+            <span>현재 수행</span>
+            <strong>${escapeHtml(agent.current || "배정 대기")}</strong>
+            ${transportBadge}
           </div>
-
-          <!-- BULLETPROOF 16PX GREEN FILL GAUGE BAR -->
-          <div class="agent-progress-row" style="display: flex; align-items: center; gap: 12px; margin: 14px 0 10px 0;">
-            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progress)}" style="flex: 1; height: 16px !important; background: #e2e8f0 !important; border-radius: 8px !important; border: 1.5px solid #94a3b8 !important; overflow: hidden !important; position: relative !important;">
-              <span style="width: ${progress}%; height: 100% !important; background: #10b981 !important; background-image: linear-gradient(90deg, #10b981 0%, #059669 100%) !important; display: block !important; border-radius: 6px !important; box-shadow: 0 0 10px rgba(16, 185, 129, 0.6) !important;"></span>
-            </div>
-            <small class="progress-percent-label" style="font-size: 0.88rem !important; font-weight: 800 !important; color: #0f172a !important; min-width: 38px; text-align: right;">${Math.round(progress)}%</small>
+          <div class="agent-progress-row">
+            <progress class="progress-track"
+                      aria-label="${escapeHtml(agent.name || agent.id)} 작업 진행률"
+                      max="100" value="${progress}">${formatPercent(progress)}</progress>
+            <small>${Math.round(progress)}%</small>
           </div>
-
           <div class="agent-next">
-            <span style="color: #64748b !important; font-weight: 700 !important;">다음 단계</span>
-            <span style="color: #1e293b !important; font-weight: 700 !important; display: block; margin-top: 2px;">${escapeHtml(agent.next || "오케스트레이터 지시 대기")}</span>
+            <span>다음 단계</span>
+            ${escapeHtml(agent.next || "오케스트레이터 지시 대기")}
           </div>
         </article>
       `;
@@ -664,7 +925,9 @@ function renderActivityHistogram(buckets, peak) {
   }
 
   const labelEvery = activityRangeHours <= 24 ? 3 : activityRangeHours <= 72 ? 6 : 12;
-  elements.activityHistogram.style.setProperty("--activity-hours", buckets.length);
+  elements.activityHistogram.classList.remove("range-72", "range-168");
+  if (activityRangeHours === 72) elements.activityHistogram.classList.add("range-72");
+  if (activityRangeHours === 168) elements.activityHistogram.classList.add("range-168");
   elements.activityHistogram.setAttribute(
     "aria-label",
     `${ACTIVITY_RANGE_LABELS[activityRangeHours]} 시간대별 원장 이벤트, 최대 ${peak}건`,
@@ -674,13 +937,17 @@ function renderActivityHistogram(buckets, peak) {
       const count = bucket.events.length;
       const showLabel =
         index === 0 || index === buckets.length - 1 || index % labelEvery === 0;
+      let segmentTop = 100;
       const segments = ACTIVITY_CATEGORIES.map((category) => {
         const categoryCount = bucket.counts[category];
         if (categoryCount === 0 || peak === 0) return "";
         const height = (categoryCount / peak) * 100;
-        return `<span class="activity-bar-segment ${category}"
-                      style="height:${height}%"
-                      title="${escapeHtml(ACTIVITY_CATEGORY_LABELS[category])} ${categoryCount}건"></span>`;
+        segmentTop -= height;
+        return `<rect class="activity-bar-segment ${category}"
+                      x="0" y="${segmentTop.toFixed(3)}" width="12"
+                      height="${height.toFixed(3)}">
+                  <title>${escapeHtml(ACTIVITY_CATEGORY_LABELS[category])} ${categoryCount}건</title>
+                </rect>`;
       }).join("");
       return `
         <div class="activity-hour" title="${escapeHtml(
@@ -689,7 +956,12 @@ function renderActivityHistogram(buckets, peak) {
           <span class="activity-hour-count">${count > 0 ? count : ""}</span>
           <div class="activity-bar-slot">
             <div class="activity-bar-stack${count === 0 ? " empty" : ""}">
-              ${segments}
+              ${
+                count > 0
+                  ? `<svg class="activity-bar-svg" viewBox="0 0 12 100"
+                          preserveAspectRatio="none" aria-hidden="true">${segments}</svg>`
+                  : ""
+              }
             </div>
           </div>
           <time class="activity-hour-label" datetime="${new Date(bucket.at).toISOString()}">
@@ -706,7 +978,7 @@ function renderActivityFeed(events) {
   elements.activityVisibleCount.textContent = `${visible.length}건 표시`;
   if (visible.length === 0) {
     elements.activityFeed.innerHTML =
-      '<div class="empty-state" style="padding: 20px; text-align: center; color: #64748b; font-weight: 700;">선택한 기간에 기록된 원장 이벤트가 없습니다.</div>';
+      '<div class="empty-state">선택한 기간에 기록된 원장 이벤트가 없습니다.</div>';
     return;
   }
 
@@ -716,7 +988,6 @@ function renderActivityFeed(events) {
     if (!groups.has(hour)) groups.set(hour, []);
     groups.get(hour).push(event);
   });
-
   elements.activityFeed.innerHTML = [...groups.entries()]
     .map(([hour, group]) => {
       const rows = group
@@ -725,130 +996,115 @@ function renderActivityFeed(events) {
             event.task_id || event.title
               ? [event.task_id, event.title].filter(Boolean).join(" · ")
               : "시스템 원장";
-
-          const categoryClass = 
-            event.category === 'verified' || event.label?.includes('서명') ? 'verified-item' :
-            event.category === 'evidence' || event.label?.includes('증거') ? 'evidence-item' : 'work-item';
-
-          const badgeClass =
-            categoryClass === 'verified-item' ? 'badge-signature' :
-            categoryClass === 'evidence-item' ? 'badge-evidence' : 'badge-work';
-
-          const badgeLabel = escapeHtml(event.label || event.action || '원장 기록');
-          const badgeEmoji = categoryClass === 'verified-item' ? '🟢' : categoryClass === 'evidence-item' ? '🟡' : '🔵';
-
           return `
-            <div class="feed-item ${categoryClass}">
-              <div style="flex: 1;">
-                <div style="display: flex; align-items: center;">
-                  <strong class="feed-item-actor">${escapeHtml(event.actor_name || event.actor || "system")}</strong>
-                  <span class="feed-badge ${badgeClass}">${badgeEmoji} ${badgeLabel}</span>
+            <div class="activity-event">
+              <time class="activity-event-time" datetime="${escapeHtml(event.at)}">
+                ${escapeHtml(formatMinute(event.at))}
+              </time>
+              <div class="activity-event-main">
+                <div class="activity-event-head">
+                  <span class="activity-actor">${escapeHtml(
+                    event.actor_name || event.actor || "system",
+                  )}</span>
+                  <span class="activity-event-label ${event.category}">${escapeHtml(
+                    event.label || event.action,
+                  )}</span>
                 </div>
-                <p class="feed-item-detail">${escapeHtml(detail)}</p>
+                <span class="activity-event-detail">${escapeHtml(detail)}</span>
               </div>
-              <time class="feed-item-time">${escapeHtml(formatMinute(event.at))}</time>
             </div>
           `;
         })
         .join("");
-
       return `
-        <div class="feed-group">
-          <div class="feed-group-header">
-            <span>🕒 ${escapeHtml(formatActivityHour(hour))}</span>
-            <small style="color: #64748b; font-weight: 700;">${group.length}건 기록</small>
-          </div>
+        <section class="activity-group">
+          <h3>${escapeHtml(formatActivityHour(hour))}<span>${group.length}건</span></h3>
           ${rows}
-        </div>
+        </section>
       `;
     })
     .join("");
 }
 
 function renderGpus(snapshot) {
-  if (!snapshot || !Array.isArray(snapshot.gpus)) return;
-  const defaultMappings = {
-    0: '🟢 CTS :: E2-R2 9문항 물리 추론 및 메인 계측 (완료예정: 2026.08.07 18:00 KST)',
-    1: '🟢 CTS :: E2-R2 사이드카 정밀 계측 및 Broyden Solver (완료예정: 2026.08.07 18:30 KST)',
-    2: '🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 작업 대상 제외 (상시 대기)',
-    3: '🔵 System 1.5 :: Stage 1 DEQ Broyden Solver 훈련 (완료예정: 2026.08.07 21:00 KST)',
-    4: '⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:00 KST)',
-    5: '⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:30 KST)',
-    6: '🟣 CTS / EFO :: E1 사전등록 초안 검증 및 S7 계측 (완료예정: 2026.08.07 16:00 KST)',
-    7: '🟣 CTS / EFO :: E1 사전등록 초안 검증 및 S7 계측 (완료예정: 2026.08.07 16:30 KST)'
-  };
+  elements.gpuHost.textContent = `${snapshot.source.host} · GPU ${snapshot.gpus.length}장`;
+  if (snapshot.gpus.length === 0) {
+    elements.gpuList.innerHTML =
+      '<div class="empty-state">GPU 상태가 수집되지 않았습니다.</div>';
+    return;
+  }
 
-  const gpus = [...snapshot.gpus].sort((a, b) => number(a.index) - number(b.index));
-  elements.gpuList.innerHTML = gpus
+  elements.gpuList.innerHTML = [...snapshot.gpus]
+    .sort((left, right) => number(left.index) - number(right.index))
     .map((gpu) => {
-      const idx = number(gpu.index);
-      const utilization = number(gpu.utilization_percent);
+      const utilization = clamp(gpu.utilization_percent);
+      const memoryTotal = number(gpu.memory_total_mib);
       const memoryUsed = number(gpu.memory_used_mib);
-      const memoryTotal = Math.max(number(gpu.memory_total_mib), 1);
-      const memoryPercent = (memoryUsed / memoryTotal) * 100;
+      const memoryPercent = memoryTotal > 0 ? (memoryUsed / memoryTotal) * 100 : 0;
       const temperature = number(gpu.temperature_c);
-      const power = number(gpu.power_w);
-      const thermalClass = temperature >= 85 ? "hot" : temperature >= 74 ? "warm" : "";
-
-      let projectBadgeStr = "";
-      if (Array.isArray(gpu.projects) && gpu.projects.length > 0) {
-        projectBadgeStr = gpu.projects.map(p => {
-          const name = typeof p === "string" ? p : p.name;
-          const isHazard = idx === 2 || name.includes("발열보호");
-          const isPriority = idx === 4 || idx === 5 || name.includes("우선가동");
-          const style = isHazard
-            ? "background:#ffedd5; color:#c2410c; border:1px solid #fdba74; font-weight:800;"
-            : isPriority
-            ? "background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:800;"
-            : "background:#f8fafc; color:#334155; border:1px solid #cbd5e1; font-weight:700;";
-          return `<span class="project-label" style="${style} padding:6px 12px; border-radius:6px; font-size:0.82rem; white-space:normal; word-break:keep-all;">${escapeHtml(name)}</span>`;
-        }).join("");
-      } else {
-        const fallbackText = defaultMappings[idx] || '🟢 과업 할당 완료';
-        const isHazard = idx === 2;
-        const isPriority = idx === 4 || idx === 5;
-        const style = isHazard
-          ? "background:#ffedd5; color:#c2410c; border:1px solid #fdba74; font-weight:800;"
-          : isPriority
-          ? "background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:800;"
-          : "background:#f8fafc; color:#334155; border:1px solid #cbd5e1; font-weight:700;";
-        projectBadgeStr = `<span class="project-label" style="${style} padding:6px 12px; border-radius:6px; font-size:0.82rem; white-space:normal; word-break:keep-all;">${escapeHtml(fallbackText)}</span>`;
-      }
-
+      const thermalClass = temperature >= 82 ? "hot" : temperature >= 74 ? "warm" : "";
+      const projects =
+        Array.isArray(gpu.projects) && gpu.projects.length > 0
+          ? gpu.projects
+              .map((project) => {
+                const name =
+                  typeof project === "string" ? project : project.name;
+                const progress =
+                  typeof project === "object" &&
+                  Number.isFinite(Number(project.progress_percent))
+                    ? ` · ${Math.round(Number(project.progress_percent))}%`
+                    : "";
+                const eta =
+                  typeof project === "object" && project.eta
+                    ? ` · ETA ${project.eta}`
+                    : "";
+                const reserved =
+                  typeof project === "object" && project.active === false;
+                const activity = reserved ? " · 대기" : "";
+                return `<span class="project-label${
+                  reserved ? " reserved" : ""
+                }" title="${escapeHtml(
+                  `${name}${progress}${eta}${activity}`,
+                )}">${escapeHtml(`${name}${progress}${activity}`)}</span>`;
+              })
+              .join("")
+          : '<span class="project-label idle">유휴 또는 매핑 없음</span>';
       return `
-        <div class="gpu-row ${idx === 2 ? 'gpu-hazard-row' : ''}">
+        <div class="gpu-row">
           <div class="gpu-identity">
-            <span class="gpu-index">GPU ${idx}</span>
+            <span class="gpu-index">GPU ${number(gpu.index)}</span>
             <span class="gpu-name">${escapeHtml(gpu.name || "NVIDIA GPU")}</span>
           </div>
           <div class="bar-metric utilization">
             <div class="bar-metric-head">
               <span>사용률</span><strong>${formatPercent(utilization)}</strong>
             </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0"
-                 aria-valuemax="100" aria-valuenow="${Math.round(utilization)}">
-              <span style="width:${utilization}%"></span>
-            </div>
+            <progress class="progress-track" aria-label="GPU ${number(
+              gpu.index,
+            )} 사용률" max="100" value="${utilization}">${formatPercent(
+              utilization,
+            )}</progress>
           </div>
           <div class="bar-metric memory">
             <div class="bar-metric-head">
               <span>VRAM</span>
               <strong>${(memoryUsed / 1024).toFixed(1)} / ${(
                 memoryTotal / 1024
-              ).toFixed(1)} GB</strong>
+              ).toFixed(1)} GiB</strong>
             </div>
-            <div class="progress-track" role="progressbar" aria-valuemin="0"
-                 aria-valuemax="100" aria-valuenow="${Math.round(memoryPercent)}">
-              <span style="width:${memoryPercent}%"></span>
-            </div>
+            <progress class="progress-track" aria-label="GPU ${number(
+              gpu.index,
+            )} VRAM 사용률" max="100" value="${clamp(
+              memoryPercent,
+            )}">${formatPercent(memoryPercent)}</progress>
           </div>
-          <div class="gpu-meta-cell">
-            <span class="meta-item">온도 <strong class="${thermalClass}">${temperature.toFixed(0)}°C</strong></span>
-            <span class="meta-item">전력 <strong>${power.toFixed(0)} W</strong></span>
+          <div class="thermal ${thermalClass}">
+            온도<strong>${temperature.toFixed(0)}°C</strong>
           </div>
-          <div class="gpu-projects-cell" style="flex:1; min-width:300px;">
-            ${projectBadgeStr}
+          <div class="power">
+            전력<strong>${number(gpu.power_w).toFixed(0)} W</strong>
           </div>
+          <div class="project-list">${projects}</div>
         </div>
       `;
     })
@@ -859,30 +1115,7 @@ function historySeries(snapshot, field) {
   const gpuIndexes = [...snapshot.gpus]
     .map((gpu) => number(gpu.index))
     .sort((a, b) => a - b);
-  
-  let history = Array.isArray(snapshot.history) && snapshot.history.length >= 2
-    ? snapshot.history.slice(-60)
-    : [];
-
-  // Fallback synthetic 12-point time-series generator if history is missing
-  if (history.length < 2) {
-    const now = Date.now();
-    history = Array.from({ length: 12 }, (_, i) => {
-      const timeAt = new Date(now - (11 - i) * 5 * 60 * 1000).toISOString();
-      return {
-        at: timeAt,
-        gpus: snapshot.gpus.map(gpu => {
-          const baseVal = number(gpu[field], 0);
-          const varOffset = baseVal > 0 ? (i % 3 === 0 ? 3 : i % 2 === 0 ? -2 : 1) : 0;
-          return {
-            index: gpu.index,
-            [field]: clamp(baseVal + varOffset, 0, 100)
-          };
-        })
-      };
-    });
-  }
-
+  const history = snapshot.history.slice(-60);
   return gpuIndexes.map((index, order) => ({
     name: `GPU ${index}`,
     color: GPU_COLORS[order % GPU_COLORS.length],
@@ -964,7 +1197,7 @@ function renderLineChart(svg, legend, series, options) {
       (options.max - options.min)) *
       plotHeight;
 
-  series.forEach((item) => {
+  series.forEach((item, seriesIndex) => {
     const segments = [];
     let current = [];
     item.points.forEach((point, index) => {
@@ -1003,7 +1236,9 @@ function renderLineChart(svg, legend, series, options) {
 
     const legendItem = document.createElement("span");
     legendItem.className = "legend-item";
-    legendItem.innerHTML = `<span class="legend-swatch" style="--swatch:${item.color}"></span>${escapeHtml(
+    legendItem.innerHTML = `<span class="legend-swatch legend-color-${
+      seriesIndex % GPU_COLORS.length
+    }"></span>${escapeHtml(
       item.name,
     )}`;
     legend.append(legendItem);
@@ -1060,67 +1295,75 @@ function setRing(ring, label, percent) {
   const normalized = clamp(percent);
   const circumference = 2 * Math.PI * 48;
   const value = ring.querySelector(".ring-value");
-  value.style.strokeDasharray = String(circumference);
-  value.style.strokeDashoffset = String(
-    circumference - (normalized / 100) * circumference,
+  value.setAttribute("stroke-dasharray", String(circumference));
+  value.setAttribute(
+    "stroke-dashoffset",
+    String(circumference - (normalized / 100) * circumference),
   );
   label.textContent = formatPercent(normalized);
 }
 
 function renderResources(snapshot) {
-  if (!snapshot || !snapshot.system) return;
   const memory = snapshot.system.memory || {};
   const disk = snapshot.system.disk || {};
-  if (memory.used_gib && memory.total_gib) {
-    elements.memoryTitle.textContent = `${formatGiB(memory.used_gib)} / ${formatGiB(memory.total_gib)}`;
-    setRing(elements.memoryRing, elements.memoryRingLabel, memory.percent);
-  }
-  if (disk.used_gib && disk.total_gib) {
-    elements.diskTitle.textContent = `${formatGiB(disk.used_gib)} / ${formatGiB(disk.total_gib)}`;
-    setRing(elements.diskRing, elements.diskRingLabel, disk.percent);
-  }
-  if (snapshot.system.load_1m !== undefined) {
-    elements.systemLoad.textContent = number(snapshot.system.load_1m).toFixed(2);
-  }
-  if (snapshot.system.uptime_seconds) {
-    elements.systemUptime.textContent = formatDuration(snapshot.system.uptime_seconds);
-  }
-  if (snapshot.collection_interval_seconds) {
-    elements.collectionInterval.textContent = `${snapshot.collection_interval_seconds}초`;
-  }
+  elements.memoryTitle.textContent = `${formatGiB(memory.used_gib)} / ${formatGiB(
+    memory.total_gib,
+  )}`;
+  elements.diskTitle.textContent = `${formatGiB(disk.used_gib)} / ${formatGiB(
+    disk.total_gib,
+  )}`;
+  setRing(elements.memoryRing, elements.memoryRingLabel, memory.percent);
+  setRing(elements.diskRing, elements.diskRingLabel, disk.percent);
+  elements.systemLoad.textContent = number(snapshot.system.load_1m).toFixed(2);
+  elements.systemUptime.textContent = formatDuration(snapshot.system.uptime_seconds);
+  elements.collectionInterval.textContent = `${snapshot.collection_interval_seconds}초`;
 }
 
 function renderTasks(snapshot) {
-  const defaultTasks = [
-    { id: "CTS-P0", title: "CTS :: Phase 0 (강등·출처추적 및 경우A)", owner: "antigravity", state: "verified", progress_percent: 100, next: "Phase 1 백본확정 및 Gemma 4 E4B-it 키트 동결", updated_at: "2026-08-06T09:33:00Z" },
-    { id: "CTS-P1", title: "CTS :: Phase 1 (백본확정 및 Gemma 4)", owner: "antigravity", state: "verified", progress_percent: 100, next: "Phase 2 E2 Baseline 1차 실측 완주 및 R2 확정", updated_at: "2026-08-06T09:33:00Z" },
-    { id: "CTS-P2-E2", title: "CTS :: Phase 2 (E2 Baseline Verified)", owner: "claude", state: "submitted", progress_percent: 70, next: "E2-R2 9문항(24k tokens) 확정 추론 및 v3 합산 채점", updated_at: "2026-08-06T09:33:00Z" },
-    { id: "CTS-P2-E3", title: "CTS :: Phase 2 (E3 Iso-Depth D<=15)", owner: "claude", state: "archived", progress_percent: 0, next: "System 1.5 Phase 1 파이프라인으로 이관 완료", updated_at: "2026-08-06T09:33:00Z" },
-    { id: "SYS15-P0", title: "System 1.5 :: Phase 0 (PoC 모듈 설계 & JFB)", owner: "antigravity", state: "verified", progress_percent: 100, next: "Phase 1 Stage 1 DEQ Broyden Solver 물리 훈련", updated_at: "2026-08-06T09:33:00Z" },
-    { id: "SYS15-P1", title: "System 1.5 :: Phase 1 (Stage 1 DEQ Broyden Solver)", owner: "claude", state: "working", progress_percent: 60, next: "Stage 2 Fast Weight Program ΔW 메모리 결합", updated_at: "2026-08-06T09:33:00Z" },
-    { id: "SYS15-P2", title: "System 1.5 :: Phase 2 (Stage 2 FWP ΔW)", owner: "claude", state: "pending", progress_percent: 0, next: "Stage 3 Gated Router 및 InfoNCE 손실 함수 착수", updated_at: "2026-08-06T09:33:00Z" }
-  ];
+  elements.taskCount.textContent = `${snapshot.tasks.length}개 작업`;
+  if (snapshot.tasks.length === 0) {
+    elements.taskTable.innerHTML =
+      '<tr><td colspan="6"><div class="empty-state">현재 원장 작업이 없습니다.</div></td></tr>';
+    return;
+  }
 
-  const tasksToRender = (Array.isArray(snapshot?.tasks) && snapshot.tasks.length > 0) ? snapshot.tasks : defaultTasks;
-  if (elements.taskCount) elements.taskCount.textContent = `${tasksToRender.length}개 과업 (CTS & System 1.5)`;
-
-  const ctsTasks = tasksToRender.filter(t => {
-    const id = String(t.id || "").toUpperCase();
-    const title = String(t.title || "").toUpperCase();
-    return id.startsWith("CTS") || id.startsWith("E1") || id.startsWith("E2") || title.includes("CTS");
-  });
-
-  const sys15Tasks = tasksToRender.filter(t => {
-    const id = String(t.id || "").toUpperCase();
-    const title = String(t.title || "").toUpperCase();
-    return id.startsWith("SYS15") || title.includes("SYSTEM 1.5") || title.includes("SYSTEM1.5");
-  });
-
-  const ctsTbody = document.getElementById("cts-task-rows");
-  if (ctsTbody) ctsTbody.innerHTML = renderTaskRows(ctsTasks);
-
-  const sys15Tbody = document.getElementById("sys15-task-rows");
-  if (sys15Tbody) sys15Tbody.innerHTML = renderTaskRows(sys15Tasks);
+  elements.taskTable.innerHTML = snapshot.tasks
+    .map((task) => {
+      const progress = clamp(task.progress_percent);
+      const state = String(task.state || "pending").toLowerCase();
+      const statusBadge =
+        task.status_source === "transport_assertion" && task.status_badge
+          ? `<span class="transport-badge" title="정식 claim이나 heartbeat가 아닌 오케스트레이터 관찰 보고">${escapeHtml(
+              task.status_badge,
+            )}</span>`
+          : "";
+      return `
+        <tr>
+          <td>
+            <span class="task-title">${escapeHtml(task.title || task.id)}</span>
+            <span class="task-id">${escapeHtml(task.id || "-")}</span>
+          </td>
+          <td>${escapeHtml(task.owner || "미지정")}</td>
+          <td>
+            <span class="state-label ${escapeHtml(state)}">${escapeHtml(
+              stateLabel(state),
+            )}</span>
+            ${statusBadge}
+          </td>
+          <td>
+            <div class="table-progress">
+              <progress class="progress-track"
+                        aria-label="${escapeHtml(task.id || "작업")} 진행률"
+                        max="100" value="${progress}">${formatPercent(progress)}</progress>
+              <small>${Math.round(progress)}%</small>
+            </div>
+          </td>
+          <td>${escapeHtml(task.next || "-")}</td>
+          <td>${escapeHtml(formatClock(task.updated_at))}</td>
+        </tr>
+      `;
+    })
+    .join("");
 }
 
 function buildAlerts(snapshot) {
@@ -1212,6 +1455,68 @@ function renderAlerts(alerts) {
     .join("");
 }
 
+async function requestChat(message, history) {
+  const token = sessionStorage.getItem(TOKEN_KEY);
+  const headers = {
+    "content-type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+  const response = await fetch(CHAT_API_URL, {
+    method: "POST",
+    headers,
+    cache: "no-store",
+    body: JSON.stringify({ message, history }),
+  });
+  if (response.status === 401) {
+    const error = new Error("access-required");
+    error.code = 401;
+    throw error;
+  }
+  if (!response.ok) throw new Error(`chat-${response.status}`);
+  return response.json();
+}
+
+async function submitChat() {
+  const message = elements.chatInput.value.trim();
+  if (!message || elements.chatSend.disabled) return;
+
+  const previousHistory = chatHistory
+    .slice(-8)
+    .map((item) => ({ role: item.role, content: item.content }));
+  recordChatMessage("user", message);
+  elements.chatInput.value = "";
+  elements.chatSend.disabled = true;
+  elements.chatInput.disabled = true;
+  elements.chatStatus.textContent = "최신 상태를 확인해 답변 중";
+
+  try {
+    const reply = await requestChat(message, previousHistory);
+    const mode = reply.mode === "openai" ? "openai" : "snapshot";
+    recordChatMessage("assistant", String(reply.answer || "답변이 비어 있습니다."), mode);
+    elements.chatMode.textContent =
+      mode === "openai" ? "OpenAI + 라이브 스냅샷" : "라이브 스냅샷";
+    elements.chatStatus.textContent = reply.snapshot_generated_at
+      ? `근거 시각 ${formatClock(reply.snapshot_generated_at)}`
+      : "답변 완료";
+  } catch (error) {
+    if (error.code === 401) {
+      elements.chatStatus.textContent = "접근 키가 필요합니다";
+      openAccessDialog();
+    } else {
+      recordChatMessage(
+        "assistant",
+        "현재 대화 API에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요. 위 대시보드의 스냅샷은 계속 확인할 수 있습니다.",
+        "error",
+      );
+      elements.chatStatus.textContent = "대화 연결 오류";
+    }
+  } finally {
+    elements.chatSend.disabled = false;
+    elements.chatInput.disabled = false;
+    elements.chatInput.focus();
+  }
+}
+
 elements.refreshButton.addEventListener("click", () => refresh({ announce: true }));
 document.querySelectorAll("[data-activity-hours]").forEach((button) => {
   button.addEventListener("click", () => {
@@ -1234,942 +1539,28 @@ elements.accessForm.addEventListener("submit", async (event) => {
     elements.accessToken.value = "";
   }
 });
+document.querySelectorAll("[data-chat-prompt]").forEach((button) => {
+  button.addEventListener("click", () => {
+    elements.chatInput.value = button.dataset.chatPrompt || "";
+    elements.chatForm.requestSubmit();
+  });
+});
+elements.chatForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  await submitChat();
+});
+elements.chatInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    elements.chatForm.requestSubmit();
+  }
+});
 
 document.addEventListener("visibilitychange", () => {
   if (!document.hidden) refresh();
 });
 
+renderStoredChat();
 refresh();
 refreshTimer = setInterval(refresh, REFRESH_INTERVAL_MS);
 window.addEventListener("beforeunload", () => clearInterval(refreshTimer));
-
-
-function renderProjects(snapshot) {
-  const container = document.getElementById("project-grid");
-  if (!container) return;
-
-  const ctsT = (snapshot?.tasks || []).find(t => String(t.id||'').includes('CTS-P2-E2')) || { progress_percent: 70 };
-  const sysT = (snapshot?.tasks || []).find(t => String(t.id||'').includes('SYS15-P1')) || { progress_percent: 60 };
-
-  const ctsProgress = ctsT.progress_percent || 70;
-  const sysProgress = sysT.progress_percent || 60;
-
-  const countElem = document.getElementById("project-count");
-  if (countElem) {
-    countElem.textContent = "2개 핵심 프로젝트 (좌측: CTS | 우측: System 1.5)";
-  }
-}
-
-/* === EFO MULTIMODAL (+) CHAT PROMPT CENTER HANDLER (v4.1.0) === */
-(function setupEfoChatHandler() {
-  const chatForm = document.getElementById("chat-form");
-  const chatInput = document.getElementById("chat-input");
-  const chatLog = document.getElementById("chat-log");
-  const chatSend = document.getElementById("chat-send");
-  const chatStatus = document.getElementById("chat-status");
-  const chatMode = document.getElementById("chat-mode");
-  const btnAttach = document.getElementById("btn-attach-file");
-  const fileInput = document.getElementById("chat-file-input");
-  const previewsBox = document.getElementById("attachment-previews");
-
-  if (!chatForm || !chatInput || !chatLog) return;
-
-  function autoResizeChatInput() {
-    if (!chatInput) return;
-    chatInput.style.height = "auto";
-    const scrollH = chatInput.scrollHeight;
-    const newHeight = Math.min(Math.max(scrollH, 38), 280);
-    chatInput.style.height = newHeight + "px";
-  }
-
-  chatInput.addEventListener("input", autoResizeChatInput);
-
-  const chatHistory = [];
-  let attachedFiles = [];
-
-  // File Upload (+) Click
-  if (btnAttach && fileInput) {
-    btnAttach.addEventListener("click", function(e) {
-      e.preventDefault();
-      fileInput.click();
-    });
-    fileInput.addEventListener("change", function(e) {
-      const selected = Array.from(e.target.files);
-      selected.forEach(function(file) {
-        attachedFiles.push(file);
-      });
-      fileInput.value = "";
-      renderFilePreviews();
-    });
-  }
-
-  function renderFilePreviews() {
-    if (!previewsBox) return;
-    if (attachedFiles.length === 0) {
-      previewsBox.style.display = "none";
-      previewsBox.innerHTML = "";
-      return;
-    }
-
-    previewsBox.style.display = "flex";
-    previewsBox.innerHTML = attachedFiles.map(function(file, index) {
-      const isImg = file.type.startsWith("image/");
-      const icon = isImg ? "🖼️" : "📄";
-      return '<span class="file-preview-pill">' + icon + ' ' + escapeHtml(file.name) + ' (' + (file.size / 1024).toFixed(1) + 'KB)<button type="button" class="btn-remove-file" data-remove-index="' + index + '">✕</button></span>';
-    }).join("");
-
-    previewsBox.querySelectorAll("[data-remove-index]").forEach(function(btn) {
-      btn.addEventListener("click", function(e) {
-        e.preventDefault();
-        const idx = parseInt(btn.dataset.removeIndex, 10);
-        attachedFiles.splice(idx, 1);
-        renderFilePreviews();
-      });
-    });
-  }
-
-  function appendMessage(role, text, files) {
-    files = files || [];
-    const isAssistant = role === "assistant";
-    const article = document.createElement("article");
-    article.className = "chat-message " + role;
-
-    const formattedText = escapeHtml(text).split("\n").join("<br/>");
-    let fileBadgesStr = "";
-    if (files.length > 0) {
-      fileBadgesStr = '<div style="margin-top:6px; display:flex; gap:6px; flex-wrap:wrap;">' +
-        files.map(function(f) { return '<span style="font-size:0.75rem; background:rgba(255,255,255,0.1); padding:2px 8px; border-radius:12px;">📄 ' + escapeHtml(f.name) + '</span>'; }).join("") +
-        '</div>';
-    }
-
-    article.innerHTML = '<div class="chat-message-meta">' +
-      '<div class="avatar ' + (isAssistant ? 'assistant-avatar' : 'user-avatar') + '">' + (isAssistant ? '🤖' : '👤') + '</div>' +
-      '<div class="sender-info"><strong>' + (isAssistant ? "EFO AI 어시스턴트" : "연구책임자 (User)") + '</strong>' +
-      '<span class="timestamp">' + new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'}) + '</span></div></div>' +
-      '<div class="chat-message-body"><p>' + formattedText + '</p>' + fileBadgesStr + '</div>';
-
-    chatLog.appendChild(article);
-    chatLog.scrollTop = chatLog.scrollHeight;
-  }
-
-  async function handleChatSubmit(promptText) {
-    const message = promptText || chatInput.value.trim();
-    if (!message && attachedFiles.length === 0) return;
-
-    const currentFiles = [...attachedFiles];
-    const userPrompt = message || "(첨부파일 분석 요청)";
-
-    appendMessage("user", userPrompt, currentFiles);
-    if (!promptText) { chatInput.value = ""; chatInput.style.height = "auto"; }
-
-    attachedFiles = [];
-    renderFilePreviews();
-
-    if (chatSend) chatSend.disabled = true;
-    if (chatStatus) chatStatus.textContent = "Gemini Pro 스마트 분석 중...";
-    if (chatMode) chatMode.innerHTML = '<span class="status-pulse-dot" style="background:#38bdf8;"></span> 멀티모달 분석 중...';
-
-    try {
-      let fileContext = "";
-      for (const file of currentFiles) {
-        if (file.type.startsWith("text/") || file.name.endsWith(".json") || file.name.endsWith(".md") || file.name.endsWith(".txt") || file.name.endsWith(".csv")) {
-          const text = await file.text();
-          fileContext += "\n\n[첨부 파일: " + file.name + "]\n" + text.slice(0, 3000);
-        } else {
-          fileContext += "\n\n[첨부 파일: " + file.name + " (유형: " + file.type + ", 크기: " + (file.size/1024).toFixed(1) + "KB)]";
-        }
-      }
-
-      const fullMessage = userPrompt + fileContext;
-
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          message: fullMessage,
-          history: chatHistory
-        })
-      });
-
-      const data = await response.json();
-      const reply = data.answer || "응답이 없습니다.";
-      appendMessage("assistant", reply);
-
-      chatHistory.push({ role: "user", content: userPrompt });
-      chatHistory.push({ role: "assistant", content: reply });
-      if (chatHistory.length > 10) chatHistory.splice(0, 2);
-
-      if (chatStatus) chatStatus.textContent = "Gemini Pro Live AI 분석 완수";
-      if (chatMode) chatMode.innerHTML = '<span class="status-pulse-dot" style="background:#10b981;"></span> Gemini Live 대기 중';
-    } catch (err) {
-      appendMessage("assistant", "[오류] 대화 연결 처리 중: " + err.message);
-      if (chatStatus) chatStatus.textContent = "API 대기";
-    } finally {
-      if (chatSend) chatSend.disabled = false;
-    }
-  }
-
-  chatForm.addEventListener("submit", function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    handleChatSubmit();
-    return false;
-  });
-
-  if (chatSend) {
-    chatSend.addEventListener("click", function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      handleChatSubmit();
-      return false;
-    });
-  }
-
-  chatInput.addEventListener("keydown", function(e) {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      e.stopPropagation();
-      handleChatSubmit();
-      return false;
-    }
-  });
-
-  document.querySelectorAll("[data-chat-prompt]").forEach(function(btn) {
-    btn.addEventListener("click", function(e) {
-      e.preventDefault();
-      const prompt = btn.getAttribute("data-chat-prompt");
-      handleChatSubmit(prompt);
-    });
-  });
-})();
-
-
-/* Schedule Matrix Modal Global Controller (v7.2.0) */
-window.renderScheduleModalBody = function(filter) {
-  const modalBody = document.getElementById("schedule-matrix-body");
-  if (!modalBody) return;
-
-  const data = window.demoData || {};
-  const sm = data.schedule_matrix || {};
-  const cts = sm.cts || { completed: [], estimated: [] };
-  const sys = sm.sys15 || { completed: [], estimated: [] };
-
-  if (filter === "timeline") {
-    modalBody.innerHTML = `
-      <div class="sched-timeline-view">
-        <div class="timeline-banner">
-          <div class="timeline-banner-text">
-            📌 <strong>ADVISOR-01 마일스톤</strong>: <span class="timeline-banner-highlight">8월 31일 전 실험 완결</span> ➔ 9월 논문 집필 ➔ <span class="timeline-banner-highlight">9월 25일경 ICLR 2027 제출</span>
-          </div>
-          <div style="font-size:0.82rem; color:#94a3b8;">오늘(8/7)은 두 프로젝트의 핵심 변곡점입니다</div>
-        </div>
-
-        <div class="sched-card">
-          <h3 style="margin-top:0; color:#38bdf8;">📅 8월~9월 전체 병렬 일정 타임라인 (Gantt View)</h3>
-          <table class="sched-table" style="margin-top:10px;">
-            <thead>
-              <tr>
-                <th style="width:22%;">기간 / 일시</th>
-                <th style="width:38%;">CTS (GPU 0·1)</th>
-                <th style="width:40%;">System 1.5 (GPU 2~5)</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td style="color:#34d399; font-weight:700;">8/6 ~ 8/7 <span class="badge-m">M</span></td>
-                <td>E2 기준점 확정 ➔ E1 스모크 통과 ➔ E1 본실험 greedy 5시드 완주</td>
-                <td>서버 세션 기동 ➔ S15-13 사전 차단 ➔ 회귀테스트 5건 전승 ➔ 2조a 통과</td>
-              </tr>
-              <tr>
-                <td style="color:#fbbf24; font-weight:700;">8/7 오늘 저녁~밤 <span class="badge-i">I</span></td>
-                <td>native_think 5시드 완주 (19:00~21:00) ➔ E1 데이터 수신</td>
-                <td>2조a v22 수신 ➔ run_evidence 배선 ➔ Stage 1 훈련 개시 (첫 100스텝 보고)</td>
-              </tr>
-              <tr>
-                <td style="color:#fbbf24; font-weight:700;">8/8 ~ 8/10 <span class="badge-i">I</span></td>
-                <td>E1 트랙 A 봉인 재채점 ➔ 본실험 delta 최종 판정</td>
-                <td>Stage 1 훈련 진행 (GPU 2~5) ➔ 100스텝 속도 기반 완주 속도 재산출</td>
-              </tr>
-              <tr>
-                <td style="color:#fbbf24; font-weight:700;">8/11 ~ 8/17 <span class="badge-i">I</span></td>
-                <td>E3(iso-depth) + E4(깊이 스윕) 병렬 진행 (트랙 B)</td>
-                <td>Stage 1 훈련 완료 및 검증 (~8/17)</td>
-              </tr>
-              <tr>
-                <td style="color:#fbbf24; font-weight:700;">8/18 ~ 8/24 <span class="badge-i">I</span></td>
-                <td>E5(패턴대조) + E6(디코드 20건) + B-1 해소</td>
-                <td>Stage 2 (FWP) 및 Stage 3 (Router) 훈련 진입</td>
-              </tr>
-              <tr>
-                <td style="color:#fbbf24; font-weight:700;">8/25 ~ 8/31 <span class="badge-i">I</span></td>
-                <td>E7(조건부) + 결과 최종 취합 ➔ <strong>실험 완결 (8/31)</strong></td>
-                <td>종합 벤치마크 평가 ➔ <strong>실험 완결 (8/31)</strong></td>
-              </tr>
-              <tr style="background:rgba(168, 85, 247, 0.1);">
-                <td style="color:#c084fc; font-weight:700;">9/1 ~ 9/25 <span class="badge-i">I</span></td>
-                <td colspan="2" style="text-align:center; font-weight:700; color:#e0e7ff;">
-                  ✍️ 논문 집필 (CTS 재제출본 + System 1.5 신규) ➔ <strong>ICLR 2027 정식 제출 (9월 25일경)</strong>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    `;
-    return;
-  }
-
-  let html = `<div class="sched-grid">`;
-
-  if (filter === "all" || filter === "cts") {
-    html += `
-      <div class="sched-card">
-        <div class="sched-card-title">
-          <span class="tag-cts">🚀 CTS (GPU 0·1 전용)</span>
-          <span style="font-size:0.8rem; color:#94a3b8;">E1 ~ E7 완결 경로</span>
-        </div>
-
-        <div class="sched-section-title">✅ 완료 실적 [<span style="color:#34d399;">M - 실측</span>]</div>
-        <table class="sched-table">
-          <thead>
-            <tr><th>단계</th><th>완료일시</th><th>등급</th><th>비고</th></tr>
-          </thead>
-          <tbody>
-            ${(cts.completed || []).map(row => `
-              <tr>
-                <td><strong>${row.stage}</strong></td>
-                <td style="color:#38bdf8; white-space:nowrap;">${row.date}</td>
-                <td><span class="badge-m">M</span></td>
-                <td style="color:#cbd5e1;">${row.note}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-
-        <div class="sched-section-title" style="margin-top:16px;">⏳ 향후 예상 [<span style="color:#fbbf24;">I - 추정</span>]</div>
-        <table class="sched-table">
-          <thead>
-            <tr><th>단계</th><th>예상완료</th><th>등급</th><th>비고</th></tr>
-          </thead>
-          <tbody>
-            ${(cts.estimated || []).map(row => `
-              <tr>
-                <td><strong>${row.stage}</strong></td>
-                <td style="color:#fbbf24; white-space:nowrap;">${row.date}</td>
-                <td><span class="badge-i">I</span></td>
-                <td style="color:#cbd5e1;">${row.note}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  if (filter === "all" || filter === "sys15") {
-    html += `
-      <div class="sched-card">
-        <div class="sched-card-title">
-          <span class="tag-sys">⚙️ System 1.5 (GPU 2~5 훈련/검증)</span>
-          <span style="font-size:0.8rem; color:#94a3b8;">Stage 1 ~ 3 경로</span>
-        </div>
-
-        <div class="sched-section-title">✅ 완료 실적 [<span style="color:#34d399;">M - 실측</span>]</div>
-        <table class="sched-table">
-          <thead>
-            <tr><th>단계</th><th>완료일시</th><th>등급</th><th>비고</th></tr>
-          </thead>
-          <tbody>
-            ${(sys.completed || []).map(row => `
-              <tr>
-                <td><strong>${row.stage}</strong></td>
-                <td style="color:#c084fc; white-space:nowrap;">${row.date}</td>
-                <td><span class="badge-m">M</span></td>
-                <td style="color:#cbd5e1;">${row.note}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-
-        <div class="sched-section-title" style="margin-top:16px;">⏳ 향후 예상 [<span style="color:#fbbf24;">I - 추정</span>]</div>
-        <table class="sched-table">
-          <thead>
-            <tr><th>단계</th><th>예상완료</th><th>등급</th><th>비고</th></tr>
-          </thead>
-          <tbody>
-            ${(sys.estimated || []).map(row => `
-              <tr>
-                <td><strong>${row.stage}</strong></td>
-                <td style="color:#fbbf24; white-space:nowrap;">${row.date}</td>
-                <td><span class="badge-i">I</span></td>
-                <td style="color:#cbd5e1;">${row.note}</td>
-              </tr>
-            `).join("")}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  html += `</div>`;
-  modalBody.innerHTML = html;
-};
-
-// Global Event Delegation for Schedule Modal
-document.addEventListener("click", function(e) {
-  const triggerBtn = e.target.closest("#open-schedule-modal-btn, #card-schedule-modal-btn, .schedule-modal-btn, .card-schedule-btn");
-  if (triggerBtn) {
-    e.preventDefault();
-    e.stopPropagation();
-    const modal = document.getElementById("schedule-matrix-modal");
-    if (modal) {
-      modal.style.display = "flex";
-      modal.classList.add("active");
-      window.renderScheduleModalBody("all");
-    }
-    return;
-  }
-
-  const closeBtn = e.target.closest("#close-schedule-modal-btn, .modal-close-btn");
-  if (closeBtn) {
-    const modal = document.getElementById("schedule-matrix-modal");
-    if (modal) {
-      modal.style.display = "none";
-      modal.classList.remove("active");
-    }
-    return;
-  }
-
-  const filterBtn = e.target.closest(".sched-filter-btn");
-  if (filterBtn) {
-    document.querySelectorAll(".sched-filter-btn").forEach(b => b.classList.remove("active"));
-    filterBtn.classList.add("active");
-    window.renderScheduleModalBody(filterBtn.dataset.filter || "all");
-    return;
-  }
-
-  const modalOverlay = document.getElementById("schedule-matrix-modal");
-  if (modalOverlay && e.target === modalOverlay) {
-    modalOverlay.style.display = "none";
-    modalOverlay.classList.remove("active");
-  }
-});
-
-document.addEventListener("keydown", function(e) {
-  if (e.key === "Escape") {
-    const modalOverlay = document.getElementById("schedule-matrix-modal");
-    if (modalOverlay) {
-      modalOverlay.style.display = "none";
-      modalOverlay.classList.remove("active");
-    }
-  }
-});
-
-
-
-window.openScheduleModal = function() {
-  const modal = document.getElementById("schedule-matrix-modal");
-  if (modal) {
-    modal.style.display = "flex";
-    modal.classList.add("active");
-    if (typeof window.renderScheduleModalBody === "function") {
-      window.renderScheduleModalBody("all");
-    }
-  }
-};
-window.closeScheduleModal = function() {
-  const modal = document.getElementById("schedule-matrix-modal");
-  if (modal) {
-    modal.style.display = "none";
-    modal.classList.remove("active");
-  }
-};
-
-
-
-/* GPU Renderer Non-Clipping Formatter (v7.4.0) */
-window.formatGpuCardHtml = function(gpu) {
-  const isThermalHazard = (gpu.id === 2 || gpu.index === 2 || gpu.name === "GPU 2");
-  const isPriority = (gpu.id === 4 || gpu.id === 5 || gpu.index === 4 || gpu.index === 5);
-  
-  let badgeBg = "rgba(51, 65, 85, 0.4)";
-  let badgeBorder = "rgba(148, 163, 184, 0.2)";
-  let badgeColor = "#e2e8f0";
-  let statusText = gpu.project || gpu.notes || "유휴 또는 대기";
-
-  if (isThermalHazard) {
-    badgeBg = "rgba(245, 158, 11, 0.15)";
-    badgeBorder = "rgba(245, 158, 11, 0.4)";
-    badgeColor = "#fbbf24";
-    statusText = "🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 작업 대상 제외 (상시 대기)";
-  } else if (isPriority) {
-    badgeBg = "rgba(16, 185, 129, 0.15)";
-    badgeBorder = "rgba(16, 185, 129, 0.4)";
-    badgeColor = "#34d399";
-    if (!gpu.project) statusText = "⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:00 KST)";
-  } else if (gpu.project) {
-    badgeBg = "rgba(99, 102, 241, 0.15)";
-    badgeBorder = "rgba(99, 102, 241, 0.4)";
-    badgeColor = "#a5b4fc";
-  }
-
-  const util = gpu.utilization !== undefined ? gpu.utilization : (gpu.gpu_util || 0);
-  const vramUsed = gpu.vram_used_gb || gpu.vram_used || 0;
-  const vramTotal = gpu.vram_total_gb || 24;
-  const temp = gpu.temperature || gpu.temp || 35;
-  const power = gpu.power_w || gpu.power || 28;
-
-  const utilColor = util > 80 ? "#34d399" : (util > 30 ? "#60a5fa" : "#94a3b8");
-  const vramPct = Math.min(100, Math.round((vramUsed / vramTotal) * 100));
-
-  return `
-    <div class="gpu-card">
-      <div class="gpu-top-row">
-        <div class="gpu-name-group">
-          <h4>GPU ${gpu.id !== undefined ? gpu.id : gpu.index}</h4>
-          <span>NVIDIA RTX 4090</span>
-        </div>
-        <div class="gpu-metrics-group">
-          <div class="gpu-metric-item">
-            <span>사용률 <strong>${util}%</strong></span>
-            <div class="gpu-bar-mini"><div class="gpu-bar-fill" style="width:${util}%; background:${utilColor};"></div></div>
-          </div>
-          <div class="gpu-metric-item">
-            <span>VRAM <strong>${vramUsed.toFixed(1)} / ${vramTotal.toFixed(1)} GB</strong> (${vramPct}%)</span>
-            <div class="gpu-bar-mini"><div class="gpu-bar-fill" style="width:${vramPct}%; background:#38bdf8;"></div></div>
-          </div>
-          <div class="gpu-metric-item">
-            <span>온도 <strong>${temp}°C</strong></span>
-          </div>
-          <div class="gpu-metric-item">
-            <span>전력 <strong>${power} W</strong></span>
-          </div>
-        </div>
-      </div>
-      <div class="gpu-project-badge-row">
-        <div class="gpu-badge-box" style="background:${badgeBg}; border:1px solid ${badgeBorder}; color:${badgeColor};">
-          <div>${statusText}</div>
-        </div>
-      </div>
-    </div>
-  `;
-};
-
-
-
-/* GPU High Contrast Renderer (v7.5.0) */
-window.formatGpuCardHtml = function(gpu) {
-  const isThermalHazard = (gpu.id === 2 || gpu.index === 2 || gpu.name === "GPU 2");
-  const isPriority = (gpu.id === 4 || gpu.id === 5 || gpu.index === 4 || gpu.index === 5);
-  
-  let badgeClass = "gpu-badge-box";
-  let statusText = gpu.project || gpu.notes || "유휴 또는 대기";
-
-  if (isThermalHazard) {
-    badgeClass += " gpu-badge-thermal";
-    statusText = "🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 작업 대상 제외 (상시 대기)";
-  } else if (isPriority) {
-    badgeClass += " gpu-badge-priority";
-    if (!gpu.project) statusText = "⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:00 KST)";
-  } else if (gpu.project) {
-    badgeClass += " gpu-badge-project";
-  }
-
-  const util = gpu.utilization !== undefined ? gpu.utilization : (gpu.gpu_util || 0);
-  const vramUsed = gpu.vram_used_gb || gpu.vram_used || 0;
-  const vramTotal = gpu.vram_total_gb || 24;
-  const temp = gpu.temperature || gpu.temp || 35;
-  const power = gpu.power_w || gpu.power || 28;
-
-  const utilColor = util > 80 ? "#10b981" : (util > 30 ? "#2563eb" : "#64748b");
-  const vramPct = Math.min(100, Math.round((vramUsed / vramTotal) * 100));
-
-  return `
-    <div class="gpu-card">
-      <div class="gpu-top-row">
-        <div class="gpu-name-group">
-          <h4>GPU ${gpu.id !== undefined ? gpu.id : gpu.index}</h4>
-          <span>NVIDIA RTX 4090</span>
-        </div>
-        <div class="gpu-metrics-group">
-          <div class="gpu-metric-item">
-            <span>사용률 <strong>${util}%</strong></span>
-            <div class="gpu-bar-mini"><div class="gpu-bar-fill" style="width:${util}%; background:${utilColor};"></div></div>
-          </div>
-          <div class="gpu-metric-item">
-            <span>VRAM <strong>${vramUsed.toFixed(1)} / ${vramTotal.toFixed(1)} GB</strong> (${vramPct}%)</span>
-            <div class="gpu-bar-mini"><div class="gpu-bar-fill" style="width:${vramPct}%; background:#0284c7;"></div></div>
-          </div>
-          <div class="gpu-metric-item">
-            <span>온도 <strong>${temp}°C</strong></span>
-          </div>
-          <div class="gpu-metric-item">
-            <span>전력 <strong>${power} W</strong></span>
-          </div>
-        </div>
-      </div>
-      <div class="gpu-project-badge-row">
-        <div class="${badgeClass}">
-          <div>${statusText}</div>
-        </div>
-      </div>
-    </div>
-  `;
-};
-
-
-
-/* GPU Twin Circular Gauges Renderer (v7.6.0) */
-window.formatGpuCardHtml = function(gpu) {
-  const isThermalHazard = (gpu.id === 2 || gpu.index === 2 || gpu.name === "GPU 2");
-  const isPriority = (gpu.id === 4 || gpu.id === 5 || gpu.index === 4 || gpu.index === 5);
-  
-  let badgeClass = "gpu-badge-box";
-  let statusText = gpu.project || gpu.notes || "유휴 또는 대기";
-
-  if (isThermalHazard) {
-    badgeClass += " gpu-badge-thermal";
-    statusText = "🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 작업 대상 제외 (상시 대기)";
-  } else if (isPriority) {
-    badgeClass += " gpu-badge-priority";
-    if (!gpu.project) statusText = "⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:00 KST)";
-  } else if (gpu.project) {
-    badgeClass += " gpu-badge-project";
-  }
-
-  const util = gpu.utilization !== undefined ? gpu.utilization : (gpu.gpu_util || 0);
-  const vramUsed = gpu.vram_used_gb || gpu.vram_used || 0;
-  const vramTotal = gpu.vram_total_gb || 24;
-  const temp = gpu.temperature || gpu.temp || 35;
-  const power = gpu.power_w || gpu.power || 28;
-
-  const vramPct = Math.min(100, Math.round((vramUsed / vramTotal) * 100));
-
-  // Circular gauge math (r=30, C=188.5)
-  const C = 188.5;
-  const utilOffset = C - (C * (util / 100));
-  const vramOffset = C - (C * (vramPct / 100));
-
-  const utilColor = util > 80 ? "#10b981" : (util > 30 ? "#3b82f6" : "#94a3b8");
-  const vramColor = "#0284c7";
-
-  return `
-    <div class="gpu-card">
-      <div class="gpu-card-header">
-        <div class="gpu-title-box">
-          <h4>GPU ${gpu.id !== undefined ? gpu.id : gpu.index}</h4>
-          <span>NVIDIA RTX 4090</span>
-        </div>
-        <div class="gpu-meta-badges">
-          <div class="gpu-meta-badge">🌡️ ${temp}°C</div>
-          <div class="gpu-meta-badge">⚡ ${power} W</div>
-        </div>
-      </div>
-
-      <div class="gpu-gauges-row">
-        <!-- Left: GPU Utilization Circular Gauge -->
-        <div class="gpu-gauge-item">
-          <div class="gauge-svg-wrap">
-            <svg viewBox="0 0 72 72">
-              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
-              <circle cx="36" cy="36" r="30" fill="none" stroke="${utilColor}" stroke-width="6"
-                      stroke-dasharray="188.5" stroke-dashoffset="${utilOffset}"
-                      stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;" />
-            </svg>
-            <div class="gauge-center-text">
-              <span class="val">${util}%</span>
-            </div>
-          </div>
-          <div class="gauge-label">GPU 사용률</div>
-        </div>
-
-        <!-- Right: VRAM Usage Circular Gauge -->
-        <div class="gpu-gauge-item">
-          <div class="gauge-svg-wrap">
-            <svg viewBox="0 0 72 72">
-              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
-              <circle cx="36" cy="36" r="30" fill="none" stroke="${vramColor}" stroke-width="6"
-                      stroke-dasharray="188.5" stroke-dashoffset="${vramOffset}"
-                      stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;" />
-            </svg>
-            <div class="gauge-center-text">
-              <span class="val">${vramPct}%</span>
-            </div>
-          </div>
-          <div class="gauge-label">VRAM 메모리</div>
-          <div class="gauge-sublabel">${vramUsed.toFixed(1)} / ${vramTotal.toFixed(1)} GB</div>
-        </div>
-      </div>
-
-      <div class="gpu-project-badge-row">
-        <div class="${badgeClass}">
-          <div>${statusText}</div>
-        </div>
-      </div>
-    </div>
-  `;
-};
-
-
-
-/* GPU Twin Circular Gauges & Status Badge Formatter (v7.7.0) */
-window.formatGpuCardHtml = function(gpu) {
-  const idx = gpu.id !== undefined ? gpu.id : (gpu.index !== undefined ? gpu.index : 0);
-  const isThermalHazard = (idx === 2);
-  const isPriority = (idx === 4 || idx === 5);
-
-  const defaultMappings = {
-    0: '🟢 CTS :: E2-R2 9문항 물리 추론 및 메인 계측 (완료예정: 2026.08.07 18:00 KST)',
-    1: '🟢 CTS :: E2-R2 사이드카 정밀 계측 및 Broyden Solver (완료예정: 2026.08.07 18:30 KST)',
-    2: '🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 작업 대상 제외 (상시 대기)',
-    3: '🔵 System 1.5 :: Stage 1 DEQ Broyden Solver 훈련 (완료예정: 2026.08.07 21:00 KST)',
-    4: '⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:00 KST)',
-    5: '⚡ [우선가동 할당] Stage 2 FWP(ΔW) 결합 파이프라인 (완료예정: 2026.08.08 02:30 KST)',
-    6: '🟣 CTS / EFO :: E1 사전등록 초안 검증 및 S7 계측 (완료예정: 2026.08.07 16:00 KST)',
-    7: '🟣 CTS / EFO :: E1 사전등록 초안 검증 및 S7 계측 (완료예정: 2026.08.07 16:30 KST)'
-  };
-
-  const defaultUtil = [94, 88, 72, 65, 0, 0, 40, 35][idx] || 0;
-  const defaultVramUsed = [18.4, 16.0, 13.9, 12.5, 2.1, 2.1, 8.3, 7.0][idx] || 2.1;
-  const defaultTemp = [68, 64, 62, 59, 42, 41, 51, 49][idx] || 35;
-  const defaultPower = [285, 260, 230, 210, 45, 44, 140, 125][idx] || 28;
-
-  const util = gpu.utilization_percent !== undefined ? Number(gpu.utilization_percent) : (gpu.utilization !== undefined ? Number(gpu.utilization) : defaultUtil);
-  const memoryUsedMib = gpu.memory_used_mib !== undefined ? Number(gpu.memory_used_mib) : 0;
-  const memoryTotalMib = gpu.memory_total_mib !== undefined ? Number(gpu.memory_total_mib) : 24576;
-  const vramUsed = memoryUsedMib > 0 ? (memoryUsedMib / 1024) : (gpu.vram_used_gb || defaultVramUsed);
-  const vramTotal = memoryTotalMib > 0 ? (memoryTotalMib / 1024) : 24.0;
-  const temp = gpu.temperature_c !== undefined ? Number(gpu.temperature_c) : (gpu.temperature || defaultTemp);
-  const power = gpu.power_w !== undefined ? Number(gpu.power_w) : (gpu.power || defaultPower);
-
-  const statusText = gpu.project || defaultMappings[idx] || "유휴 또는 대기";
-
-  // Determine top right status badge (사용중 vs 유휴 vs 발열보호)
-  let statusBadgeHtml = "";
-  if (isThermalHazard) {
-    statusBadgeHtml = `<span class="status-badge-hazard">🔥 발열대기</span>`;
-  } else if (util > 5 || vramUsed > 3.0 || idx <= 3 || idx >= 6) {
-    statusBadgeHtml = `<span class="status-badge-inuse">🟢 사용중</span>`;
-  } else {
-    statusBadgeHtml = `<span class="status-badge-idle">⚪ 유휴</span>`;
-  }
-
-  // Determine task badge style
-  let badgeClass = "gpu-badge-box";
-  if (isThermalHazard) {
-    badgeClass += " gpu-badge-thermal";
-  } else if (isPriority) {
-    badgeClass += " gpu-badge-priority";
-  } else if (util > 5) {
-    badgeClass += " gpu-badge-project";
-  }
-
-  const vramPct = Math.min(100, Math.round((vramUsed / vramTotal) * 100));
-
-  // Circular gauge math (r=30, C=188.5)
-  const C = 188.5;
-  const utilOffset = C - (C * (util / 100));
-  const vramOffset = C - (C * (vramPct / 100));
-
-  const utilColor = util > 80 ? "#10b981" : (util > 30 ? "#3b82f6" : "#94a3b8");
-  const vramColor = "#0284c7";
-
-  return `
-    <div class="gpu-card">
-      <div class="gpu-card-header">
-        <div class="gpu-title-box">
-          <h4>GPU ${idx}</h4>
-          <span>NVIDIA RTX 4090 · 🌡️ ${temp}°C · ⚡ ${power}W</span>
-        </div>
-        <div class="gpu-header-right">
-          ${statusBadgeHtml}
-        </div>
-      </div>
-
-      <div class="gpu-gauges-row">
-        <!-- Left Gauge: GPU Utilization -->
-        <div class="gpu-gauge-item">
-          <div class="gauge-svg-wrap">
-            <svg viewBox="0 0 72 72">
-              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
-              <circle cx="36" cy="36" r="30" fill="none" stroke="${utilColor}" stroke-width="6"
-                      stroke-dasharray="188.5" stroke-dashoffset="${utilOffset}"
-                      stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;" />
-            </svg>
-            <div class="gauge-center-text">
-              <span class="val">${util}%</span>
-            </div>
-          </div>
-          <div class="gauge-label">GPU 사용률</div>
-        </div>
-
-        <!-- Right Gauge: VRAM Memory -->
-        <div class="gpu-gauge-item">
-          <div class="gauge-svg-wrap">
-            <svg viewBox="0 0 72 72">
-              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
-              <circle cx="36" cy="36" r="30" fill="none" stroke="${vramColor}" stroke-width="6"
-                      stroke-dasharray="188.5" stroke-dashoffset="${vramOffset}"
-                      stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;" />
-            </svg>
-            <div class="gauge-center-text">
-              <span class="val">${vramPct}%</span>
-            </div>
-          </div>
-          <div class="gauge-label">VRAM 메모리</div>
-          <div class="gauge-sublabel">${vramUsed.toFixed(1)} / ${vramTotal.toFixed(1)} GB</div>
-        </div>
-      </div>
-
-      <div class="gpu-project-badge-row">
-        <div class="${badgeClass}">
-          <div>${statusText}</div>
-        </div>
-      </div>
-    </div>
-  `;
-};
-
-// Override renderGpus in app.js
-window.renderGpusOverride = function(snapshot) {
-  const container = document.getElementById("gpu-list");
-  if (!container) return;
-
-  const gpus = (snapshot && Array.isArray(snapshot.gpus) && snapshot.gpus.length > 0)
-    ? snapshot.gpus
-    : [0,1,2,3,4,5,6,7].map(i => ({ index: i, id: i }));
-
-  container.innerHTML = gpus.map(gpu => window.formatGpuCardHtml(gpu)).join("");
-};
-
-// Auto-run on load
-document.addEventListener("DOMContentLoaded", function() {
-  setTimeout(function() {
-    if (typeof window.renderGpusOverride === "function") {
-      window.renderGpusOverride(window.demoData);
-    }
-  }, 100);
-});
-
-
-
-/* GPU 8-Way Precise Allocation Renderer (v8.0.0) */
-window.formatGpuCardHtml = function(gpu) {
-  const idx = gpu.id !== undefined ? gpu.id : (gpu.index !== undefined ? gpu.index : 0);
-  const isThermalHazard = (idx === 2);
-  const isHwConstraint = (idx === 3);
-  const isCtsDedicated = (idx === 0);
-  const isSys15Allocated = (idx === 1 || idx === 4 || idx === 5 || idx === 6 || idx === 7);
-
-  const defaultMappings = {
-    0: '🔥 CTS :: run_stage2_math_ppo.py (PPO Retraining - VRAM 15.96 GB)',
-    1: '⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (1/5 - 완료예정: 2026.08.11 02:00 KST)',
-    2: '🔥 [발열보호 안전수칙] 89°C 육박으로 과열 위험 ➔ 작업 대상 제외 (상시 대기)',
-    3: '❌ 하드웨어 제약으로 상시 제외 상태',
-    4: '⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (2/5 - 완료예정: 2026.08.11 02:00 KST)',
-    5: '⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (3/5 - 완료예정: 2026.08.11 02:30 KST)',
-    6: '⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (4/5 - 완료예정: 2026.08.11 02:30 KST)',
-    7: '⚡ System 1.5 :: 5대 병렬 800스텝 훈련 & 3시드 평가 (5/5 - 완료예정: 2026.08.11 02:30 KST)'
-  };
-
-  const defaultUtil = [94, 88, 0, 0, 92, 90, 85, 86][idx] || 0;
-  const defaultVramUsed = [15.96, 16.0, 0.016, 0.016, 16.0, 16.0, 16.0, 16.0][idx] || 0.016;
-  const defaultTemp = [68, 64, 35, 35, 62, 61, 58, 59][idx] || 35;
-  const defaultPower = [285, 260, 28, 28, 245, 240, 210, 215][idx] || 28;
-
-  const util = gpu.utilization_percent !== undefined ? Number(gpu.utilization_percent) : (gpu.utilization !== undefined ? Number(gpu.utilization) : defaultUtil);
-  const memoryUsedMib = gpu.memory_used_mib !== undefined ? Number(gpu.memory_used_mib) : 0;
-  const memoryTotalMib = gpu.memory_total_mib !== undefined ? Number(gpu.memory_total_mib) : 49152;
-  const vramUsed = memoryUsedMib > 0 ? (memoryUsedMib / 1024) : (gpu.vram_used_gb || defaultVramUsed);
-  const vramTotal = memoryTotalMib > 0 ? (memoryTotalMib / 1024) : 48.0;
-  const temp = gpu.temperature_c !== undefined ? Number(gpu.temperature_c) : (gpu.temperature || defaultTemp);
-  const power = gpu.power_w !== undefined ? Number(gpu.power_w) : (gpu.power || defaultPower);
-
-  const statusText = gpu.project || defaultMappings[idx] || "유휴 또는 대기";
-
-  let statusBadgeHtml = "";
-  if (isThermalHazard) {
-    statusBadgeHtml = `<span class="status-badge-hazard">🔥 발열대기</span>`;
-  } else if (isHwConstraint) {
-    statusBadgeHtml = `<span class="status-badge-idle">❌ 하드웨어제약</span>`;
-  } else if (isCtsDedicated) {
-    statusBadgeHtml = `<span class="status-badge-inuse" style="background:#fff7ed; border-color:#fdba74; color:#c2410c;">🔥 CTS 점유중</span>`;
-  } else if (isSys15Allocated) {
-    statusBadgeHtml = `<span class="status-badge-inuse">⚡ System 1.5 가동</span>`;
-  } else {
-    statusBadgeHtml = `<span class="status-badge-idle">⚪ 유휴</span>`;
-  }
-
-  let badgeClass = "gpu-badge-box";
-  if (isThermalHazard || isHwConstraint) {
-    badgeClass += " gpu-badge-thermal";
-  } else if (isCtsDedicated) {
-    badgeClass += " gpu-badge-thermal";
-  } else if (isSys15Allocated) {
-    badgeClass += " gpu-badge-priority";
-  }
-
-  const vramPct = Math.min(100, Math.round((vramUsed / vramTotal) * 100));
-
-  const C = 188.5;
-  const utilOffset = C - (C * (util / 100));
-  const vramOffset = C - (C * (vramPct / 100));
-
-  const utilColor = util > 80 ? "#10b981" : (util > 30 ? "#3b82f6" : "#94a3b8");
-  const vramColor = "#0284c7";
-
-  return `
-    <div class="gpu-card">
-      <div class="gpu-card-header">
-        <div class="gpu-title-box">
-          <h4>GPU ${idx}</h4>
-          <span>NVIDIA RTX A6000 · 🌡️ ${temp}°C · ⚡ ${power}W</span>
-        </div>
-        <div class="gpu-header-right">
-          ${statusBadgeHtml}
-        </div>
-      </div>
-
-      <div class="gpu-gauges-row">
-        <!-- Left Gauge: GPU Utilization -->
-        <div class="gpu-gauge-item">
-          <div class="gauge-svg-wrap">
-            <svg viewBox="0 0 72 72">
-              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
-              <circle cx="36" cy="36" r="30" fill="none" stroke="${utilColor}" stroke-width="6"
-                      stroke-dasharray="188.5" stroke-dashoffset="${utilOffset}"
-                      stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;" />
-            </svg>
-            <div class="gauge-center-text">
-              <span class="val">${util}%</span>
-            </div>
-          </div>
-          <div class="gauge-label">GPU 사용률</div>
-        </div>
-
-        <!-- Right Gauge: VRAM Memory -->
-        <div class="gpu-gauge-item">
-          <div class="gauge-svg-wrap">
-            <svg viewBox="0 0 72 72">
-              <circle cx="36" cy="36" r="30" fill="none" stroke="#e2e8f0" stroke-width="6" />
-              <circle cx="36" cy="36" r="30" fill="none" stroke="${vramColor}" stroke-width="6"
-                      stroke-dasharray="188.5" stroke-dashoffset="${vramOffset}"
-                      stroke-linecap="round" style="transition: stroke-dashoffset 0.5s ease;" />
-            </svg>
-            <div class="gauge-center-text">
-              <span class="val">${vramPct}%</span>
-            </div>
-          </div>
-          <div class="gauge-label">VRAM 메모리</div>
-          <div class="gauge-sublabel">${vramUsed.toFixed(2)} / ${vramTotal.toFixed(1)} GB</div>
-        </div>
-      </div>
-
-      <div class="gpu-project-badge-row">
-        <div class="${badgeClass}">
-          <div>${statusText}</div>
-        </div>
-      </div>
-    </div>
-  `;
-};
