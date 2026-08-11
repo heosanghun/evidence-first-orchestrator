@@ -1,0 +1,32 @@
+
+########## P0 build a real origin + work clone ##########
+commit C = c9acd5456752b1494d0412379726c53a43e230c4
+remote  = /tmp/prov-attack/origin.git
+blob    = HONEST: 3 passed, 1 failed
+
+########## P1 POSITIVE CONTROL - honest submission (bytes match the commit) ##########
+submitted sha256 = 045aa3ee928e731bf645ad947726ac0f22f0f93aeff39af0d6ee48cc39e5d549
+ACCEPTED  byte_exact=True blob_oid=698b6494622cfadcc4ec480c9d0e55421720db8b
+<-- expect ACCEPTED
+
+########## P2 plain tamper, no git replace (submitted bytes differ from the commit) ##########
+submitted sha256 = 950f8ecd96ed7f7c994d9f739afe2d0b06d3dd83c9d2ea0f372c27848479fc7c
+REJECTED  EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'report.txt': blob=045aa3ee928e731bf645ad947726ac0f22f0f93aeff39af0d6ee48cc39e5d549, submitted=950f8ecd96ed7f7c994d9f739afe2d0b06d3dd83c9d2ea0f372c27848479fc7c
+<-- expect REJECTED
+
+########## P3 THE ATTACK - same forged bytes, plus a git replace object ##########
+replace ref: c9acd5456752b1494d0412379726c53a43e230c4  ->  7c12c7f1f786c138737f37002e7b83b1f721d610
+git cat-file blob C:report.txt      = FORGED: 4 passed, 0 failed
+with --no-replace-objects           = HONEST: 3 passed, 1 failed
+submitted sha256 = 950f8ecd96ed7f7c994d9f739afe2d0b06d3dd83c9d2ea0f372c27848479fc7c
+ACCEPTED  byte_exact=True blob_oid=08b42cd87afad7dcd942621837672397d1135749
+<-- ACCEPTED here means the replace object forged byte-exactness
+
+########## P4 what an independent re-check sees in the real history ##########
+origin.git holds: HONEST: 3 passed, 1 failed
+declared commit : c9acd5456752b1494d0412379726c53a43e230c4
+
+########## P5 A/B - the SAME forged state against cef5623, which passes --no-replace-objects ##########
+cef5623 forged+replace: REJECTED EvidenceError: Delivered artifact bytes differ from the Git blob for report.txt: expected 045aa3ee928e731bf645ad947726ac0f22f0f93aeff39af0d6ee48cc39e5d549, observed 950f8ecd96ed7f7c994d9f739afe2d0b06d3dd83c9d2ea0f372c27848479fc7c
+cef5623 honest control:   ACCEPTED sha256=045aa3ee928e731bf645ad947726ac0f22f0f93aeff39af0d6ee48cc39e5d549
+<-- the honest control must ACCEPT, otherwise the rejection above is the wrong gate

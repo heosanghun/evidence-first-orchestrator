@@ -1,0 +1,115 @@
+########## A. POSITIVE CONTROL, and the scoping number FIRST ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok] the population the earlier note named
+        expected: total: 963
+        observed: total: 963
+    base node types: {'Name': 843, 'Call': 75, 'Constant': 6, 'Attribute': 30, 'Subscript': 4, 'BinOp': 5}
+  [ok]   narrowed to names bound from a dict field
+        expected: reachable: 24
+        observed: reachable: 24
+  963 -> 24. The item said to scope first and stop if it is still too
+  many. 24 is adjudicable, so this continues.
+
+########## B. the 24, by module ##########
+    adapter.py           1
+    evidence.py          2
+    independence.py      21
+  [ok]   and they cluster in one module
+        expected: independence.py: 21
+        observed: independence.py: 21
+    adapter.py:148   task.get                     <- claim['task']
+    evidence.py:117   expected_sha.lower           <- artifact.get('sha256')
+    evidence.py:135   command.strip                <- validation.get('command')
+    independence.py:123   agents.items                 <- policy.get('agents')
+    independence.py:157   declaration.get              <- declarations.get(agent_id)
+    independence.py:172   declaration.get              <- declarations.get(agent_id)
+    independence.py:173   declaration.get              <- declarations.get(agent_id)
+    independence.py:174   declaration.get              <- declarations.get(agent_id)
+    independence.py:214   task.get                     <- event.get('payload', {}).get('task')
+    independence.py:217   task.get                     <- event.get('payload', {}).get('task')
+    independence.py:218   authorship.get               <- task.get('result', {}).get('authorship', {})
+    independence.py:219   authorship.get               <- task.get('result', {}).get('authorship', {})
+    independence.py:235   task.get                     <- event.get('payload', {}).get('task')
+    independence.py:239   task.get                     <- event.get('payload', {}).get('task')
+    independence.py:243   task.get                     <- event.get('payload', {}).get('task')
+    independence.py:244   task.get                     <- event.get('payload', {}).get('task')
+    independence.py:245   task.get                     <- event.get('payload', {}).get('task')
+    independence.py:248   worker.get                   <- submissions.get(key, {'actor': task.get('owner'), 'identity'
+    independence.py:264   worker.get                   <- submissions.get(key, {'actor': task.get('owner'), 'identity'
+    independence.py:266   worker.get                   <- submissions.get(key, {'actor': task.get('owner'), 'identity'
+
+########## C. the `.get(default).get()` shape ##########
+  `d.get('k', {}).get('j')` defaults ONLY when the key is ABSENT. If
+  the key is PRESENT and holds None or a string, the second .get raises
+  AttributeError - which cli.main does not catch, so it escapes as a
+  traceback. #19's shape.
+    independence.py:197   agents.get(agent_id, {}).get('identity')
+    independence.py:211   event.get('payload', {}).get('task')
+    independence.py:217   task.get('result', {}).get('authorship', {})
+    independence.py:235   task.get('verification', {}).get('actor')
+    independence.py:239   task.get('verification', {}).get('identity')
+    ledger.py:161   event.get('payload', {}).get('task')
+    provenance.py:118   evidence.get('manifest', {}).get('artifacts', [])
+    provenance.py:120   evidence.get('manifest', {}).get('validations', [])
+    workspace.py:87    initialization.get('payload', {}).get('config')
+    workspace.py:262   event.get('payload', {}).get('agent')
+    workspace.py:1296  task.get('result', {}).get('transport')
+    workspace.py:1311  task.get('result', {}).get('authorship', {})
+    workspace.py:1346  task.get('result', {}).get('manifest', {})
+    workspace.py:1346  task.get('result', {}).get('manifest', {}).get('sha256')
+  [ok]   chained get-with-default sites, package-wide
+        expected: sites: 14
+        observed: sites: 14
+  Note these are NOT confined to independence.py: workspace.py's proxy
+  verification path uses the same shape.
+
+########## D. driven, not argued - and what could NOT be driven ##########
+  [ok] a synthetic event with a non-dict `result` raises
+        expected: AttributeError: 'str' object has no attribute 'get'
+        observed: AttributeError: 'str' object has no attribute 'get'
+  [ok]   and the POSITIVE CONTROL, a dict `result`, does not
+        expected: no exception
+        observed: no exception
+  So the function is fragile to the shape. The question that decides
+  whether this is a FINDING is whether a real ledger can contain such
+  an event, and here is what I could establish:
+    * model.validate_task constrains id, owner, state, title, revision,
+      prerequisites, permissions and gates. It does NOT constrain
+      `result` at all - checked against the source.
+    * BUT the audit reaches :218 only for `task.submitted` /
+      `task.proxy_submitted` events, and workspace.submit writes
+      `result=evidence`, a dict it builds itself.
+    * `requeue` DOES set `result=None` (workspace.py:1411), but a
+      requeued event carries action `task.requeued`, which the audit
+      skips at its two action filters before reaching any .get chain.
+  I could NOT construct a public-API sequence that puts a non-dict
+  `result` into a task.submitted payload. So: REACHABLE FROM A CRAFTED
+  OR TAMPERED LEDGER, NOT SHOWN REACHABLE THROUGH THE API.
+  No issue is filed on that basis. Writing it down as a near miss is
+  the point - the hypothesis was that this would be #21, and it is not,
+  on the evidence I have.
+
+########## E. what this does NOT establish ##########
+  * It does not clear the other 939 attribute accesses. They are
+    excluded because their base is not bound from a dict field, which
+    is a SYNTACTIC filter: a value that reaches a name by some other
+    route - a parameter, a return - is invisible to it, exactly the
+    bound recorded in NOTE-which-of-my-censuses-measured-and-which-read.
+  * It does not prove the ledger cannot hold a malformed payload. It
+    proves I could not produce one through the API in this container.
+    An attacker who can write AND re-sign the ledger is a different
+    threat model, and #9 and #12 already cover parts of it.
+  * MEASURED: 963, 24, the module split, the 12 chained sites, and both
+    driven outcomes. REASONED: that the action filters block the
+    requeue route - read from the source, not driven end to end.
+
+########## 0 unexpected result(s) ##########
+Executed here: audit_verification_events against literals built in this
+file. No network, no GPU, no performance measurement. No issue filed.
+Pre-registered permissions unchanged.
+SUBMITTED, not VERIFIED.

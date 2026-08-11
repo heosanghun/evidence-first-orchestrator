@@ -1,0 +1,72 @@
+
+########## B0 init antigravity-codex-claude preset ##########
+init exit=0
+antigravity {"role": "orchestrator"}
+codex {"alias_chain": [], "alias_of": null, "control_principal": "codex", "model_family": "openai-codex", "role": "worker", "schema_version": 1}
+claude {"alias_chain": [], "alias_of": null, "control_principal": "claude", "model_family": "anthropic-claude", "role": "worker", "schema_version": 1}
+
+########## B1 register a verifier that SHARES claude's declared identity ##########
+add exit=0
+
+########## B2 task owned by claude, then submit ##########
+task add exit=0
+start exit=0
+submit exit=0
+
+########## B3 HONEST: claude-verifier (same declared identity) tries to verify ##########
+error: Independent verification could not be established: same_control_principal, same_model_family
+<-- expect REJECT (shared control_principal + model_family)
+
+########## B4 FORGE: orchestrator re-attests claude-verifier with a different identity ##########
+    "runs/claude-verifier"
+  ]
+}
+attest exit=0
+
+########## B5 REPLAY the identical verify ##########
+verify exit=0  <-- 0 means independence was forged
+state = verified
+
+########## B6 does ledger audit-independence surface it? ##########
+{
+  "checked": 1,
+  "findings": [
+    {
+      "attempt": 1,
+      "independent": true,
+      "reasons": [],
+      "sequence": 11,
+      "task_id": "T1",
+      "verifier": {
+        "actor": "claude-verifier",
+        "alias_chain": [],
+        "alias_of": null,
+        "control_principal": "openai",
+        "model_family": "openai-codex",
+        "schema_version": 1
+      },
+      "verifier_actor": "claude-verifier",
+      "verifier_identity_source": "verification_snapshot",
+      "worker": {
+        "actor": "claude",
+        "alias_chain": [],
+        "alias_of": null,
+        "control_principal": "claude",
+        "model_family": "anthropic-claude",
+        "schema_version": 1
+      },
+      "worker_actor": "claude",
+      "worker_identity_source": "submission_snapshot"
+    }
+  ],
+  "independent": 1,
+  "non_independent": 0,
+  "read_only": true
+}
+exit=0
+
+########## B7 ledger record of the identity attestation ##########
+5 agent.added {"alias_chain": [], "alias_of": null, "control_principal": "claude", "model_family": "anthropic-claude", "schema_version": 1}
+9 task.submitted
+10 agent.identity_attested {"alias_chain": [], "alias_of": null, "control_principal": "openai", "model_family": "openai-codex", "schema_version": 1}
+11 task.verified

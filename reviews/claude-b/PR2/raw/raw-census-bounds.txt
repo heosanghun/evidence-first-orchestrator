@@ -1,0 +1,130 @@
+########## A. POSITIVE CONTROL, and the population ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   and the population is the one that note adjudicated
+        expected: pairs: 30
+        observed: pairs: 30
+  [ok]   every pair is classified - none silently dropped
+        expected: unresolved: []
+        observed: unresolved: []
+  That check is not decoration: the first draft of `binding_of` handled
+  `Assign` and not `AnnAssign`, so `doctor.py::result` - declared
+  `result: dict[str, Any] = {...}` - vanished from the census and the
+  count came back 29 of 30. Tenth hand-rolled filter to be the bug.
+
+########## B. how each adjudicated base is bound ##########
+  !!adapter.py         task         in render_task_prompt             PARAMETER
+    adapter.py         agent        in run_once                       assigned from a call
+    adapter.py         claim        in run_once                       assigned from a call
+    adapter.py         submitted    in run_once                       assigned from a call
+    archive.py         artifact     in archive_evidence_bundle        loop / comprehension target
+    archive.py         extra        in archive_evidence_bundle        loop / comprehension target
+    archive.py         item         in archive_evidence_bundle        loop / comprehension target
+  !!archive.py         manifest     in archive_evidence_bundle        PARAMETER
+    archive.py         raw_output   in archive_evidence_bundle        assigned from a call
+  !!archive.py         report       in archive_evidence_bundle        PARAMETER
+    cli.py             task         in _cmd_task_add                  assigned from a call
+    doctor.py          check        in audit_legacy_workspace         loop / comprehension target
+    doctor.py          agent        in audit_workspace                loop / comprehension target
+    doctor.py          projection   in audit_workspace                assigned from a call
+    doctor.py          result       in audit_workspace                built in place
+    doctor.py          task         in audit_workspace                loop / comprehension target
+    evidence.py        check        in validate_manifest              loop / comprehension target
+    evidence.py        claim        in validate_manifest              loop / comprehension target
+    evidence.py        manifest     in validate_manifest              assigned from a call
+    evidence.py        report       in validate_submission            assigned from a call
+    independence.py    task         in audit_verification_events      assigned from a call
+    independence.py    item         in build_identity                 loop / comprehension target
+  !!independence.py    verifier     in evaluate_independence          PARAMETER
+  !!independence.py    worker       in evaluate_independence          PARAMETER
+    independence.py    target       in resolve_identity_registry      assigned from a call
+    ledger.py          events       in read                           built in place
+    model.py           lease        in lease_expired                  assigned from a call
+  !!model.py           task         in validate_task                  PARAMETER
+    provenance.py      artifact     in _evidence_file_map             loop / comprehension target
+    provenance.py      raw_output   in _evidence_file_map             assigned from a call
+
+  totals: {'PARAMETER': 6, 'assigned from a call': 12, 'built in place': 2, 'loop / comprehension target': 10}
+  [ok]   bases whose origin the census CANNOT see
+        expected: PARAMETER: 6
+        observed: PARAMETER: 6
+  A parameter is the whole problem. The census reads the name the
+  CALLEE chose; the caller may bind the same value to anything. For a
+  loop target or an assignment from a call, the origin is right there
+  in the same scope and the census is sound about it.
+
+########## C. the six, and what the caller actually passes ##########
+    adapter.py::render_task_prompt(task)
+        adapter.py:129 passes `task`   SAME name
+    independence.py::evaluate_independence(worker)
+        independence.py:258 passes `worker_identity`   DIFFERENT name
+    independence.py::evaluate_independence(verifier)
+        independence.py:258 passes `verifier_identity`   DIFFERENT name
+    model.py::validate_task(task)
+        model.py:86 passes `record`   DIFFERENT name
+    archive.py::archive_evidence_bundle(manifest)
+        workspace.py:1054 passes `evidence['manifest']`   DIFFERENT name
+    archive.py::archive_evidence_bundle(report)
+        workspace.py:1054 passes `evidence['report']`   DIFFERENT name
+  [ok]   call sites where the caller binds a DIFFERENT name
+        expected: differing: 5
+        observed: differing: 5 ['independence.py::worker <- worker_identity', 'independence.py::verifier <- verifier_identity', 'model.py::task <- record', "archive.py::manifest <- evidence['manifest']", "archive.py::report <- evidence['report']"]
+  FIVE of the six callers bind a different name. Only
+  `render_task_prompt(task=task)` reuses it, and that is luck rather
+  than a property - nothing stops a future caller renaming it.
+  Two of the five do not pass a variable at all:
+  `archive_evidence_bundle(manifest=evidence['manifest'], ...)` passes a
+  SUBSCRIPT. The census adjudicated `manifest` as `the caller passes
+  {path, sha256}; workspace builds it` - correct, and reached by
+  reading `workspace.py`, not by anything the census could see.
+  All six adjudications stand. What changes is that the note presented
+  30 results uniformly when 24 were measured and 6 were read.
+
+########## D. the same bound, applied to every census in the review ##########
+  NOTE-implicit-exceptions-package-wide.md
+      census: constant-key subscript reads
+      bound:  30 (module, base) pairs; 6 are PARAMETERS, so 6 adjudications are REASONED FROM READING and 24 are visible in scope. Section C above.
+  NOTE-the-144-was-my-own-misleading-number.md
+      census: dynamic-key reads
+      bound:  7 sites, each classified by key PROVENANCE rather than by base name - and the one parsed-input case was traced to `record['submitted_path']` BY READING, which the note says. Not affected.
+  NOTE-dynamic-stores-and-what-a-name-scoped-census-cannot-see.md
+      census: dynamic-key stores
+      bound:  this is where the limit was found. Already states which of its two chains is measured and which is read. Not affected further.
+  NOTE-issue19-is-the-only-one.md
+      census: workspace.py subscript reads
+      bound:  single module, and `NOTE-the-144...` measured workspace.py as having ZERO runtime dynamic-key reads - so its population is constant-key within one file. A rename across a return cannot hide a constant key.
+  NOTE-what-the-test-suite-cannot-catch.md
+      census: tests/ token map
+      bound:  keys on TOKENS in test sources, not on variable names in the package. A rename in the package would change which token to search for, which is why every issue's token is checked to exist in its module.
+  NOTE-the-node-tests-exercise-only-the-covered-input.md
+      census: web_tests
+      bound:  EXECUTED - the guards are driven, not named. Immune.
+  [ok]   censuses whose published result needs a stated bound
+        expected: affected: 1
+        observed: affected: 1 ['NOTE-implicit-exceptions-package-wide.md']
+
+########## E. what this does NOT establish ##########
+  * It does NOT re-adjudicate the six. Their reasons were reached by
+    reading the callers and remain correct; what changes is that the
+    note now says which of its 30 are measured and which are read.
+  * `binding_of` takes the FIRST function in which a name resolves.
+    Where a base appears in several functions of one module the
+    classification is of that first site, which is why section C names
+    the function alongside the module rather than the module alone.
+  * Call sites are read at ONE line each - the first caller found. A
+    second caller could pass something differently named again; that
+    would strengthen the point, not weaken it, so it is not chased.
+  * MEASURED: the classification of all 30, and the caller-side text at
+    six call sites. REASONED: that a parameter's origin is invisible to
+    a name-scoped census, which is what a parameter means.
+
+########## 0 unexpected result(s) ##########
+Static analysis only; nothing was executed against a workspace. No
+issue filed - this bounds MY OWN earlier write-up, and finds no new
+defect in EFO. Pre-registered permissions unchanged -
+gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

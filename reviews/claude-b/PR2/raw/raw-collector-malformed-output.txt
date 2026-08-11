@@ -1,0 +1,118 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   checks in the committed redaction output
+        expected: checks: 15
+        observed: checks: 15
+  [ok]     and the note's headline agrees with the file
+        expected: stated: 15 / 0
+        observed: stated: 15 / 0
+
+########## B. the fifteen, classified BY HAND ##########
+  [ok] every one of the fifteen is classified - the table is exhaustive
+        expected: unclassified: []
+        observed: unclassified: []
+      8  sensitive content
+      4  control marker
+      2  a FAILING command
+      1  shape of the output
+  [ok]   sensitive CONTENT in a well-formed fixture
+        expected: sensitive content: 8
+        observed: sensitive content: 8
+  [ok]     and exactly one failure path was fed - nvidia-smi exit 1
+        expected: a FAILING command: 2
+        observed: a FAILING command: 2
+  [ok]       the classes sum to the whole population
+        expected: sum: 15
+        observed: sum: 15
+  Every input is a well-formed CommandResult. The CONTENT varies and
+  the SHAPE never does - so for a parser of external program output,
+  the un-fed class is MALFORMED OUTPUT.
+
+########## C. DRIVEN - six shapes, control first ##########
+    good                            OK, gpus=1, alerts=0
+    csv with 3 fields               OK, gpus=0, alerts=0
+    empty stdout, exit 0            OK, gpus=0, alerts=0
+    binary garbage                  OK, gpus=0, alerts=0
+    docker ps invalid JSON          OK, gpus=1, alerts=0
+    docker inspect a JSON OBJECT    RAISED AttributeError: 'str' object has no attribute 'get'
+  [ok] the good fixture snapshots - CONTROL
+        expected: OK, gpus=1
+        observed: OK, gpus=1, alerts=0
+  [ok]   a short CSV degrades to zero GPUs, no raise
+        expected: OK, gpus=0
+        observed: OK, gpus=0, alerts=0
+  [ok]     an empty stdout degrades
+        expected: OK, gpus=0
+        observed: OK, gpus=0, alerts=0
+  [ok]       binary garbage degrades
+        expected: OK, gpus=0
+        observed: OK, gpus=0, alerts=0
+  [ok]   invalid JSON from docker ps degrades
+        expected: OK, gpus=1
+        observed: OK, gpus=1, alerts=0
+  [ok]     but a valid JSON OBJECT from docker inspect RAISES
+        expected: RAISED AttributeError
+        observed: RAISED AttributeError: 'str' object has no attribute 'get'
+  [ok]       five of the six degrade; exactly one escapes
+        expected: escapes: 1
+        observed: escapes: 1
+
+########## D. the asymmetry, in one function ##########
+    collector.py:325  requests = json.loads(result.stdout.strip() or "[]") or []
+    collector.py:326  except json.JSONDecodeError:
+    collector.py:327  return set()
+    collector.py:329  for request in requests:
+    collector.py:330  capabilities = request.get("Capabilities") or []
+  [ok] the guard catches a DECODE error
+        expected: except json.JSONDecodeError:
+        observed:     except json.JSONDecodeError:
+  [ok]   and nothing else - a wrong-SHAPED valid JSON walks past it
+        expected: for request in requests:
+        observed:     for request in requests:
+  [ok]     into request.get, where iterating a dict yields KEYS
+        expected: request.get("Capabilities")
+        observed:         capabilities = request.get("Capabilities") or []
+  A dict is iterable and yields str, and str has no .get - which is
+  exactly the AttributeError section C measured.
+
+########## E. the verdict, narrowed and not retracted ##########
+  * `monitor/collector.py redaction is clean` STANDS. All 15 checks
+    still pass and nothing here contradicts one of them.
+  * What is now stated: those 15 fed sensitive CONTENT in a
+    well-formed shape, plus one failing command. Malformed SHAPE was
+    never fed, and five of six shapes degrade correctly.
+  * RECORDED, NOT FILED. The raising input is the output of
+    `docker inspect --format '{{json .HostConfig.DeviceRequests}}'`,
+    whose shape is docker's own contract. A worker with container
+    access cannot change it, so it is outside the tampered-file threat
+    model - items 38, 45, 47, 53, 54 and 56 applied the same standard.
+  * What IS worth recording is the coverage asymmetry: the author
+    guarded the decode error and not the shape, in the same three
+    lines.
+
+########## F. what this does NOT do ##########
+  * It does not retract the clean verdict, and does not re-run the 15.
+  * It does not claim six shapes are all the shapes. Timeouts,
+    partial reads and a non-zero docker exit were NOT driven - the
+    last is already handled at collector.py:322 by inspection, which
+    is not the same as being driven, and that is stated.
+  * It does not execute nvidia-smi or docker: neither exists in this
+    container, and every result above is a recorded fixture served
+    through run_command. The EFO half is a real workspace.
+  * It does not adjudicate the other four notes item 53 named. FOUR
+    remain after this one.
+  * No network. The workspace is a tempfile directory, removed above.
+  * MEASURED: the 15-label classification and its exhaustiveness, all
+    six driven shapes, the control, the three source lines.
+    REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+One clean note re-examined by hand and its un-fed input class driven.
+Anchor untouched, no `main` write, no issue filed, no verdict
+retracted. Pre-registered permissions unchanged -
+gpu/network/performance_metrics all false. SUBMITTED, not VERIFIED.

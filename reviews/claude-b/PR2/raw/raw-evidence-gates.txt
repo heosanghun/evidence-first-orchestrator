@@ -1,0 +1,86 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] an honest manifest validates
+        expected: accepted
+        observed: accepted: passed=12 failed=0 skipped=0 known_answer_checks=1 unmeasured_claims=0
+
+########## B. the gates that carry the premise ##########
+  [ok] nonzero exit code
+        expected: did not pass: exit_code=1
+        observed: rejected (EvidenceError: validations[0] did not pass: exit_code=1, failed=0)
+  [ok] a failure with exit code 0
+        expected: did not pass: exit_code=0, failed=2
+        observed: rejected (EvidenceError: validations[0] did not pass: exit_code=0, failed=2)
+  [ok] a skip while allow_skips is false
+        expected: skip is not pass
+        observed: rejected (EvidenceError: validations[0] has 1 skipped checks; skip is not pass)
+  [ok] skips without a reason for each
+        expected: lacks a reason for each
+        observed: rejected (EvidenceError: validations[0] has 2 skipped checks but lacks a reason for each)
+  [ok] an unmeasured claim carrying a number
+        expected: must use the exact value [FILL]
+        observed: rejected (EvidenceError: claims[0] is unmeasured and must use the exact value [FILL])
+  [ok] an unmeasured claim using [FILL]
+        expected: accepted
+        observed: accepted: passed=12 failed=0 skipped=0 known_answer_checks=1 unmeasured_claims=1
+  [ok] a measured performance claim while the permission is false
+        expected: Measured performance claims are forbidden
+        observed: rejected (EvidenceError: Measured performance claims are forbidden by this task's permissions)
+  [ok] a claim citing evidence that was never bound
+        expected: references evidence not bound
+        observed: rejected (EvidenceError: claims[0] references evidence not bound in artifacts or raw output: ['ghost.txt'])
+  [ok] an artifact whose sha does not match the file
+        expected: expected
+        observed: rejected (EvidenceError: Evidence artifact SHA mismatch for /tmp/efo-evid-0wjxw0iv/a.txt: expected 0000000000000000000000000000000000000000000000000000000000000000, observed 59e4dfcc64e7cf2dbb0ce46014f6fb6544cdc64572b921b94c40d19a4420cf13)
+  [ok] a known-answer check whose values differ
+        expected: expected and observed values differ
+        observed: rejected (EvidenceError: known_answer_checks[0] expected and observed values differ)
+  [ok] a known-answer check not marked passed
+        expected: is not explicitly passed
+        observed: rejected (EvidenceError: known_answer_checks[0] is not explicitly passed)
+  [ok] no known-answer check at all
+        expected: At least one known-answer comparison is required
+        observed: rejected (EvidenceError: At least one known-answer comparison is required)
+
+########## C. can a known-answer check be vacuous? ##########
+  The gate compares expected against observed and requires passed=True.
+  Nothing requires the pair to be non-trivial.
+  [!! UNEXPECTED !!] expected == observed == null
+        expected: rejected
+        observed: accepted: passed=12 failed=0 skipped=0 known_answer_checks=1 unmeasured_claims=0
+  [!! UNEXPECTED !!] expected == observed == empty string
+        expected: rejected
+        observed: accepted: passed=12 failed=0 skipped=0 known_answer_checks=1 unmeasured_claims=0
+  [!! UNEXPECTED !!] expected == observed == zero
+        expected: rejected
+        observed: accepted: passed=12 failed=0 skipped=0 known_answer_checks=1 unmeasured_claims=0
+  [!! UNEXPECTED !!] expected == observed == the [FILL] marker itself
+        expected: rejected
+        observed: accepted: passed=12 failed=0 skipped=0 known_answer_checks=1 unmeasured_claims=0
+
+########## D. a validation that asserted nothing ##########
+  Disclosed rather than refused - the summary carries passed=0 - so this
+  is recorded as context for section C, not as a defect on its own.
+  [ok] passed=0 failed=0 skipped=0 with exit code 0
+        expected: accepted
+        observed: accepted: passed=0 failed=0 skipped=0 known_answer_checks=1 unmeasured_claims=0
+
+########## E. the report gates ##########
+  contains_fill_marker IS consumed, at evidence.py:293 - a manifest with
+  unmeasured claims whose report lacks [FILL] is refused. The first run of
+  this probe asked the wrong question; the rule runs the other way and is
+  correct. What follows is the section-boundary check instead.
+  [ok] a report may legitimately be all [FILL]
+        expected: contains_fill_marker=True
+        observed: accepted: contains_fill_marker=True
+  [ok] POSITIVE CONTROL - unmeasured claims with no [FILL] in the report
+        expected: report has no [FILL] marker
+        observed: rejected (The manifest declares unmeasured claims but the report has no [FILL] marker)
+  [!! UNEXPECTED !!] a titled section with no content is refused
+        expected: section 1 is empty
+        observed: accepted
+  [ok] POSITIVE CONTROL - a bare '## 1.' heading is refused
+        expected: section 1 is empty
+        observed: rejected (Report section 1 is empty)
+
+########## 5 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.

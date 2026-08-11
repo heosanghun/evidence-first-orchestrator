@@ -1,0 +1,109 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok] the lifecycle reaches `archived` - the CONTROL
+        expected: state: archived
+        observed: state: archived
+  [ok]   and the untouched workspace audits healthy
+        expected: HEALTHY
+        observed: HEALTHY - unnoticed
+
+########## B. every directory, ENUMERATED not named ##########
+    top-level directories : ['.efo', 'agents', 'archive', 'ledger', 'reports', 'runs', 'shared', 'submissions', 'tasks']
+    all directories       : 23
+  [ok] every top-level directory falls in exactly one coverage class
+        expected: unclassified: []
+        observed: unclassified: []
+  [ok]   and no class names a directory that does not exist
+        expected: phantom: []
+        observed: phantom: []
+  [ok]     nine top-level directories in total
+        expected: top: 9
+        observed: top: 9
+  [ok]     and they are exactly these
+        expected: ['.efo', 'agents', 'archive', 'ledger', 'reports', 'runs', 'shared', 'submissions', 'tasks']
+        observed: ['.efo', 'agents', 'archive', 'ledger', 'reports', 'runs', 'shared', 'submissions', 'tasks']
+  [ok]   `shared/` exists after INIT alone - item 60's stated premise
+        expected: shared after init: True
+        observed: shared after init: True
+  [ok]     and it is EMPTY, so nothing about it is task-derived
+        expected: contents: []
+        observed: contents: []
+  Item 57 drove config, agents, tasks and runs; item 60 drove reports,
+  submissions and archive. THREE were never driven - and item 60 said
+  so for `shared/` explicitly. Section C drives all three.
+
+########## C. the never-driven directories, DRIVEN ##########
+    add a file under shared/               HEALTHY - unnoticed
+    add a subtree under shared/            HEALTHY - unnoticed
+    DELETE shared/ entirely                HEALTHY - unnoticed
+    add a stray file under ledger/         HEALTHY - unnoticed
+    add a stray file under .efo/           HEALTHY - unnoticed
+    add a stray lock under .efo/locks/     HEALTHY - unnoticed
+    DELETE the shipped runs/.gitignore     HEALTHY - unnoticed
+    DELETE .efo/.gitignore                 HEALTHY - unnoticed
+  [ok] all eight new tampers go unnoticed
+        expected: unnoticed: 8
+        observed: unnoticed: 8
+  [ok]   and NONE of the eight was caught - the complement
+        expected: caught: 0
+        observed: caught: 0
+  [ok]     three of them are DELETIONS, not just plants
+        expected: deletions: 3
+        observed: deletions: 3
+
+########## D. and a tamper that IS caught - the other direction ##########
+  Every round in this line has reported `unnoticed`, which is a fair
+  reason to ask whether the driver detects anything at all. The key
+  lives INSIDE the workspace (item 57), so replacing it must break
+  every signature.
+    REPLACE .efo/ledger.key                CAUGHT: Ledger signature mismatch at event 1
+    DELETE .efo/ledger.key                 CAUGHT: Ledger signing key is missing: /tmp/efo-item
+  [ok] replacing the signing key IS caught
+        expected: CAUGHT
+        observed: CAUGHT: Ledger signature mismatch at event 1
+  [ok]   by a SIGNATURE mismatch, named
+        expected: Ledger signature mismatch
+        observed: CAUGHT: Ledger signature mismatch at event 1
+  [ok]   and deleting it is caught too
+        expected: CAUGHT
+        observed: CAUGHT: Ledger signing key is missing: /tmp/efo-item
+  [ok]     by a DIFFERENT failure - the key being absent
+        expected: Ledger signing key is missing
+        observed: CAUGHT: Ledger signing key is missing: /tmp/efo-item
+  [ok]       so the two controls are not one message twice
+        expected: distinct: True
+        observed: distinct: True
+  So the driver is not blind: it catches what the signature covers.
+  What the eight above show is the SCOPE of that coverage, not a
+  failure to look.
+
+########## E. what this does NOT establish ##########
+  * It does NOT file an issue. This WIDENS the measured width of #10
+    from three directories to the whole tree; quantifying an open
+    issue is not opening another one.
+  * It does NOT claim the covered set is wrong. Config, agents and
+    tasks ARE compared - item 57 drove that, and section D confirms
+    the signature path still bites.
+  * Every `unnoticed` is measured UNDER THE THREAT MODEL SECURITY.md:38
+    declares. A tamper needing the key is a different measurement, and
+    section D is the one that needs it.
+  * It does NOT enumerate FILES exhaustively - only directories, plus
+    the four shipped files the tampers name. A file this round did not
+    touch is UNCHECKED, not shown safe.
+  * It does NOT propose a fix, and does not retract or narrow #10.
+  * No network, no GPU. Eleven tempfile workspaces, removed before the
+    results print. The anchor's working tree is untouched, and it does
+    not touch `main` or another agent's branch.
+  * MEASURED: the directory enumeration, the exhaustiveness of the
+    classification, all eight tampers, both key tampers, the
+    lifecycle control. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED: re-running my own evidence is a
+re-run, not independent confirmation.

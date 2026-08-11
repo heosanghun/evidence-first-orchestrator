@@ -1,0 +1,78 @@
+########## A. POSITIVE CONTROL - a real workspace ##########
+  [ok] both resolve claude identically
+        expected: agree: True
+        observed: agree: True  anthropic/anthropic-claude chain=[]
+  [ok] both resolve claude-alias identically
+        expected: agree: True
+        observed: agree: True  anthropic/anthropic-claude chain=['claude']
+  [ok]   and the collector groups the alias with its root
+        expected: ['claude', 'claude-alias']
+        observed: ['claude', 'claude-alias']
+
+########## B. head to head over one corpus ##########
+  shape                                         independence.py                       collector.py
+    an honest non-alias                         openai/openai-codex chain=[]          openai/openai-codex chain=[]
+    an honest alias                             openai/openai-codex chain=['root']    openai/openai-codex chain=['root']
+  !!an alias whose declared chain is WRONG      openai/openai-codex chain=['mid', 'root']rejected
+  !!an alias declaring a DIFFERENT principal from its targetopenai/openai-codex chain=['root']    rejected
+  !!a NON-alias carrying a non-empty alias_chainopenai/openai-codex chain=['ghost']   rejected
+  !!an identity with an EXTRA key               openai/openai-codex chain=[]          rejected
+  !!schema_version 2                            openai/openai-codex chain=[]          rejected
+  !!an alias cycle                              RAISED ConfigurationError             rejected
+  !!a self-alias                                RAISED ConfigurationError             rejected
+    an alias to an agent that does not exist    none                                  rejected
+  !!an agent_id inside its own alias_chain      openai/openai-codex chain=['root']    rejected
+    no identity at all                          none                                  rejected
+
+  disagreements: 8
+        an alias whose declared chain is WRONG
+            independence.py -> openai/openai-codex chain=['mid', 'root']
+            collector.py    -> rejected
+        an alias declaring a DIFFERENT principal from its target
+            independence.py -> openai/openai-codex chain=['root']
+            collector.py    -> rejected
+        a NON-alias carrying a non-empty alias_chain
+            independence.py -> openai/openai-codex chain=['ghost']
+            collector.py    -> rejected
+        an identity with an EXTRA key
+            independence.py -> openai/openai-codex chain=[]
+            collector.py    -> rejected
+        schema_version 2
+            independence.py -> openai/openai-codex chain=[]
+            collector.py    -> rejected
+        an alias cycle
+            independence.py -> RAISED ConfigurationError
+            collector.py    -> rejected
+        a self-alias
+            independence.py -> RAISED ConfigurationError
+            collector.py    -> rejected
+        an agent_id inside its own alias_chain
+            independence.py -> openai/openai-codex chain=['root']
+            collector.py    -> rejected
+
+########## C. the ledger gate the collector has and the core does not ##########
+  [ok] collector: an invalid ledger empties the registry
+        expected: {}
+        observed: {}
+  [ok] independence.py has no such parameter
+        expected: resolves anyway: True
+        observed: resolves anyway: True
+  Not a defect: audit_independence calls self.ledger.verify() before
+  resolve_identity_registry (workspace.py:1488). The collector cannot
+  rely on a caller, because it reads the ledger through the CLI.
+
+########## D. task_actor_ids: attribution by exact snapshot equality ##########
+  [ok] a verification whose snapshot matches the current registry
+        expected: {'claude'}
+        observed: {'claude'}
+  [ok]   one whose snapshot no longer matches
+        expected: claude present: False
+        observed: claude present: False
+  So the dashboard drops an actor whose identity has been re-attested
+  since the verification it is being credited for. That is stricter
+  than audit_verification_events, which trusts the frozen snapshot
+  (issue #3). Recorded as a divergence, not a defect - for attribution
+  the strict reading is the safe one.
+
+########## 0 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.

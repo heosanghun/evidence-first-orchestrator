@@ -1,0 +1,153 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   cli.main's catch tuple, re-read from source
+        expected: (EFOError, OSError, ValueError, json.JSONDecodeError)
+        observed: except (EFOError, OSError, ValueError, json.JSONDecodeError) as exc:
+  [ok]     KeyError is not in it, which is why #19 is a traceback
+        expected: KeyError not caught: True
+        observed: KeyError not caught: True
+  [ok]   the CONTROL submission is accepted - the driver works
+        expected: state: submitted
+        observed: state: submitted
+
+########## B. what fed the subject probe's checks, BY HAND ##########
+  [ok] probe_implicit_exceptions.py makes this many checks
+        expected: checks: 10
+        observed: checks: 10
+  [ok]   and every one is fed by one of five feeders
+        expected: total: 10
+        observed: total: 10
+      1x  source text of cli.py
+      1x  a hardcoded set of exception types
+      2x  the workspace.py AST
+      5x  a live task projection
+      1x  a live workspace config
+  Only the fourth can be affected by editing a file on disk. The AST
+  and source-text feeders are static, and section E's config feeder is
+  ledger-bound. So the un-fed class, if there is one, is a class of
+  TASK PROJECTION.
+  [ok]   and it never WRITES a projection - so no edited class is reachable
+        expected: writes: []
+        observed: writes: []
+  [ok]     it only deletes one, which is how it reaches the repair path
+        expected: projection.unlink()
+        observed: projection.unlink()
+  [ok]   the subject probe feeds exactly two of the five classes
+        expected: fed: ['normal', 'repair-dropped']
+        observed: fed: ['normal', 'repair-dropped']
+  [ok]     leaving three UN-FED
+        expected: un-fed: ['hand-absent', 'non-object', 'wrong-valued']
+        observed: un-fed: ['hand-absent', 'non-object', 'wrong-valued']
+  [ok]       and the split is exhaustive in both directions
+        expected: classes: 5
+        observed: classes: 5
+
+########## C. two of the three are COVERED - measured, not assumed ##########
+  [ok] a projection that is not an object is refused before any index
+        expected: CAUGHT ConfigurationError
+        observed: CAUGHT ConfigurationError: Expected a JSON object in /tmp/efo-inclass71-vm0vgyul/fx-oeqhpzh0/ws/tasks/C1.json
+  [ok]   and read_json is what refuses it
+        expected: Expected a JSON object
+        observed: CAUGHT ConfigurationError: Expected a JSON object in /tmp/efo-inclass71-vm0vgyul/fx-oeqhpzh0/ws/tasks/C1.json
+  [ok] any OTHER key altered is caught by the ledger comparison
+        expected: CAUGHT IntegrityError
+        observed: CAUGHT IntegrityError: Task C1 projection differs from the signed ledger
+  [ok]   with the projection named
+        expected: projection differs from the signed ledger
+        observed: CAUGHT IntegrityError: Task C1 projection differs from the signed ledger
+  Both un-fed classes are REAL absences of a defect, not gaps. That is
+  the useful half of an input-class round: two of three predictions
+  came back negative, and they are reported as negatives.
+
+########## D. the third is NOT covered - driven end to end ##########
+  [ok] KNOWN ANSWER - deleting the key reproduces #19's traceback
+        expected: ESCAPES KeyError: 'last_event_hash'
+        observed: ESCAPES KeyError: 'last_event_hash'
+  [ok]   but FORGING it to any hex string is accepted
+        expected: ACCEPTED state=submitted
+        observed: ACCEPTED state=submitted
+  [ok]     an integer is accepted too
+        expected: ACCEPTED state=submitted
+        observed: ACCEPTED state=submitted
+  [ok]       and so is null
+        expected: ACCEPTED state=submitted
+        observed: ACCEPTED state=submitted
+  Absent CRASHES; present-and-arbitrary is ACCEPTED. The subject probe
+  measured the first and named it the sole instance of its class.
+
+########## E. why - and what the forged value becomes ##########
+  [ok] the key is excluded BY NAME from this many comparisons
+        expected: excluded at: [470, 495, 517, 1511]
+        observed: excluded at: [470, 495, 517, 1511]
+  [ok]   and read into a record at exactly one site
+        expected: read at: [1182]
+        observed: read at: [1182]
+  470 get_task, 495 list_tasks, 517 the projection writer's own
+  comparison, 1511 the doctor/audit path - so no comparison in the
+  package covers it, which is the blindness #19's title already names.
+  [ok]   on the CONTROL it lands in one signed ledger event
+        expected: sites: 1
+        observed: sites: 1
+  [ok]     the proxy-submitted one
+        expected: task.proxy_submitted
+        observed: task.proxy_submitted
+  [ok]       at this path
+        expected: /payload/task/result/transport/grant_event_hash
+        observed: /payload/task/result/transport/grant_event_hash
+  [ok]         and it equals the hash of the AUTHORIZATION event, its purpose
+        expected: 322e039a1304e7c8fdbdcaf4294ef3f6449a565aed883763db8bca3a600e3998
+        observed: 322e039a1304e7c8fdbdcaf4294ef3f6449a565aed883763db8bca3a600e3998
+  [ok]           which is action
+        expected: task.proxy_authorized
+        observed: task.proxy_authorized
+  [ok]   and the FORGED value is written into the signed event
+        expected: ['ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff']
+        observed: ['ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff']
+  [ok]     bound to no event in the ledger at all
+        expected: matches: 0
+        observed: matches: 0
+  [ok]       doctor reports the workspace healthy
+        expected: healthy: True
+        observed: healthy: True
+  [ok]         the ledger valid and signed
+        expected: valid: True, signed: True
+        observed: valid: True, signed: True
+  [ok]           with no projection mismatch
+        expected: mismatches: []
+        observed: mismatches: []
+
+########## F. what this does NOT establish ##########
+  * It does NOT retract probe_implicit_exceptions.py. Its measurement
+    stands for the classes it fed: repair drops exactly one key, and
+    no second key sits in #19's position. What was wrong was the WORD
+    `class` - it named a class of REPAIR, not a class of INPUT.
+  * It does NOT file a new issue. Same key, same missing guard, and
+    #19's own title already says `audit_projections is blind to it`.
+    A second consequence of one blindness belongs on that issue.
+  * It does NOT claim the forged submission is undetectable by a human
+    reading the bundle. It claims doctor, ledger verify and the
+    projection comparison all report clean, which is measured above.
+  * It does NOT measure the direct (non-proxy) submit path, which
+    reads no last_event_hash - the AST census above found ONE read.
+  * Writing to `tasks/C1.json` is the tamper. That file being editable
+    with doctor clean was measured in item 66; what is new here is
+    that ONE key in it is exempt from every comparison, and that the
+    exempt key is the one that ends up in a signed record.
+  * No network beyond a LOCAL git repo with an unreachable remote URL,
+    no GPU. Six workspaces under tempfile, removed before this prints.
+    The anchor's working tree is untouched, and it does not touch
+    `main` or another agent's branch.
+  * MEASURED: the ten checks' feeders, the five classes, all five
+    driven end to end, the exclusion and read sites from the AST, the
+    control's binding to the authorization event, the forged value in
+    the signed event, doctor's verdict. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED: re-running my own evidence is a
+re-run, not independent confirmation.

@@ -1,0 +1,93 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   and main has MOVED past it
+        expected: moved: True
+        observed: moved: True   (main is now 3cf9a67)
+  [ok]   the anchor's file carries every security header
+        expected: present: 5
+        observed: present: 5
+  The anchor is the known answer. If it ever stops carrying all five,
+  the comparison below is meaningless and this check says so first.
+
+########## B. what the file is at main ##########
+  [ok] security headers still present at main
+        expected: present: []
+        observed: present: []
+  [ok]   the file is not empty or missing - it GREW
+        expected: anchor 16 -> main 14
+        observed: anchor 16 -> main 14
+  [ok]   and every directive it now carries is a CACHE directive
+        expected: cache directives: 9
+        observed: cache directives: 9
+  So the file was not truncated or lost in a merge. It was REWRITTEN,
+  as a cache-control file, and the security block was not carried over.
+
+########## C. it has been edited TWICE since, by commits that NAME it ##########
+  15 commits on main since a93e720 (the last commit #20's
+  update measured); the ones that touch the file itself:
+    e4185ff  lines=12  security=0  CDN: Strict no-cache headers for Cloudflare Pages index.html
+    228b4b1  lines=14  security=0  CDN: Add s-maxage=0 max-age=0 to _headers for Cloudflare Edge 
+  [ok] commits that EDIT the headers file since a93e720
+        expected: editing: 2
+        observed: editing: 2
+  [ok]   every one of them leaves zero security headers
+        expected: max security headers after any edit: 0
+        observed: max security headers after any edit: 0
+  [ok]   and the file grows rather than shrinks
+        expected: grew: True
+        observed: grew: True   (12 -> 14 lines)
+  BOTH name the header file in their own subject line - `CDN: Strict
+  no-cache headers for Cloudflare Pages index.html` and `CDN: Add
+  s-maxage=0 max-age=0 to _headers for Cloudflare Edge POP nodes`.
+  This is not a file nobody is looking at.
+  I went in expecting THREE such commits. There are two. The
+  expectation was corrected to the measurement.
+
+########## D. a SECOND rollback, and this one did not restore them ##########
+    05cbb95  security headers after it: 5  RESTORE: Rollback to clean working state v2.2.0
+    06d2756  security headers after it: 0  RESTORE: Rollback to stable clean state v2.3.0 as requeste
+  [ok] explicit rollback commits since the anchor
+        expected: rollbacks: 2
+        observed: rollbacks: 2
+  [ok]   the FIRST one restored the block
+        expected: 05cbb95 -> 5
+        observed: 05cbb95 -> 5
+  [ok]   the SECOND one did not
+        expected: -> 0
+        observed: -> 0
+  Expected a third rollback going in; there are two. Corrected.
+  `RESTORE: Rollback to stable clean state` is the strongest signal
+  available that someone intended to return to a known-good state. The
+  state it returns to no longer contains the headers, so a rollback
+  now PRESERVES the regression instead of undoing it. That is the
+  materially new fact, and the reason this is worth a comment.
+
+########## E. what is and is not covered by a test ##########
+  Unchanged and re-stated rather than assumed: web_tests asserts the
+  CSP line only (test 21, currently failing). X-Frame-Options,
+  X-Content-Type-Options, Referrer-Policy and Permissions-Policy are
+  asserted by no test, so four of the five could stay gone with a
+  fully green suite. Measured in raw-main-regression.txt, not here.
+
+########## F. what this does NOT do ##########
+  * It does not touch main, open a PR against it, or propose a patch.
+    #20 is a report; fixing main is not this review's licence.
+  * It does not re-run the web suite - probe_main_regression.py does
+    that, and it is the citation for 37/35/2.
+  * It does not claim to know INTENT. Every subject line quoted is
+    quoted verbatim; why the block was dropped is not measured.
+  * MEASURED: every file body, line count, header presence, commit
+    subject and range. REASONED: that a rollback now preserves the
+    regression - which follows from the measured state of the two
+    rollback commits, not from any statement by their author.
+
+########## 0 unexpected result(s) ##########
+Read-only git queries against /tmp/efo-prov; nothing executed against a
+workspace, nothing written to main. Pre-registered permissions
+unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

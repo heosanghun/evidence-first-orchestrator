@@ -1,0 +1,63 @@
+########## A. POSITIVE CONTROL - the honest flow ##########
+  [ok] claim -> start -> submit succeeds
+        expected: submitted
+        observed: state=submitted
+
+########## B. ordering ##########
+  [ok] start before claim
+        expected: has no active lease
+        observed: rejected (LeaseError: Task ORD has no active lease)
+  [ok] submit before claim
+        expected: must be running before submission
+        observed: rejected (TransitionError: Task ORD must be running before submission)
+  [ok] heartbeat before claim
+        expected: Cannot heartbeat
+        observed: rejected (TransitionError: Cannot heartbeat task ORD in state pending)
+
+########## C. lease ownership and tokens ##########
+  [ok] second claim of the same task
+        expected: not pending
+        observed: rejected (TransitionError: Task ORD is claimed, not pending)
+  [ok] another agent presents the real token
+        expected: belongs to another worker
+        observed: rejected (LeaseError: Task ORD lease belongs to another worker)
+  [ok] the owner presents a wrong token
+        expected: lease token is invalid
+        observed: rejected (LeaseError: Task ORD lease token is invalid)
+  [ok] submit skipping start (claimed -> submitted)
+        expected: must be running before submission
+        observed: rejected (TransitionError: Task ORD must be running before submission)
+
+########## D. expiry ##########
+  waiting 11s for a 10s lease to lapse...
+  [ok] the lease is expired
+        expected: True
+        observed: lease_expired=True
+  [ok] start on an expired lease
+        expected: lease has expired
+        observed: rejected (LeaseError: Task EXP lease has expired)
+  [ok] heartbeat cannot revive an expired lease
+        expected: lease has expired
+        observed: rejected (LeaseError: Task EXP lease has expired)
+  [ok] recover_expired moves it to blocked
+        expected: blocked
+        observed: recovered=['EXP:blocked']
+
+########## E. is the lease duration the worker asks for bounded? ##########
+  [ok] lease_seconds below the documented floor of 10
+        expected: at least 10 seconds
+        observed: rejected (ConfigurationError: Lease duration must be at least 10 seconds)
+  [!! UNEXPECTED !!] a ten-year lease is refused
+        expected: rejected
+        observed: accepted: expires_at=2036-07-29T18:46:42Z duration_seconds=315360000
+  [!! UNEXPECTED !!]   and recover_expired can still reclaim it
+        expected: LONG
+        observed: recovered=[]
+  [!! UNEXPECTED !!] the orchestrator can requeue the stranded task
+        expected: accepted
+        observed: rejected (TransitionError: Cannot requeue task LONG in state claimed)
+  every public Workspace method whose name suggests lease recovery:
+        ['recover_expired', 'requeue']
+
+########## 3 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.

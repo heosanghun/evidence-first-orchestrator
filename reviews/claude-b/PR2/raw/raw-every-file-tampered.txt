@@ -1,0 +1,141 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok] the lifecycle reaches `archived` - the CONTROL
+        expected: state: archived
+        observed: state: archived
+  [ok]   and the untouched workspace audits healthy
+        expected: HEALTHY
+        observed: HEALTHY - unnoticed
+
+########## B. every FILE, and the KINDS they collapse to ##########
+  [ok] a full lifecycle ships this many files
+        expected: files: 27
+        observed: files: 27
+    1x  .efo/.gitignore
+    1x  .efo/ledger.key
+    1x  .efo/workspace.json
+    3x  agents/*.json
+    1x  archive/*.json
+    1x  ledger/events.jsonl
+    2x  reports/<agent>/*.artifact.txt
+    2x  reports/<agent>/*.evidence.json
+    2x  reports/<agent>/*.md
+    2x  reports/<agent>/*.raw.txt
+    1x  runs/.gitignore
+    2x  submissions/.../bundle.json
+    2x  submissions/.../files/*.artifact.txt
+    2x  submissions/.../files/*.evidence.json
+    1x  submissions/.../files/*.md
+    2x  submissions/.../files/*.raw.txt
+    1x  tasks/*.json
+  [ok]   which collapse to this many kinds
+        expected: kinds: 17
+        observed: kinds: 17
+  [ok]     and every file maps to one
+        expected: mapped: 27
+        observed: mapped: 27
+
+########## C. every kind, EDITED ##########
+  Not cited from items 57/60/63 - RE-DERIVED here, so the table below
+  stands on this run rather than on three earlier ones.
+    .efo/.gitignore                                  HEALTHY - unnoticed
+    .efo/ledger.key                                  CAUGHT: Ledger signature mismatch at event 1
+    .efo/workspace.json                              CAUGHT: Workspace configuration differs from the
+    agents/*.json                                    CAUGHT: Agent 'antigravity' registration differs
+    archive/*.json                                   HEALTHY - unnoticed
+    ledger/events.jsonl                              CAUGHT: Malformed ledger JSON at line 13: Expect
+    reports/<agent>/*.artifact.txt                   HEALTHY - unnoticed
+    reports/<agent>/*.evidence.json                  HEALTHY - unnoticed
+    reports/<agent>/*.md                             HEALTHY - unnoticed
+    reports/<agent>/*.raw.txt                        HEALTHY - unnoticed
+    runs/.gitignore                                  HEALTHY - unnoticed
+    submissions/.../bundle.json                      HEALTHY - unnoticed
+    submissions/.../files/*.artifact.txt             HEALTHY - unnoticed
+    submissions/.../files/*.evidence.json            HEALTHY - unnoticed
+    submissions/.../files/*.md                       HEALTHY - unnoticed
+    submissions/.../files/*.raw.txt                  HEALTHY - unnoticed
+    tasks/*.json                                     CAUGHT: T1: projection differs from ledger
+  [ok] every kind was driven
+        expected: driven: 17
+        observed: driven: 17
+  [ok]   kinds whose edit is CAUGHT
+        expected: caught: 5
+        observed: caught: 5
+    ['.efo/ledger.key', '.efo/workspace.json', 'agents/*.json', 'ledger/events.jsonl', 'tasks/*.json']
+  [ok]   kinds whose edit goes UNNOTICED
+        expected: unnoticed: 12
+        observed: unnoticed: 12
+  [ok]     and the two classes account for every kind
+        expected: total: 17
+        observed: total: 17
+  The ledger catch is on SHAPE, not signature - appending a line to a
+  JSONL leaves invalid JSON. Asked separately, because a guard that
+  fires on malformedness is not the same guard as one that fires on a
+  forged value:
+    a VALID-JSON edit to a ledger line               CAUGHT: Ledger event hash mismatch at event 12
+  [ok]     a well-formed ledger edit is caught too, by the HASH CHAIN
+        expected: event hash mismatch
+        observed: caught: ledger event hash mismatch at event 12
+  [ok]       a THIRD distinct message, not the signature one
+        expected: distinct: True
+        observed: distinct: True
+
+########## D. the four `reports/` kinds item 60 never reached ##########
+    ['reports/<agent>/*.artifact.txt', 'reports/<agent>/*.evidence.json', 'reports/<agent>/*.md', 'reports/<agent>/*.raw.txt']
+  [ok] there are four of them
+        expected: reports kinds: 4
+        observed: reports kinds: 4
+    reports/<agent>/*.artifact.txt                   HEALTHY - unnoticed
+    reports/<agent>/*.evidence.json                  HEALTHY - unnoticed
+    reports/<agent>/*.md                             HEALTHY - unnoticed
+    reports/<agent>/*.raw.txt                        HEALTHY - unnoticed
+  [ok]   and every one goes unnoticed
+        expected: unnoticed: 4
+        observed: unnoticed: 4
+  Item 60 drove a report under reports/. It did NOT drive the EVIDENCE
+  MANIFEST, nor the artifact and raw output whose sha256 that manifest
+  carries, while they sit in the author's own directory. Those hashes
+  are checked at SUBMIT time; nothing re-checks them afterwards.
+
+########## E. the control, so a sheet of negatives means something ##########
+    replace .efo/ledger.key                          CAUGHT: Ledger signature mismatch at event 1
+  [ok] replacing the signing key IS caught
+        expected: CAUGHT
+        observed: CAUGHT: Ledger signature mismatch at event 1
+  [ok]   by a signature mismatch, named
+        expected: Ledger signature mismatch
+        observed: CAUGHT: Ledger signature mismatch at event 1
+  Item 63's control, re-run here. The driver is not blind; the 13
+  above measure the SCOPE of what the signature covers.
+
+########## F. what this does NOT establish ##########
+  * It does NOT file an issue. This widens the measured width of #10
+    from directories to FILES; quantifying an open issue is not
+    opening another.
+  * It does NOT claim the covered set is wrong. Four kinds ARE
+    compared, and section E confirms the signature path still bites.
+  * Every `unnoticed` is measured UNDER THE THREAT MODEL SECURITY.md:38
+    declares. A tamper needing the key is a different measurement, and
+    section E is the one that needs it.
+  * It drives an EDIT of each kind, not a DELETE. Item 63 drove three
+    deletions at directory level; a per-kind deletion sweep is
+    UNCHECKED here, not shown safe.
+  * The kind rule is a JUDGEMENT stated in the source - directory role
+    plus extension. A finer rule would give more kinds; what is
+    asserted is that every one of the 27 files maps to exactly one.
+  * No network, no GPU. Nineteen tempfile workspaces, removed before
+    the results print. The anchor's working tree is untouched, and it
+    does not touch `main` or another agent's branch.
+  * MEASURED: the file enumeration, the kind collapse and its
+    completeness, all 17 edits, the four reports/ kinds, the key
+    control, the lifecycle control. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED: re-running my own evidence is a
+re-run, not independent confirmation.

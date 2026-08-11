@@ -1,0 +1,128 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok] hop 1+2 triples, said before following anything further
+        expected: hop 1+2: 21
+        observed: hop 1+2: 21
+    round 2: +4 new triples
+    round 3: +0 new triples
+  [ok]   hop THREE adds
+        expected: hop 3: 4
+        observed: hop 3: 4
+  [ok]     and hop FOUR adds nothing - the closure TERMINATES
+        expected: terminates at round: 3
+        observed: terminates at round: 3
+  [ok]       total closure size
+        expected: closure: 25
+        observed: closure: 25
+  Bounded, so this does not stop - and every hop-three access below is
+  both adjudicated and driven.
+
+########## B. the four new parameters, and their 3 accesses ##########
+    independence.py    validate_identity_value(value)
+    provenance.py      _validate_remote_url(value)
+    util.py            validate_agent_id(value)
+    util.py            validate_task_id(value)
+  [ok] hop-three parameters
+        expected: new parameters: 4
+        observed: new parameters: 4
+    independence.py:18  value.strip  in validate_identity_value()
+    provenance.py:57  value.strip  in _validate_remote_url()
+    provenance.py:59  value.strip  in _validate_remote_url()
+  [ok]   attribute accesses on them
+        expected: accesses: 3
+        observed: accesses: 3
+  [ok]     every one listed
+        expected: listed: 3
+        observed: listed: 3
+  The other two new parameters are util.validate_agent_id(value) and
+  util.validate_task_id(value), which hop three reaches through
+  workspace.py:216 and :219 - the same two functions item 47 drove.
+
+########## C. EXECUTED - control FIRST, then the non-string class ##########
+  The first driver called validate_identity_value(bad) and got a
+  TypeError on EVERY input INCLUDING the good one - the signature is
+  (value, *, field). The control failing is what said the DRIVER was
+  wrong, not the code. Controls first, always:
+  [ok] a well-formed identity value is accepted
+        expected: claude-b
+        observed: 'claude-b'
+  [ok]   and a well-formed remote url is accepted
+        expected: https://example.com/r.git
+        observed: 'https://example.com/r.git'
+    independence.validate_identity_value(None  ) **AttributeError**
+    independence.validate_identity_value(123   ) **AttributeError**
+    independence.validate_identity_value([]    ) **AttributeError**
+    independence.validate_identity_value({}    ) **AttributeError**
+    provenance._validate_remote_url(None  ) EFOError ConfigurationError
+    provenance._validate_remote_url(123   ) EFOError ConfigurationError
+    provenance._validate_remote_url([]    ) EFOError ConfigurationError
+    provenance._validate_remote_url({}    ) EFOError ConfigurationError
+  [ok] cases that raise the package's OWN error type
+        expected: EFOError: 4
+        observed: EFOError: 4
+  [ok]   and cases that raise a RAW Python exception
+        expected: raw: 4
+        observed: raw: 4
+  [ok]   _validate_remote_url's guard, which is why it is the clean one
+        expected: if not isinstance(value, str) or not value.strip():
+        observed: if not isinstance(value, str) or not value.strip():
+  _validate_remote_url is the ONLY function found across items 45, 47
+  and 48 that converts a non-string into a ConfigurationError.
+  validate_identity_value, three lines away in another module, does not.
+
+########## D. reachability - safe for a reason SYNTAX cannot see ##########
+    str()-coerced      independence.py:67    control_principal=str(identity.get("control_principa
+    DICT SUBSCRIPT     independence.py:165   control_principal=target["control_principal"],
+    str()-coerced      independence.py:172   control_principal=str(declaration.get("control_princ
+    bare name/literal  workspace.py:174   control_principal=orchestrator_control_principal,
+    bare name/literal  workspace.py:196   control_principal="codex",
+    bare name/literal  workspace.py:204   control_principal="claude",
+    bare name/literal  workspace.py:333   control_principal=control_principal,
+    DICT SUBSCRIPT     workspace.py:382   control_principal=target_identity["control_principal
+    bare name/literal  workspace.py:394   control_principal=control_principal,
+    bare name/literal  workspace.py:426   control_principal=control_principal,
+  [ok] build_identity call sites passing control_principal
+        expected: sites: 10
+        observed: sites: 10
+  [ok]   reading a dict field with str() around it
+        expected: coerced: 2
+        observed: coerced: 2
+  [ok]     reading a dict SUBSCRIPT with no coercion - the question
+        expected: subscripts: 2
+        observed: subscripts: 2
+  [ok]       and they are exactly the two named in the write-up
+        expected: ['independence.py:165', 'workspace.py:382']
+        observed: ['independence.py:165', 'workspace.py:382']
+  A syntactic census would flag independence.py:165 and
+  workspace.py:382 as uncoerced dict subscripts. They are SAFE, and
+  not because of the call site: `target` is the RETURN of a prior
+  build_identity, and `target_identity` the return of
+  identity_snapshot - both of which run every field through
+  validate_identity_value, which returns a str. The value is a string
+  BY CONSTRUCTION, which is exactly what a census over syntax cannot
+  see. Recorded as a near miss and NOT filed.
+
+########## E. what this does NOT do ##########
+  * It does not file an issue. validate_identity_value is unguarded but
+    unreachable with a non-string, on the standard items 38, 45 and 47
+    all applied.
+  * It does not clear the 69 unresolved cross-module arguments from
+    item 45 - those have no resolvable callee and no hop count changes
+    that.
+  * It did NOT write to any workspace: four pure functions driven with
+    literal values.
+  * MEASURED: the closure and its termination, all three accesses, all
+    ten driven outcomes, the guard line, the call-site census.
+    REASONED: nothing - the by-construction argument is read off the
+    return type of build_identity, which section C drove.
+
+########## 0 unexpected result(s) ##########
+Static AST reads plus ten pure-function drives at main 5694ab45. No
+workspace, no network, no issue filed. Pre-registered permissions
+unchanged - gpu/network/performance_metrics all false.
+SUBMITTED, not VERIFIED.

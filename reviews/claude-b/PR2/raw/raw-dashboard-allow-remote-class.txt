@@ -1,0 +1,259 @@
+########## A. POSITIVE CONTROLS, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   and the path used below is NOT a workspace
+        expected: exists: False
+        observed: exists: False
+    127.0.0.1 / False : PAST THE GUARD - stopped at the workspace load
+    0.0.0.0   / False : REFUSED by the bind guard
+    0.0.0.0   / True  : PAST THE GUARD - stopped at the workspace load
+  [ok] a loopback host passes the guard - CONTROL
+        expected: PAST THE GUARD
+        observed: PAST THE GUARD - stopped at the workspace load
+  [ok]   a remote host without the flag is REFUSED - CONTROL
+        expected: REFUSED by the bind guard
+        observed: REFUSED by the bind guard
+  [ok]   and a remote host WITH the flag passes - CONTROL
+        expected: PAST THE GUARD
+        observed: PAST THE GUARD - stopped at the workspace load
+  So the two outcomes are distinguishable without binding a socket,
+  which is what makes the drive below readable.
+
+########## B. what the PUBLISHED checks fed, classified by AST ##########
+    allow_remote   {'non-literal': 1}
+    host           {'non-literal': 1}
+    port           {'int': 1}
+  [ok] `port` is fed as a literal, and always the same one
+        expected: int
+        observed: ['int']
+  [ok]   host and allow_remote arrive through one helper
+        expected: helpers: 1
+        observed: helpers: 1
+    bind_verdict signature: {'host': 'str', 'allow_remote': 'bool'}
+  [ok]     whose allow_remote parameter is annotated `bool`
+        expected: bool
+        observed: bool
+  [ok]   the note claims 28 checks, which is what is being narrowed
+        expected: **28 checks, 0 unexpected.**
+        observed: # `dashboard.py` and `errors.py` at `main` `5694ab45` — the bind guard is a strict allow-list; no issue filed
+
+> **CORRECTED 2026-08-03.** The `escapes: []` result below is **too strong** and
+> is disproved by issue #19. See
+> `ADDENDUM-architecture-claims-and-repair-drops-a-field.md`: a `KeyError` from
+> `workspace.py:1182` reaches a real `efo task proxy-submit` invocation as an
+> uncaught traceback. The census below enumerated `raise` **statements**, so it
+> structurally could not see an exception arriving from a dict index, and
+> `KeyError` is a `LookupError` — in none of `cli.main`'s four caught families.
+> Everything else in this note stands as measured. The lesson is kept rather
+> than the claim: an exhaustive census is exhaustive over *the thing it
+> enumerates*, and the shape it cannot enumerate is where the counterexample
+> lives.
+>
+> **Also corrected 2026-08-03:** this note cited the bind-guard sentence as
+> `README.md:336-337`. It spans **`:335-336`**. The sentence is real and says
+> what the note says it says; only the span was wrong, and a reader following
+> the citation landed one line late.
+
+Reproduce with `raw/probe_dashboard_and_errors.py`; raw output in
+`raw/raw-dashboard-errors.txt`. **28 checks, 0 unexpected.**
+
+**No socket was bound and no request was served.** The bind guard runs before
+the server object exists, so every refusal below is measured from the guard
+itself; what the handler *would* serve is measured by calling the same
+`Workspace` methods `do_GET` calls.
+
+## The documented bind guard holds, and fails closed on every near miss
+
+`README.md:335-336` — *"Open `http://127.0.0.1:8765`. Remote binding is
+rejected unless `--allow-remote` is explicitly supplied."*
+
+`dashboard.py:218` allows exactly `{"127.0.0.1", "::1", "localhost"}`. Fourteen
+spellings, all refused with
+`Remote dashboard binding requires explicit allow_remote=True`:
+
+```
+0.0.0.0      ""            ::            192.168.1.10   example.invalid
+"127.0.0.1 " " 127.0.0.1"  LOCALHOST     Localhost      127.1
+127.0.0.2    0177.0.0.1    [::1]         localhost.
+```
+
+The interesting rows are the last five. `127.1`, `127.0.0.2`, `0177.0.0.1` and
+`[::1]` all reach the loopback interface, and `LOCALHOST` is the same name in a
+different case — every one is refused anyway, because the guard is a strict
+allow-list rather than a pattern match or a `.startswith("127.")`. A test that
+only tried `0.0.0.0` would not have shown that.
+
+## What the dashboard would serve
+
+Routes, extracted from the handler: `['/', '/api/status', '/api/ledger']`.
+There is no fourth route and no file serving — `DASHBOARD_HTML` is a module
+constant and `_handler` contains zero `open(` calls, so no request can name a
+path.
+
+`/api/status` returns `workspace.status()` plus `workspace.list_tasks()`, i.e.
+**raw task projections**. Measured with markers planted through the API:
+
+```
+task description in the payload      SECRETDESC present: True
+blocked_reason absolute path         SECRETPATH present: True
+authorization checks in the handler  0
+```
+
+The SSH collector deliberately strips both of those
+(`NOTE-collector-redaction-holds.md` — `task_to_view` and `collect_activity`
+whitelist fields, which is why the adapter's absolute paths never reach a
+public snapshot). This server does not, and it has no authentication of any
+kind.
+
+**Not filed**, because nothing claims otherwise: `README.md:335-336` promises
+the bind is local unless explicitly opted out of, and that promise holds
+exactly. What is worth an operator knowing, and is written here rather than in
+an issue: `--allow-remote` publishes complete task records — descriptions,
+blocked reasons, whole `result` evidence bundles — to anyone who can reach the
+port, with no token. The local default is the thing protecting it.
+
+## `errors.py`
+
+Eight classes, and every one derives from `EFOError`:
+`AuthorizationError`, `ConfigurationError`, `EvidenceError`, `IntegrityError`,
+`LeaseError`, `LockTimeout`, `TransitionError`.
+
+## A premise of mine that was wrong
+
+I set out to check whether any failure path reaches a user as a traceback,
+assuming `cli.py` catches only `EFOError`. It does not — measured:
+
+```
+except (EFOError, OSError, ValueError, json.JSONDecodeError) as exc:
+```
+
+Four families. Every exception **call** in the package, enumerated with the run
+failing on anything unadjudicated:
+
+| Raised | Disposition | Files |
+|---|---|---|
+| `ConfigurationError` | EFOError — caught, exit 2 | adapter, dashboard, doctor, independence, model, provenance, util, workspace |
+| `AuthorizationError` | EFOError — caught, exit 2 | provenance, workspace |
+| `EvidenceError` | EFOError — caught, exit 2 | archive, evidence, provenance, workspace |
+| `IntegrityError` | EFOError — caught, exit 2 | ledger, workspace |
+| `LeaseError`, `TransitionError`, `LockTimeout` | EFOError — caught, exit 2 | workspace, model, lock |
+| `ValueError` | not an `EFOError`, but **in** the catch tuple — exit 2 | cli |
+| `SystemExit` | `__main__.py:7`, `raise SystemExit(main())` — the exit itself | `__main__` |
+
+`escapes: []` **among raised statements** — which is the limit of this census,
+not a property of the package. Both `ValueError` sites were driven through
+`main()` and produce a one-line message with exit 2, no traceback. An
+exception raised implicitly by the interpreter is outside what this table can
+see; issue #19 is one, and it does escape.
+
+One of them is a dead branch: `cli.py:28`'s
+`raise ValueError("Either --description or --description-file is required")` is
+never reached, because argparse enforces the required mutually-exclusive group
+first and exits with `usage:`. Recorded rather than filed — it is a
+belt-and-braces guard behind a parser rule, which is the harmless direction.
+
+## Scope
+
+`dashboard.serve`'s host guard, `_handler`'s routes and what they return,
+`errors.py`'s hierarchy, and an exhaustive census of raised exception types
+against `cli.main`'s catch tuple. Not examined: the served HTML itself, and the
+handler under a real request (no socket was bound).
+
+Pre-registered permissions unchanged: `gpu: false`, `network: false`,
+`performance_metrics: false`; gates `allow_skips: false`,
+`require_validation: true`, `require_known_answer_check: true`,
+`require_independent_verification: true`.
+
+**SUBMITTED, not VERIFIED.**
+
+| Artifact | SHA-256 |
+|---|---|
+| `raw/probe_dashboard_and_errors.py` | `df47967e0b5b5990a0fc2c4c95e44fb661f47dd1aad4570c0244e712ba6e3ff4` |
+| `raw/raw-dashboard-errors.txt` | `9089ab6b37d5a74a91daa52ca56bf6dde5833f972fddfa99fad3017ce04d58b0` |
+
+  So `host` was driven hard - fourteen spellings - and `allow_remote`
+  was never driven at all beyond the two booleans. That is the un-fed
+  class.
+
+########## C. the guard is a TRUTHINESS test, quoted from the file ##########
+    dashboard.py:218  if host not in {"127.0.0.1", "::1", "localhost"} and not allow_remote:
+  [ok] the guard tests `not allow_remote`, not its type
+        expected: and not allow_remote:
+        observed:     if host not in {"127.0.0.1", "::1", "localhost"} and not allow_remote:
+  [ok]   the host side IS an exact set membership
+        expected: host not in {"127.0.0.1"
+        observed:     if host not in {"127.0.0.1", "::1", "localhost"} and not allow_remote:
+  Strict on the host, loose on the flag - in one expression.
+
+########## D. the un-fed class, DRIVEN ##########
+    allow_remote='no'     -> PAST THE GUARD - stopped at the workspace load
+    allow_remote='false'  -> PAST THE GUARD - stopped at the workspace load
+    allow_remote='0'      -> PAST THE GUARD - stopped at the workspace load
+    allow_remote=1        -> PAST THE GUARD - stopped at the workspace load
+    allow_remote=['x']    -> PAST THE GUARD - stopped at the workspace load
+    allow_remote=0        -> REFUSED by the bind guard
+    allow_remote=''       -> REFUSED by the bind guard
+    allow_remote=[]       -> REFUSED by the bind guard
+    allow_remote=None     -> REFUSED by the bind guard
+    allow_remote=0.0      -> REFUSED by the bind guard
+  [ok] non-bool values that BYPASS the documented guard
+        expected: bypass: 5
+        observed: bypass: 5
+  [ok]   and they are the truthy ones
+        expected: ['no', 'false', '0', 1, ['x']]
+        observed: ['no', 'false', '0', 1, ['x']]
+  [ok]   the falsy ones are refused
+        expected: refused: 5
+        observed: refused: 5
+  [ok]     and the two classes account for every driven value
+        expected: total: 10
+        observed: total: 10
+  The three sharpest are the STRINGS a reader would take to mean
+  false: 'no', 'false' and '0' each turn the refusal off.
+
+########## E. is it REACHABLE? the CLI is asked, not assumed ##########
+  [ok] `--allow-remote` is declared exactly once in the parser
+        expected: found: 1
+        observed: found: 1
+    action class: _StoreTrueAction   nargs=0   const=True
+  [ok]   and it is a store_true action
+        expected: _StoreTrueAction
+        observed: _StoreTrueAction
+  [ok]     so the CLI can only hand serve() a real bool
+        expected: const: True
+        observed: const: True
+  So this is NOT reachable from the CLI. The exposure is the LIBRARY
+  API, and it is the same class as issue #15 - an annotation is not a
+  check. Recorded here rather than appended there.
+
+########## F. what this does NOT establish ##########
+  * It does NOT retract `NOTE-dashboard-and-errors-hold.md`. Its 28
+    checks stand, and the host guard IS the strict allow-list it
+    reported. What is added is that the same expression is LOOSE on
+    the flag beside it.
+  * It does NOT file an issue. The CLI cannot reach it, and the class
+    - an annotation that is not enforced - is #15's, already open.
+  * It does NOT drive `port`. The published probe feeds it as 0 every
+    time, and any port validation lives in the socket layer AFTER the
+    workspace load, which this probe deliberately never reaches. So
+    `port` is UNCHECKED here, not shown safe.
+  * It does NOT bind a socket or serve a request. Every verdict is
+    read from which exception comes back, and the three controls in
+    section A are what make that reading sound.
+  * It does NOT claim a caller would pass `allow_remote='no'`. What is
+    measured is that the guard would not stop them.
+  * No network, no GPU, no workspace built. The anchor's working tree
+    is untouched, and it does not touch `main` or another agent's
+    branch.
+  * MEASURED: the AST classification, the helper's annotation, the
+    guard line quoted from the file, all ten driven values, the three
+    controls, the parser action. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED: re-running my own evidence is a
+re-run, not independent confirmation.

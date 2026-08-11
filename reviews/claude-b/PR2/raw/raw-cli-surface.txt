@@ -1,0 +1,130 @@
+########## A. POSITIVE CONTROL - the CLI drives a real workspace ##########
+  [ok] efo init
+        expected: exit 0
+        observed: exit 0
+  [ok]   and the ledger opens with its own events
+        expected: events: 2
+        observed: events: 2
+  [ok] efo agent add
+        expected: exit 0
+        observed: exit 0
+  [ok] efo task add
+        expected: exit 0
+        observed: exit 0
+  [ok]   emits the task as JSON
+        expected: 'state': 'pending'
+        observed: 'state': 'pending'
+  [ok]   with everything denied by default
+        expected: {'gpu': False, 'network': False, 'performance_metrics': False}
+        observed: {'gpu': False, 'network': False, 'performance_metrics': False}
+  [ok] efo status
+        expected: exit 0
+        observed: exit 0
+  [ok]   and reading did not append
+        expected: events: 4
+        observed: events: 4
+
+########## B. every subcommand, enumerated from the parser ##########
+  30 subcommands found
+    agent add                   writes      yes - agent.added
+    agent attest                writes      yes - agent.identity_attested
+    agent list                  read-only   no
+    doctor                      read-only   no
+    evidence check              read-only   no
+    init                        writes      yes - workspace.initialized
+    ledger audit-independence   read-only   no
+    ledger audit-projections    read-only   no
+    ledger repair-projections   WRITES      NO - rewrites tasks/*.json only
+    ledger verify               read-only   no
+    legacy audit                read-only   no - separate legacy tree
+    recover                     writes      yes - task.blocked per expired lease
+    serve                       read-only   no - dashboard
+    status                      read-only   no
+    task add                    writes      yes - task.created
+    task archive                writes      yes - task.archived
+    task block                  writes      yes - task.blocked
+    task claim                  writes      yes - task.claimed
+    task heartbeat              writes      yes - task.heartbeat
+    task list                   read-only   no
+    task proxy-authorize        writes      yes - task.proxy_authorized
+    task proxy-status           writes      yes - task.external_status_reported
+    task proxy-submit           writes      yes - task.proxy_submitted
+    task requeue                writes      yes - task.requeued
+    task show                   read-only   no
+    task start                  writes      yes - task.started
+    task submit                 writes      yes - task.submitted
+    task verify                 writes      yes - task.verified or task.rejected
+    worker loop                 writes      yes - via the adapter
+    worker once                 writes      yes - via the adapter
+  [ok] every subcommand is adjudicated
+        expected: uncovered: []
+        observed: uncovered: []
+  [ok]   and the map has no stale entries
+        expected: stale: []
+        observed: stale: []
+
+########## C. the one command that writes without a ledger event ##########
+  [ok] audit-projections notices the edit
+        expected: exit 2
+        observed: exit 2
+  [ok]   and names it
+        expected: projection differs from ledger
+        observed: error: T1: projection differs from ledger
+
+  [ok] repair-projections succeeds
+        expected: exit 0
+        observed: exit 0
+  [ok]   it rewrote the projection
+        expected: changed: True
+        observed: changed: True
+  [ok]   and appended NOTHING to the ledger
+        expected: events: 4 -> 4
+        observed: events: 4 -> 4
+        -> the only mutating command with no signed record of itself.
+           Issue #12 is about what it does to a truncated chain; this
+           records the narrower fact that the repair is itself
+           unlogged, so an auditor sees the effect and not the cause.
+
+########## D. does the CLI weaken any API gate? ##########
+  [ok] a worker claiming to be the orchestrator
+        expected: exit 2
+        observed: exit 2
+  [ok]   is refused by the same check as the API
+        expected: Only orchestrator 'antigravity' may perform this action
+        observed: error: Only orchestrator 'antigravity' may perform this action
+
+  [ok] the orchestrator claiming a worker's task
+        expected: exit 2
+        observed: exit 2
+  [ok] an invalid agent id from the command line
+        expected: exit 2
+        observed: exit 2
+  [ok]   same validator as the API
+        expected: Agent id must start with a lower-case letter
+        observed: error: Agent id must start with a lower-case letter and contain only lower-case letters, numbers, underscore, or hyphen
+
+  [ok] a --path that is not a workspace
+        expected: exit 2
+        observed: exit 2
+  [ok]   refuses rather than creating one
+        expected: Not an Evidence First Orchestrator workspace
+        observed: error: Not an Evidence First Orchestrator workspace: /tmp/efo-cli-8qqfsmm7/not-a-workspace
+
+  evidence check validates ARBITRARY paths - by design, and read-only:
+  [ok]   it accepts a path outside the workspace
+        expected: exit 2
+        observed: exit 2
+  [ok]   and fails on the CONTENT, not on ownership
+        expected: Report is missing required numbered sections
+        observed: error: Report is missing required numbered sections: 1, 2, 3, 4, 5, 6
+
+  [ok]   having appended nothing
+        expected: events: 4
+        observed: events: 4
+        -> README.md:590 calls this 'Validate a submission bundle'.
+           Workspace.submit still requires the report to be under
+           reports/<actor>/; this command records nothing, so the
+           looser path check is a convenience, not a bypass.
+
+########## 0 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.

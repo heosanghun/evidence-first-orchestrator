@@ -1,0 +1,147 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   nothing in the package is silently unlisted
+        expected: unlisted: []
+        observed: unlisted: []
+
+########## B. the published 144 reproduces - and then decomposes ##########
+  [ok] the note's figure is reproduced exactly, same 13 modules
+        expected: total: 144
+        observed: total: 144
+  So the number is not an arithmetic error. It is a MISLEADING number,
+  which is worse, because it looks checkable and reads as a gap of 144
+  runtime lookups. Decomposed:
+    annotation   128
+    store          9
+    delete         0
+    read           7
+  [ok]   the four dispositions account for every site, none double-counted
+        expected: sum: 144
+        observed: sum: 144
+  [ok]   RUNTIME dynamic-key subscript READS
+        expected: read: 7
+        observed: read: 7
+
+########## C. checking MY OWN filter against ground truth ##########
+  An exclusion I wrote is the thing most likely to be wrong here - four
+  hand-written filters in this review have already been the bug. So the
+  exclusion is checked, not trusted.
+  bases of the 128 excluded subscripts: {'list': 31, 'dict': 87, 'tuple': 5, 'set': 3, 'type': 1, 'Sequence': 1}
+  [ok]   every excluded subscript is a typing constructor, not a lookup
+        expected: non-typing bases excluded: []
+        observed: non-typing bases excluded: []
+  [ok]   and no retained site is a typing construct the filter MISSED
+        expected: typing bases retained: []
+        observed: typing bases retained: []
+  [ok]   modules deferring annotation evaluation
+        expected: 12 of 13
+        observed: 12 of 13
+    the exception is ['errors.py'], whose
+    annotations DO evaluate at import. That does not change the
+    verdict - a type expression is still not a key lookup - but the
+    reason differs per module, so it is stated rather than glossed.
+  The 9 stores are `d[k] = v`. A store CREATES the
+  key; it cannot raise KeyError. They are excluded on that ground, and
+  the 0 deletes would NOT be - there are none.
+
+########## D. the 7 runtime reads, classified by KEY PROVENANCE ##########
+    archive.py:66  [slice]  manifest['sha256'][:16]
+        class: slice
+        `manifest['sha256'][:16]`. The outer subscript is a slice on a str. The inner constant key is already adjudicated by the constant-key census (workspace builds the manifest).
+    evidence.py:37  [expression]  matches[index + 1]
+        class: local arithmetic
+        `matches[index + 1].start() if index + 1 < len(matches) else len(text)` - the bound check is in the same conditional expression.
+    evidence.py:38  [slice]  text[match.end():end]
+        class: slice
+        `text[match.end():end]` on a str. A slice clamps; it cannot raise.
+    independence.py:148  [variable]  resolved[agent_id]
+        class: own keyspace
+        `if agent_id in resolved: return resolved[agent_id]` - the membership test is the same statement.
+    independence.py:177  [variable]  resolved[agent_id]
+        class: own keyspace
+        reads the key `resolved[agent_id] = identity_snapshot(...)` assigned on the line directly above.
+    ledger.py:82  [expression]  events[-1]
+        class: local literal
+        `events[-1]['event_hash'] if events else GENESIS_HASH` - the emptiness guard is in the same conditional expression.
+    provenance.py:295  [variable]  expected_files[submitted]
+        class: PARSED INPUT
+        `submitted` is `(provenance.parent / record['submitted_path']).resolve()` - a path a worker writes into the provenance document. Guarded at :241 by `if submitted not in expected_files: raise EvidenceError`, same loop iteration, and `expected_files` is never mutated after :218 (checked below).
+  [ok] every runtime read is adjudicated
+        expected: uncovered: []
+        observed: uncovered: []
+  [ok]   and the map has no stale entries
+        expected: stale: []
+        observed: stale: []
+
+  BY KEY PROVENANCE - this is the answer to the queue item, and the
+  bare total of 7 is deliberately NOT the answer:
+    slice              2
+    own keyspace       2
+    local arithmetic   1
+    local literal      1
+    PARSED INPUT       1
+  [ok]   exactly one read is keyed by parsed input
+        expected: PARSED INPUT: 1
+        observed: PARSED INPUT: 1
+
+  GUARD DISTANCE, measured rather than eyeballed:
+    archive.py:66    slice              n/a (slice)
+    evidence.py:37    local arithmetic   0 lines
+    evidence.py:38    slice              n/a (slice)
+    independence.py:148   own keyspace       0 lines
+    independence.py:177   own keyspace       1 lines
+    ledger.py:82    local literal      0 lines
+    provenance.py:295   PARSED INPUT       54 lines
+  Four of the five index reads are guarded inside the SAME expression.
+  The parsed-input one is guarded 54 lines earlier. It holds today; the
+  distance is what makes it the fragile one, and it is the same shape as
+  #19 - a guard and a use that a refactor can separate without either
+  side looking wrong on its own.
+  [ok]   expected_files is never mutated after it is built at :218
+        expected: mutations: []
+        observed: mutations: []
+
+########## E. workspace.py - the module that carried #19 ##########
+  total dynamic-key subscripts: 61
+    annotation    60
+    store          1
+    delete         0
+    read           0
+  [ok] workspace.py has NO runtime dynamic-key subscript read at all
+        expected: read: 0
+        observed: read: 0
+  A negative result, and worth publishing: every dict index in the
+  module where #19 lives uses a CONSTANT key, which is precisely the
+  population `NOTE-issue19-is-the-only-one.md` already enumerated. So
+  that note's coverage of workspace.py was complete after all - not by
+  design, but the gap it warned about is empty here. Nothing about #19
+  changes: #19 is a constant-key read.
+
+########## F. what this still does NOT cover ##########
+  Named with counts, because a census is exhaustive only over what it
+  enumerates:
+    - 9 dynamic-key STORES: excluded on the
+      ground that a store creates its key. A store into a dict that a
+      LATER read depends on is a different question, not asked here.
+    - AttributeError / TypeError shapes: still unmeasured, for the
+      reason the previous note gave - they need type inference.
+    - Whether any of the 7 guards can be BYPASSED at runtime. This is
+      static ordering analysis; nothing was executed. The behavioural
+      half would need a crafted provenance document driven through
+      `verify_git_provenance`, which is future work.
+    - Nested constant-key reads inside a dynamic expression are counted
+      once, at the outer node.
+
+########## 0 unexpected result(s) ##########
+Static analysis only; nothing was executed against a live workspace.
+Section B corrects a number I PUBLISHED in
+NOTE-implicit-exceptions-package-wide.md - the defect being reported
+here is in this review, not in EFO.
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false.
+SUBMITTED, not VERIFIED.

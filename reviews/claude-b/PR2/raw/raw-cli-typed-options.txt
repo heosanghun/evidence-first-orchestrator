@@ -1,0 +1,115 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   checks in the committed cli-surface output
+        expected: checks: 25
+        observed: checks: 25
+  [ok]     and the note's headline agrees with the file
+        expected: stated: 25 / 0
+        observed: stated: 25 / 0
+
+########## B. the twenty-five, classified BY HAND ##########
+  [ok] every one of the twenty-five is classified - the table is exhaustive
+        expected: unclassified: []
+        observed: unclassified: []
+     10  well-formed invocation
+      5  tampered projection
+      4  authorization violation
+      2  static census
+      2  malformed string value
+      2  path that is not a workspace
+  [ok]   and the classes sum to the whole population
+        expected: sum: 25
+        observed: sum: 25
+  EVERY argument in all twenty-five is a STRING, because argparse
+  hands strings. Item 47's question cannot be asked of this surface in
+  the same words; the equivalent is WHICH ARGUMENTS ARE TYPED.
+
+########## C. the class the twenty-five never fed: TYPED options ##########
+    serve         --port                  int
+    task claim    --lease-seconds         int
+    task proxy-authorize--duration-seconds      int
+    worker loop   --idle-timeout-seconds  float
+    worker loop   --max-tasks             int
+    worker loop   --poll-seconds          float
+    worker loop   --timeout-seconds       int
+    worker once   --timeout-seconds       int
+  [ok] options the parser declares as int or float
+        expected: typed: 8
+        observed: typed: 8
+  [ok]   all of them numeric - no other coercion is declared
+        expected: kinds: ['float', 'int']
+        observed: kinds: ['float', 'int']
+  Not one of the twenty-five checks drives one of these eight.
+
+########## D. DRIVEN - the un-fed class, three different answers ##########
+    --lease-seconds 600         ACCEPTED, duration_seconds=600
+    --lease-seconds abc         argparse SystemExit(2)
+    --lease-seconds -5          Lease duration must be at least 10 seconds
+    --lease-seconds 0           ACCEPTED, duration_seconds=1800
+    --lease-seconds 999999999   ACCEPTED, duration_seconds=999999999
+  [ok] the control is accepted at the value asked for
+        expected: ACCEPTED, duration_seconds=600
+        observed: ACCEPTED, duration_seconds=600
+  [ok]   a non-numeric value never reaches EFO - argparse rejects it
+        expected: argparse SystemExit(2)
+        observed: argparse SystemExit(2)
+  [ok]     and all EIGHT typed options reject one at parse time
+        expected: rejected: 8
+        observed: rejected: 8
+  [ok]   a NEGATIVE value reaches the domain and the floor fires
+        expected: Lease duration must be at least 10 seconds
+        observed: Lease duration must be at least 10 seconds
+  [ok]     which is a ConfigurationError, model.py:139
+        expected: at least 10 seconds
+        observed:         raise ConfigurationError("Lease duration must be at least 10 seconds")
+
+########## E. the zero, which is the new fact ##########
+    --lease-seconds 0        ACCEPTED, duration_seconds=1800
+    workspace default        lease_seconds=1800
+    workspace.py:876         duration = lease_seconds or int(
+  [ok] zero is ACCEPTED where -5 is refused
+        expected: ACCEPTED
+        observed: ACCEPTED, duration_seconds=1800
+  [ok]   and the duration becomes the workspace DEFAULT, not zero
+        expected: duration: 1800
+        observed: duration: 1800
+  [ok]     because the line uses `or`, and 0 is falsy
+        expected: lease_seconds or int(
+        observed:                 duration = lease_seconds or int(
+  An explicit `0` is indistinguishable from `not supplied`. The floor
+  at model.py:139 never sees it, and the operator silently gets 1800
+  instead of what they asked for.
+  RECORDED, NOT FILED. The input is the operator's own argument, not a
+  tampered document, and 1800 is the default rather than a weakening -
+  items 38, 45, 47, 53 and 54 applied the same standard.
+  [ok]   and the huge value is ACCEPTED - but that is issue #7, already filed
+        expected: ACCEPTED
+        observed: ACCEPTED, duration_seconds=999999999
+  #7 is the missing CEILING. This is the FLOOR being skipped from
+  below, which is a different line and a different mechanism.
+
+########## F. what this does NOT do ##########
+  * It does not retract `cli.py is clean`. All 25 checks still pass.
+  * It does not file an issue, and nothing was accepted that weakens
+    a gate - 1800 is the workspace's own default.
+  * It drives ONE of the eight typed options to the domain. The other
+    seven are driven only at PARSE level, because five of them start a
+    worker loop or a server. That is stated, not implied.
+  * It does not adjudicate the other five notes item 53 named. FIVE
+    remain after this one.
+  * No network. The workspace is a tempfile directory, removed above.
+  * MEASURED: the 25-label classification and its exhaustiveness, the
+    eight typed options derived from the parser, all five domain
+    drives, all eight parse drives, the resulting durations, the two
+    source lines. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+One clean note re-examined by hand and its un-fed input class driven.
+Anchor untouched, no `main` write, no issue filed, no verdict
+retracted. Pre-registered permissions unchanged -
+gpu/network/performance_metrics all false. SUBMITTED, not VERIFIED.

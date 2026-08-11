@@ -1,0 +1,133 @@
+########## A. POSITIVE CONTROL ##########
+  [ok] an honest snapshot is accepted
+        expected: 200 ok=true
+        observed: 200 ok=true
+  [ok]   and stored
+        expected: put:snapshot:latest
+        observed: put:snapshot:latest
+  [ok]   and served back by GET
+        expected: 200
+        observed: 200
+  [ok]   with the ingest stamp applied
+        expected: "mode":"live"
+        observed: {"schema_version":"1.0","generated_at":"2026-08-02T08:29:25.239Z","collection_interval_seconds":120,"source":{"mode":"live","collector":"efo-monitor/1.2","received_at":"2026-08-02T08:29:25.314Z"},"workspace":{"name":"System1.5","workflow_progress_percent":45},"agents":[{"id":"claude","name":"ClaudeB","role":"구현검증작업자","state":"working","current":"trainthemodel","current_task_id":"T1","next":"제출준비",
+
+########## B. the transport gates ##########
+  [ok] an unsigned snapshot
+        expected: 401 invalid_signature
+        observed: 401 invalid_signature
+  [ok] a snapshot signed with the wrong secret
+        expected: 401 invalid_signature
+        observed: 401 invalid_signature
+  [ok] a correctly signed hour-old replay
+        expected: 401 invalid_timestamp
+        observed: 401 invalid_timestamp
+  [ok] a correctly signed hour-in-the-future snapshot
+        expected: 401 invalid_timestamp
+        observed: 401 invalid_timestamp
+
+########## C. per-projection exact key sets ##########
+  [ok] an extra field on a task projection
+        expected: 400 task has unexpected or missing fields
+        observed: 400 task has unexpected or missing fields
+  [ok] an extra field on an agent projection
+        expected: 400 agent has unexpected or missing fields
+        observed: 400 agent has unexpected or missing fields
+  [ok] a missing field on a task projection
+        expected: 400 task has unexpected or missing fields
+        observed: 400 task has unexpected or missing fields
+
+########## D. FORBIDDEN_KEYS: exact names only ##########
+  snapshot.js:6-19 lists: password passwd secret token environment
+  env command cmdline pid uuid ssh authorization
+  hasForbiddenKey compares key.toLowerCase() against that set.
+  caught, at any depth:
+  [ok]   gpus[0].uuid
+        expected: 400 forbidden sensitive field
+        observed: 400 forbidden sensitive field at $.gpus[0].uuid
+  [ok]   system.token
+        expected: 400 forbidden sensitive field
+        observed: 400 forbidden sensitive field at $.system.token
+  [ok]   system.nested.secret
+        expected: 400 forbidden sensitive field
+        observed: 400 forbidden sensitive field at $.system.nested.secret
+  [ok]   alerts[0].pid
+        expected: 400 forbidden sensitive field
+        observed: 400 forbidden sensitive field at $.alerts[0].pid
+  [ok]   source.command
+        expected: 400 forbidden sensitive field
+        observed: 400 forbidden sensitive field at $.source.command
+  [ok]   system.cmdline
+        expected: 400 forbidden sensitive field
+        observed: 400 forbidden sensitive field at $.system.cmdline
+  NOT caught - the same idea under a compound name:
+  [ok]   system.api_key
+        expected: 200 ok=true
+        observed: 200 ok=true
+  [ok]   system.access_token
+        expected: 200 ok=true
+        observed: 200 ok=true
+  [ok]   gpus[0].gpu_uuid
+        expected: 200 ok=true
+        observed: 200 ok=true
+  [ok]   gpus[0].process_id
+        expected: 200 ok=true
+        observed: 200 ok=true
+  [ok]   system.command_line
+        expected: 200 ok=true
+        observed: 200 ok=true
+  [ok]   system.ssh_key
+        expected: 200 ok=true
+        observed: 200 ok=true
+  [ok]   system.environment_variables
+        expected: 200 ok=true
+        observed: 200 ok=true
+  and values are never inspected, only key names:
+  [ok]   a credential, a private-key path and a command line as a VALUE
+        expected: 200 ok=true
+        observed: 200 ok=true
+  [ok]   and it is what GET will serve
+        expected: AKIA1234567890EXAMPLE present: true
+        observed: AKIA1234567890EXAMPLE present: true
+
+########## E. which containers are shape-checked at all ##########
+  [ok] system replaced with an arbitrary object
+        expected: 200 ok=true
+        observed: 200 ok=true
+  [ok] an arbitrary extra field on a GPU entry
+        expected: 200 ok=true
+        observed: 200 ok=true
+  [ok] an arbitrary alert object
+        expected: 200 ok=true
+        observed: 200 ok=true
+  so the shape-checked containers are tasks, agents, projects
+  and activity; system, gpus[] extras, alerts[], history[],
+  workspace and source rely on FORBIDDEN_KEYS alone.
+
+########## F. constantTimeEqual ##########
+  [ok]   equal("abc", "abc")
+        expected: = true
+        observed: = true
+  [ok]   equal("abc", "abd")
+        expected: = false
+        observed: = false
+  [ok]   equal("abc", "abcabc")
+        expected: = false
+        observed: = false
+  [ok]   equal("", "")
+        expected: = true
+        observed: = true
+  [ok]   equal("", "a")
+        expected: = false
+        observed: = false
+  [ok]   equal("a", "aa")
+        expected: = false
+        observed: = false
+  [ok]   equal("ab", "abab")
+        expected: = false
+        observed: = false
+  The length XOR seeds `difference`, so the cyclic index never
+  lets a repeated string match a shorter one.
+
+########## 0 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.

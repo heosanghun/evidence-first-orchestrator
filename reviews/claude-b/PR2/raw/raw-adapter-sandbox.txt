@@ -1,0 +1,124 @@
+########## A. POSITIVE CONTROL - an honest command agent ##########
+  [ok] an honest agent reaches submitted
+        expected: 'state': 'submitted'
+        observed: {'task_id': 'T1', 'state': 'submitted', 'exit_code': 0, 'report': '/tmp/efo-adapter-o7znjsfn/ws-aer517g2/ws/reports/w/T1.md', 'evidence': '/tmp/efo-adapter-o7znjsfn/ws-aer517g2/ws/reports/w/T1.evidence.json', 'stdout': '/tmp/efo-adapter-o7znjsfn/ws-aer517g2/ws/runs/w/T1/2026-08-02T025029Z/stdout.txt', 'stderr': '/tmp/efo-adapter-o7znjsfn/ws-aer517g2/ws/runs/w/T1/2026-08-02T025029Z/stderr.txt'}
+  [ok]   and doctor is healthy
+        expected: healthy=True
+        observed: healthy=True
+
+########## B. the documented claim: writes to another area block ##########
+  [ok] a write into another agent's report directory
+        expected: blocked
+        observed: blocked
+  [ok]   and reports/other/planted.md is named
+        expected: reports/other/planted.md
+        observed: ['reports/other/planted.md']
+  [ok] a rewrite of shared/FACTS.md
+        expected: blocked
+        observed: blocked
+  [ok]   and shared/FACTS.md is named
+        expected: shared/FACTS.md
+        observed: ['shared/FACTS.md']
+  [ok] a rewrite of .efo/workspace.json
+        expected: blocked
+        observed: blocked
+  [ok]   and .efo/workspace.json is named
+        expected: .efo/workspace.json
+        observed: ['.efo/workspace.json']
+  [ok] a rewrite of another agent's task projection
+        expected: blocked
+        observed: blocked
+  [ok]   and tasks/T2.json is named
+        expected: tasks/T2.json
+        observed: ['tasks/T2.json']
+  [ok] a nonzero exit
+        expected: blocked
+        observed: blocked
+  [ok]   reason
+        expected: exited with code 3
+        observed: Agent command exited with code 3
+  [ok] a command that overruns its timeout
+        expected: blocked
+        observed: blocked
+  [ok]   reason
+        expected: timed out after 2s
+        observed: Agent command timed out after 2s
+  [ok] no report written at all
+        expected: blocked
+        observed: blocked
+  [ok]   reason
+        expected: Evidence gate rejected output
+        observed: Evidence gate rejected output: Report does not exist: /tmp/efo-adapter-o7znjsfn/ws-gjb7x_ld/ws/reports/w/T1.md
+  [ok] a manifest declaring a failure
+        expected: blocked
+        observed: blocked
+  [ok]   reason
+        expected: did not pass
+        observed: Evidence gate rejected output: validations[0] did not pass: exit_code=1, failed=2
+
+########## C. what the allow-list itself sanctions ##########
+  effective allowed prefixes for this agent (adapter.py:147-156):
+        reports/w
+        runs/w
+        reports/w
+        runs/w
+        tasks/T1.json
+        ledger/events.jsonl
+  the child dropped ledger event 12 (task.started) and rolled tasks/T1.json back to match
+  [ok] does the adapter report an unauthorized change?
+        expected: None
+        observed: None
+  [ok]   what does it say instead?
+        expected: must be running before submission
+        observed: Task T1 must be running before submission
+  [ok]   does the chain still verify?
+        expected: 'valid': True
+        observed: {'valid': True, 'events': 12, 'head': 'bddc6d1d74234b8b167f2e1d682cb63a00710595361d39b2ca4f6b4a3c9ab21d', 'signed': True}
+  [ok]   does doctor notice?
+        expected: healthy=
+        observed: healthy=True
+  [ok]   the erased event is gone from the signed history
+        expected: task.started present: False
+        observed: task.started present: False -> ['task.created', 'task.claimed', 'task.blocked']
+
+########## D. structural blind spots of a before/after snapshot ##########
+  [ok] a file rewritten and restored within the run
+        expected: 'state': 'submitted'
+        observed: {'task_id': 'T1', 'state': 'submitted', 'exit_code': 0, 'report': '/tmp/efo-adapter-o7znjsfn/ws-ndw0qy_q/ws/reports/w/T1.md', 'evidence': '/tmp/efo-adapter-o7znjsfn/ws-ndw0qy_q/ws/reports/w/T1.evidence.json', 'stdout': '/tmp/efo-adapter-o7znjsfn/ws-ndw0qy_q/ws/runs/w/T1/2026-08-02T025034Z/stdout.txt', 'stderr': '/tmp/efo-adapter-o7znjsfn/ws-ndw0qy_q/ws/runs/w/T1/2026-08-02T025034Z/stderr.txt'}
+  [ok]   reported as changed?
+        expected: None
+        observed: None
+  [ok]   an empty directory created in shared/ - reported?
+        expected: None
+        observed: None
+  [ok]   the directory does exist afterwards
+        expected: exists=True
+        observed: exists=True
+  [ok] a write through a symlink pointing outside the workspace
+        expected: 'state': 'submitted'
+        observed: {'task_id': 'T1', 'state': 'submitted', 'exit_code': 0, 'report': '/tmp/efo-adapter-o7znjsfn/ws-y9xn93t3/ws/reports/w/T1.md', 'evidence': '/tmp/efo-adapter-o7znjsfn/ws-y9xn93t3/ws/reports/w/T1.evidence.json', 'stdout': '/tmp/efo-adapter-o7znjsfn/ws-y9xn93t3/ws/runs/w/T1/2026-08-02T025034Z/stdout.txt', 'stderr': '/tmp/efo-adapter-o7znjsfn/ws-y9xn93t3/ws/runs/w/T1/2026-08-02T025034Z/stderr.txt'}
+  [ok]   reported as changed?
+        expected: None
+        observed: None
+  [ok]   did the write land outside?
+        expected: landed=True
+        observed: landed=True
+  _unauthorized_changes prefix matching, checked directly:
+        reports/wombat/x.md    vs ['reports/w']        -> FLAGGED  (sibling with a shared name prefix)
+        reports/w/x.md         vs ['reports/w']        -> allowed  (genuinely inside the allowed root)
+        reports/w              vs ['reports/w']        -> allowed  (the root itself)
+        tasks/T1.json          vs ['tasks/T1.json']    -> allowed  (an exact file grant)
+        tasks/T10.json         vs ['tasks/T1.json']    -> FLAGGED  (a longer sibling of a file grant)
+
+########## E. command construction and the child environment ##########
+  argv is built by textual substitution (adapter.py:55-62) and run with
+  shell=False (adapter.py:180), so metacharacters are not interpreted.
+  [ok] the snapshot skips .efo/locks/ only
+        expected: locks=0
+        observed: locks=0 key=1
+  the signing key is inside the tree the child runs in: ['.efo/ledger.key']
+  and the child inherited an arbitrary parent variable (EFO_PROBE_MODE reached it in every section above), because
+  adapter.py:158 passes {**os.environ, ...} straight through.
+
+########## 0 unexpected result(s) ##########
+SUBMITTED, not VERIFIED.

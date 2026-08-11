@@ -1,0 +1,168 @@
+########## A. POSITIVE CONTROL - the source is main, unmodified ##########
+  [ok] probe source is main 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   and the write-ups are present
+        expected: documents: 82
+        observed: documents: 82
+
+########## B. every FILE:LINE citation in the write-ups ##########
+  266 live citations across 82 documents
+  15 more appear inside correction banners and are
+  excluded as retractions rather than claims - see the comment in the
+  source for why that exclusion is principled and not self-serving.
+  [ok] every cited file exists at main
+        expected: missing: []
+        observed: missing: []
+  [ok]   and every review-local document really is here
+        expected: absent: []
+        observed: absent: []
+  review-local paths, resolved against the review dir not main: ['REPORT.md', 'SYNTHESIS.md']
+  [ok]   and every cited line is within its file
+        expected: out of range: []
+        observed: out of range: []
+  distinct files cited: 36
+    CONTRIBUTING.md                                2 citations, 31 lines
+    docs/MIGRATION.md                              4 citations, 167 lines
+    docs/PROXY_SUBMISSION.md                       2 citations, 192 lines
+    README.md                                     24 citations, 452 lines
+    (review) REPORT.md                             6 citations, 460 lines
+    SECURITY.md                                   16 citations, 67 lines
+    src/evidence_orchestrator/__main__.py          1 citations, 7 lines
+    src/evidence_orchestrator/adapter.py           7 citations, 320 lines
+    public/assets/app.js                           3 citations, 1566 lines
+    src/evidence_orchestrator/archive.py           3 citations, 163 lines
+    functions/api/chat.js                          5 citations, 445 lines
+    web_tests/chat.test.mjs                        1 citations, 359 lines
+    src/evidence_orchestrator/cli.py               5 citations, 635 lines
+    monitor/collector.py                           9 citations, 1436 lines
+    src/evidence_orchestrator/dashboard.py         2 citations, 228 lines
+    docs/ARCHITECTURE.md                           7 citations, 169 lines
+    docs/MIGRATION.md                              3 citations, 167 lines
+    docs/PROXY_SUBMISSION.md                       1 citations, 192 lines
+    src/evidence_orchestrator/doctor.py            8 citations, 220 lines
+    src/evidence_orchestrator/evidence.py          8 citations, 297 lines
+    functions/api/snapshot.js                      1 citations, 714 lines
+    tests/helpers.py                               1 citations, 148 lines
+    src/evidence_orchestrator/independence.py     16 citations, 281 lines
+    src/evidence_orchestrator/ledger.py            6 citations, 165 lines
+    src/evidence_orchestrator/model.py             7 citations, 143 lines
+    monitor/collector.py                           5 citations, 1436 lines
+    src/evidence_orchestrator/provenance.py       35 citations, 341 lines
+    functions/api/snapshot.js                      1 citations, 714 lines
+    src/evidence_orchestrator/adapter.py           1 citations, 320 lines
+    tests/test_evidence.py                         1 citations, 151 lines
+    tests/test_independence.py                     5 citations, 373 lines
+    tests/test_proxy_status.py                     4 citations, 287 lines
+    tests/test_workspace.py                        1 citations, 234 lines
+    tests/test_concurrency.py                      2 citations, 59 lines
+    tests/test_ledger.py                           1 citations, 41 lines
+    src/evidence_orchestrator/workspace.py        60 citations, 1562 lines
+
+########## C. the two that did NOT resolve, and what they should be ##########
+  [ok] README.md is shorter than one citation claimed
+        expected: lines: 452
+        observed: lines: 452
+  [ok]   "Validate a submission bundle" is in NO markdown file
+        expected: markdown hits: 0
+        observed: markdown hits: 0
+  [ok]   it is an argparse help string at cli.py:590
+        expected: help="Validate a submission bundle"
+        observed: evidence = subparsers.add_parser("evidence", help="Validate a submission bundle")
+  -> NOTE-cli-surface-holds.md cited `README.md:590`. The LINE NUMBER
+     was right and the FILE was wrong, which is why it looked
+     plausible. It matters for the argument: I leaned on it as
+     documented intent, and an argparse help= string is a weaker
+     basis than README prose. The conclusion that `evidence check` is
+     a convenience rather than a bypass still stands - it rests on the
+     measurement that the command records nothing, not on the quote.
+  [ok] the bind-guard sentence starts at README.md:335
+        expected: [335]
+        observed: [335]
+  README.md:335-336 reads: 'Open `http://127.0.0.1:8765`. Remote binding is rejected unless'
+                            '`--allow-remote` is explicitly supplied.'
+  -> NOTE-dashboard-and-errors-hold.md cited `:336-337`, off by one.
+     The sentence is real and says what I said it says; only the span
+     was wrong. Corrected rather than left, because a reader who
+     follows the citation lands on the wrong line.
+
+########## D. spot-check the citations the FINDINGS rest on ##########
+  [ok]   README.md:391 contains the quoted fragment
+        expected: present: True
+        observed: present: True
+  [ok]   docs/ARCHITECTURE.md:143 contains the quoted fragment
+        expected: present: True
+        observed: present: True
+  [ok]   docs/PROXY_SUBMISSION.md:79 contains the quoted fragment
+        expected: present: True
+        observed: present: True
+  [ok]   docs/MIGRATION.md:51 contains the quoted fragment
+        expected: present: True
+        observed: present: True
+  [ok]   src/evidence_orchestrator/doctor.py:109 contains the quoted fragment
+        expected: present: True
+        observed: present: True
+  [ok]   src/evidence_orchestrator/provenance.py:263 contains the quoted fragment
+        expected: present: True
+        observed: present: True
+  [ok]   src/evidence_orchestrator/archive.py:128 contains the quoted fragment
+        expected: present: True
+        observed: present: True
+  [ok]   src/evidence_orchestrator/workspace.py:1182 contains the quoted fragment
+        expected: present: True
+        observed: present: True
+  [ok]   src/evidence_orchestrator/workspace.py:1511 contains the quoted fragment
+        expected: present: True
+        observed: present: True
+  These are the anchors the FILED issues rest on - #17, #18, #19 and
+  the byte-exactness NOTE. All resolve within a two-line window of the
+  cited number. The two errors in section C were both in NOTEs, not in
+  issues, which is luck rather than process: nothing in my workflow
+  checked a citation before this probe existed.
+
+########## E. REPORT.md cites a different ref, and never says which ##########
+  Two of its citations resolve against NEITHER main NOR the branch's
+  old base: `workspace.py:2366` (main has 1562 lines, dad3f4c4 has 920)
+  and `docs/META_ORCHESTRATION_V2.md`, which exists at neither.
+  [ok]   workspace.py at origin/main
+        expected: lines: 1562
+        observed: lines: 1562
+  [ok]   workspace.py at dad3f4c4
+        expected: lines: 920
+        observed: lines: 920
+  [ok]   workspace.py at origin/codex/meta-orchestration-v2
+        expected: lines: 2528
+        observed: lines: 2528
+  [ok]   and META_ORCHESTRATION_V2.md exists on that branch alone
+        expected: found: True
+        observed: found: True
+  So REPORT.md reviewed `codex/meta-orchestration-v2`, where line 2366
+  is real. The citations are CORRECT for their subject. The defect is
+  that the document never NAMES that subject, so a reader who follows
+  a citation against main lands nowhere and reasonably concludes the
+  review invented it. Fixed by labelling the document, not by editing
+  its citations - they were right all along.
+
+########## F. do the write-ups STATE the numbers this run measured? ##########
+  Counts copied into prose go stale the moment another document is
+  added, and a stale count is indistinguishable from an invented one.
+  On 2026-08-03 this note said `141 live citations across 34 documents`
+  while the committed raw output beside it said 152 across 35. Nobody
+  was checking. Now the run fails when prose and output disagree.
+  [ok]   NOTE-citation-audit-of-this-review.md states this run's counts
+        expected: 266 citations / 82 documents
+        observed: 266 citations / 82 documents
+  [ok]   SYNTHESIS.md states this run's counts
+        expected: 266 citations / 82 documents
+        observed: 266 citations / 82 documents
+  [ok]   and the retraction count it excludes
+        expected: retractions: 15
+        observed: retractions: 15
+
+########## 0 unexpected result(s) ##########
+This audits MY OWN write-ups, not EFO. Every finding it reports is a
+defect in the review, not in the reviewed code.
+SUBMITTED, not VERIFIED.

@@ -1,0 +1,560 @@
+########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  [ok]   raw outputs scanned, the marker-printing ones excluded
+        expected: outputs: 87
+        observed: outputs: 87
+  [ok]     six are excluded now, this probe's own among them
+        expected: excluded: 6
+        observed: excluded: 6
+
+########## B. the four, DERIVED rather than copied ##########
+    raw-attack-prov-main.txt         anchor=2 divergent=2
+    raw-full-final.txt               anchor=1 divergent=2
+    raw-quote-accuracy.txt           anchor=10 divergent=2
+    raw-w4-replay.txt                anchor=3 divergent=5
+  [ok] item 64's union count reproduces
+        expected: mixed: 4
+        observed: mixed: 4
+  [ok]   and they are these four
+        expected: ['raw-attack-prov-main.txt', 'raw-full-final.txt', 'raw-quote-accuracy.txt', 'raw-w4-replay.txt']
+        observed: ['raw-attack-prov-main.txt', 'raw-full-final.txt', 'raw-quote-accuracy.txt', 'raw-w4-replay.txt']
+
+########## C. one is the SUBSTRING TRAP, a third time ##########
+  [ok] raw-full-final.txt has exactly ONE anchor marker
+        expected: anchor marks: 1
+        observed: anchor marks: 1
+  [ok]   and it is a literal, not a module or test name
+        expected: author_identity
+        observed: ['author_identity']
+    occurrences: 2   swallowed: 2
+    line 54: test_submission_freezes_author_identity_before_profile_changes (tests.test_meta_orchestration.Me
+  [ok]   EVERY occurrence sits inside a longer identifier
+        expected: swallowed: 2
+        observed: swallowed: 2
+  [ok]     and that identifier is a DIVERGENT-only test method
+        expected: test_submission_freezes_author_identity_before_profile_changes
+        observed: test_command_adapter_submits_valid_output (tests.test_adapter.CommandAdapterTests.test_command_adapter_submits_valid_output) ... ok
+test_detached_descendant_is_killed_and_blocked (tests.test_adapter.CommandAdapterTests.test_detached_descendant_is_killed_and_blocked) ... ok
+test_procfs_inspection_failure_is_not_empty_tree_confirmation (tests.test_adapter.CommandAdapterTests.test_procfs_inspection_failure_is_not_empty_tree_confirmation) ... ok
+test_revocation_race_keeps_lock_and_disables_broker (tests.test_adapter.CommandAdapterTests.test_revocation_race_keeps_lock_and_disables_broker) ... ok
+test_revocation_stops_process_before_releasing_resource_lock (tests.test_adapter.CommandAdapterTests.test_revocation_stops_process_before_releasing_resource_lock) ... ok
+test_unexpected_active_execution_error_disables_broker (tests.test_adapter.CommandAdapterTests.test_unexpected_active_execution_error_disables_broker) ... ok
+test_only_one_worker_claims_the_same_task (tests.test_concurrency.ConcurrencyTests.test_only_one_worker_claims_the_same_task) ... ok
+test_legacy_audit_is_readable_and_redacts_secrets (tests.test_doctor.LegacyDoctorTests.test_legacy_audit_is_readable_and_redacts_secrets) ... ok
+test_malformed_event_is_reported (tests.test_doctor.LegacyDoctorTests.test_malformed_event_is_reported) ... ok
+test_artifact_hash_mismatch_is_rejected (tests.test_evidence.EvidenceGateTests.test_artifact_hash_mismatch_is_rejected) ... ok
+test_empty_or_duplicate_report_section_is_rejected (tests.test_evidence.EvidenceGateTests.test_empty_or_duplicate_report_section_is_rejected) ... ok
+test_failed_validation_is_rejected (tests.test_evidence.EvidenceGateTests.test_failed_validation_is_rejected) ... ok
+test_measured_claim_must_reference_bound_evidence (tests.test_evidence.EvidenceGateTests.test_measured_claim_must_reference_bound_evidence) ... ok
+test_missing_report_section_is_rejected (tests.test_evidence.EvidenceGateTests.test_missing_report_section_is_rejected) ... ok
+test_non_finite_number_is_rejected (tests.test_evidence.EvidenceGateTests.test_non_finite_number_is_rejected) ... ok
+test_performance_claim_requires_permission (tests.test_evidence.EvidenceGateTests.test_performance_claim_requires_permission) ... ok
+test_skip_is_not_pass (tests.test_evidence.EvidenceGateTests.test_skip_is_not_pass) ... ok
+test_unmeasured_claim_requires_fill (tests.test_evidence.EvidenceGateTests.test_unmeasured_claim_requires_fill) ... ok
+test_valid_bundle_passes (tests.test_evidence.EvidenceGateTests.test_valid_bundle_passes) ... ok
+test_tampering_breaks_hash_and_signature_verification (tests.test_ledger.LedgerTests.test_tampering_breaks_hash_and_signature_verification) ... ok
+test_crlf_conversion_is_detected (tests.test_meta_orchestration.GitProxySubmissionTests.test_crlf_conversion_is_detected) ... ok
+test_local_replace_ref_cannot_substitute_remote_commit_tree (tests.test_meta_orchestration.GitProxySubmissionTests.test_local_replace_ref_cannot_substitute_remote_commit_tree) ... ok
+test_proxy_cannot_forge_a_different_author (tests.test_meta_orchestration.GitProxySubmissionTests.test_proxy_cannot_forge_a_different_author) ... ok
+test_proxy_rechecks_orchestrator_before_archiving (tests.test_meta_orchestration.GitProxySubmissionTests.test_proxy_rechecks_orchestrator_before_archiving) ... ok
+test_proxy_scope_must_match_preregistered_repository_paths (tests.test_meta_orchestration.GitProxySubmissionTests.test_proxy_scope_must_match_preregistered_repository_paths) ... ok
+test_proxy_submission_records_author_proxy_and_git_commit (tests.test_meta_orchestration.GitProxySubmissionTests.test_proxy_submission_records_author_proxy_and_git_commit) ... ok
+test_proxy_submission_respects_live_resource_locks (tests.test_meta_orchestration.GitProxySubmissionTests.test_proxy_submission_respects_live_resource_locks) ... ok
+test_proxy_submitter_cannot_be_the_work_author (tests.test_meta_orchestration.GitProxySubmissionTests.test_proxy_submitter_cannot_be_the_work_author) ... ok
+test_unexpected_remote_url_is_rejected (tests.test_meta_orchestration.GitProxySubmissionTests.test_unexpected_remote_url_is_rejected) ... ok
+test_unpushed_local_commit_is_rejected (tests.test_meta_orchestration.GitProxySubmissionTests.test_unpushed_local_commit_is_rejected) ... ok
+test_attestation_quorum_cannot_be_filled_by_same_model_aliases (tests.test_meta_orchestration.MetaOrchestrationTests.test_attestation_quorum_cannot_be_filled_by_same_model_aliases) ... ok
+test_capability_and_resource_policies_block_bad_claims (tests.test_meta_orchestration.MetaOrchestrationTests.test_capability_and_resource_policies_block_bad_claims) ... ok
+test_capability_withdrawal_blocks_heartbeat_and_submission (tests.test_meta_orchestration.MetaOrchestrationTests.test_capability_withdrawal_blocks_heartbeat_and_submission) ... ok
+test_command_revocation_requires_adapter_execution_token (tests.test_meta_orchestration.MetaOrchestrationTests.test_command_revocation_requires_adapter_execution_token) ... ok
+test_critical_risk_enforces_strict_named_verification (tests.test_meta_orchestration.MetaOrchestrationTests.test_critical_risk_enforces_strict_named_verification) ... ok
+test_deactivated_owner_cannot_advance_and_orchestrator_revokes_lease (tests.test_meta_orchestration.MetaOrchestrationTests.test_deactivated_owner_cannot_advance_and_orchestrator_revokes_lease) ... ok
+test_distinct_model_attester_and_finalizer_can_complete_quorum (tests.test_meta_orchestration.MetaOrchestrationTests.test_distinct_model_attester_and_finalizer_can_complete_quorum) ... ok
+test_doctor_fails_closed_on_inconclusive_historical_identity (tests.test_meta_orchestration.MetaOrchestrationTests.test_doctor_fails_closed_on_inconclusive_historical_identity) ... ok
+test_gpu_permission_requires_an_explicit_gpu_lock (tests.test_meta_orchestration.MetaOrchestrationTests.test_gpu_permission_requires_an_explicit_gpu_lock) ... ok
+test_idempotency_key_cannot_reuse_a_weaker_task_contract (tests.test_meta_orchestration.MetaOrchestrationTests.test_idempotency_key_cannot_reuse_a_weaker_task_contract) ... ok
+test_impossible_attestation_and_finalizer_policy_is_rejected (tests.test_meta_orchestration.MetaOrchestrationTests.test_impossible_attestation_and_finalizer_policy_is_rejected) ... ok
+test_inactive_agent_cannot_claim (tests.test_meta_orchestration.MetaOrchestrationTests.test_inactive_agent_cannot_claim) ... ok
+test_known_independence_cases (tests.test_meta_orchestration.MetaOrchestrationTests.test_known_independence_cases) ... ok
+test_legacy_alias_approval_is_found_by_retrospective_audit (tests.test_meta_orchestration.MetaOrchestrationTests.test_legacy_alias_approval_is_found_by_retrospective_audit) ... ok
+test_meta_four_agent_preset_declares_specialized_roles (tests.test_meta_orchestration.MetaOrchestrationTests.test_meta_four_agent_preset_declares_specialized_roles) ... ok
+test_orchestrator_can_confirm_external_termination (tests.test_meta_orchestration.MetaOrchestrationTests.test_orchestrator_can_confirm_external_termination) ... ok
+test_preserved_v01_wheel_matches_release_hash (tests.test_meta_orchestration.MetaOrchestrationTests.test_preserved_v01_wheel_matches_release_hash) ... ok
+test_proxy_policy_requires_remote_identity_and_full_branch_ref (tests.test_meta_orchestration.MetaOrchestrationTests.test_proxy_policy_requires_remote_identity_and_full_branch_ref) ... ok
+test_running_worker_block_retains_lock_until_external_confirmation (tests.test_meta_orchestration.MetaOrchestrationTests.test_running_worker_block_retains_lock_until_external_confirmation) ... ok
+test_runtime_version_matches_v2_release (tests.test_meta_orchestration.MetaOrchestrationTests.test_runtime_version_matches_v2_release) ... ok
+test_same_model_aliases_cannot_form_creation_time_quorum (tests.test_meta_orchestration.MetaOrchestrationTests.test_same_model_aliases_cannot_form_creation_time_quorum) ... ok
+test_same_model_verifier_is_rejected_but_codex_verifier_passes (tests.test_meta_orchestration.MetaOrchestrationTests.test_same_model_verifier_is_rejected_but_codex_verifier_passes) ... ok
+test_signed_orchestrator_transfer_changes_authority (tests.test_meta_orchestration.MetaOrchestrationTests.test_signed_orchestrator_transfer_changes_authority) ... ok
+test_submission_freezes_author_identity_before_profile_changes (tests.test_meta_orchestration.MetaOrchestrationTests.test_submission_freezes_author_identity_before_profile_changes) ... ok
+test_v01_agent_check_fails_closed_after_v02_handoff (tests.test_meta_orchestration.MetaOrchestrationTests.test_v01_agent_check_fails_closed_after_v02_handoff) ... ok
+test_v02_reads_and_transitions_a_v01_workspace (tests.test_meta_orchestration.MetaOrchestrationTests.test_v02_reads_and_transitions_a_v01_workspace) ... ok
+test_verifier_profile_is_rechecked_after_task_lock_acquisition (tests.test_meta_orchestration.MetaOrchestrationTests.test_verifier_profile_is_rechecked_after_task_lock_acquisition) ... ok
+test_agent_registration_tampering_is_detected (tests.test_workspace.WorkspaceLifecycleTests.test_agent_registration_tampering_is_detected) ... ok
+test_configuration_tampering_is_detected_on_open (tests.test_workspace.WorkspaceLifecycleTests.test_configuration_tampering_is_detected_on_open) ... ok
+test_expired_lease_is_blocked_not_silently_requeued (tests.test_workspace.WorkspaceLifecycleTests.test_expired_lease_is_blocked_not_silently_requeued) ... ok
+test_expired_running_lease_retains_lock_until_termination_confirmed (tests.test_workspace.WorkspaceLifecycleTests.test_expired_running_lease_retains_lock_until_termination_confirmed) ... ok
+test_full_lifecycle_requires_independent_verification (tests.test_workspace.WorkspaceLifecycleTests.test_full_lifecycle_requires_independent_verification) ... ok
+test_idempotency_key_returns_existing_task (tests.test_workspace.WorkspaceLifecycleTests.test_idempotency_key_returns_existing_task) ... ok
+test_invalid_lease_token_fails (tests.test_workspace.WorkspaceLifecycleTests.test_invalid_lease_token_fails) ... ok
+test_prerequisite_must_be_verified (tests.test_workspace.WorkspaceLifecycleTests.test_prerequisite_must_be_verified) ... ok
+test_projection_loss_is_detected_and_repairable (tests.test_workspace.WorkspaceLifecycleTests.test_projection_loss_is_detected_and_repairable) ... ok
+test_projection_tampering_blocks_the_next_transition (tests.test_workspace.WorkspaceLifecycleTests.test_projection_tampering_blocks_the_next_transition) ... ok
+test_runtime_secrets_and_runs_are_git_ignored (tests.test_workspace.WorkspaceLifecycleTests.test_runtime_secrets_and_runs_are_git_ignored) ... ok
+test_same_idempotency_key_cannot_create_a_second_task (tests.test_workspace.WorkspaceLifecycleTests.test_same_idempotency_key_cannot_create_a_second_task) ... ok
+test_wrong_actor_cannot_create_or_claim (tests.test_workspace.WorkspaceLifecycleTests.test_wrong_actor_cannot_create_or_claim) ... ok
+
+----------------------------------------------------------------------
+Ran 70 tests in 9.140s
+
+OK
+
+  [ok]       whose module is divergent-only
+        expected: test_meta_orchestration
+        observed: ['test_meta_orchestration']
+  Item 61 fixed a module name being a PREFIX of a method name by
+  PARSING the identifier. Item 64 introduced literals - and a
+  distinctive anchor-only LITERAL is swallowed by a divergent
+  IDENTIFIER in exactly the same way. Third instance of one lesson.
+  So raw-full-final.txt is NOT mixed. Item 61's placement of it as
+  purely DIVERGENT stands, and this round removes a mark that should
+  never have been counted rather than adding one.
+
+########## D. one is not a PROGRAM RUN at all ##########
+    probe_quote_accuracy.py   .md paths= 25  efo paths=3
+    probe_w4_replay.py        .md paths=  0  efo paths=9
+  [ok] the quote probe's subject is my own Markdown
+        expected: md: 25
+        observed: md: 25
+  [ok]   where the replay probe reads none
+        expected: md: 0
+        observed: md: 0
+  [ok]   and the replay probe reads three times as many EFO paths
+        expected: more: True
+        observed: more: True
+  So raw-quote-accuracy.txt carries text from both lines because the
+  NOTES IT AUDITS quote both. Neither its anchor marks nor its
+  divergent marks are program output, and calling it a MIXED RUN
+  would be a category error - it is not a run of either line.
+
+########## E. two are GENUINE, and say so in their own text ##########
+    raw-attack-prov-main.txt     names cef5623: True   swallowed anchor marks: 0
+  [ok]   raw-attack-prov-main.txt names the other ref in its own output
+        expected: cef5623
+        observed: 
+########## P0 build a real origin + work clone ##########
+commit C = c9acd5456752b1494d0412379726c53a43e230c4
+remote  = /tmp/prov-attack/origin.git
+blob    = HONEST: 3 passed, 1 failed
+
+########## P1 POSITIVE CONTROL - honest submission (bytes match the commit) ##########
+submitted sha256 = 045aa3ee928e731bf645ad947726ac0f22f0f93aeff39af0d6ee48cc39e5d549
+ACCEPTED  byte_exact=True blob_oid=698b6494622cfadcc4ec480c9d0e55421720db8b
+<-- expect ACCEPTED
+
+########## P2 plain tamper, no git replace (submitted bytes differ from the commit) ##########
+submitted sha256 = 950f8ecd96ed7f7c994d9f739afe2d0b06d3dd83c9d2ea0f372c27848479fc7c
+REJECTED  EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'report.txt': blob=045aa3ee928e731bf645ad947726ac0f22f0f93aeff39af0d6ee48cc39e5d549, submitted=950f8ecd96ed7f7c994d9f739afe2d0b06d3dd83c9d2ea0f372c27848479fc7c
+<-- expect REJECTED
+
+########## P3 THE ATTACK - same forged bytes, plus a git replace object ##########
+replace ref: c9acd5456752b1494d0412379726c53a43e230c4  ->  7c12c7f1f786c138737f37002e7b83b1f721d610
+git cat-file blob C:report.txt      = FORGED: 4 passed, 0 failed
+with --no-replace-objects           = HONEST: 3 passed, 1 failed
+submitted sha256 = 950f8ecd96ed7f7c994d9f739afe2d0b06d3dd83c9d2ea0f372c27848479fc7c
+ACCEPTED  byte_exact=True blob_oid=08b42cd87afad7dcd942621837672397d1135749
+<-- ACCEPTED here means the replace object forged byte-exactness
+
+########## P4 what an independent re-check sees in the real history ##########
+origin.git holds: HONEST: 3 passed, 1 failed
+declared commit : c9acd5456752b1494d0412379726c53a43e230c4
+
+########## P5 A/B - the SAME forged state against cef5623, which passes --no-replace-objects ##########
+cef5623 forged+replace: REJECTED EvidenceError: Delivered artifact bytes differ from the Git blob for report.txt: expected 045aa3ee928e731bf645ad947726ac0f22f0f93aeff39af0d6ee48cc39e5d549, observed 950f8ecd96ed7f7c994d9f739afe2d0b06d3dd83c9d2ea0f372c27848479fc7c
+cef5623 honest control:   ACCEPTED sha256=045aa3ee928e731bf645ad947726ac0f22f0f93aeff39af0d6ee48cc39e5d549
+<-- the honest control must ACCEPT, otherwise the rejection above is the wrong gate
+
+  [ok]     and none of its anchor marks is swallowed
+        expected: swallowed: 0
+        observed: swallowed: 0
+    raw-w4-replay.txt            names 7a9553b: True   swallowed anchor marks: 0
+  [ok]   raw-w4-replay.txt names the other ref in its own output
+        expected: 7a9553b
+        observed: ########## A. POSITIVE CONTROL, and the scope FIRST ##########
+  [ok] the review's anchor is UNMOVED at 5694ab45
+        expected: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+        observed: 5694ab455139f1e72d946bc2fe7e42c7c0c8a43a
+  [ok]   with no working-tree modification
+        expected: dirty: ''
+        observed: dirty: ''
+  This probe reads a SECOND ref on purpose and names both, the way
+  ADDENDUM-main-is-red does. The anchor is still not re-pointed.
+  [ok]   the second checkout is at 7a9553b
+        expected: 7a9553b
+        observed: 7a9553b
+  [ok]     and it is a different commit from the anchor
+        expected: same: False
+        observed: same: False
+
+########## B. the feature W4 needs is ABSENT at the anchor ##########
+    7a9553b  7a9553b:src/evidence_orchestrator/cli.py
+    7a9553b  7a9553b:src/evidence_orchestrator/workspace.py
+    7a9553b  7a9553b:tests/test_meta_orchestration.py
+  [ok] transfer_orchestrator lives in three files at 7a9553b
+        expected: at 7a9553b: 3
+        observed: at 7a9553b: 3
+  [ok]   over seven occurrences - cli, workspace and one test file
+        expected: occurrences: 7
+        observed: occurrences: 7
+  [ok]   and in NONE at the anchor - not src, not tests, not docs
+        expected: at anchor: []
+        observed: at anchor: []
+  [ok]     and 7a9553b is NOT an ancestor of the anchor - divergent history
+        expected: is ancestor: False
+        observed: is ancestor: False
+    the anchor's workspace.py line: f827f29 Build evidence-first multi-agent orchestrator
+    the anchor's ledger actions: ['agent.added', 'agent.identity_attested', 'task.archived', 'task.blocked', 'task.claimed', 'task.created', 'task.heartbeat', 'task.lease_expired', 'task.proxy_authorized', 'task.proxy_status_reported', 'task.proxy_submitted', 'task.rejected', 'task.requeued', 'task.started', 'task.submitted', 'task.verified', 'workspace.initialized', 'workspace.json']
+  [ok]       none of them is an orchestrator transfer
+        expected: transfer actions: []
+        observed: transfer actions: []
+  So W4, W5, W6 and W6b drive an API the anchor does not have. Item
+  52 said their blocker was gone; for these four a DIFFERENT blocker
+  exists, and that note is corrected in place.
+
+########## C. the expectations, PARSED from the committed W4 ##########
+    handoff payload keys : ['event_hash', 'from', 'reason', 'to']
+    from -> to           : antigravity -> codex
+    traceback            : FileNotFoundError: [Errno 2] No such file or directory: '/tmp/claude-0/-home-user-S
+    traceback            : KeyError: 'orchestrator'
+  [ok]   the committed handoff records four keys
+        expected: keys: ['event_hash', 'from', 'to', 'reason']
+        observed: keys: ['event_hash', 'from', 'to', 'reason']
+  [ok]     and W4 records exactly two tracebacks
+        expected: tracebacks: 2
+        observed: tracebacks: 2
+
+########## D. W4 REPLAYED - against 7a9553b, not the anchor ##########
+    init                                     exit=0
+    workspace transfer-orchestrator          exit=0
+    from -> to                               antigravity -> codex
+  [ok] the handoff succeeds, as the committed run recorded
+        expected: transfer exit: 0
+        observed: transfer exit: 0
+  [ok]   and returns the same four keys
+        expected: keys: ['event_hash', 'from', 'reason', 'to']
+        observed: keys: ['event_hash', 'from', 'reason', 'to']
+  [ok]     with the same from and to
+        expected: antigravity -> codex
+        observed: antigravity -> codex
+  [ok]       but NOT the same event_hash - it is signed and timestamped
+        expected: hashes equal: False
+        observed: hashes equal: False
+
+########## E. both tracebacks are the DRIVER's, adjudicated ##########
+    driver's path  ws/workspace.json        FileNotFoundError: [Errno 2] No such file or directory: '/tmp/efo-w4-ms31pz8l/ws/workspace.json'
+    correct path   ws/.efo/workspace.json   antigravity
+    driver's key   status()['orchestrator'] KeyError: 'orchestrator'
+    correct key    ['status']['orchestrator'] codex
+  [ok] the driver's path reproduces the committed FileNotFoundError
+        expected: FileNotFoundError
+        observed: FileNotFoundError: [Errno 2] No such file or directory: '/tmp/efo-w4-ms31pz8l/ws/workspace.json'
+  [ok]   and the CORRECT path reads the config fine
+        expected: antigravity
+        observed: antigravity
+  [ok]     the driver's key reproduces the committed KeyError
+        expected: KeyError: 'orchestrator'
+        observed: KeyError: 'orchestrator'
+  [ok]       and the CORRECT key - W6b's - returns the new orchestrator
+        expected: codex
+        observed: codex
+  Both are the ORIGINAL DRIVER's defects, not EFO's: one wrong path,
+  one index on the CLI's `{status, tasks}` wrapper. W6b is the same
+  question asked correctly, and it answers.
+
+########## F. the config/ledger divergence is REAL, and by design ##########
+      -> str:
+      orchestrator = str(self.config["orchestrator"])
+      if not self.ledger.path.exists():
+      return orchestrator
+      for event in self.ledger.read():
+      if event.get("action") != "workspace.orchestrator_transferred":
+      continue
+      target = event.get("payload", {}).get("to")
+      if isinstance(target, str):
+      orchestrator = target
+      return orchestrator
+  [ok] 7a9553b's `orchestrator` seeds from the CONFIG
+        expected: orchestrator = str(self.config["orchestrator"])
+        observed:  -> str:
+        orchestrator = str(self.config["orchestrator"])
+        if not self.ledger.path.exists():
+            return orchestrator
+        for event in self.ledger.read():
+            if event.get("action") != "workspace.orchestrator_transferred":
+                continue
+            target = event.get("payload", {}).get("to")
+            if isinstance(target, str):
+                orchestrator = target
+        return orchestrator
+
+    
+  [ok]   then REPLAYS the transfer events from the ledger
+        expected: workspace.orchestrator_transferred
+        observed:  -> str:
+        orchestrator = str(self.config["orchestrator"])
+        if not self.ledger.path.exists():
+            return orchestrator
+        for event in self.ledger.read():
+            if event.get("action") != "workspace.orchestrator_transferred":
+                continue
+            target = event.get("payload", {}).get("to")
+            if isinstance(target, str):
+                orchestrator = target
+        return orchestrator
+
+    
+  So `config file orchestrator: antigravity` and `effective
+  orchestrator: codex` are BOTH correct at once - the config is a seed
+  and the ledger is the authority. W6/W6b measured a real divergence,
+  and it is the intended one, not a defect.
+  This says NOTHING about the anchor, where no such event exists and
+  `orchestrator` is the config value alone.
+
+########## G. what this does NOT do ##########
+  * It does not run W5, W6, W6b, W7 or W8. Four of the six remaining
+    sections need 7a9553b, which is now checked out and named.
+  * It does not review 7a9553b. That commit is NOT this review's
+    subject; nothing here is a verdict about its code.
+  * It does not file an issue and retracts no finding. It DOES correct
+    item 52's `their blocker is gone`, in place and dated.
+  * It does not claim to know which v2 produced raw-attack4.txt - only
+    that the API W4 uses exists on 7a9553b's line and not the anchor's.
+  * No network, no server. Both checkouts are local; the workspace is a
+    tempfile directory, removed before this section printed.
+  * MEASURED: both file censuses, the ancestry, the anchor's action
+    list, the committed payload, all five driven commands, both
+    tracebacks and both corrections, the property body. REASONED:
+    nothing.
+
+########## 0 unexpected result(s) ##########
+Two refs read and named. The anchor's working tree is untouched, no
+`main` write, no issue filed. Pre-registered permissions unchanged -
+gpu/network/performance_metrics all false. SUBMITTED, not VERIFIED.
+
+  [ok]     and none of its anchor marks is swallowed
+        expected: swallowed: 0
+        observed: swallowed: 0
+  [ok] raw-attack-prov-main.txt runs the SAME forged state against both
+        expected: the SAME forged state against cef5623
+        observed: 
+########## P0 build a real origin + work clone ##########
+commit C = c9acd5456752b1494d0412379726c53a43e230c4
+remote  = /tmp/prov-attack/origin.git
+blob    = HONEST: 3 passed, 1 failed
+
+########## P1 POSITIVE CONTROL - honest submission (bytes match the commit) ##########
+submitted sha256 = 045aa3ee928e731bf645ad947726ac0f22f0f93aeff39af0d6ee48cc39e5d549
+ACCEPTED  byte_exact=True blob_oid=698b6494622cfadcc4ec480c9d0e55421720db8b
+<-- expect ACCEPTED
+
+########## P2 plain tamper, no git replace (submitted bytes differ from the commit) ##########
+submitted sha256 = 950f8ecd96ed7f7c994d9f739afe2d0b06d3dd83c9d2ea0f372c27848479fc7c
+REJECTED  EvidenceError: Git blob bytes differ from submitted evidence; possible newline or transport mutation for 'report.txt': blob=045aa3ee928e731bf645ad947726ac0f22f0f93aeff39af0d6ee48cc39e5d549, submitted=950f8ecd96ed7f7c994d9f739afe2d0b06d3dd83c9d2ea0f372c27848479fc7c
+<-- expect REJECTED
+
+########## P3 THE ATTACK - same forged bytes, plus a git replace object ##########
+replace ref: c9acd5456752b1494d0412379726c53a43e230c4  ->  7c12c7f1f786c138737f37002e7b83b1f721d610
+git cat-file blob C:report.txt      = FORGED: 4 passed, 0 failed
+with --no-replace-objects           = HONEST: 3 passed, 1 failed
+submitted sha256 = 950f8ecd96ed7f7c994d9f739afe2d0b06d3dd83c9d2ea0f372c27848479fc7c
+ACCEPTED  byte_exact=True blob_oid=08b42cd87afad7dcd942621837672397d1135749
+<-- ACCEPTED here means the replace object forged byte-exactness
+
+########## P4 what an independent re-check sees in the real history ##########
+origin.git holds: HONEST: 3 passed, 1 failed
+declared commit : c9acd5456752b1494d0412379726c53a43e230c4
+
+########## P5 A/B - the SAME forged state against cef5623, which passes --no-replace-objects ##########
+cef5623 forged+replace: REJECTED EvidenceError: Delivered artifact bytes differ from the Git blob for report.txt: expected 045aa3ee928e731bf645ad947726ac0f22f0f93aeff39af0d6ee48cc39e5d549, observed 950f8ecd96ed7f7c994d9f739afe2d0b06d3dd83c9d2ea0f372c27848479fc7c
+cef5623 honest control:   ACCEPTED sha256=045aa3ee928e731bf645ad947726ac0f22f0f93aeff39af0d6ee48cc39e5d549
+<-- the honest control must ACCEPT, otherwise the rejection above is the wrong gate
+
+  [ok]   and raw-w4-replay.txt was already known mixed by design - item 55
+        expected: 7a9553b
+        observed: # W4 needs a ref the anchor never took — and both its tracebacks are the driver's
+
+Reproduce with `raw/probe_w4_replay.py`; raw output in `raw/raw-w4-replay.txt`.
+**21 checks, 0 unexpected.** A **map about a ref this review is not anchored
+to** — no issue filed, nothing retracted.
+
+**Scope, stated first:** 2 refs, **1 of the 7** remaining sections, 5 driven
+commands.
+
+## The correction, first
+
+Item 52 replayed W3 six-for-six at the anchor and wrote that W4–W8's *"blocker
+is gone"*. **For W4, W5, W6 and W6b that is wrong**, and the reason is not a
+missing client:
+
+```
+    transfer_orchestrator     7 occurrences across 3 files at 7a9553b
+                              (cli.py, workspace.py, test_meta_orchestration.py)
+                              0 files at 5694ab45 — not src, not tests, not docs
+
+    git merge-base --is-ancestor 7a9553b 5694ab45   →  NO
+```
+
+**`7a9553b` is not an ancestor of the anchor.** The anchor's `workspace.py` line
+begins at `f827f29`; `7a9553b` is a separate branch. Corrected in that note with
+a dated banner.
+
+So `raw-attack4.txt` **mixes two lines of history**: W1/W2/W2b compare the v0.1
+wheel against `git archive f827f29` — the anchor's ancestor — while W4, W5, W6
+and W6b drive a v2 that only exists on the other line. W3 reproduced at the
+anchor because its property (the v0.1 client refusing an attested agent record)
+is common to both.
+
+The anchor's ledger action list is **derived from its own source**, not typed
+here, and holds no orchestrator transfer:
+
+```
+    agent.added  agent.identity_attested  task.archived  task.blocked
+    task.claimed  task.created  task.heartbeat  task.lease_expired
+    task.proxy_authorized  task.proxy_status_reported  task.proxy_submitted
+    task.rejected  task.requeued  task.started  task.submitted  task.verified
+    workspace.initialized
+```
+
+## W4 replayed — against `7a9553b`, named rather than assumed
+
+| | committed | fresh run at `7a9553b` |
+|---|---|---|
+| `workspace transfer-orchestrator` | `exit=0` | **0** |
+| payload keys | `event_hash`, `from`, `to`, `reason` | **same four** |
+| from → to | `antigravity → codex` | **antigravity → codex** |
+| `event_hash` | `58f129a9…` | **differs — and must** |
+
+The hash is signed and timestamped; a byte-equal one would mean the run had not
+been redone.
+
+## Both tracebacks are the original driver's
+
+| | result |
+|---|---|
+| driver's path `ws4/workspace.json` | **`FileNotFoundError`** — reproduces exactly |
+| correct path `.efo/workspace.json` | **`antigravity`** |
+| driver's key `status_json['orchestrator']` | **`KeyError: 'orchestrator'`** — reproduces exactly |
+| correct key `['status']['orchestrator']` | **`codex`** |
+
+The CLI's `status` output has keys `['status', 'tasks']`, so indexing
+`orchestrator` on the **wrapper** raises. **W6b is the same question asked
+correctly**, and it answers. Neither traceback is EFO's.
+
+> **An expectation of mine, corrected to the measurement.** I first predicted
+> that `Workspace(...).status()['orchestrator']` would raise the `KeyError`. It
+> does not — the Python API returns a flat dict and gives `codex` directly. The
+> `KeyError` comes from the **CLI's JSON**, which is a different shape. Measured
+> before it was written down.
+
+## The config/ledger divergence is real, and by design
+
+```python
+    def orchestrator(self) -> str:
+        orchestrator = str(self.config["orchestrator"])
+        if not self.ledger.path.exists():
+            return orchestrator
+        for event in self.ledger.read():
+            if event.get("action") != "workspace.orchestrator_transferred":
+                continue
+            target = event.get("payload", {}).get("to")
+            if isinstance(target, str):
+                orchestrator = target
+        return orchestrator
+```
+
+At `7a9553b` the property **seeds from the config and then replays the transfer
+events**. So *"config file orchestrator: antigravity"* and *"effective
+orchestrator: codex"* are both correct at once — the config is a seed, the
+ledger is the authority. W6/W6b measured a real divergence, and it is the
+intended one.
+
+**This says nothing about the anchor**, where no such event exists and
+`orchestrator` is the config value alone.
+
+## What this does not do
+
+- It does **not** run W5, W6, W6b, W7 or W8. Four of the six remaining sections
+  need `7a9553b`, which is now checked out at `/tmp/efo-7a9553b` and named.
+- It does **not** review `7a9553b`. That commit is **not** this review's
+  subject; nothing here is a verdict about its code.
+- It does **not** claim to know which v2 produced `raw-attack4.txt` — only that
+  the API W4 uses exists on `7a9553b`'s line and not the anchor's.
+- It does **not** file an issue and retracts no finding. It **does** correct
+  item 52's *"their blocker is gone"*, in place and dated.
+- No network, no server. Both checkouts are local (`git clone --shared`), and
+  the workspace is a `tempfile` directory removed before the results print. It
+  does **not** touch `main`, the anchor's working tree, or another agent's
+  branch.
+- **MEASURED:** both file censuses, the ancestry, the anchor's action list, the
+  committed payload, all five driven commands, both tracebacks and both
+  corrections, the property body. **REASONED:** nothing.
+
+Pre-registered permissions unchanged: `gpu: false`, `network: false`,
+`performance_metrics: false`; gates `allow_skips: false`,
+`require_validation: true`, `require_known_answer_check: true`,
+`require_independent_verification: true`.
+
+**SUBMITTED, not VERIFIED.** Re-running my own evidence is a re-run, not
+independent confirmation.
+
+| Artifact | SHA-256 |
+|---|---|
+| `raw/probe_w4_replay.py` | `8bb143dce90ef45040dceb4b9f658c92a77523cab856eefe2f6cff7b827e0c71` |
+| `raw/raw-w4-replay.txt` | `53d2097ee23bf76a9114bf8c1d4f0ae2a41db60a2385eaba4435217581f77e54` |
+
+
+########## F. the corrected count ##########
+    item 64 reported : mixed 4
+    corrected        : 2 GENUINE, 1 SPURIOUS (swallowed literal),
+                       1 NOT A PROGRAM RUN
+  [ok] two of the four are genuine
+        expected: genuine: 2
+        observed: genuine: 2
+  [ok]   raw-attack4.txt is NOT among the four - it is undecidable by tokens
+        expected: attack4 in the four: False
+        observed: attack4 in the four: False
+  So the population of outputs KNOWN to exercise two lines is THREE:
+  raw-attack4.txt (item 55, by absent API and ancestry),
+  raw-attack-prov-main.txt and raw-w4-replay.txt (this round, by
+  their own text). Not four, and not one.
+
+########## G. what this does NOT establish ##########
+  * It does NOT retract item 64. Its union count of 4 is what the
+    test reports; what this adds is WHY each of the four is in it.
+  * It does NOT change item 61's placement of raw-full-final.txt.
+    That round called it purely divergent, and this round REMOVES the
+    later anchor mark rather than contradicting it.
+  * It does NOT re-classify the whole corpus. Only the four are
+    examined; the 36 undecidable are untouched and still open.
+  * It does NOT claim the swallowing rule catches every such case. It
+    is applied to the four mixed outputs only - a corpus-wide sweep
+    for swallowed literals is UNCHECKED, not shown clean.
+  * It does NOT file an issue. Nothing here is about EFO's behaviour;
+    it is about the provenance of evidence this review inherited and
+    about a filter of my own.
+  * No network, no GPU, no workspace built. Two refs read and named.
+    The anchor's working tree is untouched, and it does not touch
+    `main` or another agent's branch.
+  * MEASURED: the four derived, every occurrence of the swallowed
+    literal, both probes' path literals, both genuine files' refs and
+    unswallowed marks. REASONED: nothing.
+
+########## 0 unexpected result(s) ##########
+Pre-registered permissions unchanged - gpu/network/performance_metrics
+all false. SUBMITTED, not VERIFIED: re-running my own evidence is a
+re-run, not independent confirmation.

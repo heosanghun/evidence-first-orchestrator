@@ -1,0 +1,287 @@
+
+########## A0 init meta-4-agent preset ##########
+{
+  "agents": 4,
+  "ledger": {
+    "events": 6,
+    "head": "dc53640da7cc722289f96de69509af4ea4efa005ee4ff41ce64d661bab65b364",
+    "signed": true,
+    "valid": true
+  },
+  "orchestrator": "antigravity",
+  "states": {
+    "archived": 0,
+    "blocked": 0,
+    "claimed": 0,
+    "invalidated": 0,
+    "pending": 0,
+    "rejected": 0,
+    "revoking": 0,
+    "running": 0,
+    "submitted": 0,
+    "verified": 0
+  },
+  "tasks": 0,
+  "workspace": "attack2",
+  "workspace_id": "e74420d0bbdd7f19ba7d24206bfb8d0f"
+}
+exit=0
+
+########## A1 declared identities as shipped by the preset ##########
+claude-a {"controller_id": "claude-a", "id": "claude-a", "model_family": "claude-code", "provider": "anthropic", "role": "worker"}
+claude-b {"controller_id": "claude-b", "id": "claude-b", "model_family": "claude-code", "provider": "anthropic", "role": "verifier"}
+
+########## A2 HONEST: critical task, owner=claude-a verifier=claude-b, 3 dimensions ##########
+error: No allowed verifier is independent from the task owner under the declared dimensions
+exit=2  <-- expect NONZERO (model_family both claude-code)
+
+########## A3 FORGE: orchestrator rewrites claude-b's declared model_family ##########
+{
+  "active": true,
+  "capabilities": [],
+  "command": null,
+  "created_at": "2026-07-30T01:40:46Z",
+  "id": "claude-b",
+  "identity": {
+    "controller_id": "claude-b",
+    "model_family": "gpt",
+    "provider": "anthropic"
+  },
+  "max_concurrency": 1,
+  "mode": "manual",
+  "prompt_stdin": false,
+  "role": "verifier",
+  "schema_version": 1,
+  "updated_at": "2026-07-30T01:40:46Z",
+  "write_roots": [
+    "reports/claude-b",
+    "runs/claude-b"
+  ]
+}
+exit=0
+
+########## A4 REPLAY the identical critical task add ##########
+{
+  "allowed_write_roots": [],
+  "attempt": 0,
+  "blocked_reason": null,
+  "created_at": "2026-07-30T01:40:46Z",
+  "created_by": "antigravity",
+  "delivery_policy": {
+    "allow_proxy": false,
+    "git_ref": null,
+    "git_remote_name": null,
+    "git_remote_url": null,
+    "required_repo_paths": []
+  },
+  "description": "d",
+  "execution": null,
+  "gates": {
+    "allow_skips": false,
+    "require_independent_verification": true,
+    "require_known_answer_check": true,
+    "require_validation": true
+  },
+  "id": "T1",
+  "idempotency_key": "T1",
+  "last_event_hash": "028d50a11ea97f94a2047dee1574ba50639f3be8113e4b3bb6b5c0353d821028",
+  "lease": null,
+  "owner": "claude-a",
+  "permissions": {
+    "gpu": false,
+    "network": false,
+    "outcome_data": false,
+    "performance_metrics": false
+  },
+  "prerequisites": [],
+  "required_capabilities": [],
+  "resource_locks": [],
+  "result": null,
+  "revision": 1,
+  "revocation": null,
+  "risk_tier": "critical",
+  "schema_version": 1,
+  "state": "pending",
+  "task_type": "general",
+  "title": "t",
+  "updated_at": "2026-07-30T01:40:46Z",
+  "verification": null,
+  "verification_attestations": [],
+  "verification_policy": {
+    "allowed_verifiers": [
+      "claude-b"
+    ],
+    "independence_dimensions": [
+      "actor",
+      "controller",
+      "model_family"
+    ],
+    "required_attestations": 0
+  }
+}
+exit=0  <-- 0 means the critical-tier control was bypassed
+
+########## A5 drive T1 to verified ##########
+lease_token acquired: JpuvTS-_...
+start exit=0
+submit exit=0
+attest exit=0
+verify exit=0  <-- 0 means claude-b VERIFIED claude-a on a critical task
+
+########## A6 audit independence on the forged history ##########
+{
+  "dimensions": [
+    "actor",
+    "controller",
+    "model_family"
+  ],
+  "records": [
+    {
+      "attempt": 1,
+      "author": "claude-a",
+      "profile_source": "frozen_verification",
+      "proxy": "claude-a",
+      "quarantined": false,
+      "result": {
+        "checks": {
+          "actor": {
+            "author": "claude-a",
+            "passed": true,
+            "verifier": "claude-b"
+          },
+          "controller": {
+            "author": "claude-a",
+            "passed": true,
+            "verifier": "claude-b"
+          },
+          "model_family": {
+            "author": "claude-code",
+            "passed": true,
+            "verifier": "gpt"
+          }
+        },
+        "dimensions": [
+          "actor",
+          "controller",
+          "model_family"
+        ],
+        "independent": true,
+        "reasons": []
+      },
+      "status": "independent",
+      "task_id": "T1",
+      "verification_event_hash": "5da6e8f0c14c1a658fefde95bf2139a9bde58adce776217cbbaed7a070718274",
+      "verification_sequence": 13,
+      "verifier": "claude-b"
+    }
+  ],
+  "summary": {
+    "action_required": 0,
+    "inconclusive": 0,
+    "independent": 1,
+    "non_independent": 0,
+    "quarantined": 0
+  }
+}
+exit=0
+
+########## A7 REVERT the declaration to the truth, then re-audit ##########
+revert exit=0
+{
+  "dimensions": [
+    "actor",
+    "controller",
+    "model_family"
+  ],
+  "records": [
+    {
+      "attempt": 1,
+      "author": "claude-a",
+      "profile_source": "frozen_verification",
+      "proxy": "claude-a",
+      "quarantined": false,
+      "result": {
+        "checks": {
+          "actor": {
+            "author": "claude-a",
+            "passed": true,
+            "verifier": "claude-b"
+          },
+          "controller": {
+            "author": "claude-a",
+            "passed": true,
+            "verifier": "claude-b"
+          },
+          "model_family": {
+            "author": "claude-code",
+            "passed": true,
+            "verifier": "gpt"
+          }
+        },
+        "dimensions": [
+          "actor",
+          "controller",
+          "model_family"
+        ],
+        "independent": true,
+        "reasons": []
+      },
+      "status": "independent",
+      "task_id": "T1",
+      "verification_event_hash": "5da6e8f0c14c1a658fefde95bf2139a9bde58adce776217cbbaed7a070718274",
+      "verification_sequence": 13,
+      "verifier": "claude-b"
+    }
+  ],
+  "summary": {
+    "action_required": 0,
+    "inconclusive": 0,
+    "independent": 1,
+    "non_independent": 0,
+    "quarantined": 0
+  }
+}
+exit=0
+
+########## A8 does anything else flag it? ##########
+--- ledger verify ---
+{
+  "events": 14,
+  "head": "4276475ed889e13a23282fa6ce1dd04ab56b125ae445bc645cb06dcf5c38814a",
+  "signed": true,
+  "valid": true
+}
+exit=0
+--- doctor ---
+        "head": "4276475ed889e13a23282fa6ce1dd04ab56b125ae445bc645cb06dcf5c38814a",
+        "signed": true,
+        "valid": true
+      },
+      "orchestrator": "antigravity",
+      "states": {
+        "archived": 0,
+        "blocked": 0,
+        "claimed": 0,
+        "invalidated": 0,
+        "pending": 0,
+        "rejected": 0,
+        "revoking": 0,
+        "running": 0,
+        "submitted": 0,
+        "verified": 1
+      },
+      "tasks": 1,
+      "workspace": "attack2",
+      "workspace_id": "e74420d0bbdd7f19ba7d24206bfb8d0f"
+    }
+  },
+  "healthy": true,
+  "root": "/tmp/claude-0/-home-user-System1-5/992ff3ac-68a2-507b-8410-c48708c0b55d/scratchpad/cb/ws2_cef"
+}
+exit=0
+
+########## A9 ledger record of the mutations ##########
+6 agent.added {"controller_id": "claude-b", "model_family": "claude-code", "provider": "anthropic"}
+7 agent.updated {"controller_id": "claude-b", "model_family": "gpt", "provider": "anthropic"}
+13 task.verified
+14 agent.updated {"controller_id": "claude-b", "model_family": "claude-code", "provider": "anthropic"}
